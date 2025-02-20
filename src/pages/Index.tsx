@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BedDouble, UtensilsCrossed, Swimming, PhoneCall, MapPin, Calendar } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import { Card } from '@/components/ui/card';
 
@@ -51,7 +51,7 @@ const Index = () => {
             action="View Menus"
           />
           <ServiceCard
-            icon={<Swimming />}
+            icon={<Calendar />}
             title="Activities"
             description="Explore pool and fitness activities"
             action="Discover More"
