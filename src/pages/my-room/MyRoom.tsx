@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRoom } from '@/hooks/useRoom';
-import { requestService } from '@/features/rooms/controllers/roomService';
+import { requestService, ServiceType } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/components/ui/use-toast';
 import Layout from '@/components/Layout';
 import {
