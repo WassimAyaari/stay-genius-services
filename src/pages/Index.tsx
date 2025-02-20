@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Menu, User, Sun, Clock, ConciergeIcon, Heart } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Menu, User, Sun, Clock, Heart } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
