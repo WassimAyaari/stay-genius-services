@@ -4,6 +4,7 @@ import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
 import SpaSection from '@/features/spa/components/SpaSection';
+import ActivitiesSection from '@/features/activities/components/ActivitiesSection';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,6 +88,17 @@ const Index = () => {
             </Button>
           </div>
           <SpaSection />
+        </section>
+
+        {/* Activities Section */}
+        <section className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-secondary">Activities & Events</h2>
+            <Button variant="ghost" className="text-primary text-sm">
+              View All
+            </Button>
+          </div>
+          <ActivitiesSection />
         </section>
 
         {/* Services Grid */}

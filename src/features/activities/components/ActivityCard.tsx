@@ -1,0 +1,67 @@
+
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Clock, MapPin, Users } from 'lucide-react';
+import { Activity } from '../types';
+
+interface ActivityCardProps {
+  activity: Activity;
+  onBook: (activityId: string) => void;
+}
+
+const ActivityCard = ({ activity, onBook }: ActivityCardProps) => {
+  const statusColors = {
+    'upcoming': 'bg-blue-100 text-blue-800',
+    'in-progress': 'bg-green-100 text-green-800',
+    'full': 'bg-yellow-100 text-yellow-800',
+    'cancelled': 'bg-red-100 text-red-800'
+  };
+
+  return (
+    <Card className="w-full snap-center animate-fade-in">
+      <div className="aspect-video relative overflow-hidden rounded-t-lg">
+        <img 
+          src={activity.image} 
+          alt={activity.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute top-2 right-2">
+          <span className={`px-2 py-1 rounded-full text-xs ${statusColors[activity.status]}`}>
+            {activity.status}
+          </span>
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-semibold text-secondary">{activity.name}</h3>
+          <span className="text-primary font-semibold">${activity.price}</span>
+        </div>
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Clock className="w-4 h-4" />
+            {activity.time} - {activity.duration}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPin className="w-4 h-4" />
+            {activity.location}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Users className="w-4 h-4" />
+            {activity.capacity} spots available
+          </div>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">{activity.description}</p>
+        <Button 
+          onClick={() => onBook(activity.id)}
+          className="w-full bg-primary hover:bg-primary-dark"
+          disabled={activity.status === 'full' || activity.status === 'cancelled'}
+        >
+          Book Activity
+        </Button>
+      </div>
+    </Card>
+  );
+};
+
+export default ActivityCard;
