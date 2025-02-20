@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Menu, User, Sun, Clock, Heart } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
