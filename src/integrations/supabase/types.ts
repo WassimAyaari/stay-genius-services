@@ -178,9 +178,14 @@ export type Database = {
       }
       rooms: {
         Row: {
+          amenities: string[] | null
+          capacity: number
           created_at: string | null
+          description: string | null
           floor: number
           id: string
+          images: string[] | null
+          price: number
           room_number: string
           status: string | null
           type: string
@@ -188,9 +193,14 @@ export type Database = {
           view_type: string | null
         }
         Insert: {
+          amenities?: string[] | null
+          capacity?: number
           created_at?: string | null
+          description?: string | null
           floor: number
           id?: string
+          images?: string[] | null
+          price?: number
           room_number: string
           status?: string | null
           type: string
@@ -198,9 +208,14 @@ export type Database = {
           view_type?: string | null
         }
         Update: {
+          amenities?: string[] | null
+          capacity?: number
           created_at?: string | null
+          description?: string | null
           floor?: number
           id?: string
+          images?: string[] | null
+          price?: number
           room_number?: string
           status?: string | null
           type?: string

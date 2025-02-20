@@ -2,9 +2,25 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BedDouble, Coffee, Wifi, Tv, PhoneCall, UtensilsCrossed, Wind } from 'lucide-react';
+import { useRoom } from '@/hooks/useRoom';
+import { requestService } from '@/features/rooms/controllers/roomService';
+import { useToast } from '@/components/ui/use-toast';
+import Layout from '@/components/Layout';
+import {
+  BedDouble,
+  Coffee,
+  Wifi,
+  Tv,
+  PhoneCall,
+  UtensilsCrossed,
+  Wind,
+  Loader2
+} from 'lucide-react';
 
 const MyRoom = () => {
+  const { data: room, isLoading } = useRoom('401'); // Hardcoded for now, should come from user profile
+  const { toast } = useToast();
+
   const roomControls = [
     { icon: <Wind className="h-6 w-6" />, label: 'AC Control', value: '22°C' },
     { icon: <Tv className="h-6 w-6" />, label: 'TV', value: 'On' },
@@ -12,17 +28,59 @@ const MyRoom = () => {
   ];
 
   const services = [
-    { icon: <UtensilsCrossed className="h-6 w-6" />, label: 'Room Service', action: 'Order' },
-    { icon: <Coffee className="h-6 w-6" />, label: 'Housekeeping', action: 'Request' },
-    { icon: <PhoneCall className="h-6 w-6" />, label: 'Front Desk', action: 'Call' },
+    { 
+      icon: <UtensilsCrossed className="h-6 w-6" />, 
+      label: 'Room Service', 
+      type: 'room_service' as const,
+      action: 'Order'
+    },
+    { 
+      icon: <Coffee className="h-6 w-6" />, 
+      label: 'Housekeeping', 
+      type: 'housekeeping' as const,
+      action: 'Request'
+    },
+    { 
+      icon: <PhoneCall className="h-6 w-6" />, 
+      label: 'Front Desk',
+      type: 'maintenance' as const,
+      action: 'Call'
+    },
   ];
 
+  const handleServiceRequest = async (type: ServiceType) => {
+    try {
+      if (!room) return;
+      await requestService(room.id, type);
+      toast({
+        title: "Service Requested",
+        description: "Your request has been sent successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to request service. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Layout>
       {/* Room Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-secondary mb-2">Room 401</h1>
-        <p className="text-gray-600">Deluxe Ocean View Suite</p>
+        <h1 className="text-3xl font-semibold text-secondary mb-2">Room {room?.room_number}</h1>
+        <p className="text-gray-600">{room?.type}</p>
       </div>
 
       {/* Room Status */}
@@ -64,14 +122,19 @@ const MyRoom = () => {
                 <div className="text-primary">{service.icon}</div>
                 <div>
                   <p className="font-medium mb-2">{service.label}</p>
-                  <Button variant="outline">{service.action}</Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => handleServiceRequest(service.type)}
+                  >
+                    {service.action}
+                  </Button>
                 </div>
               </div>
             </Card>
           ))}
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
