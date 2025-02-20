@@ -1,89 +1,118 @@
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import ActivityCard from './ActivityCard';
 import { Activity } from '../types';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const ActivitiesSection = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [participants, setParticipants] = useState(1);
+  const [specialRequests, setSpecialRequests] = useState('');
 
   const { data: activities, isLoading } = useQuery({
     queryKey: ['activities'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .order('date', { ascending: true });
 
-      // Mock data for now - would typically fetch from Supabase
-      return [
-        {
-          id: '1',
-          name: 'Morning Yoga',
-          description: 'Start your day with energizing yoga session',
-          date: '2024-03-20',
-          time: '07:00 AM',
-          duration: '60 minutes',
-          location: 'Wellness Center',
-          capacity: 15,
-          price: 25,
-          image: '/placeholder.svg',
-          category: 'fitness' as const,
-          status: 'upcoming' as const
-        },
-        {
-          id: '2',
-          name: 'Wine Tasting',
-          description: 'Experience premium wines with our sommelier',
-          date: '2024-03-20',
-          time: '18:00 PM',
-          duration: '90 minutes',
-          location: 'Wine Cellar',
-          capacity: 10,
-          price: 75,
-          image: '/placeholder.svg',
-          category: 'entertainment' as const,
-          status: 'upcoming' as const
-        }
-      ];
+      if (error) throw error;
+      return data as Activity[];
     }
   });
 
-  const handleBookActivity = async (activityId: string) => {
-    try {
+  const bookActivityMutation = useMutation({
+    mutationFn: async ({ 
+      activityId, 
+      participants, 
+      specialRequests 
+    }: { 
+      activityId: string; 
+      participants: number; 
+      specialRequests: string;
+    }) => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Please sign in to book an activity",
-        });
-        return;
-      }
+      if (!user) throw new Error('Not authenticated');
 
-      const activity = activities?.find(a => a.id === activityId);
-      if (!activity) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Activity not found",
-        });
-        return;
-      }
+      const { data, error } = await supabase
+        .from('activity_bookings')
+        .insert({
+          activity_id: activityId,
+          user_id: user.id,
+          participants,
+          special_requests: specialRequests,
+        })
+        .select()
+        .single();
 
-      // Here we would typically insert the booking into Supabase
-      // For now, just show a success toast
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      const activity = activities?.find(a => a.id === variables.activityId);
       toast({
         title: "Success",
-        description: `Successfully booked ${activity.name}!`,
+        description: `Successfully booked ${activity?.name}!`,
       });
-    } catch (error: any) {
+      setSelectedActivity(null);
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+    },
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
         title: "Error",
         description: error.message,
       });
     }
+  });
+
+  const handleBookActivity = async (activityId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please sign in to book an activity",
+      });
+      return;
+    }
+
+    const activity = activities?.find(a => a.id === activityId);
+    if (!activity) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Activity not found",
+      });
+      return;
+    }
+
+    setSelectedActivity(activity);
+  };
+
+  const handleConfirmBooking = () => {
+    if (!selectedActivity) return;
+
+    bookActivityMutation.mutate({
+      activityId: selectedActivity.id,
+      participants,
+      specialRequests,
+    });
   };
 
   if (isLoading) {
@@ -95,15 +124,62 @@ const ActivitiesSection = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {activities?.map((activity) => (
-        <ActivityCard
-          key={activity.id}
-          activity={activity}
-          onBook={handleBookActivity}
-        />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {activities?.map((activity) => (
+          <ActivityCard
+            key={activity.id}
+            activity={activity}
+            onBook={handleBookActivity}
+          />
+        ))}
+      </div>
+
+      <Dialog open={!!selectedActivity} onOpenChange={() => setSelectedActivity(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Book {selectedActivity?.name}</DialogTitle>
+            <DialogDescription>
+              Please provide the following details to complete your booking.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="participants" className="text-sm font-medium">
+                Number of Participants
+              </label>
+              <Input
+                id="participants"
+                type="number"
+                min={1}
+                max={selectedActivity?.capacity || 1}
+                value={participants}
+                onChange={(e) => setParticipants(parseInt(e.target.value))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="special-requests" className="text-sm font-medium">
+                Special Requests
+              </label>
+              <Textarea
+                id="special-requests"
+                placeholder="Any special requirements or requests..."
+                value={specialRequests}
+                onChange={(e) => setSpecialRequests(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-4">
+            <Button variant="outline" onClick={() => setSelectedActivity(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmBooking} disabled={bookActivityMutation.isPending}>
+              {bookActivityMutation.isPending ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

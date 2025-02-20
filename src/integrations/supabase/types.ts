@@ -9,6 +9,98 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activities: {
+        Row: {
+          capacity: number
+          category: string
+          created_at: string | null
+          date: string
+          description: string | null
+          duration: string
+          id: string
+          image: string | null
+          location: string
+          name: string
+          price: number
+          status: string
+          time: string
+          updated_at: string | null
+        }
+        Insert: {
+          capacity: number
+          category: string
+          created_at?: string | null
+          date: string
+          description?: string | null
+          duration: string
+          id?: string
+          image?: string | null
+          location: string
+          name: string
+          price: number
+          status?: string
+          time: string
+          updated_at?: string | null
+        }
+        Update: {
+          capacity?: number
+          category?: string
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          duration?: string
+          id?: string
+          image?: string | null
+          location?: string
+          name?: string
+          price?: number
+          status?: string
+          time?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      activity_bookings: {
+        Row: {
+          activity_id: string
+          created_at: string | null
+          id: string
+          participants: number
+          special_requests: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string | null
+          id?: string
+          participants?: number
+          special_requests?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string | null
+          id?: string
+          participants?: number
+          special_requests?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_bookings_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           check_in: string
