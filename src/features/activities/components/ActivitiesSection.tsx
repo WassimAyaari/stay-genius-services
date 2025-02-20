@@ -12,7 +12,10 @@ const ActivitiesSection = () => {
   const { data: activities, isLoading } = useQuery({
     queryKey: ['activities'],
     queryFn: async () => {
-      // Mock data for now
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Mock data for now - would typically fetch from Supabase
       return [
         {
           id: '1',
@@ -49,12 +52,30 @@ const ActivitiesSection = () => {
   const handleBookActivity = async (activityId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Please sign in to book an activity');
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Please sign in to book an activity",
+        });
+        return;
+      }
 
-      // TODO: Add booking logic here
+      const activity = activities?.find(a => a.id === activityId);
+      if (!activity) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Activity not found",
+        });
+        return;
+      }
+
+      // Here we would typically insert the booking into Supabase
+      // For now, just show a success toast
       toast({
         title: "Success",
-        description: "Activity booked successfully!",
+        description: `Successfully booked ${activity.name}!`,
       });
     } catch (error: any) {
       toast({
