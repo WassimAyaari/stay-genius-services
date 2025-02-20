@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Menu, User } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
+import DiningSection from '@/features/dining/components/DiningSection';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,6 +64,17 @@ const Index = () => {
           <div className="overflow-x-auto pb-4 -mx-4 px-4">
             <RoomList />
           </div>
+        </section>
+
+        {/* Dining Section */}
+        <section className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-secondary">Restaurants & Dining</h2>
+            <Button variant="ghost" className="text-primary text-sm">
+              View All
+            </Button>
+          </div>
+          <DiningSection />
         </section>
 
         {/* Services Grid */}
