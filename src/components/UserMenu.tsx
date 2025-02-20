@@ -2,12 +2,12 @@
 import React from 'react';
 import { User, Settings, LogOut, BedDouble } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -18,8 +18,8 @@ interface UserMenuProps {
 
 const UserMenu = ({ username = "Guest", roomNumber }: UserMenuProps) => {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Sheet>
+      <SheetTrigger asChild>
         <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
           <div className="flex items-center gap-2">
             <div className="text-right mr-2">
@@ -33,29 +33,33 @@ const UserMenu = ({ username = "Guest", roomNumber }: UserMenuProps) => {
             </Avatar>
           </div>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 p-2">
-        {roomNumber && (
-          <DropdownMenuItem className="py-2 cursor-pointer">
-            <BedDouble className="mr-2 h-4 w-4 text-primary" />
-            <span>Room {roomNumber}</span>
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem className="py-2 cursor-pointer">
-          <User className="mr-2 h-4 w-4 text-primary" />
-          <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="py-2 cursor-pointer">
-          <Settings className="mr-2 h-4 w-4 text-primary" />
-          <span>Settings</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="my-2" />
-        <DropdownMenuItem className="py-2 cursor-pointer text-red-600">
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </SheetTrigger>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>User Profile</SheetTitle>
+        </SheetHeader>
+        <div className="grid gap-4 py-4">
+          {roomNumber && (
+            <Button variant="ghost" className="w-full justify-start gap-2">
+              <BedDouble className="h-4 w-4 text-primary" />
+              Room {roomNumber}
+            </Button>
+          )}
+          <Button variant="ghost" className="w-full justify-start gap-2">
+            <User className="h-4 w-4 text-primary" />
+            Profile
+          </Button>
+          <Button variant="ghost" className="w-full justify-start gap-2">
+            <Settings className="h-4 w-4 text-primary" />
+            Settings
+          </Button>
+          <Button variant="ghost" className="w-full justify-start gap-2 text-red-600">
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

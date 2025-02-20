@@ -1,12 +1,12 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UtensilsCrossed, Clock } from 'lucide-react';
+import Layout from '@/components/Layout';
 
 const Dining = () => {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <Layout showBackButton>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Dining Experiences</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
@@ -36,7 +36,7 @@ const Dining = () => {
           </div>
         </Card>
       </div>
-    </div>
+    </Layout>
   );
 };
 

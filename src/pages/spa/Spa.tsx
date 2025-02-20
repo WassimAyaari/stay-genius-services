@@ -1,13 +1,12 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, Heart, Calendar } from 'lucide-react';
+import Layout from '@/components/Layout';
 
 const Spa = () => {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Header Section */}
+    <Layout showBackButton>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Spa & Wellness</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
@@ -16,7 +15,6 @@ const Spa = () => {
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Spa Treatment Card */}
         <Card className="overflow-hidden animate-fade-in">
           <img 
             src="/lovable-uploads/3cbdcf79-9da5-48bd-90f2-2c1737b76741.png"
@@ -40,7 +38,6 @@ const Spa = () => {
         </Card>
       </div>
 
-      {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
         <Card className="p-4 text-center">
           <Heart className="w-6 h-6 mx-auto text-primary mb-2" />
@@ -51,7 +48,7 @@ const Spa = () => {
           <h4 className="font-medium">Schedule</h4>
         </Card>
       </div>
-    </div>
+    </Layout>
   );
 };
 
