@@ -9,8 +9,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Layout from '@/components/Layout';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <Layout>
       {/* Welcome Section */}
@@ -39,11 +42,17 @@ const Index = () => {
       {/* Quick Actions */}
       <section className="mb-8">
         <div className="grid grid-cols-2 gap-4">
-          <Button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-6 text-lg">
+          <Button 
+            className="w-full flex items-center justify-center gap-2 bg-primary text-white py-6 text-lg"
+            onClick={() => navigate('/my-room')}
+          >
             <BedDouble className="w-6 h-6" />
-            Book Room
+            My Room
           </Button>
-          <Button className="w-full flex items-center justify-center gap-2 bg-secondary text-white py-6 text-lg">
+          <Button 
+            className="w-full flex items-center justify-center gap-2 bg-secondary text-white py-6 text-lg"
+            onClick={() => navigate('/contact')}
+          >
             <PhoneCall className="w-6 h-6" />
             Call Concierge
           </Button>
@@ -73,7 +82,12 @@ const Index = () => {
                 <p className="font-medium text-secondary">Wine Tasting</p>
                 <p className="text-sm text-gray-600">Today at 6 PM - Wine Cellar</p>
               </div>
-              <Button variant="outline" className="ml-auto" size="sm">
+              <Button 
+                variant="outline" 
+                className="ml-auto" 
+                size="sm"
+                onClick={() => navigate('/activities')}
+              >
                 Book Now
               </Button>
             </div>
@@ -85,7 +99,12 @@ const Index = () => {
                 <p className="font-medium text-secondary">Chef's Special Dinner</p>
                 <p className="text-sm text-gray-600">Tonight at 7 PM - Main Restaurant</p>
               </div>
-              <Button variant="outline" className="ml-auto" size="sm">
+              <Button 
+                variant="outline" 
+                className="ml-auto" 
+                size="sm"
+                onClick={() => navigate('/dining')}
+              >
                 Reserve
               </Button>
             </div>
@@ -97,7 +116,11 @@ const Index = () => {
       <section className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-secondary">Available Rooms</h2>
-          <Button variant="ghost" className="text-primary text-sm">
+          <Button 
+            variant="ghost" 
+            className="text-primary text-sm"
+            onClick={() => navigate('/my-room')}
+          >
             View All
           </Button>
         </div>
@@ -115,18 +138,21 @@ const Index = () => {
             title="Dining"
             description="Restaurant reservations"
             action="Book Table"
+            onClick={() => navigate('/dining')}
           />
           <ServiceCard
             icon={<Heart />}
             title="Spa & Wellness"
             description="Relaxation awaits"
             action="Book Service"
+            onClick={() => navigate('/spa')}
           />
           <ServiceCard
             icon={<MapPin />}
             title="Local Guide"
             description="Explore the area"
             action="Discover"
+            onClick={() => navigate('/activities')}
           />
         </div>
       </section>
@@ -167,6 +193,7 @@ const Index = () => {
         <Button 
           size="icon"
           className="h-14 w-14 rounded-full shadow-lg bg-red-500 hover:bg-red-600 animate-pulse"
+          onClick={() => navigate('/contact')}
         >
           <PhoneCall className="h-6 w-6" />
         </Button>

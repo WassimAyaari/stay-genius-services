@@ -3,10 +3,11 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin } from 'lucide-react';
+import Layout from '@/components/Layout';
 
 const Activities = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Layout showBackButton>
       {/* Header Section */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Things To Do</h1>
@@ -55,7 +56,7 @@ const Activities = () => {
           </div>
         </Card>
       </div>
-    </div>
+    </Layout>
   );
 };
 

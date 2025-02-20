@@ -15,7 +15,7 @@ const MainMenu = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { icon: <BedDouble className="h-5 w-5" />, label: 'Rooms & Suites', path: '/rooms' },
+    { icon: <BedDouble className="h-5 w-5" />, label: 'My Room', path: '/my-room' },
     { icon: <UtensilsCrossed className="h-5 w-5" />, label: 'Dining', path: '/dining' },
     { icon: <Heart className="h-5 w-5" />, label: 'Spa & Wellness', path: '/spa' },
     { icon: <Compass className="h-5 w-5" />, label: 'Activities', path: '/activities' },
