@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthGuard from "@/components/AuthGuard";
 import Index from "./pages/Index";
 import RoomDetails from "./pages/rooms/RoomDetails";
+import MyRoom from "./pages/my-room/MyRoom";
 import Dining from "./pages/dining/Dining";
 import Spa from "./pages/spa/Spa";
 import Activities from "./pages/activities/Activities";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/auth/login" element={<Login />} />
             <Route path="/" element={<Index />} />
             <Route path="/rooms/:id" element={<RoomDetails />} />
+            <Route path="/my-room" element={<MyRoom />} />
             <Route path="/dining" element={<Dining />} />
             <Route path="/spa" element={<Spa />} />
             <Route path="/activities" element={<Activities />} />

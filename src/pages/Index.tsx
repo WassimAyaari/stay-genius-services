@@ -1,5 +1,5 @@
 import React from 'react';
-import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Menu, User, Sun, Clock, Heart } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Sun, Clock, Heart } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
@@ -8,6 +8,8 @@ import ActivitiesSection from '@/features/activities/components/ActivitiesSectio
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import MainMenu from '@/components/MainMenu';
+import UserMenu from '@/components/UserMenu';
 
 const Index = () => {
   return (
@@ -16,13 +18,9 @@ const Index = () => {
       <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <Button variant="ghost" size="icon">
-              <Menu className="w-6 h-6 text-secondary" />
-            </Button>
+            <MainMenu />
             <h1 className="text-2xl font-semibold text-secondary">Stay Genius</h1>
-            <Button variant="ghost" size="icon">
-              <User className="w-6 h-6 text-secondary" />
-            </Button>
+            <UserMenu username="John Doe" roomNumber="401" />
           </div>
         </div>
       </header>

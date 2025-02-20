@@ -9,7 +9,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
-import { Menu, BedDouble, UtensilsCrossed, Spa, Compass, Phone, Gift, Info } from 'lucide-react';
+import { Menu, BedDouble, UtensilsCrossed, Heart, Compass, Phone, Gift, Info } from 'lucide-react';
 
 const MainMenu = () => {
   const navigate = useNavigate();
@@ -17,11 +17,10 @@ const MainMenu = () => {
   const menuItems = [
     { icon: <BedDouble className="h-5 w-5" />, label: 'Rooms & Suites', path: '/rooms' },
     { icon: <UtensilsCrossed className="h-5 w-5" />, label: 'Dining', path: '/dining' },
-    { icon: <Spa className="h-5 w-5" />, label: 'Spa & Wellness', path: '/spa' },
+    { icon: <Heart className="h-5 w-5" />, label: 'Spa & Wellness', path: '/spa' },
     { icon: <Compass className="h-5 w-5" />, label: 'Activities', path: '/activities' },
-    { icon: <Gift className="h-5 w-5" />, label: 'Hotel Boutiques', path: '/boutiques' },
+    { icon: <Gift className="h-5 w-5" />, label: 'Hotel Services', path: '/services' },
     { icon: <Phone className="h-5 w-5" />, label: 'Contact', path: '/contact' },
-    { icon: <Info className="h-5 w-5" />, label: 'About', path: '/about' },
   ];
 
   return (
