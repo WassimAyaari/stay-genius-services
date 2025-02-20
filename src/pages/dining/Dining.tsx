@@ -6,15 +6,15 @@ import { UtensilsCrossed, Clock } from 'lucide-react';
 
 const Dining = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Dining Experiences</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
           Discover culinary excellence at our restaurants, where every meal becomes a memorable experience
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Restaurant Card */}
         <Card className="overflow-hidden animate-fade-in">
           <img 
@@ -22,9 +22,9 @@ const Dining = () => {
             alt="Restaurant"
             className="w-full h-48 object-cover"
           />
-          <div className="p-6">
+          <div className="p-4">
             <h3 className="text-xl font-semibold text-secondary mb-2">Ocean View Restaurant</h3>
-            <div className="flex items-center gap-2 text-gray-600 mb-4">
+            <div className="flex items-center gap-2 text-gray-600 mb-2">
               <UtensilsCrossed className="w-4 h-4" />
               <span>International Cuisine</span>
             </div>
@@ -35,8 +35,6 @@ const Dining = () => {
             <Button className="w-full">Reserve a Table</Button>
           </div>
         </Card>
-
-        {/* More restaurant cards would go here */}
       </div>
     </div>
   );

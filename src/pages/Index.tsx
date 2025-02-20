@@ -15,7 +15,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
-      <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+      <header className="bg-white shadow-sm sticky top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <MainMenu />
@@ -26,7 +26,7 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 pt-20">
+      <main className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Welcome Section */}
         <section className="mb-8">
           <Card className="p-6 bg-gradient-to-r from-primary-light to-white border-none">

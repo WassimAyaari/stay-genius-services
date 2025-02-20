@@ -6,23 +6,24 @@ import { Clock, Heart, Calendar } from 'lucide-react';
 
 const Spa = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Header Section */}
+      <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Spa & Wellness</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
           Relax and rejuvenate with our luxurious spa treatments and wellness services
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Spa Treatment Card */}
         <Card className="overflow-hidden animate-fade-in">
           <img 
-            src="public/lovable-uploads/3cbdcf79-9da5-48bd-90f2-2c1737b76741.png"
+            src="/lovable-uploads/3cbdcf79-9da5-48bd-90f2-2c1737b76741.png"
             alt="Luxury Spa Package"
             className="w-full h-48 object-cover"
           />
-          <div className="p-6">
+          <div className="p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-semibold text-secondary">Luxury Massage</h3>
               <span className="text-primary font-semibold">$120</span>
