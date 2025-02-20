@@ -3,6 +3,7 @@ import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, 
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
+import SpaSection from '@/features/spa/components/SpaSection';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +26,7 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content with padding for fixed header */}
+      {/* Main Content */}
       <main className="container mx-auto px-4 py-8 pt-20">
         {/* Search Section */}
         <section className="mb-6">
@@ -75,6 +76,17 @@ const Index = () => {
             </Button>
           </div>
           <DiningSection />
+        </section>
+
+        {/* Spa Services */}
+        <section className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-secondary">Spa & Wellness</h2>
+            <Button variant="ghost" className="text-primary text-sm">
+              View All
+            </Button>
+          </div>
+          <SpaSection />
         </section>
 
         {/* Services Grid */}
