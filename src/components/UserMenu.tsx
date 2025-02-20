@@ -5,7 +5,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -21,36 +20,37 @@ const UserMenu = ({ username = "Guest", roomNumber }: UserMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>{username[0]}</AvatarFallback>
-          </Avatar>
+        <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
+          <div className="flex items-center gap-2">
+            <div className="text-right mr-2">
+              <p className="text-sm font-medium text-secondary">{username}</p>
+              <p className="text-xs text-gray-500">Guest</p>
+            </div>
+            <Avatar className="h-8 w-8 border-2 border-gray-100">
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {username[0]}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{username}</p>
-            <p className="text-xs leading-none text-muted-foreground">Guest</p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      <DropdownMenuContent align="end" className="w-56 p-2">
         {roomNumber && (
-          <DropdownMenuItem>
-            <BedDouble className="mr-2 h-4 w-4" />
+          <DropdownMenuItem className="py-2 cursor-pointer">
+            <BedDouble className="mr-2 h-4 w-4 text-primary" />
             <span>Room {roomNumber}</span>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
+        <DropdownMenuItem className="py-2 cursor-pointer">
+          <User className="mr-2 h-4 w-4 text-primary" />
           <span>Profile</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
+        <DropdownMenuItem className="py-2 cursor-pointer">
+          <Settings className="mr-2 h-4 w-4 text-primary" />
           <span>Settings</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuSeparator className="my-2" />
+        <DropdownMenuItem className="py-2 cursor-pointer text-red-600">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign out</span>
         </DropdownMenuItem>
