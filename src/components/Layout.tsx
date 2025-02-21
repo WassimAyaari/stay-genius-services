@@ -31,14 +31,9 @@ const Layout = ({ children }: LayoutProps) => {
               <MainMenu />
             </div>
             
-            <div className="flex flex-col items-center absolute left-1/2 transform -translate-x-1/2">
-              <div className="w-8 h-8 bg-primary rounded-xl mb-1 flex items-center justify-center">
-                <span className="text-white font-semibold text-lg">S</span>
-              </div>
-              <h1 className="text-sm font-medium text-secondary">
-                Stay Genius
-              </h1>
-            </div>
+            <h1 className="text-lg font-medium text-secondary absolute left-1/2 transform -translate-x-1/2">
+              Stay Genius
+            </h1>
 
             <div className="flex items-center gap-2 w-20 justify-end">
               {!isHomePage && (
