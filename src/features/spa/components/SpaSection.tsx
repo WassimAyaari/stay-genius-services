@@ -3,8 +3,12 @@ import React from 'react';
 import { CarouselItem } from '@/components/ui/carousel';
 import SpaServiceCard from './SpaServiceCard';
 import { SpaService } from '../types';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const SpaSection = () => {
+  const { toast } = useToast();
+
   const spaServices: SpaService[] = [
     {
       id: '1',
@@ -38,11 +42,29 @@ const SpaSection = () => {
     }
   ];
 
+  const handleBookService = async (serviceId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Please sign in to book a spa service');
+
+      toast({
+        title: "Success",
+        description: "Spa service booked successfully!",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
   return (
     <>
       {spaServices.map((service) => (
         <CarouselItem key={service.id} className="md:basis-1/2 lg:basis-1/3">
-          <SpaServiceCard service={service} />
+          <SpaServiceCard service={service} onBook={handleBookService} />
         </CarouselItem>
       ))}
     </>
