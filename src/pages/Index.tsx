@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind, Bell } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
@@ -5,6 +6,13 @@ import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
 import SpaSection from '@/features/spa/components/SpaSection';
 import ActivitiesSection from '@/features/activities/components/ActivitiesSection';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -327,9 +335,19 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
-          <SpaSection />
-        </div>
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
+            <SpaSection />
+          </CarouselContent>
+          <CarouselPrevious className="hidden sm:flex" />
+          <CarouselNext className="hidden sm:flex" />
+        </Carousel>
       </motion.section>
 
       <motion.section 
@@ -369,9 +387,19 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
-          <ActivitiesSection />
-        </div>
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
+            <ActivitiesSection />
+          </CarouselContent>
+          <CarouselPrevious className="hidden sm:flex" />
+          <CarouselNext className="hidden sm:flex" />
+        </Carousel>
       </motion.section>
     </Layout>
   );
