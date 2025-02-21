@@ -5,7 +5,7 @@ import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
 import { Button } from './ui/button';
-import { ChevronLeft, MessageCircle } from 'lucide-react';
+import { ChevronLeft, Send } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -45,7 +45,7 @@ const Layout = ({ children }: LayoutProps) => {
                 onClick={() => navigate('/messages')}
                 className="relative hover:opacity-60 transition-opacity"
               >
-                <MessageCircle className="h-[26px] w-[26px] stroke-[1.5px]" />
+                <Send className="h-[26px] w-[26px] stroke-[1.5px]" />
                 <span className="absolute -top-1 -right-1 h-[18px] w-[18px] bg-red-500 rounded-full text-[11px] text-white flex items-center justify-center font-medium border-2 border-white">
                   2
                 </span>
