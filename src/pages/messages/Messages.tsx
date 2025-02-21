@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Bell, Briefcase, ArrowLeft } from 'lucide-react';
+import { Bell, Briefcase, ArrowLeft, Send } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -83,33 +83,40 @@ const Messages = () => {
   if (selectedContact) {
     return (
       <Layout>
-        <div className="max-w-2xl mx-auto h-[calc(100vh-180px)] flex flex-col">
+        <div className="max-w-3xl mx-auto h-[calc(100vh-180px)] flex flex-col bg-[#f0f2f5]">
           {/* Chat Header */}
-          <div className="p-4 border-b flex items-center gap-3">
+          <div className="p-3 bg-[#008069] text-white flex items-center gap-3 shadow-sm">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setSelectedContact(null)}
-              className="mr-2"
+              className="mr-2 hover:bg-[#ffffff1a]"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5 text-white" />
             </Button>
             <div className="relative">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
                 {selectedContact.icon}
               </div>
               {selectedContact.isOnline && (
-                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-[#008069]" />
               )}
             </div>
             <div>
-              <h3 className="font-medium">{selectedContact.name}</h3>
-              <p className="text-sm text-muted-foreground">{selectedContact.role}</p>
+              <h3 className="font-medium text-white">{selectedContact.name}</h3>
+              <p className="text-xs text-white/80">{selectedContact.role}</p>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div 
+            className="flex-1 overflow-y-auto p-4 space-y-2"
+            style={{
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e5e5e5' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E\")",
+              backgroundRepeat: 'repeat',
+              backgroundColor: '#efeae2'
+            }}
+          >
             {selectedContact.messages.map((message) => (
               <div
                 key={message.id}
@@ -120,19 +127,14 @@ const Messages = () => {
               >
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-2xl px-4 py-2",
+                    "max-w-[80%] px-3 py-2 rounded-lg relative shadow-sm",
                     message.sender === 'user'
-                      ? "bg-primary text-white"
-                      : "bg-gray-100"
+                      ? "bg-[#d9fdd3] rounded-tr-none"
+                      : "bg-white rounded-tl-none"
                   )}
                 >
-                  <p className="text-sm">{message.text}</p>
-                  <p className={cn(
-                    "text-[10px] mt-1",
-                    message.sender === 'user'
-                      ? "text-primary-foreground/80"
-                      : "text-muted-foreground"
-                  )}>
+                  <p className="text-[0.9375rem] text-[#111b21]">{message.text}</p>
+                  <p className="text-[0.6875rem] text-[#667781] text-right mt-1">
                     {message.time}
                   </p>
                 </div>
@@ -141,24 +143,26 @@ const Messages = () => {
           </div>
 
           {/* Message Input */}
-          <div className="p-4 border-t">
-            <div className="flex items-center gap-2">
+          <div className="p-3 bg-[#f0f2f5]">
+            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-1">
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                placeholder="Type a message"
+                className="flex-1 py-2 bg-transparent text-sm focus:outline-none"
               />
               <Button 
+                size="icon"
+                variant="ghost"
                 onClick={() => {
                   if (inputMessage.trim()) {
                     setInputMessage('');
                   }
                 }}
-                className="rounded-full"
+                className="text-[#008069] hover:bg-[#008069]/10"
               >
-                Send
+                <Send className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -170,18 +174,20 @@ const Messages = () => {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto">
-        <div className="space-y-4">
-          <h1 className="text-2xl font-semibold mb-6">Messages</h1>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-semibold">Messages</h1>
+          </div>
           
           {contacts.map((contact) => (
             <Card 
               key={contact.id}
-              className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="cursor-pointer hover:bg-gray-50 transition-colors border-0 shadow-none"
               onClick={() => setSelectedContact(contact)}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 p-3">
                 <div className="relative">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-full bg-[#008069]/10 flex items-center justify-center">
                     {contact.icon}
                   </div>
                   {contact.isOnline && (
@@ -189,14 +195,14 @@ const Messages = () => {
                   )}
                 </div>
                 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 border-b pb-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{contact.name}</h3>
-                    <span className="text-sm text-muted-foreground">2m ago</span>
+                    <h3 className="font-medium text-[#111b21]">{contact.name}</h3>
+                    <span className="text-xs text-[#667781]">2m ago</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{contact.role}</p>
+                  <p className="text-sm text-[#667781]">{contact.role}</p>
                   {contact.lastMessage && (
-                    <p className="text-sm truncate mt-1">{contact.lastMessage}</p>
+                    <p className="text-sm text-[#667781] truncate mt-1">{contact.lastMessage}</p>
                   )}
                 </div>
               </div>
