@@ -59,7 +59,6 @@ const Index = () => {
                     <h2 className="text-2xl font-semibold text-secondary mb-1">
                       Good Morning, Emma
                     </h2>
-                    <p className="text-gray-600">Welcome to Hotel Genius</p>
                   </div>
                 </div>
                 <div className="flex gap-4 flex-wrap">
