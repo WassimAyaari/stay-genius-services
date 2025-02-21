@@ -31,12 +31,11 @@ const Layout = ({ children }: LayoutProps) => {
               <MainMenu />
             </div>
             
-            <button 
-              onClick={() => navigate('/')} 
-              className="text-xl font-semibold text-secondary absolute left-1/2 transform -translate-x-1/2 hover:text-primary transition-colors"
+            <h1 className="text-xl font-semibold text-secondary absolute left-1/2 transform -translate-x-1/2 hover:text-primary transition-colors cursor-pointer"
+              onClick={() => navigate('/')}
             >
               Hotel Genius
-            </button>
+            </h1>
 
             <div className="flex items-center gap-2 w-20 justify-end">
               <UserMenu username="John Doe" roomNumber="401" />
