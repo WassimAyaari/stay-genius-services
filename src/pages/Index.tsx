@@ -16,10 +16,10 @@ import useEmblaCarousel from 'embla-carousel-react';
 const Index = () => {
   const navigate = useNavigate();
   const [emblaRef] = useEmblaCarousel({ 
-    loop: true, 
-    dragFree: true,
-    align: 'start',
-    containScroll: 'trimSnaps'
+    loop: true,
+    dragFree: false,
+    containScroll: 'trimSnaps',
+    align: 'center'
   });
 
   const [greeting, setGreeting] = useState("");
@@ -39,7 +39,7 @@ const Index = () => {
     };
 
     updateGreeting();
-    const interval = setInterval(updateGreeting, 60000); // Update every minute
+    const interval = setInterval(updateGreeting, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -61,70 +61,72 @@ const Index = () => {
   return (
     <Layout>
       {/* Welcome Section with Weather */}
-      <section className="mb-12 px-4 -mx-4">
-        <div className="overflow-visible" ref={emblaRef}>
-          <div className="flex -ml-4">
+      <section className="mb-12">
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex">
             {/* Welcome Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex-[0_0_85%] min-w-0 sm:flex-[0_0_60%] pl-4"
-            >
-              <Card className="p-8 h-full bg-gradient-to-br from-primary-light via-white to-white border-none shadow-md rounded-3xl overflow-hidden relative">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
-                    <Sun className="w-8 h-8 text-primary animate-pulse" />
+            <div className="flex-[0_0_100%] min-w-0 pl-0">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="p-8 h-full bg-gradient-to-br from-primary-light via-white to-white border-none shadow-md rounded-3xl overflow-hidden relative">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
+                      <Sun className="w-8 h-8 text-primary animate-pulse" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-semibold text-secondary mb-1">
+                        {greeting}, Emma
+                      </h2>
+                      <p className="text-gray-600">Welcome to Hotel Genius</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-secondary mb-1">
-                      {greeting}, Emma
-                    </h2>
-                    <p className="text-gray-600">Welcome to Hotel Genius</p>
+                  <div className="flex gap-4 flex-wrap">
+                    <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+                      <Clock className="w-5 h-5 mr-2" />
+                      Check-in: 3 PM
+                    </Button>
+                    <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+                      <Clock className="w-5 h-5 mr-2" />
+                      Check-out: 11 AM
+                    </Button>
                   </div>
-                </div>
-                <div className="flex gap-4 flex-wrap">
-                  <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-                    <Clock className="w-5 h-5 mr-2" />
-                    Check-in: 3 PM
-                  </Button>
-                  <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-                    <Clock className="w-5 h-5 mr-2" />
-                    Check-out: 11 AM
-                  </Button>
-                </div>
-              </Card>
-            </motion.div>
+                </Card>
+              </motion.div>
+            </div>
 
             {/* Weather Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex-[0_0_75%] min-w-0 sm:flex-[0_0_40%] pl-4"
-            >
-              <Card className="p-8 h-full border-none shadow-md rounded-3xl overflow-hidden bg-gradient-to-b from-gray-50 to-white">
-                <div className="flex flex-col h-full justify-center">
-                  <div className="flex items-center gap-6 mb-6">
-                    <CloudSun className="w-16 h-16 text-primary animate-pulse" />
-                    <div>
-                      <p className="text-4xl font-semibold text-secondary">24°C</p>
-                      <p className="text-gray-600 text-lg">Sunny</p>
+            <div className="flex-[0_0_100%] min-w-0 pl-0">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="p-8 h-full border-none shadow-md rounded-3xl overflow-hidden bg-gradient-to-b from-gray-50 to-white">
+                  <div className="flex flex-col h-full justify-center">
+                    <div className="flex items-center gap-6 mb-6">
+                      <CloudSun className="w-16 h-16 text-primary animate-pulse" />
+                      <div>
+                        <p className="text-4xl font-semibold text-secondary">24°C</p>
+                        <p className="text-gray-600 text-lg">Sunny</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
+                        <ThermometerSun className="w-5 h-5 text-primary" />
+                        <span>High: 27°C</span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
+                        <Wind className="w-5 h-5 text-primary" />
+                        <span>12 km/h</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
-                      <ThermometerSun className="w-5 h-5 text-primary" />
-                      <span>High: 27°C</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
-                      <Wind className="w-5 h-5 text-primary" />
-                      <span>12 km/h</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
+                </Card>
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>

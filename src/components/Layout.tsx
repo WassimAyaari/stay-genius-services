@@ -21,7 +21,7 @@ const Layout = ({ children }: LayoutProps) => {
       <header className="bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 sticky top-0 left-0 right-0 z-50 border-b">
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2 w-20">
+            <div className="flex items-center gap-2 w-40">
               {!isHomePage && (
                 <Button variant="ghost" size="icon" onClick={() => navigate(-1)}
                   className="animate-in fade-in duration-300">
@@ -30,8 +30,16 @@ const Layout = ({ children }: LayoutProps) => {
               )}
               <MainMenu />
             </div>
+
+            <div className="flex-1 flex justify-center">
+              <img 
+                src="/lovable-uploads/ad4ef1bb-ac95-4aaf-87df-6e874d0fcf46.png" 
+                alt="Hotel Genius" 
+                className="h-8 object-contain"
+              />
+            </div>
             
-            <div className="flex items-center gap-2 w-20 justify-end">
+            <div className="flex items-center gap-2 w-40 justify-end">
               <UserMenu username="Emma Watson" roomNumber="401" />
             </div>
           </div>
