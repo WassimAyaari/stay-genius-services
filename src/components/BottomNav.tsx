@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, BedDouble, UtensilsCrossed, Heart, Phone } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Heart, Phone, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,11 +13,11 @@ const BottomNav = () => {
   const [startY, setStartY] = useState(0);
 
   const navItems = [
-    { icon: <Home className="w-6 h-6" />, label: 'Home', path: '/' },
     { icon: <BedDouble className="w-6 h-6" />, label: 'Room', path: '/my-room' },
     { icon: <UtensilsCrossed className="w-6 h-6" />, label: 'Dining', path: '/dining' },
     { icon: <Heart className="w-6 h-6" />, label: 'Spa', path: '/spa' },
     { icon: <Phone className="w-6 h-6" />, label: 'Contact', path: '/contact' },
+    { icon: <Menu className="w-6 h-6" />, label: 'Menu', path: '/services' },
   ];
 
   useEffect(() => {

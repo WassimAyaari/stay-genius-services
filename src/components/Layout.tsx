@@ -33,7 +33,7 @@ const Layout = ({ children }: LayoutProps) => {
             
             <button 
               onClick={() => navigate('/')} 
-              className="text-lg font-medium text-secondary absolute left-1/2 transform -translate-x-1/2 hover:text-primary transition-colors"
+              className="text-xl font-semibold text-secondary absolute left-1/2 transform -translate-x-1/2 hover:text-primary transition-colors"
             >
               Hotel Genius
             </button>
