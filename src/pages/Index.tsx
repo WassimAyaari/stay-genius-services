@@ -99,26 +99,18 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="relative overflow-hidden rounded-3xl">
+          <Card className="relative overflow-hidden rounded-3xl max-w-4xl mx-auto">
             <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-primary-light/20 to-transparent" />
-            <div className="relative p-8">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-4 bg-white rounded-2xl shadow-sm">
-                    <Bell className="w-8 h-8 text-primary animate-pulse" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-secondary mb-1">
-                      {greeting}, Emma
-                    </h2>
-                    <p className="text-gray-600">Welcome to Hotel Genius</p>
-                  </div>
+            <div className="relative p-6 sm:p-8">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="p-4 bg-white rounded-2xl shadow-sm">
+                  <Bell className="w-8 h-8 text-primary animate-pulse" />
                 </div>
-                <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-xl">
-                  <Clock className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-medium text-gray-600">
-                    {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                <div>
+                  <h2 className="text-2xl font-semibold text-secondary mb-1">
+                    {greeting}, Emma
+                  </h2>
+                  <p className="text-gray-600">Welcome to Hotel Genius</p>
                 </div>
               </div>
 
