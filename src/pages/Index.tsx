@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind, Bell } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
@@ -11,7 +10,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Layout from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+
+// Define animation variants
+const containerVariants: Variants = {
+  hidden: { 
+    opacity: 0,
+  },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { 
+    opacity: 0,
+    y: 20 
+  },
+  show: { 
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3
+    }
+  }
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -61,7 +87,7 @@ const Index = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentNotification((prev) => (prev + 1) % notifications.length);
-    }, 5000); // Change notification every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -160,12 +186,12 @@ const Index = () => {
       {/* Quick Actions */}
       <motion.section 
         className="mb-12"
-        variants={container}
+        variants={containerVariants}
         initial="hidden"
         animate="show"
       >
         <div className="grid grid-cols-2 gap-6">
-          <motion.div variants={item}>
+          <motion.div variants={itemVariants}>
             <Button 
               className="w-full flex items-center justify-center gap-3 bg-primary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
               onClick={() => navigate('/my-room')}
@@ -174,7 +200,7 @@ const Index = () => {
               My Room
             </Button>
           </motion.div>
-          <motion.div variants={item}>
+          <motion.div variants={itemVariants}>
             <Button 
               className="w-full flex items-center justify-center gap-3 bg-secondary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
               onClick={() => navigate('/contact')}
@@ -206,13 +232,13 @@ const Index = () => {
       {/* Today's Highlights */}
       <motion.section 
         className="mb-12"
-        variants={container}
+        variants={containerVariants}
         initial="hidden"
         animate="show"
       >
         <h2 className="text-2xl font-semibold text-secondary mb-6">Today's Highlights</h2>
         <div className="space-y-4">
-          <motion.div variants={item}>
+          <motion.div variants={itemVariants}>
             <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
               <div className="flex items-center gap-4">
                 <Calendar className="w-6 h-6 text-primary" />
@@ -231,7 +257,7 @@ const Index = () => {
               </div>
             </Card>
           </motion.div>
-          <motion.div variants={item}>
+          <motion.div variants={itemVariants}>
             <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
               <div className="flex items-center gap-4">
                 <UtensilsCrossed className="w-6 h-6 text-primary" />
@@ -278,13 +304,13 @@ const Index = () => {
       {/* Services Grid */}
       <motion.section 
         className="mb-12"
-        variants={container}
+        variants={containerVariants}
         initial="hidden"
         animate="show"
       >
         <h2 className="text-xl font-semibold text-secondary mb-6">Hotel Services</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <motion.div variants={item}>
+          <motion.div variants={itemVariants}>
             <ServiceCard
               icon={<UtensilsCrossed />}
               title="Dining"
@@ -293,7 +319,7 @@ const Index = () => {
               onClick={() => navigate('/dining')}
             />
           </motion.div>
-          <motion.div variants={item}>
+          <motion.div variants={itemVariants}>
             <ServiceCard
               icon={<Heart />}
               title="Spa & Wellness"
@@ -302,7 +328,7 @@ const Index = () => {
               onClick={() => navigate('/spa')}
             />
           </motion.div>
-          <motion.div variants={item}>
+          <motion.div variants={itemVariants}>
             <ServiceCard
               icon={<MapPin />}
               title="Local Guide"
