@@ -40,16 +40,16 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
             </div>
             
-            <div className="flex items-center gap-3 w-40 justify-end">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative"
+            <div className="flex items-center gap-4 w-40 justify-end">
+              <button 
                 onClick={() => navigate('/messages')}
+                className="relative hover:opacity-60 transition-opacity"
               >
-                <MessageCircle className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full" />
-              </Button>
+                <MessageCircle className="h-[26px] w-[26px] stroke-[1.5px]" />
+                <span className="absolute -top-1 -right-1 h-[18px] w-[18px] bg-red-500 rounded-full text-[11px] text-white flex items-center justify-center font-medium border-2 border-white">
+                  2
+                </span>
+              </button>
               <UserMenu username="Emma Watson" roomNumber="401" />
             </div>
           </div>
