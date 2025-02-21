@@ -12,9 +12,11 @@ import { Input } from '@/components/ui/input';
 import Layout from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import useEmblaCarousel from 'embla-carousel-react';
 
 const Index = () => {
   const navigate = useNavigate();
+  const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true });
 
   const container = {
     hidden: { opacity: 0 },
@@ -35,15 +37,17 @@ const Index = () => {
     <Layout>
       {/* Welcome Section with Weather */}
       <section className="mb-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="p-8 bg-gradient-to-br from-primary-light via-white to-white border-none shadow-lg rounded-3xl overflow-hidden relative">
-            <div className="flex flex-col md:flex-row justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-4 mb-6">
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-4">
+            {/* Welcome Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_60%]"
+            >
+              <Card className="p-8 h-full bg-gradient-to-br from-primary-light via-white to-white border-none shadow-lg rounded-3xl overflow-hidden relative">
+                <div className="flex items-start gap-4 mb-6">
                   <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
                     <Sun className="w-8 h-8 text-primary animate-pulse" />
                   </div>
@@ -62,31 +66,40 @@ const Index = () => {
                     Check-out: 11 AM
                   </Button>
                 </div>
-              </div>
-              
-              {/* Weather Card */}
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-sm">
-                <div className="flex items-center gap-4 mb-4">
-                  <CloudSun className="w-12 h-12 text-primary" />
-                  <div>
-                    <p className="text-3xl font-semibold text-secondary">24°C</p>
-                    <p className="text-gray-600">Sunny</p>
+              </Card>
+            </motion.div>
+
+            {/* Weather Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_40%]"
+            >
+              <Card className="p-8 h-full bg-gradient-to-br from-white to-primary-light border-none shadow-lg rounded-3xl">
+                <div className="flex flex-col h-full justify-center">
+                  <div className="flex items-center gap-6 mb-6">
+                    <CloudSun className="w-16 h-16 text-primary" />
+                    <div>
+                      <p className="text-4xl font-semibold text-secondary">24°C</p>
+                      <p className="text-gray-600 text-lg">Sunny</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 bg-white/50 p-3 rounded-xl">
+                      <ThermometerSun className="w-5 h-5 text-primary" />
+                      <span>High: 27°C</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/50 p-3 rounded-xl">
+                      <Wind className="w-5 h-5 text-primary" />
+                      <span>12 km/h</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <ThermometerSun className="w-4 h-4" />
-                    <span>High: 27°C</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Wind className="w-4 h-4" />
-                    <span>Wind: 12 km/h</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* Quick Actions */}
