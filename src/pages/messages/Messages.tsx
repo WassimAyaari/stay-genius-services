@@ -157,6 +157,8 @@ const Messages = () => {
                 variant="ghost"
                 onClick={() => {
                   if (inputMessage.trim()) {
+                    // Here we would normally add the message to the chat
+                    // and send it to the backend
                     setInputMessage('');
                   }
                 }}
