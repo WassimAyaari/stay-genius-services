@@ -12,7 +12,6 @@ import Layout from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 
-// Define animation variants
 const containerVariants: Variants = {
   hidden: { 
     opacity: 0,
@@ -94,7 +93,6 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Enhanced Welcome Section */}
       <section className="mb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -104,7 +102,6 @@ const Index = () => {
           <Card className="relative overflow-hidden rounded-3xl">
             <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-primary-light/20 to-transparent" />
             <div className="relative p-8">
-              {/* Header */}
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-start gap-4">
                   <div className="p-4 bg-white rounded-2xl shadow-sm">
@@ -125,7 +122,6 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Dynamic Content */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentNotification}
@@ -133,7 +129,7 @@ const Index = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6"
+                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-6"
                 >
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-primary/5 rounded-xl">
@@ -166,24 +162,11 @@ const Index = () => {
                   </div>
                 </motion.div>
               </AnimatePresence>
-
-              {/* Quick Actions */}
-              <div className="flex gap-4 flex-wrap">
-                <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-                  <Clock className="w-5 h-5 mr-2" />
-                  Check-in: 3 PM
-                </Button>
-                <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-                  <Clock className="w-5 h-5 mr-2" />
-                  Check-out: 11 AM
-                </Button>
-              </div>
             </div>
           </Card>
         </motion.div>
       </section>
 
-      {/* Quick Actions */}
       <motion.section 
         className="mb-12"
         variants={containerVariants}
@@ -212,7 +195,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Search Section with Context */}
       <motion.section 
         className="mb-12"
         initial={{ opacity: 0, y: 20 }}
@@ -229,7 +211,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Today's Highlights */}
       <motion.section 
         className="mb-12"
         variants={containerVariants}
@@ -279,7 +260,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Available Rooms */}
       <motion.section 
         className="mb-12"
         initial={{ opacity: 0, y: 20 }}
@@ -301,7 +281,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Services Grid */}
       <motion.section 
         className="mb-12"
         variants={containerVariants}
@@ -340,7 +319,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Spa Section */}
       <motion.section 
         className="mb-12"
         initial={{ opacity: 0, y: 20 }}
@@ -362,7 +340,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Dining Section */}
       <motion.section 
         className="mb-12"
         initial={{ opacity: 0, y: 20 }}
@@ -384,7 +361,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* Activities Section */}
       <motion.section 
         className="mb-12"
         initial={{ opacity: 0, y: 20 }}
