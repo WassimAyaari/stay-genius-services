@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Sun, Clock, Heart } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
@@ -190,17 +189,6 @@ const Index = () => {
         </div>
         <ActivitiesSection />
       </section>
-
-      {/* Emergency Contact */}
-      <div className="fixed bottom-24 right-6">
-        <Button 
-          size="icon"
-          className="h-16 w-16 rounded-full shadow-lg bg-red-500 hover:bg-red-600 animate-pulse hover:scale-110 transition-all duration-300"
-          onClick={() => navigate('/contact')}
-        >
-          <PhoneCall className="h-7 w-7" />
-        </Button>
-      </div>
     </Layout>
   );
 };
