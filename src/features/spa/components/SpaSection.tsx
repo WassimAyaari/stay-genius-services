@@ -5,6 +5,7 @@ import SpaServiceCard from './SpaServiceCard';
 import { SpaService } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ChevronRight } from 'lucide-react';
 
 const SpaSection = () => {
   const { toast } = useToast();
@@ -62,9 +63,16 @@ const SpaSection = () => {
 
   return (
     <>
+      <div className="relative w-full">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/50 animate-pulse hidden md:block">
+          <ChevronRight className="w-6 h-6" />
+        </div>
+      </div>
       {spaServices.map((service) => (
-        <CarouselItem key={service.id} className="md:basis-1/2 lg:basis-1/3">
-          <SpaServiceCard service={service} onBook={handleBookService} />
+        <CarouselItem key={service.id} className="md:basis-2/5 lg:basis-[30%]">
+          <div className="px-2">
+            <SpaServiceCard service={service} onBook={handleBookService} />
+          </div>
         </CarouselItem>
       ))}
     </>

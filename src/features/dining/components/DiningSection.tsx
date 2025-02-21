@@ -6,6 +6,7 @@ import RestaurantCard from './RestaurantCard';
 import { Restaurant } from '../types';
 import { useToast } from '@/hooks/use-toast';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { ChevronRight } from 'lucide-react';
 
 const DiningSection = () => {
   const { toast } = useToast();
@@ -45,7 +46,6 @@ const DiningSection = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Please sign in to book a table');
 
-      // TODO: Add booking logic here
       toast({
         title: "Success",
         description: "Table reserved successfully!",
@@ -75,13 +75,20 @@ const DiningSection = () => {
       }}
       className="w-full"
     >
-      <CarouselContent>
+      <div className="relative w-full">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/50 animate-pulse hidden md:block">
+          <ChevronRight className="w-6 h-6" />
+        </div>
+      </div>
+      <CarouselContent className="-ml-4">
         {restaurants?.map((restaurant) => (
-          <CarouselItem key={restaurant.id} className="md:basis-1/2 lg:basis-1/2">
-            <RestaurantCard
-              restaurant={restaurant}
-              onBookTable={handleBookTable}
-            />
+          <CarouselItem key={restaurant.id} className="md:basis-2/5 lg:basis-[30%] pl-4">
+            <div className="px-2">
+              <RestaurantCard
+                restaurant={restaurant}
+                onBookTable={handleBookTable}
+              />
+            </div>
           </CarouselItem>
         ))}
       </CarouselContent>
