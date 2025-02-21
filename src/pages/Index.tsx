@@ -99,18 +99,18 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="relative overflow-hidden rounded-3xl max-w-4xl mx-auto">
+          <Card className="relative overflow-hidden rounded-3xl max-w-4xl mx-auto h-[250px]">
             <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-primary-light/20 to-transparent" />
-            <div className="relative p-6 sm:p-8">
+            <div className="relative p-6 sm:p-8 h-full">
               <div className="flex items-start gap-4 mb-6">
                 <div className="p-4 bg-white rounded-2xl shadow-sm">
                   <Bell className="w-8 h-8 text-primary animate-pulse" />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-semibold text-secondary mb-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-semibold text-secondary">
                     {greeting}, Emma
                   </h2>
-                  <p className="text-gray-600">Welcome to Hotel Genius</p>
+                  <span className="text-gray-600">- Hotel Genius</span>
                 </div>
               </div>
 
@@ -181,7 +181,7 @@ const Index = () => {
               onClick={() => navigate('/contact')}
             >
               <PhoneCall className="w-7 h-7" />
-              Call Concierge
+              Request Service
             </Button>
           </motion.div>
         </div>
