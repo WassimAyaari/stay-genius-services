@@ -9,7 +9,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
 interface UserMenuProps {
@@ -17,7 +17,7 @@ interface UserMenuProps {
   roomNumber?: string;
 }
 
-const UserMenu = ({ username = "Guest", roomNumber }: UserMenuProps) => {
+const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -25,9 +25,10 @@ const UserMenu = ({ username = "Guest", roomNumber }: UserMenuProps) => {
           <div className="flex items-center gap-3">
             <div className="text-right">
               <p className="text-sm font-medium text-secondary">{username}</p>
-              <p className="text-xs text-gray-500">Guest</p>
+              <p className="text-xs text-gray-500">Premium Guest</p>
             </div>
             <Avatar className="h-9 w-9 border-2 border-primary/10">
+              <AvatarImage src="/lovable-uploads/b0b89a1c-2c12-444b-be2c-1a65b9884f18.png" alt={username} />
               <AvatarFallback className="bg-primary/10 text-primary font-medium">
                 {username[0]}
               </AvatarFallback>
@@ -40,6 +41,7 @@ const UserMenu = ({ username = "Guest", roomNumber }: UserMenuProps) => {
         <SheetHeader className="p-6 bg-gradient-to-br from-primary-light to-white">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16 border-4 border-white/50">
+              <AvatarImage src="/lovable-uploads/b0b89a1c-2c12-444b-be2c-1a65b9884f18.png" alt={username} />
               <AvatarFallback className="bg-primary text-white text-xl">
                 {username[0]}
               </AvatarFallback>

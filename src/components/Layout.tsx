@@ -31,14 +31,8 @@ const Layout = ({ children }: LayoutProps) => {
               <MainMenu />
             </div>
             
-            <h1 className="text-xl font-semibold text-secondary absolute left-1/2 transform -translate-x-1/2 hover:text-primary transition-colors cursor-pointer"
-              onClick={() => navigate('/')}
-            >
-              Hotel Genius
-            </h1>
-
             <div className="flex items-center gap-2 w-20 justify-end">
-              <UserMenu username="John Doe" roomNumber="401" />
+              <UserMenu username="Emma Watson" roomNumber="401" />
             </div>
           </div>
         </div>

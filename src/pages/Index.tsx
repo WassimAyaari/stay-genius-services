@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
@@ -16,7 +15,12 @@ import useEmblaCarousel from 'embla-carousel-react';
 
 const Index = () => {
   const navigate = useNavigate();
-  const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true });
+  const [emblaRef] = useEmblaCarousel({ 
+    loop: true, 
+    dragFree: true,
+    align: 'start',
+    containScroll: 'trimSnaps'
+  });
 
   const container = {
     hidden: { opacity: 0 },
@@ -36,23 +40,25 @@ const Index = () => {
   return (
     <Layout>
       {/* Welcome Section with Weather */}
-      <section className="mb-12">
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-4">
+      <section className="mb-12 px-4 -mx-4">
+        <div className="overflow-visible" ref={emblaRef}>
+          <div className="flex -ml-4">
             {/* Welcome Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_60%]"
+              className="flex-[0_0_85%] min-w-0 sm:flex-[0_0_60%] pl-4"
             >
-              <Card className="p-8 h-full bg-gradient-to-br from-primary-light via-white to-white border-none shadow-lg rounded-3xl overflow-hidden relative">
+              <Card className="p-8 h-full bg-gradient-to-br from-primary-light via-white to-white border-none shadow-md rounded-3xl overflow-hidden relative">
                 <div className="flex items-start gap-4 mb-6">
                   <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
                     <Sun className="w-8 h-8 text-primary animate-pulse" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-semibold text-secondary mb-1">Good Morning</h2>
+                    <h2 className="text-2xl font-semibold text-secondary mb-1">
+                      Good Morning, Emma
+                    </h2>
                     <p className="text-gray-600">Welcome to Hotel Genius</p>
                   </div>
                 </div>
@@ -74,24 +80,27 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_40%]"
+              className="flex-[0_0_75%] min-w-0 sm:flex-[0_0_40%] pl-4"
             >
-              <Card className="p-8 h-full bg-gradient-to-br from-white to-primary-light border-none shadow-lg rounded-3xl">
+              <Card className="p-8 h-full border-none shadow-md rounded-3xl overflow-hidden"
+                style={{
+                  background: "linear-gradient(225deg, #FFE29F 0%, #FFA99F 48%, #FF719A 100%)",
+                }}>
                 <div className="flex flex-col h-full justify-center">
                   <div className="flex items-center gap-6 mb-6">
-                    <CloudSun className="w-16 h-16 text-primary" />
+                    <CloudSun className="w-16 h-16 text-white" />
                     <div>
-                      <p className="text-4xl font-semibold text-secondary">24°C</p>
-                      <p className="text-gray-600 text-lg">Sunny</p>
+                      <p className="text-4xl font-semibold text-white">24°C</p>
+                      <p className="text-white/90 text-lg">Sunny</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-2 bg-white/50 p-3 rounded-xl">
-                      <ThermometerSun className="w-5 h-5 text-primary" />
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-xl text-white">
+                      <ThermometerSun className="w-5 h-5" />
                       <span>High: 27°C</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-white/50 p-3 rounded-xl">
-                      <Wind className="w-5 h-5 text-primary" />
+                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-xl text-white">
+                      <Wind className="w-5 h-5" />
                       <span>12 km/h</span>
                     </div>
                   </div>
