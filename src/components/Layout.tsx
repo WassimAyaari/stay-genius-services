@@ -32,11 +32,9 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
 
             <div className="flex-1 flex justify-center">
-              <img 
-                src="/lovable-uploads/ad4ef1bb-ac95-4aaf-87df-6e874d0fcf46.png" 
-                alt="Hotel Genius" 
-                className="h-8 object-contain"
-              />
+              <span className="text-xl font-semibold text-primary">
+                Hotel Genius
+              </span>
             </div>
             
             <div className="flex items-center gap-2 w-40 justify-end">
