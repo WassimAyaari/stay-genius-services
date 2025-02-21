@@ -7,7 +7,7 @@ import Layout from '@/components/Layout';
 
 const Activities = () => {
   return (
-    <Layout showBackButton>
+    <Layout>
       {/* Header Section */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Things To Do</h1>

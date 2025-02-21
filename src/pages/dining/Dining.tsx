@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import Layout from '@/components/Layout';
 
 const Dining = () => {
   return (
-    <Layout showBackButton>
+    <Layout>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Dining Experiences</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
