@@ -5,7 +5,7 @@ import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
 import { Button } from './ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, MessageCircle } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,7 +40,16 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
             </div>
             
-            <div className="flex items-center gap-2 w-40 justify-end">
+            <div className="flex items-center gap-3 w-40 justify-end">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={() => navigate('/messages')}
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full" />
+              </Button>
               <UserMenu username="Emma Watson" roomNumber="401" />
             </div>
           </div>
