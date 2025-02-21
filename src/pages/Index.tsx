@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind, Bell } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
@@ -10,19 +11,33 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Layout from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import useEmblaCarousel from 'embla-carousel-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Index = () => {
   const navigate = useNavigate();
-  const [emblaRef] = useEmblaCarousel({ 
-    loop: true,
-    dragFree: false,
-    containScroll: 'trimSnaps',
-    align: 'center'
-  });
-
   const [greeting, setGreeting] = useState("");
+  const [currentNotification, setCurrentNotification] = useState(0);
+
+  const notifications = [
+    {
+      icon: <Sun className="w-8 h-8 text-primary" />,
+      temp: "24°C",
+      weather: "Sunny",
+      info: "Perfect day for the pool!"
+    },
+    {
+      icon: <UtensilsCrossed className="w-8 h-8 text-primary" />,
+      title: "Dinner Reservation",
+      time: "7:00 PM",
+      info: "Italian Restaurant - Table for 2"
+    },
+    {
+      icon: <Calendar className="w-8 h-8 text-primary" />,
+      title: "Wine Tasting",
+      time: "5:00 PM",
+      info: "Join us at the Cellar"
+    }
+  ];
 
   useEffect(() => {
     const updateGreeting = () => {
@@ -43,92 +58,103 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentNotification((prev) => (prev + 1) % notifications.length);
+    }, 5000); // Change notification every 5 seconds
 
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Layout>
-      {/* Welcome Section with Weather */}
+      {/* Enhanced Welcome Section */}
       <section className="mb-12">
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex">
-            {/* Welcome Card */}
-            <div className="flex-[0_0_100%] min-w-0 pl-0">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card className="p-8 h-full bg-gradient-to-br from-primary-light via-white to-white border-none shadow-md rounded-3xl overflow-hidden relative">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
-                      <Sun className="w-8 h-8 text-primary animate-pulse" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="relative overflow-hidden rounded-3xl">
+            <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-primary-light/20 to-transparent" />
+            <div className="relative p-8">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-4 bg-white rounded-2xl shadow-sm">
+                    <Bell className="w-8 h-8 text-primary animate-pulse" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-semibold text-secondary mb-1">
+                      {greeting}, Emma
+                    </h2>
+                    <p className="text-gray-600">Welcome to Hotel Genius</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-xl">
+                  <Clock className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-gray-600">
+                    {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dynamic Content */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentNotification}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/5 rounded-xl">
+                      {notifications[currentNotification].icon}
                     </div>
                     <div>
-                      <h2 className="text-2xl font-semibold text-secondary mb-1">
-                        {greeting}, Emma
-                      </h2>
-                      <p className="text-gray-600">Welcome to Hotel Genius</p>
+                      {notifications[currentNotification].temp ? (
+                        <>
+                          <p className="text-3xl font-semibold text-secondary">
+                            {notifications[currentNotification].temp}
+                          </p>
+                          <p className="text-gray-600">
+                            {notifications[currentNotification].weather}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-semibold text-secondary">
+                            {notifications[currentNotification].title}
+                          </p>
+                          <p className="text-gray-600">
+                            {notifications[currentNotification].time}
+                          </p>
+                        </>
+                      )}
+                      <p className="text-sm text-primary mt-1">
+                        {notifications[currentNotification].info}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex gap-4 flex-wrap">
-                    <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-                      <Clock className="w-5 h-5 mr-2" />
-                      Check-in: 3 PM
-                    </Button>
-                    <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-                      <Clock className="w-5 h-5 mr-2" />
-                      Check-out: 11 AM
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            </div>
+                </motion.div>
+              </AnimatePresence>
 
-            {/* Weather Card */}
-            <div className="flex-[0_0_100%] min-w-0 pl-0">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card className="p-8 h-full border-none shadow-md rounded-3xl overflow-hidden bg-gradient-to-b from-gray-50 to-white">
-                  <div className="flex flex-col h-full justify-center">
-                    <div className="flex items-center gap-6 mb-6">
-                      <CloudSun className="w-16 h-16 text-primary animate-pulse" />
-                      <div>
-                        <p className="text-4xl font-semibold text-secondary">24°C</p>
-                        <p className="text-gray-600 text-lg">Sunny</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
-                        <ThermometerSun className="w-5 h-5 text-primary" />
-                        <span>High: 27°C</span>
-                      </div>
-                      <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
-                        <Wind className="w-5 h-5 text-primary" />
-                        <span>12 km/h</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
+              {/* Quick Actions */}
+              <div className="flex gap-4 flex-wrap">
+                <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+                  <Clock className="w-5 h-5 mr-2" />
+                  Check-in: 3 PM
+                </Button>
+                <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+                  <Clock className="w-5 h-5 mr-2" />
+                  Check-out: 11 AM
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
+          </Card>
+        </motion.div>
       </section>
 
       {/* Quick Actions */}
