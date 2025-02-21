@@ -41,6 +41,7 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
             
             <div className="flex items-center gap-4 w-40 justify-end">
+              <UserMenu username="Emma Watson" roomNumber="401" />
               <button 
                 onClick={() => navigate('/messages')}
                 className="relative hover:opacity-60 transition-opacity"
@@ -50,7 +51,6 @@ const Layout = ({ children }: LayoutProps) => {
                   2
                 </span>
               </button>
-              <UserMenu username="Emma Watson" roomNumber="401" />
             </div>
           </div>
         </div>
