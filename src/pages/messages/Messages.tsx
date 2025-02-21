@@ -3,15 +3,22 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Bell, Briefcase } from 'lucide-react';
 import Layout from '@/components/Layout';
+import { cn } from '@/lib/utils';
+
+interface Message {
+  id: string;
+  text: string;
+  time: string;
+  sender: 'user' | 'staff';
+}
 
 interface Contact {
   id: string;
   name: string;
   role: string;
   icon: React.ReactNode;
-  lastMessage: string;
-  time: string;
-  unread: number;
+  messages: Message[];
+  isOnline: boolean;
 }
 
 const contacts: Contact[] = [
@@ -20,57 +27,162 @@ const contacts: Contact[] = [
     name: 'Guest Relations',
     role: 'Available 24/7',
     icon: <Bell className="h-6 w-6 text-primary" />,
-    lastMessage: "How may we assist you today?",
-    time: '2m ago',
-    unread: 1
+    isOnline: true,
+    messages: [
+      {
+        id: '1',
+        text: "Welcome to Hotel Genius! How may we assist you today?",
+        time: '2:30 PM',
+        sender: 'staff'
+      },
+      {
+        id: '2',
+        text: "I'd like to request a late check-out tomorrow if possible.",
+        time: '2:31 PM',
+        sender: 'user'
+      },
+      {
+        id: '3',
+        text: "I'll check the availability and get back to you shortly.",
+        time: '2:32 PM',
+        sender: 'staff'
+      }
+    ]
   },
   {
     id: '2',
     name: 'Concierge',
     role: 'Available 8AM-10PM',
     icon: <Briefcase className="h-6 w-6 text-primary" />,
-    lastMessage: "Would you like me to make dinner reservations?",
-    time: '3h ago',
-    unread: 1
-  },
+    isOnline: true,
+    messages: [
+      {
+        id: '1',
+        text: "Would you like me to make dinner reservations for tonight?",
+        time: '1:00 PM',
+        sender: 'staff'
+      },
+      {
+        id: '2',
+        text: "Yes, please. A table for two at 8 PM would be great.",
+        time: '1:05 PM',
+        sender: 'user'
+      }
+    ]
+  }
 ];
 
 const Messages = () => {
+  const [selectedContact, setSelectedContact] = React.useState<Contact | null>(contacts[0]);
+
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b">
-            <h1 className="text-2xl font-semibold">Messages</h1>
+      <div className="max-w-4xl mx-auto h-[calc(100vh-180px)]">
+        <div className="grid grid-cols-12 h-full gap-4">
+          {/* Contacts Sidebar */}
+          <div className="col-span-4 border-r overflow-y-auto">
+            <div className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Messages</h2>
+              <div className="space-y-2">
+                {contacts.map((contact) => (
+                  <div
+                    key={contact.id}
+                    onClick={() => setSelectedContact(contact)}
+                    className={cn(
+                      "p-3 rounded-lg cursor-pointer transition-colors",
+                      selectedContact?.id === contact.id ? "bg-primary/10" : "hover:bg-gray-50"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          {contact.icon}
+                        </div>
+                        {contact.isOnline && (
+                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{contact.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{contact.role}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-4">
-            {contacts.map((contact) => (
-              <Card key={contact.id} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    {contact.icon}
+          {/* Chat Area */}
+          {selectedContact ? (
+            <div className="col-span-8 flex flex-col h-full">
+              {/* Chat Header */}
+              <div className="p-4 border-b flex items-center gap-3">
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    {selectedContact.icon}
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold truncate">{contact.name}</p>
-                      <span className="text-sm text-muted-foreground flex-shrink-0">{contact.time}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm text-muted-foreground truncate">{contact.role}</p>
-                      {contact.unread > 0 && (
-                        <span className="h-5 w-5 rounded-full bg-primary text-[11px] text-white flex items-center justify-center flex-shrink-0 font-medium">
-                          {contact.unread}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  {selectedContact.isOnline && (
+                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground mt-2 truncate">{contact.lastMessage}</p>
-              </Card>
-            ))}
-          </div>
+                <div>
+                  <h3 className="font-medium">{selectedContact.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedContact.role}</p>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {selectedContact.messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex",
+                      message.sender === 'user' ? "justify-end" : "justify-start"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-[80%] rounded-2xl px-4 py-2",
+                        message.sender === 'user'
+                          ? "bg-primary text-white"
+                          : "bg-gray-100"
+                      )}
+                    >
+                      <p className="text-sm">{message.text}</p>
+                      <p className={cn(
+                        "text-[10px] mt-1",
+                        message.sender === 'user'
+                          ? "text-primary-foreground/80"
+                          : "text-muted-foreground"
+                      )}>
+                        {message.time}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Message Input */}
+              <div className="p-4 border-t">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Type a message..."
+                    className="flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                  <button className="bg-primary text-white rounded-full p-2 hover:bg-primary/90 transition-colors">
+                    Send
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="col-span-8 flex items-center justify-center">
+              <p className="text-muted-foreground">Select a conversation to start messaging</p>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
