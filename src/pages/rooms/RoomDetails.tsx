@@ -4,12 +4,13 @@ import { useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BedDouble, Users, Wifi, Coffee, Tv } from 'lucide-react';
+import Layout from '@/components/Layout';
 
 const RoomDetails = () => {
   const { id } = useParams();
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Layout>
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <img 
@@ -74,7 +75,7 @@ const RoomDetails = () => {
           </Card>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
