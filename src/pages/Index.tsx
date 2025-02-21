@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Sun, Clock, Heart } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
@@ -10,59 +11,120 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Layout from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Index = () => {
   const navigate = useNavigate();
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
     <Layout>
-      {/* Welcome Section */}
+      {/* Welcome Section with Weather */}
       <section className="mb-12">
-        <Card className="p-8 bg-gradient-to-r from-primary-light via-white to-white border-none shadow-lg rounded-3xl">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
-              <Sun className="w-8 h-8 text-primary" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="p-8 bg-gradient-to-br from-primary-light via-white to-white border-none shadow-lg rounded-3xl overflow-hidden relative">
+            <div className="flex flex-col md:flex-row justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
+                    <Sun className="w-8 h-8 text-primary animate-pulse" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-semibold text-secondary mb-1">Good Morning</h2>
+                    <p className="text-gray-600">Welcome to Hotel Genius</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 flex-wrap">
+                  <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+                    <Clock className="w-5 h-5 mr-2" />
+                    Check-in: 3 PM
+                  </Button>
+                  <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+                    <Clock className="w-5 h-5 mr-2" />
+                    Check-out: 11 AM
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Weather Card */}
+              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-sm">
+                <div className="flex items-center gap-4 mb-4">
+                  <CloudSun className="w-12 h-12 text-primary" />
+                  <div>
+                    <p className="text-3xl font-semibold text-secondary">24°C</p>
+                    <p className="text-gray-600">Sunny</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <ThermometerSun className="w-4 h-4" />
+                    <span>High: 27°C</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Wind className="w-4 h-4" />
+                    <span>Wind: 12 km/h</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-semibold text-secondary mb-1">Good Morning</h2>
-              <p className="text-gray-600">Welcome to Hotel Genius</p>
-            </div>
-          </div>
-          <div className="flex gap-6 flex-wrap">
-            <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-              <Clock className="w-5 h-5 mr-2" />
-              Check-in: 3 PM
-            </Button>
-            <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
-              <Clock className="w-5 h-5 mr-2" />
-              Check-out: 11 AM
-            </Button>
-          </div>
-        </Card>
+          </Card>
+        </motion.div>
       </section>
 
       {/* Quick Actions */}
-      <section className="mb-12">
+      <motion.section 
+        className="mb-12"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         <div className="grid grid-cols-2 gap-6">
-          <Button 
-            className="w-full flex items-center justify-center gap-3 bg-primary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
-            onClick={() => navigate('/my-room')}
-          >
-            <BedDouble className="w-7 h-7" />
-            My Room
-          </Button>
-          <Button 
-            className="w-full flex items-center justify-center gap-3 bg-secondary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
-            onClick={() => navigate('/contact')}
-          >
-            <PhoneCall className="w-7 h-7" />
-            Call Concierge
-          </Button>
+          <motion.div variants={item}>
+            <Button 
+              className="w-full flex items-center justify-center gap-3 bg-primary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
+              onClick={() => navigate('/my-room')}
+            >
+              <BedDouble className="w-7 h-7" />
+              My Room
+            </Button>
+          </motion.div>
+          <motion.div variants={item}>
+            <Button 
+              className="w-full flex items-center justify-center gap-3 bg-secondary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
+              onClick={() => navigate('/contact')}
+            >
+              <PhoneCall className="w-7 h-7" />
+              Call Concierge
+            </Button>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Search Section with Context */}
-      <section className="mb-12">
+      <motion.section 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
         <div className="relative">
           <Input
             type="search"
@@ -71,56 +133,70 @@ const Index = () => {
           />
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
-      </section>
+      </motion.section>
 
       {/* Today's Highlights */}
-      <section className="mb-12">
+      <motion.section 
+        className="mb-12"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         <h2 className="text-2xl font-semibold text-secondary mb-6">Today's Highlights</h2>
         <div className="space-y-4">
-          <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <Calendar className="w-6 h-6 text-primary" />
-              <div>
-                <p className="font-medium text-secondary">Wine Tasting</p>
-                <p className="text-sm text-gray-600">Today at 6 PM - Wine Cellar</p>
+          <motion.div variants={item}>
+            <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
+              <div className="flex items-center gap-4">
+                <Calendar className="w-6 h-6 text-primary" />
+                <div>
+                  <p className="font-medium text-secondary">Wine Tasting</p>
+                  <p className="text-sm text-gray-600">Today at 6 PM - Wine Cellar</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="ml-auto rounded-xl" 
+                  size="sm"
+                  onClick={() => navigate('/activities')}
+                >
+                  Book Now
+                </Button>
               </div>
-              <Button 
-                variant="outline" 
-                className="ml-auto rounded-xl" 
-                size="sm"
-                onClick={() => navigate('/activities')}
-              >
-                Book Now
-              </Button>
-            </div>
-          </Card>
-          <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <UtensilsCrossed className="w-6 h-6 text-primary" />
-              <div>
-                <p className="font-medium text-secondary">Chef's Special Dinner</p>
-                <p className="text-sm text-gray-600">Tonight at 7 PM - Main Restaurant</p>
+            </Card>
+          </motion.div>
+          <motion.div variants={item}>
+            <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
+              <div className="flex items-center gap-4">
+                <UtensilsCrossed className="w-6 h-6 text-primary" />
+                <div>
+                  <p className="font-medium text-secondary">Chef's Special Dinner</p>
+                  <p className="text-sm text-gray-600">Tonight at 7 PM - Main Restaurant</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="ml-auto rounded-xl" 
+                  size="sm"
+                  onClick={() => navigate('/dining')}
+                >
+                  Reserve
+                </Button>
               </div>
-              <Button 
-                variant="outline" 
-                className="ml-auto rounded-xl" 
-                size="sm"
-                onClick={() => navigate('/dining')}
-              >
-                Reserve
-              </Button>
-            </div>
-          </Card>
+            </Card>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Featured Rooms */}
-      <section className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-secondary">Available Rooms</h2>
+      {/* Available Rooms */}
+      <motion.section 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-secondary">Available Rooms</h2>
           <Button 
             variant="ghost" 
-            className="text-primary text-sm"
+            className="text-primary font-medium"
             onClick={() => navigate('/my-room')}
           >
             View All
@@ -129,66 +205,112 @@ const Index = () => {
         <div className="overflow-x-auto pb-4 -mx-4 px-4">
           <RoomList />
         </div>
-      </section>
+      </motion.section>
 
-      {/* Quick Services Grid */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold text-secondary mb-4">Hotel Services</h2>
+      {/* Services Grid */}
+      <motion.section 
+        className="mb-12"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        <h2 className="text-xl font-semibold text-secondary mb-6">Hotel Services</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <ServiceCard
-            icon={<UtensilsCrossed />}
-            title="Dining"
-            description="Restaurant reservations"
-            action="Book Table"
-            onClick={() => navigate('/dining')}
-          />
-          <ServiceCard
-            icon={<Heart />}
-            title="Spa & Wellness"
-            description="Relaxation awaits"
-            action="Book Service"
+          <motion.div variants={item}>
+            <ServiceCard
+              icon={<UtensilsCrossed />}
+              title="Dining"
+              description="Restaurant reservations"
+              action="Book Table"
+              onClick={() => navigate('/dining')}
+            />
+          </motion.div>
+          <motion.div variants={item}>
+            <ServiceCard
+              icon={<Heart />}
+              title="Spa & Wellness"
+              description="Relaxation awaits"
+              action="Book Service"
+              onClick={() => navigate('/spa')}
+            />
+          </motion.div>
+          <motion.div variants={item}>
+            <ServiceCard
+              icon={<MapPin />}
+              title="Local Guide"
+              description="Explore the area"
+              action="Discover"
+              onClick={() => navigate('/activities')}
+            />
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Spa Section */}
+      <motion.section 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-secondary">Spa & Wellness</h2>
+          <Button 
+            variant="ghost" 
+            className="text-primary font-medium"
             onClick={() => navigate('/spa')}
-          />
-          <ServiceCard
-            icon={<MapPin />}
-            title="Local Guide"
-            description="Explore the area"
-            action="Discover"
+          >
+            View All
+          </Button>
+        </div>
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <SpaSection />
+        </div>
+      </motion.section>
+
+      {/* Dining Section */}
+      <motion.section 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-secondary">Restaurants & Dining</h2>
+          <Button 
+            variant="ghost" 
+            className="text-primary font-medium"
+            onClick={() => navigate('/dining')}
+          >
+            View All
+          </Button>
+        </div>
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <DiningSection />
+        </div>
+      </motion.section>
+
+      {/* Activities Section */}
+      <motion.section 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1 }}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-secondary">Activities & Events</h2>
+          <Button 
+            variant="ghost" 
+            className="text-primary font-medium"
             onClick={() => navigate('/activities')}
-          />
-        </div>
-      </section>
-
-      {/* Other Sections */}
-      <section className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-secondary">Restaurants & Dining</h2>
-          <Button variant="ghost" className="text-primary text-sm">
+          >
             View All
           </Button>
         </div>
-        <DiningSection />
-      </section>
-
-      <section className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-secondary">Spa & Wellness</h2>
-          <Button variant="ghost" className="text-primary text-sm">
-            View All
-          </Button>
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <ActivitiesSection />
         </div>
-        <SpaSection />
-      </section>
-
-      <section className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-secondary">Activities & Events</h2>
-          <Button variant="ghost" className="text-primary text-sm">
-            View All
-          </Button>
-        </div>
-        <ActivitiesSection />
-      </section>
+      </motion.section>
     </Layout>
   );
 };
