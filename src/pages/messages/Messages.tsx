@@ -79,97 +79,119 @@ const contacts: Contact[] = [
 const Messages = () => {
   const [selectedContact, setSelectedContact] = React.useState<Contact | null>(null);
   const [inputMessage, setInputMessage] = React.useState('');
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [selectedContact?.messages]);
+
+  const handleSendMessage = () => {
+    if (inputMessage.trim() && selectedContact) {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        text: inputMessage,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: 'user'
+      };
+
+      // Here we would integrate with a real chat service
+      console.log('Sending message:', newMessage);
+      
+      setInputMessage('');
+    }
+  };
 
   if (selectedContact) {
     return (
-      <Layout>
-        <div className="max-w-3xl mx-auto h-[calc(100vh-180px)] flex flex-col bg-[#f0f2f5]">
-          {/* Chat Header */}
-          <div className="p-3 bg-[#008069] text-white flex items-center gap-3 shadow-sm">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setSelectedContact(null)}
-              className="mr-2 hover:bg-[#ffffff1a]"
-            >
-              <ArrowLeft className="h-5 w-5 text-white" />
-            </Button>
-            <div className="relative">
-              <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
-                {selectedContact.icon}
-              </div>
-              {selectedContact.isOnline && (
-                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-[#008069]" />
-              )}
-            </div>
-            <div>
-              <h3 className="font-medium text-white">{selectedContact.name}</h3>
-              <p className="text-xs text-white/80">{selectedContact.role}</p>
-            </div>
-          </div>
-
-          {/* Messages */}
-          <div 
-            className="flex-1 overflow-y-auto p-4 space-y-2"
-            style={{
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e5e5e5' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E\")",
-              backgroundRepeat: 'repeat',
-              backgroundColor: '#efeae2'
-            }}
+      <div className="fixed inset-0 bg-background">
+        {/* Chat Header */}
+        <div className="h-16 border-b bg-card flex items-center px-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setSelectedContact(null)}
+            className="mr-2"
           >
-            {selectedContact.messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "flex",
-                  message.sender === 'user' ? "justify-end" : "justify-start"
-                )}
-              >
-                <div
-                  className={cn(
-                    "max-w-[80%] px-3 py-2 rounded-lg relative shadow-sm",
-                    message.sender === 'user'
-                      ? "bg-[#d9fdd3] rounded-tr-none"
-                      : "bg-white rounded-tl-none"
-                  )}
-                >
-                  <p className="text-[0.9375rem] text-[#111b21]">{message.text}</p>
-                  <p className="text-[0.6875rem] text-[#667781] text-right mt-1">
-                    {message.time}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Message Input */}
-          <div className="p-3 bg-[#f0f2f5]">
-            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-1">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Type a message"
-                className="flex-1 py-2 bg-transparent text-sm focus:outline-none"
-              />
-              <Button 
-                size="icon"
-                variant="ghost"
-                onClick={() => {
-                  if (inputMessage.trim()) {
-                    // Here we would normally add the message to the chat
-                    // and send it to the backend
-                    setInputMessage('');
-                  }
-                }}
-                className="text-[#008069] hover:bg-[#008069]/10"
-              >
-                <Send className="h-5 w-5" />
-              </Button>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              {selectedContact.icon}
             </div>
+            {selectedContact.isOnline && (
+              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
+            )}
+          </div>
+          <div className="ml-3">
+            <h3 className="font-medium">{selectedContact.name}</h3>
+            <p className="text-xs text-muted-foreground">{selectedContact.role}</p>
           </div>
         </div>
-      </Layout>
+
+        {/* Messages */}
+        <div className="h-[calc(100vh-128px)] overflow-y-auto p-4 space-y-4">
+          {selectedContact.messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex",
+                message.sender === 'user' ? "justify-end" : "justify-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "max-w-[80%] px-4 py-2 rounded-2xl",
+                  message.sender === 'user'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
+              >
+                <p className="text-sm">{message.text}</p>
+                <p className={cn(
+                  "text-[10px] mt-1",
+                  message.sender === 'user'
+                    ? "text-primary-foreground/80"
+                    : "text-muted-foreground"
+                )}>
+                  {message.time}
+                </p>
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Message Input */}
+        <div className="h-16 border-t bg-card p-3">
+          <div className="flex items-center gap-2 h-full">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              placeholder="Type a message"
+              className="flex-1 bg-muted rounded-full px-4 py-2 text-sm focus:outline-none"
+            />
+            <Button 
+              size="icon"
+              onClick={handleSendMessage}
+              className="rounded-full"
+              disabled={!inputMessage.trim()}
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -184,27 +206,27 @@ const Messages = () => {
           {contacts.map((contact) => (
             <Card 
               key={contact.id}
-              className="cursor-pointer hover:bg-gray-50 transition-colors border-0 shadow-none"
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => setSelectedContact(contact)}
             >
-              <div className="flex items-center gap-4 p-3">
+              <div className="flex items-center gap-4 p-4">
                 <div className="relative">
-                  <div className="h-12 w-12 rounded-full bg-[#008069]/10 flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                     {contact.icon}
                   </div>
                   {contact.isOnline && (
-                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
                   )}
                 </div>
                 
-                <div className="flex-1 min-w-0 border-b pb-3">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-[#111b21]">{contact.name}</h3>
-                    <span className="text-xs text-[#667781]">2m ago</span>
+                    <h3 className="font-medium">{contact.name}</h3>
+                    <span className="text-xs text-muted-foreground">2m ago</span>
                   </div>
-                  <p className="text-sm text-[#667781]">{contact.role}</p>
+                  <p className="text-sm text-muted-foreground">{contact.role}</p>
                   {contact.lastMessage && (
-                    <p className="text-sm text-[#667781] truncate mt-1">{contact.lastMessage}</p>
+                    <p className="text-sm truncate mt-1">{contact.lastMessage}</p>
                   )}
                 </div>
               </div>
