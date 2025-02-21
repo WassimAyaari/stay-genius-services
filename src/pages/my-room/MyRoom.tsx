@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRoom } from '@/hooks/useRoom';
@@ -21,7 +20,12 @@ import {
   Clock,
   CheckCircle2,
   Timer,
-  XCircle
+  XCircle,
+  ChevronUp,
+  ChevronDown,
+  Power,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 
 const MyRoom = () => {
@@ -29,10 +33,127 @@ const MyRoom = () => {
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests(room?.id);
   const { toast } = useToast();
 
+  const [temperature, setTemperature] = useState(22);
+  const [tvPower, setTvPower] = useState(true);
+  const [tvVolume, setTvVolume] = useState(30);
+  const [wifiConnected, setWifiConnected] = useState(true);
+
+  const handleTemperatureChange = (increment: boolean) => {
+    setTemperature(prev => {
+      const newTemp = increment ? prev + 1 : prev - 1;
+      if (newTemp >= 16 && newTemp <= 30) {
+        toast({
+          title: "Temperature Updated",
+          description: `Room temperature set to ${newTemp}°C`,
+        });
+        return newTemp;
+      }
+      return prev;
+    });
+  };
+
+  const toggleTvPower = () => {
+    setTvPower(prev => !prev);
+    toast({
+      title: "TV Power",
+      description: tvPower ? "TV turned off" : "TV turned on",
+    });
+  };
+
+  const handleTvVolume = (increment: boolean) => {
+    setTvVolume(prev => {
+      const newVolume = increment ? Math.min(100, prev + 10) : Math.max(0, prev - 10);
+      toast({
+        title: "TV Volume",
+        description: `Volume set to ${newVolume}%`,
+      });
+      return newVolume;
+    });
+  };
+
+  const toggleWifi = () => {
+    setWifiConnected(prev => !prev);
+    toast({
+      title: "WiFi Connection",
+      description: wifiConnected ? "WiFi disconnected" : "WiFi connected",
+    });
+  };
+
   const roomControls = [
-    { icon: <Wind className="h-6 w-6" />, label: 'AC Control', value: '22°C' },
-    { icon: <Tv className="h-6 w-6" />, label: 'TV', value: 'On' },
-    { icon: <Wifi className="h-6 w-6" />, label: 'WiFi', value: 'Connected' },
+    { 
+      icon: <Wind className="h-6 w-6" />, 
+      label: 'AC Control', 
+      value: `${temperature}°C`,
+      controls: (
+        <div className="flex gap-2 mt-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleTemperatureChange(false)}
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleTemperatureChange(true)}
+          >
+            <ChevronUp className="h-4 w-4" />
+          </Button>
+        </div>
+      )
+    },
+    { 
+      icon: <Tv className="h-6 w-6" />, 
+      label: 'TV', 
+      value: tvPower ? 'On' : 'Off',
+      controls: (
+        <div className="space-y-2 mt-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={toggleTvPower}
+          >
+            <Power className="h-4 w-4 mr-2" />
+            {tvPower ? 'Turn Off' : 'Turn On'}
+          </Button>
+          {tvPower && (
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleTvVolume(false)}
+              >
+                <VolumeX className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleTvVolume(true)}
+              >
+                <Volume2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      )
+    },
+    { 
+      icon: <Wifi className="h-6 w-6" />, 
+      label: 'WiFi', 
+      value: wifiConnected ? 'Connected' : 'Disconnected',
+      controls: (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full mt-2"
+          onClick={toggleWifi}
+        >
+          {wifiConnected ? 'Disconnect' : 'Connect'}
+        </Button>
+      )
+    },
   ];
 
   const services = [
@@ -141,15 +262,18 @@ const MyRoom = () => {
       {/* Room Controls */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-secondary mb-4">Room Controls</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {roomControls.map((control) => (
             <Card key={control.label} className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="text-primary">{control.icon}</div>
-                <div>
-                  <p className="text-sm font-medium">{control.label}</p>
-                  <p className="text-sm text-gray-600">{control.value}</p>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-3">
+                  <div className="text-primary">{control.icon}</div>
+                  <div>
+                    <p className="text-sm font-medium">{control.label}</p>
+                    <p className="text-sm text-gray-600">{control.value}</p>
+                  </div>
                 </div>
+                {control.controls}
               </div>
             </Card>
           ))}
