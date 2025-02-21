@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
@@ -21,6 +21,27 @@ const Index = () => {
     align: 'start',
     containScroll: 'trimSnaps'
   });
+
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    const updateGreeting = () => {
+      const hour = new Date().getHours();
+      if (hour >= 5 && hour < 12) {
+        setGreeting("Good Morning");
+      } else if (hour >= 12 && hour < 17) {
+        setGreeting("Good Afternoon");
+      } else if (hour >= 17 && hour < 21) {
+        setGreeting("Time for Dinner");
+      } else {
+        setGreeting("Good Evening");
+      }
+    };
+
+    updateGreeting();
+    const interval = setInterval(updateGreeting, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const container = {
     hidden: { opacity: 0 },
@@ -57,8 +78,9 @@ const Index = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-semibold text-secondary mb-1">
-                      Good Morning, Emma
+                      {greeting}, Emma
                     </h2>
+                    <p className="text-gray-600">Welcome to Hotel Genius</p>
                   </div>
                 </div>
                 <div className="flex gap-4 flex-wrap">
@@ -81,25 +103,22 @@ const Index = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex-[0_0_75%] min-w-0 sm:flex-[0_0_40%] pl-4"
             >
-              <Card className="p-8 h-full border-none shadow-md rounded-3xl overflow-hidden"
-                style={{
-                  background: "linear-gradient(225deg, #FFE29F 0%, #FFA99F 48%, #FF719A 100%)",
-                }}>
+              <Card className="p-8 h-full border-none shadow-md rounded-3xl overflow-hidden bg-gradient-to-b from-gray-50 to-white">
                 <div className="flex flex-col h-full justify-center">
                   <div className="flex items-center gap-6 mb-6">
-                    <CloudSun className="w-16 h-16 text-white" />
+                    <CloudSun className="w-16 h-16 text-primary animate-pulse" />
                     <div>
-                      <p className="text-4xl font-semibold text-white">24°C</p>
-                      <p className="text-white/90 text-lg">Sunny</p>
+                      <p className="text-4xl font-semibold text-secondary">24°C</p>
+                      <p className="text-gray-600 text-lg">Sunny</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-xl text-white">
-                      <ThermometerSun className="w-5 h-5" />
+                    <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
+                      <ThermometerSun className="w-5 h-5 text-primary" />
                       <span>High: 27°C</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-xl text-white">
-                      <Wind className="w-5 h-5" />
+                    <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-xl text-gray-600">
+                      <Wind className="w-5 h-5 text-primary" />
                       <span>12 km/h</span>
                     </div>
                   </div>

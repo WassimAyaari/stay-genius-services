@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked } from 'lucide-react';
 import {
@@ -22,26 +21,20 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" className="p-0 h-auto hover:bg-transparent relative">
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-secondary">{username}</p>
-              <p className="text-xs text-gray-500">Premium Guest</p>
-            </div>
-            <Avatar className="h-9 w-9 border-2 border-primary/10">
-              <AvatarImage src="/lovable-uploads/b0b89a1c-2c12-444b-be2c-1a65b9884f18.png" alt={username} />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                {username[0]}
-              </AvatarFallback>
-            </Avatar>
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full" />
-          </div>
+          <Avatar className="h-9 w-9 border-2 border-primary/10">
+            <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={username} />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {username[0]}
+            </AvatarFallback>
+          </Avatar>
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full" />
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="p-0">
         <SheetHeader className="p-6 bg-gradient-to-br from-primary-light to-white">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16 border-4 border-white/50">
-              <AvatarImage src="/lovable-uploads/b0b89a1c-2c12-444b-be2c-1a65b9884f18.png" alt={username} />
+              <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={username} />
               <AvatarFallback className="bg-primary text-white text-xl">
                 {username[0]}
               </AvatarFallback>
