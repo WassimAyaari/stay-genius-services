@@ -9,6 +9,7 @@ const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const [startY, setStartY] = useState(0);
 
   const navItems = [
@@ -20,6 +21,20 @@ const BottomNav = () => {
   ];
 
   useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Scrolling down
+        setIsVisible(true);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setIsVisible(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
     const handleTouchStart = (e: TouchEvent) => {
       setStartY(e.touches[0].clientY);
     };
@@ -29,20 +44,22 @@ const BottomNav = () => {
       const diff = startY - currentY;
 
       if (diff > 50) { // Swipe up
-        setIsVisible(false);
-      } else if (diff < -50) { // Swipe down
         setIsVisible(true);
+      } else if (diff < -50) { // Swipe down
+        setIsVisible(false);
       }
     };
 
+    window.addEventListener('scroll', handleScroll);
     document.addEventListener('touchstart', handleTouchStart);
     document.addEventListener('touchmove', handleTouchMove);
 
     return () => {
+      window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [startY]);
+  }, [lastScrollY, startY]);
 
   return (
     <AnimatePresence>

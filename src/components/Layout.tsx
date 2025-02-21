@@ -5,7 +5,7 @@ import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
 import { Button } from './ui/button';
-import { ChevronLeft, Home } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,17 +31,14 @@ const Layout = ({ children }: LayoutProps) => {
               <MainMenu />
             </div>
             
-            <h1 className="text-lg font-medium text-secondary absolute left-1/2 transform -translate-x-1/2">
-              Stay Genius
-            </h1>
+            <button 
+              onClick={() => navigate('/')} 
+              className="text-lg font-medium text-secondary absolute left-1/2 transform -translate-x-1/2 hover:text-primary transition-colors"
+            >
+              Hotel Genius
+            </button>
 
             <div className="flex items-center gap-2 w-20 justify-end">
-              {!isHomePage && (
-                <Button variant="ghost" size="icon" onClick={() => navigate('/')}
-                  className="animate-in fade-in duration-300">
-                  <Home className="h-5 w-5" />
-                </Button>
-              )}
               <UserMenu username="John Doe" roomNumber="401" />
             </div>
           </div>
