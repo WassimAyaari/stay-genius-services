@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRoom } from '@/hooks/useRoom';
@@ -8,62 +8,15 @@ import { requestService, ServiceType } from '@/features/rooms/controllers/roomSe
 import { useToast } from '@/components/ui/use-toast';
 import Layout from '@/components/Layout';
 import {
-  BedDouble, Coffee, Wifi, Tv, PhoneCall, UtensilsCrossed,
-  Wind, Loader2, ShowerHead, Shirt, Clock, CheckCircle2,
-  Timer, XCircle, ChevronUp, ChevronDown, Power, Volume2,
-  VolumeX, AlertCircle, BarChart2, CalendarClock, Settings
+  BedDouble, PhoneCall, UtensilsCrossed,
+  Loader2, ShowerHead, Shirt, Clock, CheckCircle2,
+  Timer, XCircle,
 } from 'lucide-react';
 
 const MyRoom = () => {
   const { data: room, isLoading } = useRoom('401');
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests(room?.id);
   const { toast } = useToast();
-
-  const [temperature, setTemperature] = useState(22);
-  const [tvPower, setTvPower] = useState(true);
-  const [tvVolume, setTvVolume] = useState(30);
-  const [wifiConnected, setWifiConnected] = useState(true);
-
-  const handleTemperatureChange = (increment: boolean) => {
-    setTemperature(prev => {
-      const newTemp = increment ? prev + 1 : prev - 1;
-      if (newTemp >= 16 && newTemp <= 30) {
-        toast({
-          title: "Temperature Updated",
-          description: `Room temperature set to ${newTemp}°C`,
-        });
-        return newTemp;
-      }
-      return prev;
-    });
-  };
-
-  const toggleTvPower = () => {
-    setTvPower(prev => !prev);
-    toast({
-      title: "TV Power",
-      description: tvPower ? "TV turned off" : "TV turned on",
-    });
-  };
-
-  const handleTvVolume = (increment: boolean) => {
-    setTvVolume(prev => {
-      const newVolume = increment ? Math.min(100, prev + 10) : Math.max(0, prev - 10);
-      toast({
-        title: "TV Volume",
-        description: `Volume set to ${newVolume}%`,
-      });
-      return newVolume;
-    });
-  };
-
-  const toggleWifi = () => {
-    setWifiConnected(prev => !prev);
-    toast({
-      title: "WiFi Connection",
-      description: wifiConnected ? "WiFi disconnected" : "WiFi connected",
-    });
-  };
 
   const services = [
     { 
@@ -147,98 +100,6 @@ const MyRoom = () => {
           </div>
         </div>
       </Card>
-
-      {/* Smart Controls Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="p-6 rounded-2xl hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <Wind className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-semibold">Temperature</p>
-              <p className="text-2xl font-bold text-secondary">{temperature}°C</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              className="flex-1 rounded-xl"
-              onClick={() => handleTemperatureChange(false)}
-            >
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline"
-              className="flex-1 rounded-xl"
-              onClick={() => handleTemperatureChange(true)}
-            >
-              <ChevronUp className="h-4 w-4" />
-            </Button>
-          </div>
-        </Card>
-
-        <Card className="p-6 rounded-2xl hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <Tv className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-semibold">Smart TV</p>
-              <p className="text-2xl font-bold text-secondary">{tvPower ? 'On' : 'Off'}</p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full rounded-xl"
-              onClick={toggleTvPower}
-            >
-              <Power className="h-4 w-4 mr-2" />
-              {tvPower ? 'Turn Off' : 'Turn On'}
-            </Button>
-            {tvPower && (
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline"
-                  className="flex-1 rounded-xl"
-                  onClick={() => handleTvVolume(false)}
-                >
-                  <VolumeX className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="flex-1 rounded-xl"
-                  onClick={() => handleTvVolume(true)}
-                >
-                  <Volume2 className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-        </Card>
-
-        <Card className="p-6 rounded-2xl hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <Wifi className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-semibold">WiFi</p>
-              <p className="text-2xl font-bold text-secondary">
-                {wifiConnected ? 'Connected' : 'Off'}
-              </p>
-            </div>
-          </div>
-          <Button 
-            variant="outline" 
-            className="w-full rounded-xl"
-            onClick={toggleWifi}
-          >
-            {wifiConnected ? 'Disconnect' : 'Connect'}
-          </Button>
-        </Card>
-      </div>
 
       {/* Room Services */}
       <h2 className="text-2xl font-bold text-secondary mb-6">Room Services</h2>
