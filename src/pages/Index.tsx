@@ -18,22 +18,24 @@ const Index = () => {
   return (
     <Layout>
       {/* Welcome Section */}
-      <section className="mb-8">
-        <Card className="p-6 bg-gradient-to-r from-primary-light to-white border-none">
-          <div className="flex items-center gap-3 mb-4">
-            <Sun className="w-6 h-6 text-primary" />
+      <section className="mb-12">
+        <Card className="p-8 bg-gradient-to-r from-primary-light via-white to-white border-none shadow-lg rounded-3xl">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-4 bg-white/80 rounded-2xl shadow-sm">
+              <Sun className="w-8 h-8 text-primary" />
+            </div>
             <div>
-              <h2 className="text-xl font-semibold text-secondary">Good Morning</h2>
-              <p className="text-sm text-gray-600">Welcome to Hotel Genius</p>
+              <h2 className="text-2xl font-semibold text-secondary mb-1">Good Morning</h2>
+              <p className="text-gray-600">Welcome to Hotel Genius</p>
             </div>
           </div>
-          <div className="flex gap-4 flex-wrap">
-            <Button className="bg-white text-primary hover:bg-primary hover:text-white">
-              <Clock className="w-4 h-4 mr-2" />
+          <div className="flex gap-6 flex-wrap">
+            <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+              <Clock className="w-5 h-5 mr-2" />
               Check-in: 3 PM
             </Button>
-            <Button className="bg-white text-primary hover:bg-primary hover:text-white">
-              <Clock className="w-4 h-4 mr-2" />
+            <Button className="bg-white text-primary hover:bg-primary hover:text-white rounded-2xl shadow-sm transition-all duration-300 px-6 py-3">
+              <Clock className="w-5 h-5 mr-2" />
               Check-out: 11 AM
             </Button>
           </div>
@@ -41,51 +43,51 @@ const Index = () => {
       </section>
 
       {/* Quick Actions */}
-      <section className="mb-8">
-        <div className="grid grid-cols-2 gap-4">
+      <section className="mb-12">
+        <div className="grid grid-cols-2 gap-6">
           <Button 
-            className="w-full flex items-center justify-center gap-2 bg-primary text-white py-6 text-lg"
+            className="w-full flex items-center justify-center gap-3 bg-primary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
             onClick={() => navigate('/my-room')}
           >
-            <BedDouble className="w-6 h-6" />
+            <BedDouble className="w-7 h-7" />
             My Room
           </Button>
           <Button 
-            className="w-full flex items-center justify-center gap-2 bg-secondary text-white py-6 text-lg"
+            className="w-full flex items-center justify-center gap-3 bg-secondary text-white py-8 text-lg rounded-3xl hover:scale-105 transition-all duration-300 shadow-lg"
             onClick={() => navigate('/contact')}
           >
-            <PhoneCall className="w-6 h-6" />
+            <PhoneCall className="w-7 h-7" />
             Call Concierge
           </Button>
         </div>
       </section>
 
       {/* Search Section with Context */}
-      <section className="mb-8">
+      <section className="mb-12">
         <div className="relative">
           <Input
             type="search"
             placeholder="Find restaurants, spa services, or activities..."
-            className="w-full pl-10 pr-4 py-3 rounded-lg text-base"
+            className="w-full pl-12 pr-6 py-4 rounded-2xl text-base bg-white/80 backdrop-blur-sm shadow-sm border-gray-100"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
       </section>
 
       {/* Today's Highlights */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold text-secondary mb-4">Today's Highlights</h2>
+      <section className="mb-12">
+        <h2 className="text-2xl font-semibold text-secondary mb-6">Today's Highlights</h2>
         <div className="space-y-4">
-          <Card className="p-4 animate-fade-in bg-accent/50">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-primary" />
+          <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
+            <div className="flex items-center gap-4">
+              <Calendar className="w-6 h-6 text-primary" />
               <div>
                 <p className="font-medium text-secondary">Wine Tasting</p>
                 <p className="text-sm text-gray-600">Today at 6 PM - Wine Cellar</p>
               </div>
               <Button 
                 variant="outline" 
-                className="ml-auto" 
+                className="ml-auto rounded-xl" 
                 size="sm"
                 onClick={() => navigate('/activities')}
               >
@@ -93,16 +95,16 @@ const Index = () => {
               </Button>
             </div>
           </Card>
-          <Card className="p-4 animate-fade-in bg-accent/50">
-            <div className="flex items-center gap-3">
-              <UtensilsCrossed className="w-5 h-5 text-primary" />
+          <Card className="p-6 animate-fade-in bg-white/80 backdrop-blur-sm rounded-2xl hover:scale-[1.02] transition-all duration-300">
+            <div className="flex items-center gap-4">
+              <UtensilsCrossed className="w-6 h-6 text-primary" />
               <div>
                 <p className="font-medium text-secondary">Chef's Special Dinner</p>
                 <p className="text-sm text-gray-600">Tonight at 7 PM - Main Restaurant</p>
               </div>
               <Button 
                 variant="outline" 
-                className="ml-auto" 
+                className="ml-auto rounded-xl" 
                 size="sm"
                 onClick={() => navigate('/dining')}
               >
@@ -190,13 +192,13 @@ const Index = () => {
       </section>
 
       {/* Emergency Contact */}
-      <div className="fixed bottom-6 right-6">
+      <div className="fixed bottom-24 right-6">
         <Button 
           size="icon"
-          className="h-14 w-14 rounded-full shadow-lg bg-red-500 hover:bg-red-600 animate-pulse"
+          className="h-16 w-16 rounded-full shadow-lg bg-red-500 hover:bg-red-600 animate-pulse hover:scale-110 transition-all duration-300"
           onClick={() => navigate('/contact')}
         >
-          <PhoneCall className="h-6 w-6" />
+          <PhoneCall className="h-7 w-7" />
         </Button>
       </div>
     </Layout>
