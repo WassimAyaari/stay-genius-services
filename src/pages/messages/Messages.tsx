@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Bell, Briefcase, Mail } from 'lucide-react';
+import { Bell, Briefcase } from 'lucide-react';
 import Layout from '@/components/Layout';
 
 interface Contact {
@@ -42,9 +42,6 @@ const Messages = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between pb-4 border-b">
             <h1 className="text-2xl font-semibold">Messages</h1>
-            <button className="text-primary">
-              <Mail className="h-6 w-6" />
-            </button>
           </div>
 
           <div className="space-y-4">

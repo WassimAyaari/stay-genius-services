@@ -5,7 +5,7 @@ import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
 import { Button } from './ui/button';
-import { ChevronLeft, MessageCircle } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,14 +34,13 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="flex-1 flex justify-center">
               <button 
                 onClick={() => navigate('/')}
-                className="text-xl font-semibold text-primary hover:opacity-80 transition-opacity"
+                className="text-lg font-semibold text-primary hover:opacity-80 transition-opacity whitespace-nowrap"
               >
                 Hotel Genius
               </button>
             </div>
             
             <div className="flex items-center gap-4 w-40 justify-end">
-              <UserMenu username="Emma Watson" roomNumber="401" />
               <button 
                 onClick={() => navigate('/messages')}
                 className="relative hover:opacity-60 transition-opacity"
@@ -51,6 +50,7 @@ const Layout = ({ children }: LayoutProps) => {
                   2
                 </span>
               </button>
+              <UserMenu username="Emma Watson" roomNumber="401" />
             </div>
           </div>
         </div>
