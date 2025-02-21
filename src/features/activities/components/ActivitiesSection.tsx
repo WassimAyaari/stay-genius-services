@@ -10,17 +10,20 @@ import { CarouselItem } from '@/components/ui/carousel';
 const ActivitiesSection = () => {
   const { toast } = useToast();
 
-  const activities = [
+  const activities: Activity[] = [
     {
       id: '1',
       name: 'Wine Tasting',
       description: 'Experience the finest wines',
       date: '2024-03-15',
       time: '18:00',
+      duration: '2 hours',
       location: 'Wine Cellar',
-      price: '$75',
+      price: 75,
       capacity: 12,
-      image: '/placeholder.svg'
+      image: '/placeholder.svg',
+      category: 'entertainment',
+      status: 'upcoming'
     },
     {
       id: '2',
@@ -28,10 +31,13 @@ const ActivitiesSection = () => {
       description: 'Morning yoga session',
       date: '2024-03-16',
       time: '08:00',
+      duration: '1 hour',
       location: 'Wellness Center',
-      price: '$25',
+      price: 25,
       capacity: 15,
-      image: '/placeholder.svg'
+      image: '/placeholder.svg',
+      category: 'fitness',
+      status: 'upcoming'
     },
     {
       id: '3',
@@ -39,10 +45,13 @@ const ActivitiesSection = () => {
       description: 'Learn to cook local cuisine',
       date: '2024-03-16',
       time: '14:00',
+      duration: '3 hours',
       location: 'Main Kitchen',
-      price: '$95',
+      price: 95,
       capacity: 8,
-      image: '/placeholder.svg'
+      image: '/placeholder.svg',
+      category: 'culture',
+      status: 'upcoming'
     }
   ];
 
