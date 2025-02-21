@@ -15,7 +15,7 @@ const BottomNav = () => {
     { icon: <BedDouble className="w-6 h-6" />, label: 'Room', path: '/my-room' },
     { icon: <UtensilsCrossed className="w-6 h-6" />, label: 'Dining', path: '/dining' },
     { icon: <Heart className="w-6 h-6" />, label: 'Spa', path: '/spa' },
-    { icon: <Phone className="w-6 h-6" />, label: 'Request', path: '/contact' },
+    { icon: <Phone className="w-6 h-6" />, label: 'Request', path: '/services' },
     { icon: <Menu className="w-6 h-6" />, label: 'Menu', path: '/services' },
   ];
 

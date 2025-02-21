@@ -32,9 +32,12 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
 
             <div className="flex-1 flex justify-center">
-              <span className="text-xl font-semibold text-primary">
+              <button 
+                onClick={() => navigate('/')}
+                className="text-xl font-semibold text-primary hover:opacity-80 transition-opacity"
+              >
                 Hotel Genius
-              </span>
+              </button>
             </div>
             
             <div className="flex items-center gap-2 w-40 justify-end">
