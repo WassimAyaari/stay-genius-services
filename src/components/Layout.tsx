@@ -19,9 +19,9 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-20">
       <header className="bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 sticky top-0 left-0 right-0 z-50 border-b">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-20">
               {!isHomePage && (
                 <Button variant="ghost" size="icon" onClick={() => navigate(-1)}
                   className="animate-in fade-in duration-300">
@@ -31,11 +31,16 @@ const Layout = ({ children }: LayoutProps) => {
               <MainMenu />
             </div>
             
-            <h1 className="text-xl font-semibold text-secondary absolute left-1/2 transform -translate-x-1/2">
-              Stay Genius
-            </h1>
+            <div className="flex flex-col items-center absolute left-1/2 transform -translate-x-1/2">
+              <div className="w-8 h-8 bg-primary rounded-xl mb-1 flex items-center justify-center">
+                <span className="text-white font-semibold text-lg">S</span>
+              </div>
+              <h1 className="text-sm font-medium text-secondary">
+                Stay Genius
+              </h1>
+            </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-20 justify-end">
               {!isHomePage && (
                 <Button variant="ghost" size="icon" onClick={() => navigate('/')}
                   className="animate-in fade-in duration-300">
