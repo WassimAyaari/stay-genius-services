@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind, Bell } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
@@ -342,7 +341,7 @@ const Index = () => {
           }}
           className="w-full"
         >
-          <CarouselContent>
+          <CarouselContent className="-ml-4">
             <SpaSection />
           </CarouselContent>
           <CarouselPrevious className="hidden sm:flex" />
@@ -366,9 +365,7 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
-          <DiningSection />
-        </div>
+        <DiningSection />
       </motion.section>
 
       <motion.section 
@@ -394,7 +391,7 @@ const Index = () => {
           }}
           className="w-full"
         >
-          <CarouselContent>
+          <CarouselContent className="-ml-4">
             <ActivitiesSection />
           </CarouselContent>
           <CarouselPrevious className="hidden sm:flex" />

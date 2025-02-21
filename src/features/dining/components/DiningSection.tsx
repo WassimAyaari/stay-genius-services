@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import RestaurantCard from './RestaurantCard';
 import { Restaurant } from '../types';
 import { useToast } from '@/hooks/use-toast';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 const DiningSection = () => {
   const { toast } = useToast();
@@ -67,15 +68,26 @@ const DiningSection = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {restaurants?.map((restaurant) => (
-        <RestaurantCard
-          key={restaurant.id}
-          restaurant={restaurant}
-          onBookTable={handleBookTable}
-        />
-      ))}
-    </div>
+    <Carousel
+      opts={{
+        align: "start",
+        loop: true,
+      }}
+      className="w-full"
+    >
+      <CarouselContent>
+        {restaurants?.map((restaurant) => (
+          <CarouselItem key={restaurant.id} className="md:basis-1/2 lg:basis-1/2">
+            <RestaurantCard
+              restaurant={restaurant}
+              onBookTable={handleBookTable}
+            />
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="hidden sm:flex" />
+      <CarouselNext className="hidden sm:flex" />
+    </Carousel>
   );
 };
 
