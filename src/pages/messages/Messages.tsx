@@ -107,9 +107,9 @@ const Messages = () => {
 
   if (selectedContact) {
     return (
-      <div className="fixed inset-0 bg-background">
+      <div className="fixed inset-0 bg-background flex flex-col h-screen">
         {/* Chat Header */}
-        <div className="h-16 border-b bg-card flex items-center px-4">
+        <div className="h-16 border-b bg-card flex items-center px-4 flex-shrink-0">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -133,7 +133,7 @@ const Messages = () => {
         </div>
 
         {/* Messages */}
-        <div className="h-[calc(100vh-128px)] overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {selectedContact.messages.map((message) => (
             <div
               key={message.id}
@@ -166,7 +166,7 @@ const Messages = () => {
         </div>
 
         {/* Message Input */}
-        <div className="h-16 border-t bg-card p-3">
+        <div className="h-16 border-t bg-card p-3 flex-shrink-0">
           <div className="flex items-center gap-2 h-full">
             <input
               type="text"
@@ -197,7 +197,7 @@ const Messages = () => {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto min-h-[calc(100vh-16rem)]">
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold">Messages</h1>
