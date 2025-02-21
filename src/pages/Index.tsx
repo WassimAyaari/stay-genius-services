@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Bell, Sun, Clock, Heart } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
@@ -23,7 +24,7 @@ const Index = () => {
             <Sun className="w-6 h-6 text-primary" />
             <div>
               <h2 className="text-xl font-semibold text-secondary">Good Morning</h2>
-              <p className="text-sm text-gray-600">Welcome to Stay Genius</p>
+              <p className="text-sm text-gray-600">Welcome to Hotel Genius</p>
             </div>
           </div>
           <div className="flex gap-4 flex-wrap">
