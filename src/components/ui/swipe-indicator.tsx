@@ -10,22 +10,41 @@ interface SwipeIndicatorProps {
 
 const SwipeIndicator = ({ selectedIndex, totalSlides, className }: SwipeIndicatorProps) => {
   return (
-    <div className={cn("flex justify-center items-center gap-1 mt-4", className)}>
+    <div className={cn("flex justify-center items-center gap-2 mt-6", className)}>
       {Array.from({ length: totalSlides }).map((_, index) => (
         <div
           key={index}
-          className={cn(
-            "h-1 rounded-full transition-all duration-300 transform",
-            index === selectedIndex 
-              ? "w-12 bg-primary animate-pulse h-1.5 translate-x-0" 
-              : index < selectedIndex
-              ? "w-2 bg-primary/30 -translate-x-1"
-              : "w-2 bg-primary/30 translate-x-1"
+          className="relative"
+        >
+          <div
+            className={cn(
+              "transition-all duration-300 transform",
+              index === selectedIndex 
+                ? "bg-primary/20 backdrop-blur-sm p-4 rounded-full scale-100" 
+                : "bg-transparent p-3 rounded-full scale-90"
+            )}
+          >
+            <div 
+              className={cn(
+                "h-2 w-2 rounded-full transition-all duration-300",
+                index === selectedIndex 
+                  ? "bg-primary scale-100" 
+                  : index < selectedIndex
+                  ? "bg-primary/30 scale-75 -translate-x-1"
+                  : "bg-primary/30 scale-75 translate-x-1"
+              )}
+              style={{
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+              }}
+            />
+          </div>
+          {index === selectedIndex && (
+            <div 
+              className="absolute inset-0 bg-primary/10 rounded-full animate-ping"
+              style={{ animationDuration: "2s" }}
+            />
           )}
-          style={{
-            transition: "transform 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out"
-          }}
-        />
+        </div>
       ))}
     </div>
   );

@@ -46,7 +46,7 @@ const RoomList = () => {
   }, [emblaApi]);
 
   return (
-    <div>
+    <div className="relative">
       <Carousel
         opts={{
           align: "start",
@@ -71,7 +71,11 @@ const RoomList = () => {
         <CarouselPrevious className="hidden sm:flex" />
         <CarouselNext className="hidden sm:flex" />
       </Carousel>
-      <SwipeIndicator selectedIndex={selectedIndex} totalSlides={rooms.length} />
+      <SwipeIndicator 
+        selectedIndex={selectedIndex} 
+        totalSlides={rooms.length} 
+        className="absolute bottom-4 left-1/2 transform -translate-x-1/2"
+      />
     </div>
   );
 };
