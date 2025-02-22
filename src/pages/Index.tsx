@@ -278,11 +278,6 @@ const Index = () => {
         <div className="overflow-x-auto pb-4 -mx-4 px-4">
           <RoomList />
         </div>
-        <div className="flex justify-center items-center gap-1 mt-4">
-          <div className="h-1.5 w-12 rounded-full bg-primary animate-pulse" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
-        </div>
       </motion.section>
 
       <motion.section 
@@ -303,11 +298,6 @@ const Index = () => {
         </div>
         <div className="overflow-x-auto pb-4 -mx-4 px-4">
           <SpaSection />
-        </div>
-        <div className="flex justify-center items-center gap-1 mt-4">
-          <div className="h-1.5 w-12 rounded-full bg-primary animate-pulse" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
         </div>
       </motion.section>
 
@@ -330,11 +320,6 @@ const Index = () => {
         <div className="overflow-x-auto pb-4 -mx-4 px-4">
           <DiningSection />
         </div>
-        <div className="flex justify-center items-center gap-1 mt-4">
-          <div className="h-1.5 w-12 rounded-full bg-primary animate-pulse" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
-        </div>
       </motion.section>
 
       <motion.section 
@@ -355,11 +340,6 @@ const Index = () => {
         </div>
         <div className="overflow-x-auto pb-4 -mx-4 px-4">
           <ActivitiesSection />
-        </div>
-        <div className="flex justify-center items-center gap-1 mt-4">
-          <div className="h-1.5 w-12 rounded-full bg-primary animate-pulse" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
-          <div className="h-1 w-2 rounded-full bg-primary/30" />
         </div>
       </motion.section>
     </Layout>

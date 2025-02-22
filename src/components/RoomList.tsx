@@ -1,10 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import RoomCard from './RoomCard';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import { ChevronRight } from 'lucide-react';
+import SwipeIndicator from './ui/swipe-indicator';
+import useEmblaCarousel from 'embla-carousel-react';
 
 const RoomList = () => {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+
   const rooms = [
     {
       id: '1',
@@ -32,31 +37,42 @@ const RoomList = () => {
     }
   ];
 
+  React.useEffect(() => {
+    if (!emblaApi) return;
+
+    emblaApi.on('select', () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    });
+  }, [emblaApi]);
+
   return (
-    <Carousel
-      opts={{
-        align: "start",
-        loop: true,
-      }}
-      className="w-full"
-    >
-      <div className="relative w-full">
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/50 animate-pulse hidden md:block">
-          <ChevronRight className="w-6 h-6" />
+    <div>
+      <Carousel
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <div className="relative w-full">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/50 animate-pulse hidden md:block">
+            <ChevronRight className="w-6 h-6" />
+          </div>
         </div>
-      </div>
-      <CarouselContent className="-ml-4">
-        {rooms.map((room) => (
-          <CarouselItem key={room.id} className="md:basis-2/5 lg:basis-[30%] pl-4">
-            <div className="px-2">
-              <RoomCard {...room} />
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious className="hidden sm:flex" />
-      <CarouselNext className="hidden sm:flex" />
-    </Carousel>
+        <CarouselContent ref={emblaRef} className="-ml-4">
+          {rooms.map((room) => (
+            <CarouselItem key={room.id} className="md:basis-2/5 lg:basis-[30%] pl-4">
+              <div className="px-2">
+                <RoomCard {...room} />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="hidden sm:flex" />
+        <CarouselNext className="hidden sm:flex" />
+      </Carousel>
+      <SwipeIndicator selectedIndex={selectedIndex} totalSlides={rooms.length} />
+    </div>
   );
 };
 
