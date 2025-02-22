@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind, Bell } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Calendar, PhoneCall, MapPin, Search, Sun, Clock, Heart, CloudSun, ThermometerSun, Wind, Bell, MessageCircle } from 'lucide-react';
 import ServiceCard from '@/components/ServiceCard';
 import RoomList from '@/components/RoomList';
 import DiningSection from '@/features/dining/components/DiningSection';
@@ -342,6 +342,55 @@ const Index = () => {
           <ActivitiesSection />
         </div>
       </motion.section>
+
+      <motion.section 
+        className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-background to-transparent pb-20"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2 }}
+      >
+        <Card className="bg-primary text-white rounded-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer shadow-lg">
+          <div 
+            className="flex items-center justify-between p-4"
+            onClick={() => navigate('/contact')}
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-xl">
+                <PhoneCall className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Need Assistance?</h3>
+                <p className="text-sm text-white/80">We're here to help 24/7</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                size="icon"
+                variant="secondary"
+                className="rounded-xl bg-white/20 hover:bg-white/30"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = 'tel:+1234567890';
+                }}
+              >
+                <PhoneCall className="w-5 h-5" />
+              </Button>
+              <Button 
+                size="icon"
+                variant="secondary"
+                className="rounded-xl bg-white/20 hover:bg-white/30"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = 'https://wa.me/1234567890';
+                }}
+              >
+                <MessageCircle className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </motion.section>
+
     </Layout>
   );
 };
