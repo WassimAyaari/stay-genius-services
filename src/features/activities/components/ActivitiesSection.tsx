@@ -21,7 +21,7 @@ const ActivitiesSection = () => {
       location: 'Wine Cellar',
       price: 75,
       capacity: 12,
-      image: '/placeholder.svg',
+      image: '/lovable-uploads/044dc763-e0b0-462e-8c6e-788f35efcd0c.png',
       category: 'entertainment',
       status: 'upcoming'
     },
@@ -35,7 +35,7 @@ const ActivitiesSection = () => {
       location: 'Wellness Center',
       price: 25,
       capacity: 15,
-      image: '/placeholder.svg',
+      image: '/lovable-uploads/b0b89a1c-2c12-444b-be2c-1a65b9884f18.png',
       category: 'fitness',
       status: 'upcoming'
     },
@@ -49,7 +49,7 @@ const ActivitiesSection = () => {
       location: 'Main Kitchen',
       price: 95,
       capacity: 8,
-      image: '/placeholder.svg',
+      image: '/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png',
       category: 'culture',
       status: 'upcoming'
     }

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,15 +13,13 @@ const DiningSection = () => {
   const { data: restaurants, isLoading } = useQuery({
     queryKey: ['restaurants'],
     queryFn: async () => {
-      // This would typically fetch from your database
-      // For now, returning mock data
       return [
         {
           id: '1',
           name: 'The Grand Bistro',
           description: 'Experience fine dining with a modern twist',
           cuisine: 'International',
-          images: ['/placeholder.svg'],
+          images: ['/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png'],
           openHours: '7:00 AM - 11:00 PM',
           location: 'Ground Floor',
           status: 'open' as const
@@ -32,7 +29,7 @@ const DiningSection = () => {
           name: 'Sakura Japanese',
           description: 'Authentic Japanese cuisine and sushi',
           cuisine: 'Japanese',
-          images: ['/placeholder.svg'],
+          images: ['/lovable-uploads/044dc763-e0b0-462e-8c6e-788f35efcd0c.png'],
           openHours: '12:00 PM - 10:00 PM',
           location: 'Level 2',
           status: 'open' as const
