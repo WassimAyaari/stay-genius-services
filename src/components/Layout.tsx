@@ -24,14 +24,9 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2 w-[100px]">
               {!isHomePage && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => navigate(-1)}
-                  className="hover:bg-gray-100/50"
-                >
+                <Link to="/" className="hover:bg-gray-100/50 p-2 rounded-lg">
                   <ChevronLeft className="h-5 w-5" />
-                </Button>
+                </Link>
               )}
               <MainMenu />
             </div>
@@ -47,17 +42,15 @@ const Layout = ({ children }: LayoutProps) => {
             
             <div className="flex items-center gap-3 w-[100px] justify-end">
               <UserMenu username="Emma Watson" roomNumber="401" />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative hover:bg-gray-100/50"
-                onClick={() => navigate('/messages')}
+              <Link
+                to="/messages"
+                className="relative hover:bg-gray-100/50 p-2 rounded-lg"
               >
                 <Send className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-medium border-2 border-white">
                   2
                 </span>
-              </Button>
+              </Link>
             </div>
           </div>
         </div>
