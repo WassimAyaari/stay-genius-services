@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from './components/Layout';
@@ -28,7 +28,7 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/auth/login" element={<Login />} />
-        <Route element={<Layout />}>
+        <Route element={<Layout><Outlet /></Layout>}>
           <Route path="/" element={<Index />} />
           <Route path="/rooms/:id" element={<RoomDetails />} />
           <Route path="/my-room" element={<MyRoom />} />
