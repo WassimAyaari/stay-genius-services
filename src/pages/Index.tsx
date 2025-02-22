@@ -275,7 +275,7 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+        <div className="scrollbar-none">
           <RoomList />
         </div>
       </motion.section>
@@ -296,7 +296,7 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+        <div className="scrollbar-none">
           <SpaSection />
         </div>
       </motion.section>
@@ -317,7 +317,7 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+        <div className="scrollbar-none">
           <DiningSection />
         </div>
       </motion.section>
@@ -338,7 +338,7 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+        <div className="scrollbar-none">
           <ActivitiesSection />
         </div>
       </motion.section>
