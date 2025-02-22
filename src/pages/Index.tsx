@@ -278,43 +278,10 @@ const Index = () => {
         <div className="overflow-x-auto pb-4 -mx-4 px-4">
           <RoomList />
         </div>
-      </motion.section>
-
-      <motion.section 
-        className="mb-12"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-      >
-        <h2 className="text-xl font-semibold text-secondary mb-6">Hotel Services</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <motion.div variants={itemVariants}>
-            <ServiceCard
-              icon={<UtensilsCrossed />}
-              title="Dining"
-              description="Restaurant reservations"
-              action="Book Table"
-              onClick={() => navigate('/dining')}
-            />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <ServiceCard
-              icon={<Heart />}
-              title="Spa & Wellness"
-              description="Relaxation awaits"
-              action="Book Service"
-              onClick={() => navigate('/spa')}
-            />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <ServiceCard
-              icon={<MapPin />}
-              title="Local Guide"
-              description="Explore the area"
-              action="Discover"
-              onClick={() => navigate('/activities')}
-            />
-          </motion.div>
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
+          <span className="text-sm text-gray-500">Swipe for more</span>
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
         </div>
       </motion.section>
 
@@ -334,19 +301,14 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-4">
-            <SpaSection />
-          </CarouselContent>
-          <CarouselPrevious className="hidden sm:flex" />
-          <CarouselNext className="hidden sm:flex" />
-        </Carousel>
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <SpaSection />
+        </div>
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
+          <span className="text-sm text-gray-500">Swipe for more</span>
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
+        </div>
       </motion.section>
 
       <motion.section 
@@ -365,7 +327,14 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <DiningSection />
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <DiningSection />
+        </div>
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
+          <span className="text-sm text-gray-500">Swipe for more</span>
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
+        </div>
       </motion.section>
 
       <motion.section 
@@ -384,19 +353,14 @@ const Index = () => {
             View All
           </Button>
         </div>
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-4">
-            <ActivitiesSection />
-          </CarouselContent>
-          <CarouselPrevious className="hidden sm:flex" />
-          <CarouselNext className="hidden sm:flex" />
-        </Carousel>
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <ActivitiesSection />
+        </div>
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
+          <span className="text-sm text-gray-500">Swipe for more</span>
+          <div className="h-1 w-8 rounded-full bg-primary/50" />
+        </div>
       </motion.section>
     </Layout>
   );
