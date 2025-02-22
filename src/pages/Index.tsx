@@ -344,47 +344,36 @@ const Index = () => {
       </motion.section>
 
       <motion.section 
-        className="mb-8"
+        className="mb-20"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2 }}
       >
         <Card className="bg-primary/95 backdrop-blur-sm text-white rounded-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer shadow-lg border-none">
           <div 
-            className="flex items-center justify-between p-6"
+            className="flex items-center justify-between p-4 sm:p-5"
             onClick={() => navigate('/contact')}
           >
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 p-3 rounded-xl">
-                <PhoneCall className="w-7 h-7" />
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2.5 rounded-xl">
+                <PhoneCall className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold">Need Assistance?</h3>
-                <p className="text-white/90">We're here to help 24/7</p>
+                <h3 className="text-base sm:text-lg font-semibold">Need Assistance?</h3>
+                <p className="text-sm text-white/90">We're here to help 24/7</p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button 
                 size="icon"
                 variant="secondary"
-                className="rounded-xl bg-white/20 hover:bg-white/30 h-12 w-12"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = 'tel:+1234567890';
-                }}
-              >
-                <PhoneCall className="w-6 h-6" />
-              </Button>
-              <Button 
-                size="icon"
-                variant="secondary"
-                className="rounded-xl bg-white/20 hover:bg-white/30 h-12 w-12"
+                className="rounded-xl bg-white/20 hover:bg-white/30 h-10 w-10"
                 onClick={(e) => {
                   e.stopPropagation();
                   window.location.href = 'https://wa.me/1234567890';
                 }}
               >
-                <MessageCircle className="w-6 h-6" />
+                <MessageCircle className="w-5 h-5" />
               </Button>
             </div>
           </div>

@@ -52,7 +52,7 @@ const BottomNav = () => {
         animate={{ y: isVisible ? 0 : "100%" }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t shadow-lg pb-safe z-50"
+        className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t shadow-lg z-50"
       >
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => (
