@@ -21,7 +21,7 @@ const SpaSection = () => {
       description: '60-minute relaxing massage',
       price: 120,
       duration: '60 min',
-      image: '/lovable-uploads/3cbdcf79-9da5-48bd-90f2-2c1737b76741.png',
+      image: '/placeholder.svg',
       category: 'massage',
       availability: 'available'
     },
@@ -31,7 +31,7 @@ const SpaSection = () => {
       description: 'Therapeutic deep tissue treatment',
       price: 140,
       duration: '60 min',
-      image: '/lovable-uploads/ad4ef1bb-ac95-4aaf-87df-6e874d0fcf46.png',
+      image: '/placeholder.svg',
       category: 'massage',
       availability: 'available'
     },
@@ -41,7 +41,7 @@ const SpaSection = () => {
       description: 'Essential oils massage therapy',
       price: 130,
       duration: '60 min',
-      image: '/lovable-uploads/b0b89a1c-2c12-444b-be2c-1a65b9884f18.png',
+      image: '/placeholder.svg',
       category: 'wellness',
       availability: 'available'
     }

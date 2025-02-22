@@ -17,7 +17,7 @@ const RoomList = () => {
       price: 299,
       capacity: 2,
       size: '45m²',
-      image: '/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png'
+      image: '/placeholder.svg'
     },
     {
       id: '2',
@@ -25,7 +25,7 @@ const RoomList = () => {
       price: 499,
       capacity: 4,
       size: '65m²',
-      image: '/lovable-uploads/3cbdcf79-9da5-48bd-90f2-2c1737b76741.png'
+      image: '/placeholder.svg'
     },
     {
       id: '3',
@@ -33,7 +33,7 @@ const RoomList = () => {
       price: 399,
       capacity: 3,
       size: '55m²',
-      image: '/lovable-uploads/ad4ef1bb-ac95-4aaf-87df-6e874d0fcf46.png'
+      image: '/placeholder.svg'
     }
   ];
 
