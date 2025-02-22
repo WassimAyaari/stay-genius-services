@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { BedDouble, UtensilsCrossed, Heart, Phone, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 const BottomNav = () => {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ const BottomNav = () => {
           {navItems.map((item) => (
             <Button
               key={item.path}
+              variant="ghost"
               onClick={() => handleNavigation(item.path)}
               className={cn(
                 "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors",
