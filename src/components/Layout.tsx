@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
 import { Button } from './ui/button';
 import { ChevronLeft, Send } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,66 +18,60 @@ const Layout = ({ children }: LayoutProps) => {
   const isHomePage = location.pathname === '/';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-20">
-      <header className="bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 sticky top-0 left-0 right-0 z-50 border-b">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2 w-40">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 border-b">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-2 w-[100px]">
               {!isHomePage && (
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   onClick={() => navigate(-1)}
-                  className="animate-in fade-in duration-300"
+                  className="hover:bg-gray-100/50"
                 >
-                  <ChevronLeft className="h-6 w-6" />
+                  <ChevronLeft className="h-5 w-5" />
                 </Button>
               )}
               <MainMenu />
             </div>
 
-            <motion.div 
-              className="flex-1 flex justify-center"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+            <Link 
+              to="/"
+              className="flex-1 flex justify-center items-center"
             >
-              <button 
-                onClick={() => navigate('/')}
-                className="text-lg font-semibold text-primary hover:opacity-80 transition-opacity whitespace-nowrap"
-              >
+              <span className="text-lg font-semibold text-primary hover:opacity-80 transition-opacity">
                 Hotel Genius
-              </button>
-            </motion.div>
+              </span>
+            </Link>
             
-            <div className="flex items-center gap-4 w-40 justify-end">
+            <div className="flex items-center gap-3 w-[100px] justify-end">
               <UserMenu username="Emma Watson" roomNumber="401" />
-              <button 
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative hover:bg-gray-100/50"
                 onClick={() => navigate('/messages')}
-                className="relative hover:opacity-60 transition-opacity"
               >
-                <Send className="h-[26px] w-[26px] stroke-[1.5px]" />
-                <span className="absolute -top-1 -right-1 h-[18px] w-[18px] bg-red-500 rounded-full text-[11px] text-white flex items-center justify-center font-medium border-2 border-white">
+                <Send className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-medium border-2 border-white">
                   2
                 </span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-6xl overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+      <main className="container mx-auto px-4 pt-20 pb-24">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          {children}
+        </motion.div>
       </main>
 
       <BottomNav />
