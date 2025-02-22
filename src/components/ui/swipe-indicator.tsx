@@ -15,11 +15,16 @@ const SwipeIndicator = ({ selectedIndex, totalSlides, className }: SwipeIndicato
         <div
           key={index}
           className={cn(
-            "h-1 rounded-full transition-all duration-300",
+            "h-1 rounded-full transition-all duration-300 transform",
             index === selectedIndex 
-              ? "w-12 bg-primary animate-pulse h-1.5" 
-              : "w-2 bg-primary/30"
+              ? "w-12 bg-primary animate-pulse h-1.5 translate-x-0" 
+              : index < selectedIndex
+              ? "w-2 bg-primary/30 -translate-x-1"
+              : "w-2 bg-primary/30 translate-x-1"
           )}
+          style={{
+            transition: "transform 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out"
+          }}
         />
       ))}
     </div>
