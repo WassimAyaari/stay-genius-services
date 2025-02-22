@@ -20,7 +20,6 @@ const BottomNav = () => {
   ];
 
   const handleNavigation = (path: string) => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(path);
   };
 
@@ -41,10 +40,6 @@ const BottomNav = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [location.pathname]);
-
   return (
     <AnimatePresence>
       <motion.nav
@@ -56,7 +51,7 @@ const BottomNav = () => {
       >
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => (
-            <button
+            <Button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
               className={cn(
@@ -68,7 +63,7 @@ const BottomNav = () => {
             >
               {item.icon}
               <span className="text-xs font-medium">{item.label}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </motion.nav>

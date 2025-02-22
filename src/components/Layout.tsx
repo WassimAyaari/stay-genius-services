@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
@@ -16,6 +16,10 @@ const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -37,40 +41,43 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
 
             <div className="flex-1 flex justify-center">
-              <button 
-                onClick={() => navigate('/')}
+              <Button 
+                variant="ghost"
+                onClick={() => handleNavigation('/')}
                 className="text-lg font-semibold text-primary hover:opacity-80 transition-opacity whitespace-nowrap"
               >
                 Hotel Genius
-              </button>
+              </Button>
             </div>
             
             <div className="flex items-center gap-4 w-40 justify-end">
               <UserMenu username="Emma Watson" roomNumber="401" />
-              <button 
-                onClick={() => navigate('/messages')}
-                className="relative hover:opacity-60 transition-opacity"
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative hover:opacity-60 transition-opacity p-0"
+                onClick={() => handleNavigation('/messages')}
               >
                 <Send className="h-[26px] w-[26px] stroke-[1.5px]" />
                 <span className="absolute -top-1 -right-1 h-[18px] w-[18px] bg-red-500 rounded-full text-[11px] text-white flex items-center justify-center font-medium border-2 border-white">
                   2
                 </span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-6xl">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0 }}
             transition={{ 
-              duration: 0.3,
-              ease: "easeInOut"
+              duration: 0.2,
+              ease: "easeOut"
             }}
           >
             {children}
