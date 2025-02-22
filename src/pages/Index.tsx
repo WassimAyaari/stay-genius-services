@@ -344,47 +344,47 @@ const Index = () => {
       </motion.section>
 
       <motion.section 
-        className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-background to-transparent pb-20"
+        className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2 }}
       >
-        <Card className="bg-primary text-white rounded-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer shadow-lg">
+        <Card className="bg-primary/95 backdrop-blur-sm text-white rounded-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer shadow-lg border-none">
           <div 
-            className="flex items-center justify-between p-4"
+            className="flex items-center justify-between p-6"
             onClick={() => navigate('/contact')}
           >
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-xl">
-                <PhoneCall className="w-6 h-6" />
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 p-3 rounded-xl">
+                <PhoneCall className="w-7 h-7" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Need Assistance?</h3>
-                <p className="text-sm text-white/80">We're here to help 24/7</p>
+                <h3 className="text-xl font-semibold">Need Assistance?</h3>
+                <p className="text-white/90">We're here to help 24/7</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button 
                 size="icon"
                 variant="secondary"
-                className="rounded-xl bg-white/20 hover:bg-white/30"
+                className="rounded-xl bg-white/20 hover:bg-white/30 h-12 w-12"
                 onClick={(e) => {
                   e.stopPropagation();
                   window.location.href = 'tel:+1234567890';
                 }}
               >
-                <PhoneCall className="w-5 h-5" />
+                <PhoneCall className="w-6 h-6" />
               </Button>
               <Button 
                 size="icon"
                 variant="secondary"
-                className="rounded-xl bg-white/20 hover:bg-white/30"
+                className="rounded-xl bg-white/20 hover:bg-white/30 h-12 w-12"
                 onClick={(e) => {
                   e.stopPropagation();
                   window.location.href = 'https://wa.me/1234567890';
                 }}
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-6 h-6" />
               </Button>
             </div>
           </div>
