@@ -1,10 +1,15 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import StoryViewer from './StoryViewer';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem 
+} from '@/components/ui/carousel';
+import SwipeIndicator from '@/components/ui/swipe-indicator';
 
 export interface StoryProps {
   id: number;
@@ -65,6 +70,8 @@ const EventsStories: React.FC = () => {
   const [viewedStories, setViewedStories] = useState<number[]>([]);
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const isMobile = useIsMobile();
   
   const markAsSeen = (id: number, index: number) => {
     if (!viewedStories.includes(id)) {
@@ -80,34 +87,84 @@ const EventsStories: React.FC = () => {
         <h2 className="text-2xl font-bold text-secondary">Events & Promos</h2>
         <Link to="/events" className="text-primary text-sm font-medium">View all</Link>
       </div>
-      <ScrollArea className="w-full pb-4">
-        <div className="flex space-x-4 pb-2">
-          {stories.map((story, index) => (
-            <button 
-              key={story.id} 
-              className="flex flex-col items-center space-y-1 bg-transparent border-none"
-              onClick={() => markAsSeen(story.id, index)}
-            >
-              <div className={cn(
-                "p-1 rounded-full", 
-                viewedStories.includes(story.id) || story.seen 
-                  ? "bg-gray-300" 
-                  : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"
-              )}>
-                <div className="p-0.5 bg-white rounded-full">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={story.image} alt={story.title} className="object-cover" />
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {story.title.substring(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              </div>
-              <span className="text-xs text-center w-16 truncate">{story.title}</span>
-            </button>
-          ))}
+      
+      {isMobile ? (
+        <div className="relative">
+          <Carousel 
+            opts={{
+              align: "start",
+              loop: false,
+            }}
+            className="w-full"
+            onSelect={(api) => {
+              const selectedIndex = api?.selectedScrollSnap() || 0;
+              setActiveIndex(selectedIndex);
+            }}
+          >
+            <CarouselContent className="py-2">
+              {stories.map((story, index) => (
+                <CarouselItem key={story.id} className="basis-auto pl-4 pr-2">
+                  <button 
+                    className="flex flex-col items-center space-y-1 bg-transparent border-none"
+                    onClick={() => markAsSeen(story.id, index)}
+                  >
+                    <div className={cn(
+                      "p-1 rounded-full", 
+                      viewedStories.includes(story.id) || story.seen 
+                        ? "bg-gray-300" 
+                        : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"
+                    )}>
+                      <div className="p-0.5 bg-white rounded-full">
+                        <Avatar className="h-16 w-16">
+                          <AvatarImage src={story.image} alt={story.title} className="object-cover" />
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {story.title.substring(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+                    <span className="text-xs text-center w-16 truncate">{story.title}</span>
+                  </button>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+          <SwipeIndicator 
+            selectedIndex={activeIndex} 
+            totalSlides={stories.length} 
+            className="mt-2" 
+          />
         </div>
-      </ScrollArea>
+      ) : (
+        <div className="overflow-x-auto pb-4">
+          <div className="flex space-x-4 pb-2">
+            {stories.map((story, index) => (
+              <button 
+                key={story.id} 
+                className="flex flex-col items-center space-y-1 bg-transparent border-none"
+                onClick={() => markAsSeen(story.id, index)}
+              >
+                <div className={cn(
+                  "p-1 rounded-full", 
+                  viewedStories.includes(story.id) || story.seen 
+                    ? "bg-gray-300" 
+                    : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"
+                )}>
+                  <div className="p-0.5 bg-white rounded-full">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={story.image} alt={story.title} className="object-cover" />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {story.title.substring(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </div>
+                <span className="text-xs text-center w-16 truncate">{story.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       
       {storyViewerOpen && (
         <StoryViewer 

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import HeroSection from '@/components/home/HeroSection';
 import MainServicesSection from '@/components/home/MainServicesSection';
 import FeaturedExperienceSection from '@/components/home/FeaturedExperienceSection';
