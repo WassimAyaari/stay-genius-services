@@ -1,28 +1,38 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRoom } from '@/hooks/useRoom';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { requestService, ServiceType } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/components/ui/use-toast';
 import Layout from '@/components/Layout';
-import { UtensilsCrossed, ShowerHead, Shirt, PhoneCall, Loader2 } from 'lucide-react';
+import { 
+  ShowerHead, 
+  Shirt, 
+  PhoneCall, 
+  Loader2, 
+  Wifi, 
+  FileText, 
+  Settings, 
+  Search 
+} from 'lucide-react';
 import WelcomeBanner from './components/WelcomeBanner';
 import ServiceCard from './components/ServiceCard';
 import RequestHistory from './components/RequestHistory';
 import { Service } from './types';
+import { Input } from '@/components/ui/input';
+import { Form, FormField, FormItem, FormControl } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
 
 const MyRoom = () => {
   const { data: room, isLoading } = useRoom('401');
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests(room?.id);
   const { toast } = useToast();
+  const [customRequest, setCustomRequest] = useState('');
+
+  const form = useForm();
 
   const services: Service[] = [
-    { 
-      icon: <UtensilsCrossed className="h-6 w-6" />, 
-      label: 'Room Service', 
-      type: 'room_service',
-      description: 'Order food and beverages to your room'
-    },
     { 
       icon: <ShowerHead className="h-6 w-6" />, 
       label: 'Housekeeping', 
@@ -36,9 +46,27 @@ const MyRoom = () => {
       description: 'Laundry pickup and delivery'
     },
     { 
+      icon: <Wifi className="h-6 w-6" />, 
+      label: 'WiFi Access',
+      type: 'wifi',
+      description: 'Connect to high-speed internet'
+    },
+    { 
+      icon: <FileText className="h-6 w-6" />, 
+      label: 'Guest Bill',
+      type: 'bill',
+      description: 'View your current charges'
+    },
+    { 
+      icon: <Settings className="h-6 w-6" />, 
+      label: 'Preferences',
+      type: 'preferences',
+      description: 'Set your room preferences'
+    },
+    { 
       icon: <PhoneCall className="h-6 w-6" />, 
       label: 'Concierge',
-      type: 'maintenance',
+      type: 'concierge',
       description: '24/7 concierge assistance'
     },
   ];
@@ -60,6 +88,26 @@ const MyRoom = () => {
     }
   };
 
+  const handleCustomRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customRequest.trim() || !room) return;
+    
+    try {
+      await requestService(room.id, 'custom', customRequest);
+      setCustomRequest('');
+      toast({
+        title: "Custom Request Sent",
+        description: "Your custom request has been submitted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit request. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -74,8 +122,21 @@ const MyRoom = () => {
     <Layout>
       <WelcomeBanner room={room} />
 
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-secondary mb-4">Custom Request</h2>
+        <form onSubmit={handleCustomRequest} className="flex gap-2">
+          <Input
+            value={customRequest}
+            onChange={(e) => setCustomRequest(e.target.value)}
+            placeholder="Extra pillows, amenities, etc."
+            className="flex-1"
+          />
+          <Button type="submit">Submit</Button>
+        </form>
+      </div>
+
       <h2 className="text-2xl font-bold text-secondary mb-6">Room Services</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {services.map((service) => (
           <ServiceCard 
             key={service.type}
