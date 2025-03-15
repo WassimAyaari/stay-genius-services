@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search, Elevator, Utensils, Coffee, LifeBuoy, Dumbbell, Wifi, DoorClosed } from 'lucide-react';
+import { Search, Building, Utensils, Coffee, LifeBuoy, Dumbbell, Wifi, DoorClosed } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const HotelMap = () => {
@@ -107,7 +107,7 @@ const HotelMap = () => {
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
-                  <Elevator className="h-5 w-5 text-primary" />
+                  <Building className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-medium">Elevators</h3>

@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Users, Percent, Ticket, Heart, Share } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import {
   Carousel,
   CarouselContent,
@@ -72,8 +73,9 @@ const Events = () => {
         <div className="mb-12">
           <Carousel
             className="w-full"
-            selectedIndex={selectedIndex}
-            onSelect={setSelectedIndex}
+            // Fix the type error by adding a proper onSelect handler
+            // that updates selectedIndex with the value coming from the carousel
+            onSelect={(index) => setSelectedIndex(index)}
           >
             <CarouselContent>
               {events.map((event, index) => (
