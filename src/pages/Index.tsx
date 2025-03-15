@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -17,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
+import EventsStories from '@/components/EventsStories';
 
 const Index = () => {
   return (
@@ -49,8 +51,13 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Instagram-style Stories Section */}
+      <section className="px-6 mt-10">
+        <EventsStories />
+      </section>
+
       {/* Main Services Section - Updated to match menu structure */}
-      <section className="px-6 mb-10 mt-8">
+      <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Main Services</h2>
         <div className="grid grid-cols-2 gap-4">
           <ServiceCard 

@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,9 +13,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import SwipeIndicator from '@/components/ui/swipe-indicator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { cn } from "@/lib/utils";
 
 const Events = () => {
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
+  
   const events = [
     {
       id: 1,
@@ -55,8 +61,38 @@ const Events = () => {
       description: "Book 5 nights and get 15% off your entire stay, plus complimentary breakfast and spa access.",
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
       category: "promo"
+    },
+    {
+      id: 5,
+      title: "Cocktail Masterclass",
+      date: "Every Friday",
+      time: "8:00 PM - 10:00 PM",
+      location: "The Bar",
+      description: "Learn how to make signature cocktails with our expert mixologists. Includes tastings and recipe cards.",
+      image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      category: "event"
+    },
+    {
+      id: 6,
+      title: "Weekend Package",
+      date: "Every weekend",
+      time: "Check-in Friday",
+      location: "Reception",
+      description: "Book our weekend package and enjoy special amenities including spa credits and dining discounts.",
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      category: "promo"
     }
   ];
+
+  // States for tracking viewed stories
+  const [viewedStories, setViewedStories] = useState<number[]>([]);
+  
+  const markAsSeen = (id: number) => {
+    if (!viewedStories.includes(id)) {
+      setViewedStories([...viewedStories, id]);
+    }
+    setActiveStoryIndex(events.findIndex(event => event.id === id));
+  };
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -68,7 +104,42 @@ const Events = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Featured Carousel */}
+        {/* Stories Navigation Bar */}
+        <div className="mb-8">
+          <ScrollArea className="w-full pb-4">
+            <div className="flex space-x-4 pb-2">
+              {events.map((story, index) => (
+                <button 
+                  key={story.id} 
+                  className="flex flex-col items-center space-y-1"
+                  onClick={() => markAsSeen(story.id)}
+                >
+                  <div className={cn(
+                    "p-1 rounded-full", 
+                    viewedStories.includes(story.id) 
+                      ? "bg-gray-300" 
+                      : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"
+                  )}>
+                    <div className="p-0.5 bg-white rounded-full">
+                      <Avatar className={cn(
+                        "h-16 w-16 transition-all",
+                        activeStoryIndex === index ? "ring-2 ring-primary" : ""
+                      )}>
+                        <AvatarImage src={story.image} alt={story.title} className="object-cover" />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {story.title.substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  </div>
+                  <span className="text-xs text-center w-16 truncate">{story.title}</span>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Story Viewer */}
         <div className="mb-12">
           <Carousel
             className="w-full"
@@ -77,6 +148,8 @@ const Events = () => {
                 api.on("select", () => {
                   const currentIndex = api.selectedScrollSnap();
                   setSelectedIndex(currentIndex);
+                  setActiveStoryIndex(currentIndex);
+                  markAsSeen(events[currentIndex].id);
                 });
               }
             }}
@@ -88,8 +161,18 @@ const Events = () => {
                     <img 
                       src={event.image} 
                       alt={event.title} 
-                      className="w-full h-64 object-cover"
+                      className="w-full h-[70vh] object-cover"
                     />
+                    <div className="absolute top-0 left-0 right-0 p-2">
+                      <div className="flex space-x-1">
+                        {events.map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`h-1 flex-1 rounded-full ${i === index ? 'bg-white' : 'bg-white/30'}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                     <div className="absolute bottom-0 left-0 p-6 text-white">
                       <span className="text-sm font-medium bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full mb-2 inline-block">
