@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit } from 'lucide-react';
+import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit, Key } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -28,6 +28,10 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
     { id: 1, message: "Your room has been cleaned", time: "2 minutes ago" },
     { id: 2, message: "Spa appointment confirmed", time: "1 hour ago" },
   ]);
+  const [familyMembers] = useState([
+    { id: 1, name: "John Watson", relation: "Spouse", profileImage: null },
+    { id: 2, name: "Lily Watson", relation: "Child", profileImage: null },
+  ]);
   const { toast } = useToast();
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +54,13 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
       });
       setIsEditing(false);
     }
+  };
+
+  const handleMobileKey = () => {
+    toast({
+      title: "Mobile Key Activated",
+      description: "You can now use your phone to unlock your room door.",
+    });
   };
 
   return (
@@ -123,8 +134,48 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
                     <span className="font-medium">Current Stay</span>
                   </div>
                   <p className="text-sm text-gray-600">Room {roomNumber}</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full mt-3 flex items-center justify-center gap-2"
+                    onClick={handleMobileKey}
+                  >
+                    <Key className="h-4 w-4 text-primary" />
+                    <span>Mobile Key</span>
+                  </Button>
                 </div>
               )}
+
+              {/* Family Members */}
+              <div className="space-y-3">
+                <h3 className="font-medium flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  Family Members
+                </h3>
+                <div className="space-y-2">
+                  {familyMembers.map(member => (
+                    <motion.div
+                      key={member.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
+                          {member.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{member.name}</p>
+                        <span className="text-xs text-gray-500">{member.relation}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                  <Button variant="outline" size="sm" className="w-full">
+                    <span>Add Family Member</span>
+                  </Button>
+                </div>
+              </div>
 
               <div className="space-y-4">
                 <h3 className="font-medium flex items-center gap-2">
