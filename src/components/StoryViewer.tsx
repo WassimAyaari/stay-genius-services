@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -107,16 +107,8 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryIndex, o
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {/* Close button */}
-      <button 
-        className="absolute top-4 right-4 text-white z-10"
-        onClick={onClose}
-      >
-        <X className="w-6 h-6" />
-      </button>
-      
       {/* Progress bars */}
-      <div className="absolute top-4 left-4 right-20 flex space-x-1 z-10">
+      <div className="absolute top-4 left-4 right-4 flex space-x-1 z-10">
         {stories.map((_, index) => (
           <div key={index} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
             <div 

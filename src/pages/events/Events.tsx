@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
@@ -89,9 +90,9 @@ const Events = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         {/* Story Viewer */}
-        <div className="mb-12">
+        <div className="mb-6">
           <Carousel
             className="w-full"
             setApi={(api) => {
