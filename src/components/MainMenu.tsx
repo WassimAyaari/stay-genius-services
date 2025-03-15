@@ -10,8 +10,13 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Menu, BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const MainMenu = () => {
+interface MainMenuProps {
+  buttonClassName?: string;
+}
+
+const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
   const navigate = useNavigate();
 
   const menuItems = [
@@ -30,7 +35,11 @@ const MainMenu = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className={cn("relative", buttonClassName)}
+        >
           <Menu className="h-6 w-6" />
           <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full" />
         </Button>
