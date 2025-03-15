@@ -4,62 +4,74 @@ import { Link } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import StoryViewer from './StoryViewer';
 
-interface StoryProps {
+export interface StoryProps {
   id: number;
   title: string;
   image: string;
   category: 'event' | 'promo';
+  description?: string;
   seen?: boolean;
 }
 
-const stories: StoryProps[] = [
+export const stories: StoryProps[] = [
   {
     id: 1,
     title: "Wine Tasting",
     image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    category: "event"
+    category: "event",
+    description: "Join our sommelier for an exclusive wine tasting event featuring premium selections from around the world."
   },
   {
     id: 2,
     title: "Chef's Special",
     image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    category: "event"
+    category: "event",
+    description: "Experience a culinary journey with our executive chef's special tasting menu featuring seasonal ingredients."
   },
   {
     id: 3,
     title: "Spa Day",
     image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     category: "promo",
+    description: "Enjoy 20% off on our signature spa treatments. Package includes a 60-minute massage and facial.",
     seen: true
   },
   {
     id: 4,
     title: "Stay Discount",
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    category: "promo"
+    category: "promo",
+    description: "Book 5 nights and get 15% off your entire stay, plus complimentary breakfast and spa access."
   },
   {
     id: 5,
     title: "Cocktail Hour",
     image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    category: "event"
+    category: "event",
+    description: "Learn how to make signature cocktails with our expert mixologists. Includes tastings and recipe cards."
   },
   {
     id: 6,
     title: "Weekend Deal",
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    category: "promo"
+    category: "promo",
+    description: "Book our weekend package and enjoy special amenities including spa credits and dining discounts."
   }
 ];
 
 const EventsStories: React.FC = () => {
   const [viewedStories, setViewedStories] = useState<number[]>([]);
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
   
-  const markAsSeen = (id: number) => {
+  const markAsSeen = (id: number, index: number) => {
     if (!viewedStories.includes(id)) {
       setViewedStories([...viewedStories, id]);
     }
+    setSelectedStoryIndex(index);
+    setStoryViewerOpen(true);
   };
   
   return (
@@ -70,12 +82,11 @@ const EventsStories: React.FC = () => {
       </div>
       <ScrollArea className="w-full pb-4">
         <div className="flex space-x-4 pb-2">
-          {stories.map((story) => (
-            <Link 
+          {stories.map((story, index) => (
+            <button 
               key={story.id} 
-              to={`/events`} 
-              className="flex flex-col items-center space-y-1"
-              onClick={() => markAsSeen(story.id)}
+              className="flex flex-col items-center space-y-1 bg-transparent border-none"
+              onClick={() => markAsSeen(story.id, index)}
             >
               <div className={cn(
                 "p-1 rounded-full", 
@@ -93,10 +104,18 @@ const EventsStories: React.FC = () => {
                 </div>
               </div>
               <span className="text-xs text-center w-16 truncate">{story.title}</span>
-            </Link>
+            </button>
           ))}
         </div>
       </ScrollArea>
+      
+      {storyViewerOpen && (
+        <StoryViewer 
+          stories={stories} 
+          initialStoryIndex={selectedStoryIndex}
+          onClose={() => setStoryViewerOpen(false)}
+        />
+      )}
     </div>
   );
 };

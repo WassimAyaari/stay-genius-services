@@ -12,13 +12,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import SwipeIndicator from '@/components/ui/swipe-indicator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { cn } from "@/lib/utils";
+import { stories } from '@/components/EventsStories';
 
 const Events = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
   
   const events = [
     {
@@ -83,16 +80,6 @@ const Events = () => {
     }
   ];
 
-  // States for tracking viewed stories
-  const [viewedStories, setViewedStories] = useState<number[]>([]);
-  
-  const markAsSeen = (id: number) => {
-    if (!viewedStories.includes(id)) {
-      setViewedStories([...viewedStories, id]);
-    }
-    setActiveStoryIndex(events.findIndex(event => event.id === id));
-  };
-
   React.useEffect(() => {
     const interval = setInterval(() => {
       setSelectedIndex((prevIndex) => (prevIndex + 1) % events.length);
@@ -112,8 +99,6 @@ const Events = () => {
                 api.on("select", () => {
                   const currentIndex = api.selectedScrollSnap();
                   setSelectedIndex(currentIndex);
-                  setActiveStoryIndex(currentIndex);
-                  markAsSeen(events[currentIndex].id);
                 });
               }
             }}
