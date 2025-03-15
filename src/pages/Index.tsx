@@ -51,11 +51,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Instagram-style Stories Section */}
-      <section className="px-6 mt-10">
-        <EventsStories />
-      </section>
-
       {/* Main Services Section - Updated to match menu structure */}
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Main Services</h2>
@@ -126,7 +121,7 @@ const Index = () => {
         </Card>
       </section>
 
-      {/* Instagram-style Stories Section - Moved after Featured Experience */}
+      {/* Instagram-style Stories Section - Positioned right after Featured Experience */}
       <section className="px-6 mb-10">
         <EventsStories />
       </section>
