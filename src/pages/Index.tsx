@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -16,7 +15,8 @@ import {
   Phone,
   MessageSquare,
   Star,
-  Building
+  Building,
+  ThumbsUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -306,10 +306,10 @@ const Index = () => {
               <span>2 days ago</span>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <thumbs-up className="w-3 h-3" /> 24
+                  <ThumbsUp className="w-3 h-3" /> 24
                 </div>
                 <div className="flex items-center gap-1">
-                  <heart className="w-3 h-3 text-red-400" /> 7
+                  <Heart className="w-3 h-3 text-red-400" /> 7
                 </div>
               </div>
             </div>
@@ -336,10 +336,10 @@ const Index = () => {
               <span>1 week ago</span>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <thumbs-up className="w-3 h-3" /> 18
+                  <ThumbsUp className="w-3 h-3" /> 18
                 </div>
                 <div className="flex items-center gap-1">
-                  <heart className="w-3 h-3 text-red-400" /> 3
+                  <Heart className="w-3 h-3 text-red-400" /> 3
                 </div>
               </div>
             </div>
@@ -365,10 +365,10 @@ const Index = () => {
               <span>2 weeks ago</span>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <thumbs-up className="w-3 h-3" /> 31
+                  <ThumbsUp className="w-3 h-3" /> 31
                 </div>
                 <div className="flex items-center gap-1">
-                  <heart className="w-3 h-3 text-red-400" /> 12
+                  <Heart className="w-3 h-3 text-red-400" /> 12
                 </div>
               </div>
             </div>
