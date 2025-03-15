@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { History, Building2, Users, Award, ChevronRight } from 'lucide-react';
+import { History, Building2, Users, Award, ChevronRight, Phone, Map, Book, Info } from 'lucide-react';
 
 const About = () => {
   return (
@@ -32,6 +32,84 @@ const About = () => {
           <p className="text-gray-600 mb-4">
             Since our establishment in 2010, we have been committed to creating a home away from home for our guests, combining modern amenities with classic hospitality.
           </p>
+        </div>
+
+        {/* Hotel Directory and Information */}
+        <div className="mb-10">
+          <h2 className="text-2xl font-bold text-secondary mb-4">Hotel Directory & Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="p-4 rounded-xl">
+              <div className="flex items-start gap-3">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Phone className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Important Numbers</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>Reception: Dial 0</li>
+                    <li>Room Service: Dial 1</li>
+                    <li>Concierge: Dial 2</li>
+                    <li>Housekeeping: Dial 3</li>
+                    <li>Emergency: Dial 9</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 rounded-xl">
+              <div className="flex items-start gap-3">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Book className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Hotel Policies</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>Check-in: 3:00 PM</li>
+                    <li>Check-out: 12:00 PM</li>
+                    <li>Breakfast: 6:30 AM - 10:30 AM</li>
+                    <li>Pool Hours: 7:00 AM - 10:00 PM</li>
+                    <li>Pet Policy: Pet-friendly rooms available</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 rounded-xl">
+              <div className="flex items-start gap-3">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Map className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Facilities & Amenities</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>Swimming Pool: Level 5</li>
+                    <li>Fitness Center: Level 3</li>
+                    <li>Spa & Wellness: Level 4</li>
+                    <li>Business Center: Level 2</li>
+                    <li>Restaurants: Lobby & Level 20</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 rounded-xl">
+              <div className="flex items-start gap-3">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Info className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Additional Information</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>Wi-Fi: Network "HotelGenius" - Password provided at check-in</li>
+                    <li>Parking: Valet service available</li>
+                    <li>Airport Transfer: Contact concierge</li>
+                    <li>Currency Exchange: Available at reception</li>
+                    <li>Medical Services: Contact reception for assistance</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
 
         {/* Features Grid */}
