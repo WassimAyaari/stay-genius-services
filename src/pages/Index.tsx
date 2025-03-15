@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -221,6 +220,15 @@ const Index = () => {
             actionLink="/destination"
             status="Available"
           />
+          
+          <ServiceCard 
+            icon={<Star className="w-6 h-6 text-primary" />}
+            title="Feedback & Reviews"
+            description="Share your experience"
+            actionText="Write Review"
+            actionLink="/feedback"
+            status="Available"
+          />
         </div>
       </section>
 
@@ -247,42 +255,6 @@ const Index = () => {
           </Card>
         </Link>
       </section>
-
-      {/* Feedback & Reviews Section - Now after Need Assistance */}
-      <section className="px-6 mb-10">
-        <h2 className="text-2xl font-bold text-secondary mb-4">Feedback & Reviews</h2>
-        
-        {/* Write a review card */}
-        <Link to="/feedback">
-          <Card className="overflow-hidden bg-gradient-to-r from-primary/10 to-primary/5 hover:shadow-lg transition-all duration-300 mb-4">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-primary/20 rounded-full">
-                    <Star className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-secondary">Share Your Experience</h3>
-                    <p className="text-gray-600">Leave a review and earn rewards</p>
-                  </div>
-                </div>
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="w-4 h-4 text-primary" />
-                  ))}
-                </div>
-              </div>
-              <div className="mt-4 flex justify-between items-center">
-                <p className="text-sm text-primary">Help us improve and get rewarded</p>
-                <Button size="sm" className="gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  Write Review
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </Link>
-      </section>
     </div>
   );
 };
@@ -298,33 +270,34 @@ const ServiceCard = ({
   highlighted = false 
 }) => {
   return (
-    <Card className={`overflow-hidden ${highlighted ? 'border-2 border-primary rounded-2xl' : 'rounded-2xl'}`}>
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-2">
-          <div className="p-2.5 bg-gray-100 rounded-lg">
-            {icon}
+    <Link to={actionLink} className="block">
+      <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${highlighted ? 'border-2 border-primary rounded-2xl' : 'rounded-2xl'} hover:scale-[1.02]`}>
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-2">
+            <div className="p-2.5 bg-gray-100 rounded-lg">
+              {icon}
+            </div>
+            <span className="text-gray-500 text-sm">{status}</span>
           </div>
-          <span className="text-gray-500 text-sm">{status}</span>
+          <h3 className="text-xl font-bold text-secondary mb-1 group-hover:text-primary transition-colors">{title}</h3>
+          <p className="text-gray-600 text-sm mb-3">{description}</p>
+          <span 
+            className={`text-sm font-medium flex items-center transition-colors ${highlighted ? 'text-[#e57373]' : 'text-primary'} hover:text-secondary`}
+          >
+            {actionText}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
+              <path 
+                d="M6 12L10 8L6 4" 
+                stroke="currentColor"
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
         </div>
-        <h3 className="text-xl font-bold text-secondary mb-1">{title}</h3>
-        <p className="text-gray-600 text-sm mb-3">{description}</p>
-        <Link 
-          to={actionLink}
-          className={`text-sm font-medium flex items-center ${highlighted ? 'text-[#e57373]' : 'text-primary'}`}
-        >
-          {actionText}
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
-            <path 
-              d="M6 12L10 8L6 4" 
-              stroke={highlighted ? '#e57373' : '#00AFB9'} 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-      </div>
-    </Card>
+      </Card>
+    </Link>
   );
 };
 
