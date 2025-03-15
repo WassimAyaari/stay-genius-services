@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
@@ -73,9 +72,14 @@ const Events = () => {
         <div className="mb-12">
           <Carousel
             className="w-full"
-            // Fix the type error by adding a proper onSelect handler
-            // that updates selectedIndex with the value coming from the carousel
-            onSelect={(index) => setSelectedIndex(index)}
+            setApi={(api) => {
+              if (api) {
+                api.on("select", () => {
+                  const currentIndex = api.selectedScrollSnap();
+                  setSelectedIndex(currentIndex);
+                });
+              }
+            }}
           >
             <CarouselContent>
               {events.map((event, index) => (
