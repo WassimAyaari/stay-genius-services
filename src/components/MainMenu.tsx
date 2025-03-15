@@ -9,22 +9,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
-import { Menu, BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Info, Home, Map, MessageSquare, Star } from 'lucide-react';
+import { Menu, BedDouble, UtensilsCrossed, Heart, Compass, Phone, Gift, Info, Home, Bell } from 'lucide-react';
 
 const MainMenu = () => {
   const navigate = useNavigate();
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: 'Home', path: '/' },
-    { icon: <Info className="h-5 w-5" />, label: 'About Us', path: '/about' },
-    { icon: <UtensilsCrossed className="h-5 w-5" />, label: 'Gastronomy', path: '/dining' },
-    { icon: <Heart className="h-5 w-5" />, label: 'Spa & Wellness', path: '/spa' },
-    { icon: <Phone className="h-5 w-5" />, label: 'Concierge', path: '/contact' },
-    { icon: <Compass className="h-5 w-5" />, label: 'Destination', path: '/destination' },
-    { icon: <ShoppingBag className="h-5 w-5" />, label: 'Shops', path: '/shops' },
-    { icon: <Map className="h-5 w-5" />, label: 'Hotel Map', path: '/map' },
-    { icon: <Star className="h-5 w-5" />, label: 'Feedback & Reviews', path: '/feedback' },
     { icon: <BedDouble className="h-5 w-5" />, label: 'My Room', path: '/my-room' },
+    { icon: <UtensilsCrossed className="h-5 w-5" />, label: 'Dining', path: '/dining' },
+    { icon: <Heart className="h-5 w-5" />, label: 'Spa & Wellness', path: '/spa' },
+    { icon: <Compass className="h-5 w-5" />, label: 'Activities', path: '/activities' },
+    { icon: <Gift className="h-5 w-5" />, label: 'Hotel Services', path: '/services' },
+    { icon: <Phone className="h-5 w-5" />, label: 'Contact', path: '/contact' },
   ];
 
   return (

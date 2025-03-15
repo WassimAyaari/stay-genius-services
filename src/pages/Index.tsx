@@ -1,31 +1,26 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Info, 
+  BedDouble, 
   UtensilsCrossed, 
   Heart, 
   Map, 
   Search, 
   CalendarDays, 
   Compass, 
-  Phone, 
+  Percent, 
+  Info, 
   ShoppingBag, 
-  MessageSquare, 
+  Key, 
   Headphones,
-  Wine,
-  Star
+  Wine
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import SwipeIndicator from '@/components/ui/swipe-indicator';
 import { motion } from 'framer-motion';
 
 const Index = () => {
-  const [activeSlide, setActiveSlide] = React.useState(0);
-
   return (
     <div className="pb-20">
       {/* Hero Section */}
@@ -48,7 +43,7 @@ const Index = () => {
           <div className="relative">
             <Input
               type="search"
-              placeholder="Search for services, A/C, TV, Pillow, toilet..."
+              placeholder="Search for services, activities, or amenities..."
               className="w-full pl-12 pr-4 py-4 rounded-xl text-base bg-white shadow-lg border-none"
             />
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -61,11 +56,11 @@ const Index = () => {
         <h2 className="text-2xl font-bold text-secondary mb-4">Main Services</h2>
         <div className="grid grid-cols-2 gap-4">
           <ServiceCard 
-            icon={<Info className="w-6 h-6 text-primary" />}
-            title="About Us"
-            description="Learn about our hotel and services"
-            actionText="View Details"
-            actionLink="/about"
+            icon={<BedDouble className="w-6 h-6 text-primary" />}
+            title="Rooms & Suites"
+            description="Explore our luxurious accommodations"
+            actionText="View Rooms"
+            actionLink="/my-room"
             status="Available"
           />
           
@@ -95,77 +90,53 @@ const Index = () => {
             actionLink="/services"
             status="Online"
           />
+          
+          <ServiceCard 
+            icon={<Map className="w-6 h-6 text-primary" />}
+            title="Hotel Map"
+            description="Interactive indoor navigation"
+            actionText="Open Map"
+            actionLink="/services"
+            status="Available"
+          />
+          
+          <ServiceCard 
+            icon={<Key className="w-6 h-6 text-primary" />}
+            title="Mobile Key"
+            description="Digital room access"
+            actionText="Access Room"
+            actionLink="/my-room"
+            status="Active"
+          />
         </div>
       </section>
 
-      {/* Events & Promos Slideshow */}
+      {/* Featured Experience */}
       <section className="px-6 mb-10">
-        <h2 className="text-2xl font-bold text-secondary mb-4">Events & Promos</h2>
-        <Carousel className="w-full" onSelect={(index) => setActiveSlide(index)}>
-          <CarouselContent>
-            <CarouselItem>
-              <Card className="overflow-hidden">
-                <div className="relative h-64">
-                  <img 
-                    src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80" 
-                    alt="Summer Promotion" 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6 text-white">
-                    <span className="text-sm font-medium bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full mb-2 inline-block">Limited Time</span>
-                    <h3 className="text-2xl font-bold">Summer Escape Package</h3>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-gray-600 mb-4">Enjoy 20% off on all stays between June and August</p>
-                  <Button className="w-full">Learn More</Button>
-                </div>
-              </Card>
-            </CarouselItem>
-            <CarouselItem>
-              <Card className="overflow-hidden">
-                <div className="relative h-64">
-                  <img 
-                    src="https://images.unsplash.com/photo-1515283736202-caca85c8e526?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-                    alt="Weekend Getaway" 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6 text-white">
-                    <span className="text-sm font-medium bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full mb-2 inline-block">New Offer</span>
-                    <h3 className="text-2xl font-bold">Weekend Getaway</h3>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-gray-600 mb-4">Book 2 nights and get a complimentary spa treatment</p>
-                  <Button className="w-full">See Details</Button>
-                </div>
-              </Card>
-            </CarouselItem>
-            <CarouselItem>
-              <Card className="overflow-hidden">
-                <div className="relative h-64">
-                  <img 
-                    src="https://images.unsplash.com/photo-1621275471769-e6aa44546522?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80" 
-                    alt="Family Package" 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6 text-white">
-                    <span className="text-sm font-medium bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full mb-2 inline-block">Family Friendly</span>
-                    <h3 className="text-2xl font-bold">Family Package</h3>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-gray-600 mb-4">Kids stay and eat free when booking a family room</p>
-                  <Button className="w-full">Book Now</Button>
-                </div>
-              </Card>
-            </CarouselItem>
-          </CarouselContent>
-        </Carousel>
-        <SwipeIndicator selectedIndex={activeSlide} totalSlides={3} />
+        <h2 className="text-2xl font-bold text-secondary mb-4">Featured Experience</h2>
+        <Card className="overflow-hidden">
+          <div className="relative h-64">
+            <img 
+              src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+              alt="Spa Treatment" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-0 left-0 p-6 text-white">
+              <span className="text-sm font-medium bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full mb-2 inline-block">Spa & Wellness</span>
+              <h3 className="text-2xl font-bold">Luxury Spa Treatments</h3>
+            </div>
+            <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
+              1 / 2
+            </div>
+          </div>
+          <div className="p-4">
+            <p className="text-gray-600 mb-4">Indulge in our signature spa treatments for ultimate relaxation</p>
+            <Button className="w-full" onClick={() => {}}>
+              Explore Now
+            </Button>
+          </div>
+        </Card>
       </section>
 
       {/* Today's Highlights Section */}
@@ -233,39 +204,48 @@ const Index = () => {
         <h2 className="text-2xl font-bold text-secondary mb-4">Additional Services</h2>
         <div className="grid grid-cols-2 gap-4">
           <ServiceCard 
-            icon={<Compass className="w-6 h-6 text-primary" />}
-            title="Destination"
-            description="Local attractions & guides"
-            actionText="Explore"
-            actionLink="/destination"
-            status="Updated"
+            icon={<CalendarDays className="w-6 h-6 text-primary" />}
+            title="Things To Do"
+            description="Discover activities and experiences"
+            actionText="Explore Activities"
+            actionLink="/activities"
+            status="Updated Daily"
           />
           
           <ServiceCard 
             icon={<ShoppingBag className="w-6 h-6 text-[#e57373]" />}
-            title="Shops"
+            title="Boutiques"
             description="Luxury shopping experience"
             actionText="Shop Now"
-            actionLink="/shops"
+            actionLink="/services"
             status="Open"
             highlighted={true}
           />
           
           <ServiceCard 
-            icon={<Map className="w-6 h-6 text-primary" />}
-            title="Hotel Map"
-            description="Interactive indoor navigation"
-            actionText="Open Map"
-            actionLink="/map"
+            icon={<Compass className="w-6 h-6 text-primary" />}
+            title="Destination"
+            description="Local attractions & guides"
+            actionText="Explore"
+            actionLink="/activities"
+            status="Updated"
+          />
+          
+          <ServiceCard 
+            icon={<Percent className="w-6 h-6 text-primary" />}
+            title="Special Offers"
+            description="Exclusive deals & packages"
+            actionText="View Offers"
+            actionLink="/services"
             status="Available"
           />
           
           <ServiceCard 
-            icon={<Star className="w-6 h-6 text-primary" />}
-            title="Feedback & Reviews"
-            description="Share your experience"
-            actionText="Leave Review"
-            actionLink="/feedback"
+            icon={<Info className="w-6 h-6 text-primary" />}
+            title="About"
+            description="About Hotel Genius"
+            actionText="Learn More"
+            actionLink="/services"
             status="Available"
           />
         </div>

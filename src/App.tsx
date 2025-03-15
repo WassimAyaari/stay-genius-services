@@ -15,11 +15,6 @@ import Spa from "./pages/spa/Spa";
 import Activities from "./pages/activities/Activities";
 import Services from "./pages/services/Services";
 import Contact from "./pages/Contact";
-import About from "./pages/about/About";
-import Shops from "./pages/shops/Shops";
-import Destination from "./pages/destination/Destination";
-import Map from "./pages/map/Map";
-import Feedback from "./pages/feedback/Feedback";
 import Login from "./pages/auth/Login";
 import NotFound from "./pages/NotFound";
 import Messages from './pages/messages/Messages';
@@ -39,11 +34,6 @@ const AnimatedRoutes = () => {
           <Route path="/my-room" element={<MyRoom />} />
           <Route path="/dining" element={<Dining />} />
           <Route path="/spa" element={<Spa />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/shops" element={<Shops />} />
-          <Route path="/destination" element={<Destination />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/feedback" element={<Feedback />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
