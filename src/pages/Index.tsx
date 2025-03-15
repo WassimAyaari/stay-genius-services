@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  BedDouble, 
   UtensilsCrossed, 
   Heart, 
   Map, 
@@ -11,9 +10,8 @@ import {
   Percent, 
   Info, 
   ShoppingBag, 
-  Key, 
-  Headphones,
-  Wine
+  Wine,
+  Headphones
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -51,16 +49,16 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Main Services Section */}
+      {/* Main Services Section - Updated to match menu structure */}
       <section className="px-6 mb-10 mt-8">
         <h2 className="text-2xl font-bold text-secondary mb-4">Main Services</h2>
         <div className="grid grid-cols-2 gap-4">
           <ServiceCard 
-            icon={<BedDouble className="w-6 h-6 text-primary" />}
-            title="Rooms & Suites"
-            description="Explore our luxurious accommodations"
-            actionText="View Rooms"
-            actionLink="/my-room"
+            icon={<Info className="w-6 h-6 text-primary" />}
+            title="About Us"
+            description="Hotel information"
+            actionText="Learn More"
+            actionLink="/about"
             status="Available"
           />
           
@@ -74,6 +72,15 @@ const Index = () => {
           />
           
           <ServiceCard 
+            icon={<Compass className="w-6 h-6 text-primary" />}
+            title="Destination"
+            description="Things to do"
+            actionText="Explore"
+            actionLink="/destination"
+            status="Available"
+          />
+          
+          <ServiceCard 
             icon={<Heart className="w-6 h-6 text-primary" />}
             title="Spa & Wellness"
             description="Relax and rejuvenate"
@@ -81,37 +88,10 @@ const Index = () => {
             actionLink="/spa"
             status="Available"
           />
-          
-          <ServiceCard 
-            icon={<Headphones className="w-6 h-6 text-primary" />}
-            title="Concierge"
-            description="24/7 personal assistance"
-            actionText="Contact Now"
-            actionLink="/services"
-            status="Online"
-          />
-          
-          <ServiceCard 
-            icon={<Map className="w-6 h-6 text-primary" />}
-            title="Hotel Map"
-            description="Interactive indoor navigation"
-            actionText="Open Map"
-            actionLink="/services"
-            status="Available"
-          />
-          
-          <ServiceCard 
-            icon={<Key className="w-6 h-6 text-primary" />}
-            title="Mobile Key"
-            description="Digital room access"
-            actionText="Access Room"
-            actionLink="/my-room"
-            status="Active"
-          />
         </div>
       </section>
 
-      {/* Featured Experience */}
+      {/* Featured Experience - Kept as requested */}
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Featured Experience</h2>
         <Card className="overflow-hidden">
@@ -139,7 +119,7 @@ const Index = () => {
         </Card>
       </section>
 
-      {/* Today's Highlights Section */}
+      {/* Today's Highlights Section - Kept as requested */}
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Today's Highlights</h2>
         <div className="grid grid-cols-1 gap-4">
@@ -199,53 +179,25 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Additional Services */}
+      {/* Additional Services - Updated to match menu structure */}
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Additional Services</h2>
         <div className="grid grid-cols-2 gap-4">
           <ServiceCard 
-            icon={<CalendarDays className="w-6 h-6 text-primary" />}
-            title="Things To Do"
-            description="Discover activities and experiences"
-            actionText="Explore Activities"
-            actionLink="/activities"
-            status="Updated Daily"
-          />
-          
-          <ServiceCard 
-            icon={<ShoppingBag className="w-6 h-6 text-[#e57373]" />}
-            title="Boutiques"
+            icon={<ShoppingBag className="w-6 h-6 text-primary" />}
+            title="Shops"
             description="Luxury shopping experience"
             actionText="Shop Now"
-            actionLink="/services"
+            actionLink="/shops"
             status="Open"
-            highlighted={true}
           />
           
           <ServiceCard 
-            icon={<Compass className="w-6 h-6 text-primary" />}
-            title="Destination"
-            description="Local attractions & guides"
-            actionText="Explore"
-            actionLink="/activities"
-            status="Updated"
-          />
-          
-          <ServiceCard 
-            icon={<Percent className="w-6 h-6 text-primary" />}
-            title="Special Offers"
-            description="Exclusive deals & packages"
-            actionText="View Offers"
-            actionLink="/services"
-            status="Available"
-          />
-          
-          <ServiceCard 
-            icon={<Info className="w-6 h-6 text-primary" />}
-            title="About"
-            description="About Hotel Genius"
-            actionText="Learn More"
-            actionLink="/services"
+            icon={<Map className="w-6 h-6 text-primary" />}
+            title="Hotel Map"
+            description="Interactive indoor navigation"
+            actionText="Open Map"
+            actionLink="/map"
             status="Available"
           />
         </div>
