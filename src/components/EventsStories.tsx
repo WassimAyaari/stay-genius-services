@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -7,7 +8,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Carousel, 
   CarouselContent, 
-  CarouselItem 
+  CarouselItem,
+  type CarouselApi
 } from '@/components/ui/carousel';
 import SwipeIndicator from '@/components/ui/swipe-indicator';
 
@@ -71,6 +73,7 @@ const EventsStories: React.FC = () => {
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const isMobile = useIsMobile();
   
   const markAsSeen = (id: number, index: number) => {
@@ -80,6 +83,20 @@ const EventsStories: React.FC = () => {
     setSelectedStoryIndex(index);
     setStoryViewerOpen(true);
   };
+
+  React.useEffect(() => {
+    if (!carouselApi) return;
+    
+    const onSelect = () => {
+      setActiveIndex(carouselApi.selectedScrollSnap());
+    };
+    
+    carouselApi.on("select", onSelect);
+    
+    return () => {
+      carouselApi.off("select", onSelect);
+    };
+  }, [carouselApi]);
   
   return (
     <div className="mb-8">
@@ -95,11 +112,8 @@ const EventsStories: React.FC = () => {
               align: "start",
               loop: false,
             }}
+            setApi={setCarouselApi}
             className="w-full"
-            onSelect={(api) => {
-              const selectedIndex = api?.selectedScrollSnap() || 0;
-              setActiveIndex(selectedIndex);
-            }}
           >
             <CarouselContent className="py-2">
               {stories.map((story, index) => (
