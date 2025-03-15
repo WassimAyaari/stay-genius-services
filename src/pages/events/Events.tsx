@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
@@ -104,41 +103,6 @@ const Events = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Stories Navigation Bar */}
-        <div className="mb-8">
-          <ScrollArea className="w-full pb-4">
-            <div className="flex space-x-4 pb-2">
-              {events.map((story, index) => (
-                <button 
-                  key={story.id} 
-                  className="flex flex-col items-center space-y-1"
-                  onClick={() => markAsSeen(story.id)}
-                >
-                  <div className={cn(
-                    "p-1 rounded-full", 
-                    viewedStories.includes(story.id) 
-                      ? "bg-gray-300" 
-                      : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"
-                  )}>
-                    <div className="p-0.5 bg-white rounded-full">
-                      <Avatar className={cn(
-                        "h-16 w-16 transition-all",
-                        activeStoryIndex === index ? "ring-2 ring-primary" : ""
-                      )}>
-                        <AvatarImage src={story.image} alt={story.title} className="object-cover" />
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {story.title.substring(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                  </div>
-                  <span className="text-xs text-center w-16 truncate">{story.title}</span>
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-
         {/* Story Viewer */}
         <div className="mb-12">
           <Carousel

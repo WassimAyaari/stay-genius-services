@@ -126,6 +126,11 @@ const Index = () => {
         </Card>
       </section>
 
+      {/* Instagram-style Stories Section - Moved after Featured Experience */}
+      <section className="px-6 mb-10">
+        <EventsStories />
+      </section>
+
       {/* Today's Highlights Section - Kept as requested */}
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Today's Highlights</h2>
