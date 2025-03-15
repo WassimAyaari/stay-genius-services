@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { BedDouble, UtensilsCrossed, Heart, Phone, Menu } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Info, Phone, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -9,9 +9,9 @@ const BottomNav = () => {
   const location = useLocation();
 
   const navItems = [
-    { icon: <BedDouble className="w-6 h-6" />, label: 'Room', path: '/my-room' },
+    { icon: <Info className="w-6 h-6" />, label: 'About Us', path: '/about' },
     { icon: <UtensilsCrossed className="w-6 h-6" />, label: 'Dining', path: '/dining' },
-    { icon: <Heart className="w-6 h-6" />, label: 'Spa', path: '/spa' },
+    { icon: <BedDouble className="w-6 h-6" />, label: 'My Room', path: '/my-room' },
     { icon: <Phone className="w-6 h-6" />, label: 'Request', path: '/services' },
     { icon: <Menu className="w-6 h-6" />, label: 'Menu', path: '/services' },
   ];

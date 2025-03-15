@@ -18,6 +18,12 @@ import Contact from "./pages/Contact";
 import Login from "./pages/auth/Login";
 import NotFound from "./pages/NotFound";
 import Messages from './pages/messages/Messages';
+import About from './pages/about/About';
+import Destination from './pages/destination/Destination';
+import Shops from './pages/shops/Shops';
+import HotelMap from './pages/map/HotelMap';
+import Feedback from './pages/feedback/Feedback';
+import Events from './pages/events/Events';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +44,12 @@ const AnimatedRoutes = () => {
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/destination" element={<Destination />} />
+          <Route path="/shops" element={<Shops />} />
+          <Route path="/map" element={<HotelMap />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/events" element={<Events />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
