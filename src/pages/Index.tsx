@@ -12,7 +12,10 @@ import {
   Info, 
   ShoppingBag, 
   Wine,
-  Headphones
+  Headphones,
+  Phone,
+  MessageSquare,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -74,11 +77,11 @@ const Index = () => {
           />
           
           <ServiceCard 
-            icon={<Compass className="w-6 h-6 text-primary" />}
-            title="Destination"
-            description="Things to do"
-            actionText="Explore"
-            actionLink="/destination"
+            icon={<Phone className="w-6 h-6 text-primary" />}
+            title="Concierge"
+            description="24/7 assistance services"
+            actionText="Contact Now"
+            actionLink="/services"
             status="Available"
           />
           
@@ -124,6 +127,40 @@ const Index = () => {
       {/* Instagram-style Stories Section - Positioned right after Featured Experience */}
       <section className="px-6 mb-10">
         <EventsStories />
+      </section>
+
+      {/* Feedback & Reviews Section - New section */}
+      <section className="px-6 mb-10">
+        <h2 className="text-2xl font-bold text-secondary mb-4">Feedback & Reviews</h2>
+        <Link to="/feedback">
+          <Card className="overflow-hidden bg-gradient-to-r from-primary/10 to-primary/5 hover:shadow-lg transition-all duration-300">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-primary/20 rounded-full">
+                    <Star className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-secondary">Share Your Experience</h3>
+                    <p className="text-gray-600">Leave a review and earn rewards</p>
+                  </div>
+                </div>
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} className="w-4 h-4 text-primary" />
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 flex justify-between items-center">
+                <p className="text-sm text-primary">Help us improve and get rewarded</p>
+                <Button size="sm" className="gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  Write Review
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </Link>
       </section>
 
       {/* Today's Highlights Section - Kept as requested */}
@@ -186,7 +223,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Additional Services - Updated to match menu structure */}
+      {/* Additional Services - Updated to include Destination */}
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Additional Services</h2>
         <div className="grid grid-cols-2 gap-4">
@@ -205,6 +242,15 @@ const Index = () => {
             description="Interactive indoor navigation"
             actionText="Open Map"
             actionLink="/map"
+            status="Available"
+          />
+
+          <ServiceCard 
+            icon={<Compass className="w-6 h-6 text-primary" />}
+            title="Destination"
+            description="Things to do nearby"
+            actionText="Explore"
+            actionLink="/destination"
             status="Available"
           />
         </div>
