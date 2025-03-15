@@ -21,7 +21,7 @@ const Dining = () => {
       name: 'Ocean View Restaurant',
       description: 'Enjoy international cuisine with breathtaking ocean views',
       cuisine: 'International',
-      images: ['/placeholder.svg'],
+      images: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
       openHours: '7:00 AM - 11:00 PM',
       location: 'Main Building, Ground Floor',
       status: 'open' as const
@@ -31,7 +31,7 @@ const Dining = () => {
       name: 'Sunrise Buffet',
       description: 'Extensive breakfast and dinner buffet with global flavors',
       cuisine: 'Buffet',
-      images: ['/placeholder.svg'],
+      images: ['https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80'],
       openHours: '6:30 AM - 10:30 AM, 6:00 PM - 10:30 PM',
       location: 'Main Building, First Floor',
       status: 'open' as const
@@ -41,7 +41,7 @@ const Dining = () => {
       name: 'Seaside Grill',
       description: 'Fresh seafood and premium steaks by the beach',
       cuisine: 'Steakhouse & Seafood',
-      images: ['/placeholder.svg'],
+      images: ['https://images.unsplash.com/photo-1501188628168-1bf756efe9a8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
       openHours: '12:00 PM - 3:00 PM, 6:00 PM - 10:00 PM',
       location: 'Beach Area',
       status: 'open' as const
@@ -51,7 +51,7 @@ const Dining = () => {
       name: 'Poolside Bar & Bistro',
       description: 'Light meals and refreshing drinks by the pool',
       cuisine: 'Snacks & Beverages',
-      images: ['/placeholder.svg'],
+      images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1168&q=80'],
       openHours: '10:00 AM - 8:00 PM',
       location: 'Pool Area',
       status: 'open' as const
@@ -61,7 +61,7 @@ const Dining = () => {
       name: 'In-Room Dining',
       description: 'Private dining experience in the comfort of your room',
       cuisine: 'Room Service',
-      images: ['/placeholder.svg'],
+      images: ['https://images.unsplash.com/photo-1625584681890-6774cf3c96a0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
       openHours: '24 Hours',
       location: 'Available in all rooms',
       status: 'open' as const
@@ -80,11 +80,21 @@ const Dining = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {restaurants.map(restaurant => (
           <Card key={restaurant.id} className="overflow-hidden animate-fade-in">
-            <img 
-              src={restaurant.images[0]}
-              alt={restaurant.name}
-              className="w-full h-48 object-cover"
-            />
+            <div className="relative">
+              <img 
+                src={restaurant.images[0]}
+                alt={restaurant.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute top-2 right-2">
+                <span className={`
+                  px-2 py-1 rounded-full text-xs font-medium
+                  ${restaurant.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                `}>
+                  {restaurant.status}
+                </span>
+              </div>
+            </div>
             <div className="p-4">
               <h3 className="text-xl font-semibold text-secondary mb-2">{restaurant.name}</h3>
               <div className="flex items-center gap-2 text-gray-600 mb-2">
