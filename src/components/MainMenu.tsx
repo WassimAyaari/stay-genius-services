@@ -9,6 +9,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Menu, BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -44,22 +45,26 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
           <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0">
-        <SheetHeader className="p-6 bg-gradient-to-br from-primary-light to-white">
-          <SheetTitle className="text-2xl">Menu</SheetTitle>
-        </SheetHeader>
-        <div className="grid gap-2 p-4">
-          {menuItems.map((item) => (
-            <Button
-              key={item.path}
-              variant="ghost"
-              className="w-full justify-start gap-3 p-4 rounded-xl hover:bg-primary/10 transition-colors"
-              onClick={() => navigate(item.path)}
-            >
-              {item.icon}
-              <span className="font-medium">{item.label}</span>
-            </Button>
-          ))}
+      <SheetContent side="left" className="p-0 w-full sm:max-w-full">
+        <div className="flex flex-col h-full">
+          <SheetHeader className="p-6 bg-gradient-to-br from-primary-light to-white">
+            <SheetTitle className="text-2xl">Menu</SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="flex-1 h-[calc(100vh-80px)]">
+            <div className="grid gap-2 p-4">
+              {menuItems.map((item) => (
+                <Button
+                  key={item.path}
+                  variant="ghost"
+                  className="w-full justify-start gap-3 p-4 rounded-xl hover:bg-primary/10 transition-colors"
+                  onClick={() => navigate(item.path)}
+                >
+                  {item.icon}
+                  <span className="font-medium">{item.label}</span>
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       </SheetContent>
     </Sheet>
