@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -11,7 +10,6 @@ import {
   CarouselItem,
   type CarouselApi
 } from '@/components/ui/carousel';
-import SwipeIndicator from '@/components/ui/swipe-indicator';
 
 export interface StoryProps {
   id: number;
@@ -143,11 +141,6 @@ const EventsStories: React.FC = () => {
               ))}
             </CarouselContent>
           </Carousel>
-          <SwipeIndicator 
-            selectedIndex={activeIndex} 
-            totalSlides={stories.length} 
-            className="mt-2" 
-          />
         </div>
       ) : (
         <div className="overflow-x-auto pb-4">
