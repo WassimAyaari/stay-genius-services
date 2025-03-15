@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
-import { Button } from './ui/button';
 import { ChevronLeft, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -13,7 +12,6 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
@@ -56,7 +54,7 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 pt-20 pb-24">
+      <main className="container mx-auto px-0 pt-16 pb-24">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
