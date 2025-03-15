@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -247,7 +248,7 @@ const Index = () => {
         </Link>
       </section>
 
-      {/* Feedback & Reviews Section - Moved after Need Assistance and updated with TripAdvisor reviews */}
+      {/* Feedback & Reviews Section - Now after Need Assistance */}
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Feedback & Reviews</h2>
         
@@ -281,106 +282,6 @@ const Index = () => {
             </div>
           </Card>
         </Link>
-        
-        {/* TripAdvisor Reviews */}
-        <h3 className="text-lg font-semibold text-secondary mb-3">Recent TripAdvisor Reviews</h3>
-        
-        <div className="space-y-4">
-          {/* Review 1 */}
-          <Card className="p-4">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2">
-                <div className="bg-gray-100 rounded-full p-2">
-                  <MessageSquare className="w-4 h-4 text-primary" />
-                </div>
-                <span className="font-medium">Sarah J.</span>
-              </div>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-4 h-4 text-yellow-400" />
-                ))}
-              </div>
-            </div>
-            <p className="text-sm text-gray-700 mb-3">"Absolutely amazing stay! The staff went above and beyond to make our anniversary special. The ocean view room was breathtaking."</p>
-            <div className="flex justify-between items-center text-xs text-gray-500">
-              <span>2 days ago</span>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <ThumbsUp className="w-3 h-3" /> 24
-                </div>
-                <div className="flex items-center gap-1">
-                  <Heart className="w-3 h-3 text-red-400" /> 7
-                </div>
-              </div>
-            </div>
-          </Card>
-          
-          {/* Review 2 */}
-          <Card className="p-4">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2">
-                <div className="bg-gray-100 rounded-full p-2">
-                  <MessageSquare className="w-4 h-4 text-primary" />
-                </div>
-                <span className="font-medium">Michael T.</span>
-              </div>
-              <div className="flex">
-                {[1, 2, 3, 4].map((star) => (
-                  <Star key={star} className="w-4 h-4 text-yellow-400" />
-                ))}
-                <Star className="w-4 h-4 text-gray-300" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-700 mb-3">"Great location and beautiful property. The spa services were top-notch. Would have given 5 stars but the check-in process was a bit slow."</p>
-            <div className="flex justify-between items-center text-xs text-gray-500">
-              <span>1 week ago</span>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <ThumbsUp className="w-3 h-3" /> 18
-                </div>
-                <div className="flex items-center gap-1">
-                  <Heart className="w-3 h-3 text-red-400" /> 3
-                </div>
-              </div>
-            </div>
-          </Card>
-          
-          {/* Review 3 */}
-          <Card className="p-4">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2">
-                <div className="bg-gray-100 rounded-full p-2">
-                  <MessageSquare className="w-4 h-4 text-primary" />
-                </div>
-                <span className="font-medium">Elena R.</span>
-              </div>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-4 h-4 text-yellow-400" />
-                ))}
-              </div>
-            </div>
-            <p className="text-sm text-gray-700 mb-3">"The culinary experience was exceptional! Chef's tasting menu at the Ocean View Restaurant was the highlight of our stay. Will definitely return!"</p>
-            <div className="flex justify-between items-center text-xs text-gray-500">
-              <span>2 weeks ago</span>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <ThumbsUp className="w-3 h-3" /> 31
-                </div>
-                <div className="flex items-center gap-1">
-                  <Heart className="w-3 h-3 text-red-400" /> 12
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-        
-        {/* See all reviews button */}
-        <div className="mt-4 text-center">
-          <Button variant="outline" size="sm" className="w-full">
-            See All Reviews
-          </Button>
-        </div>
       </section>
     </div>
   );
