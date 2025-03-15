@@ -17,6 +17,16 @@ import DiningSection from '@/features/dining/components/DiningSection';
 const Dining = () => {
   const restaurants = [
     {
+      id: '5',
+      name: 'In-Room Dining',
+      description: 'Private dining experience in the comfort of your room',
+      cuisine: 'Room Service',
+      images: ['https://images.unsplash.com/photo-1625584681890-6774cf3c96a0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
+      openHours: '24 Hours',
+      location: 'Available in all rooms',
+      status: 'open' as const
+    },
+    {
       id: '1',
       name: 'Ocean View Restaurant',
       description: 'Enjoy international cuisine with breathtaking ocean views',
@@ -54,16 +64,6 @@ const Dining = () => {
       images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1168&q=80'],
       openHours: '10:00 AM - 8:00 PM',
       location: 'Pool Area',
-      status: 'open' as const
-    },
-    {
-      id: '5',
-      name: 'In-Room Dining',
-      description: 'Private dining experience in the comfort of your room',
-      cuisine: 'Room Service',
-      images: ['https://images.unsplash.com/photo-1625584681890-6774cf3c96a0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
-      openHours: '24 Hours',
-      location: 'Available in all rooms',
       status: 'open' as const
     }
   ];
