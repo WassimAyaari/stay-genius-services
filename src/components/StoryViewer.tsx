@@ -20,7 +20,11 @@ interface StoryViewerProps {
   onClose: () => void;
 }
 
-const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryIndex, onClose }) => {
+const StoryViewer: React.FC<StoryViewerProps> = ({ 
+  stories, 
+  initialStoryIndex, 
+  onClose 
+}) => {
   const [currentIndex, setCurrentIndex] = useState(initialStoryIndex);
   const [progress, setProgress] = useState(0);
   const navigate = useNavigate();
@@ -110,7 +114,10 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryIndex, o
       {/* Progress bars */}
       <div className="absolute top-4 left-4 right-4 flex space-x-1 z-10">
         {stories.map((_, index) => (
-          <div key={index} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+          <div 
+            key={index} 
+            className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden"
+          >
             <div 
               className="h-full bg-white"
               style={{ 
@@ -140,13 +147,18 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryIndex, o
             alt={currentStory.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+          <div 
+            className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" 
+          />
           
           <div className="absolute bottom-20 left-4 right-4 text-white p-4">
             <h2 className="text-2xl font-bold mb-2">{currentStory.title}</h2>
             <p className="mb-6">{currentStory.description}</p>
             <div className="flex space-x-3">
-              <Button onClick={navigateToEventPage} className="flex gap-2 items-center">
+              <Button 
+                onClick={navigateToEventPage} 
+                className="flex gap-2 items-center"
+              >
                 <ExternalLink className="w-4 h-4" />
                 View Details
               </Button>
@@ -157,14 +169,16 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryIndex, o
       
       {/* Navigation buttons */}
       <button 
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 flex items-center justify-start"
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 
+          flex items-center justify-start"
         onClick={handlePrevious}
       >
         <ArrowLeft className="w-6 h-6" />
       </button>
       
       <button 
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 flex items-center justify-end"
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 
+          flex items-center justify-end"
         onClick={handleNext}
       >
         <ArrowRight className="w-6 h-6" />
