@@ -37,7 +37,7 @@ const AdditionalServicesSection = () => {
         
         <ServiceCard 
           icon={<Star className="w-6 h-6 text-primary" />}
-          title="Feedback & Reviews"
+          title="Feedback"
           description="Share your experience"
           actionText="Write Review"
           actionLink="/feedback"
