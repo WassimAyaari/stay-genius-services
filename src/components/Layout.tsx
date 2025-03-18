@@ -4,7 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
-import { ChevronLeft, MessageSquare } from 'lucide-react';
+import { ChevronLeft, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface LayoutProps {
@@ -42,9 +42,11 @@ const Layout = ({
               <UserMenu username="Emma Watson" roomNumber="401" />
               <Link 
                 to="/messages" 
-                className="relative hover:bg-gray-100/50 p-2 rounded-lg transition-colors"
+                className="relative flex items-center justify-center hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 transition-all duration-300 w-10 h-10 rounded-full"
+                aria-label="Messages"
               >
-                <MessageSquare className="h-5 w-5 text-secondary" />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-20"></div>
+                <MessageCircle className="h-5 w-5 text-secondary" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border-2 border-white">
                   2
                 </span>
