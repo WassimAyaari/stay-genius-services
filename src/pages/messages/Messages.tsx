@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -7,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Message {
@@ -91,10 +89,8 @@ const Messages = () => {
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>(contacts);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { toast } = useToast();
   const [contactsData, setContactsData] = useState<Contact[]>(contacts);
 
-  // Get previous location from state
   const fromLocation = location.state?.from || '/messages';
 
   useEffect(() => {
@@ -174,15 +170,9 @@ const Messages = () => {
           filteredContacts.map(contact => contact.id === selectedContact.id ? updatedContact : contact)
         );
       }
-
-      toast({
-        title: "Message sent",
-        description: "Your message has been sent successfully."
-      });
       
       setInputMessage('');
       
-      // Simulate response after a delay
       setTimeout(() => {
         if (updatedContact) {
           const responseMessage: Message = {
