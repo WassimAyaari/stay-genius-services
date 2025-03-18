@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
@@ -5,14 +6,17 @@ import UserMenu from './UserMenu';
 import BottomNav from './BottomNav';
 import { ChevronLeft, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
+
 interface LayoutProps {
   children: React.ReactNode;
 }
+
 const Layout = ({
   children
 }: LayoutProps) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  
   return <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
         <div className="container mx-auto px-4">
@@ -21,7 +25,8 @@ const Layout = ({
               {!isHomePage && <Link to="/" className="hover:bg-gray-100/50 p-2 rounded-lg">
                   <ChevronLeft className="h-5 w-5" />
                 </Link>}
-              <MainMenu />
+              {/* Only show MainMenu on the home page */}
+              {isHomePage && <MainMenu />}
             </div>
 
             <Link to="/" className="flex-1 flex justify-center items-center">
@@ -60,4 +65,5 @@ const Layout = ({
       <BottomNav />
     </div>;
 };
+
 export default Layout;
