@@ -19,7 +19,7 @@ const Layout = ({
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2 w-[100px]">
@@ -33,7 +33,7 @@ const Layout = ({
             </div>
 
             <Link to="/" className="flex-1 flex justify-center items-center">
-              <span className="text-lg font-semibold text-secondary hover:opacity-80 transition-opacity">
+              <span className="text-xl font-bold text-secondary hover:opacity-80 transition-opacity">
                 Hotel Genius
               </span>
             </Link>
