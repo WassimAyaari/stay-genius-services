@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,23 @@ const HeroSection = () => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
+  // Log component rendering
+  console.log("HeroSection rendering with search dialog open:", open);
+
+  useEffect(() => {
+    // Close search with Escape key
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen(open => !open);
+      }
+    };
+
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
+
+  // Get search results based on query
   const searchResults = getSearchResults(query);
 
   // Close command dialog and navigate
@@ -81,7 +98,7 @@ const HeroSection = () => {
                   onSelect={() => handleSelect(item.path)}
                 >
                   <div className="flex items-center gap-2">
-                    <span>{item.icon}</span>
+                    {item.icon}
                     <span>{item.title}</span>
                   </div>
                 </CommandItem>
@@ -96,10 +113,12 @@ const HeroSection = () => {
 
 // Search results processor
 function getSearchResults(query: string) {
-  // Import icons at function level to avoid React hook rules violation
+  // Import icons directly to avoid React hook rules violation
   const { 
     UtensilsCrossed, BedDouble, Heart, Calendar, Phone, 
-    Map, ShoppingBag, Compass, Info
+    Map, ShoppingBag, Compass, Info, Coffee, Utensils,
+    Bath, Spa, Dumbbell, Pool, Wifi, Bell, Clock, 
+    ShieldCheck, CreditCard, Shirt
   } = require('lucide-react');
 
   // Base search categories with their items
@@ -127,6 +146,20 @@ function getSearchResults(query: string) {
           path: "/dining",
           keywords: ["food", "restaurants", "dining", "eat", "all restaurants"],
           icon: <UtensilsCrossed className="h-4 w-4" /> 
+        },
+        { 
+          id: "breakfast-service", 
+          title: "Breakfast Service", 
+          path: "/dining/breakfast",
+          keywords: ["breakfast", "morning", "coffee", "buffet", "continental"],
+          icon: <Coffee className="h-4 w-4" /> 
+        },
+        { 
+          id: "room-service", 
+          title: "Room Service", 
+          path: "/my-room/dining",
+          keywords: ["room service", "in-room dining", "delivery", "private dining"],
+          icon: <Utensils className="h-4 w-4" /> 
         }
       ]
     },
@@ -139,6 +172,27 @@ function getSearchResults(query: string) {
           path: "/spa",
           keywords: ["spa", "massage", "wellness", "relax", "facial", "treatment"],
           icon: <Heart className="h-4 w-4" /> 
+        },
+        { 
+          id: "fitness-center", 
+          title: "Fitness Center", 
+          path: "/wellness/fitness",
+          keywords: ["gym", "workout", "fitness", "exercise", "training"],
+          icon: <Dumbbell className="h-4 w-4" /> 
+        },
+        { 
+          id: "swimming-pool", 
+          title: "Swimming Pool", 
+          path: "/wellness/pool",
+          keywords: ["pool", "swim", "jacuzzi", "sauna", "water"],
+          icon: <Pool className="h-4 w-4" /> 
+        },
+        { 
+          id: "thermal-baths", 
+          title: "Thermal Baths", 
+          path: "/wellness/thermal",
+          keywords: ["bath", "thermal", "hot springs", "relaxation"],
+          icon: <Bath className="h-4 w-4" /> 
         }
       ]
     },
@@ -151,6 +205,27 @@ function getSearchResults(query: string) {
           path: "/my-room",
           keywords: ["room", "suite", "bed", "sleep", "accommodation", "my room", "housekeeping"],
           icon: <BedDouble className="h-4 w-4" /> 
+        },
+        { 
+          id: "housekeeping", 
+          title: "Housekeeping", 
+          path: "/services/housekeeping",
+          keywords: ["cleaning", "housekeeping", "towels", "room service", "laundry"],
+          icon: <Shirt className="h-4 w-4" /> 
+        },
+        { 
+          id: "wifi-access", 
+          title: "Wi-Fi Access", 
+          path: "/services/wifi",
+          keywords: ["wifi", "internet", "connection", "network"],
+          icon: <Wifi className="h-4 w-4" /> 
+        },
+        { 
+          id: "room-service-general", 
+          title: "Room Service", 
+          path: "/services/room-service",
+          keywords: ["service", "room", "assistance", "help", "request"],
+          icon: <Bell className="h-4 w-4" /> 
         }
       ]
     },
@@ -170,6 +245,13 @@ function getSearchResults(query: string) {
           path: "/map",
           keywords: ["map", "directions", "location", "find", "navigation"],
           icon: <Map className="h-4 w-4" /> 
+        },
+        { 
+          id: "daily-schedule", 
+          title: "Daily Schedule", 
+          path: "/activities/schedule",
+          keywords: ["schedule", "program", "agenda", "timetable", "daily"],
+          icon: <Clock className="h-4 w-4" /> 
         }
       ]
     },
@@ -203,6 +285,20 @@ function getSearchResults(query: string) {
           path: "/destination",
           keywords: ["destination", "local", "attractions", "sightseeing", "tour", "explore"],
           icon: <Compass className="h-4 w-4" /> 
+        },
+        { 
+          id: "security", 
+          title: "Security Information", 
+          path: "/services/security",
+          keywords: ["security", "safety", "emergency", "help", "assistance"],
+          icon: <ShieldCheck className="h-4 w-4" /> 
+        },
+        { 
+          id: "payment", 
+          title: "Payment Options", 
+          path: "/services/payment",
+          keywords: ["payment", "bill", "invoice", "credit card", "cash", "checkout"],
+          icon: <CreditCard className="h-4 w-4" /> 
         }
       ]
     }
@@ -244,7 +340,17 @@ function getSearchResults(query: string) {
     
     // Spa related
     "relax": ["spa", "massage", "wellness"],
-    "tired": ["spa", "massage", "wellness", "room"]
+    "tired": ["spa", "massage", "wellness", "room"],
+    
+    // Specific needs
+    "internet": ["wifi", "connection"],
+    "workout": ["gym", "fitness"],
+    "swim": ["pool", "spa"],
+    "pay": ["checkout", "bill", "payment"],
+    "emergency": ["security", "help", "assistance"],
+    "checkout": ["payment", "reception", "bill"],
+    "tours": ["destination", "activities", "local"],
+    "buy": ["shops", "shopping", "purchase"]
   };
 
   // Expand query with context terms
