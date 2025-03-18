@@ -91,7 +91,7 @@ const Messages = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [contactsData, setContactsData] = useState<Contact[]>(contacts);
 
-  const fromLocation = location.state?.from || '/messages';
+  const fromLocation = location.state?.from || '/';
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -109,7 +109,7 @@ const Messages = () => {
     if (selectedContact) {
       navigate(`/messages?contact=${selectedContact.id}`, { 
         replace: true,
-        state: { from: location.state?.from || '/messages' }
+        state: { from: location.state?.from || '/' }
       });
     } else {
       navigate('/messages', { replace: true });
@@ -220,7 +220,7 @@ const Messages = () => {
         state: { from: fromLocation } 
       });
     } else {
-      navigate(fromLocation, { replace: true });
+      navigate('/', { replace: true });
     }
   };
 
