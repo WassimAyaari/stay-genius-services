@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Bell, Briefcase, ArrowLeft, Send, Paperclip, Smile, Mic } from 'lucide-react';
-import Layout from '@/components/Layout';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -93,26 +92,33 @@ const Messages = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  const [contactsData, setContactsData] = useState<Contact[]>(contacts);
+
+  // Get previous location from state
+  const fromLocation = location.state?.from || '/messages';
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const contactId = params.get('contact');
     
     if (contactId) {
-      const contact = contacts.find(c => c.id === contactId);
+      const contact = contactsData.find(c => c.id === contactId);
       if (contact) {
         setSelectedContact(contact);
       }
     }
-  }, [location]);
+  }, [location, contactsData]);
 
   useEffect(() => {
     if (selectedContact) {
-      navigate(`/messages?contact=${selectedContact.id}`, { replace: true });
+      navigate(`/messages?contact=${selectedContact.id}`, { 
+        replace: true,
+        state: { from: location.state?.from || '/messages' }
+      });
     } else {
       navigate('/messages', { replace: true });
     }
-  }, [selectedContact, navigate]);
+  }, [selectedContact, navigate, location.state?.from]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -127,15 +133,15 @@ const Messages = () => {
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
-      setFilteredContacts(contacts);
+      setFilteredContacts(contactsData);
     } else {
-      const filtered = contacts.filter(contact => 
+      const filtered = contactsData.filter(contact => 
         contact.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         contact.role.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredContacts(filtered);
     }
-  }, [searchTerm]);
+  }, [searchTerm, contactsData]);
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && selectedContact) {
@@ -147,7 +153,7 @@ const Messages = () => {
         status: 'sent'
       };
 
-      const updatedContacts = contacts.map(contact => {
+      const updatedContacts = contactsData.map(contact => {
         if (contact.id === selectedContact.id) {
           return {
             ...contact,
@@ -158,6 +164,8 @@ const Messages = () => {
         return contact;
       });
 
+      setContactsData(updatedContacts);
+      
       const updatedContact = updatedContacts.find(contact => contact.id === selectedContact.id);
       
       if (updatedContact) {
@@ -174,6 +182,7 @@ const Messages = () => {
       
       setInputMessage('');
       
+      // Simulate response after a delay
       setTimeout(() => {
         if (updatedContact) {
           const responseMessage: Message = {
@@ -183,26 +192,46 @@ const Messages = () => {
             sender: 'staff'
           };
           
-          const contactWithResponse = {
-            ...updatedContact,
-            messages: [...updatedContact.messages, responseMessage],
-            lastMessage: responseMessage.text
-          };
+          const updatedContactsWithResponse = contactsData.map(contact => {
+            if (contact.id === selectedContact.id) {
+              return {
+                ...contact,
+                messages: [...contact.messages, responseMessage],
+                lastMessage: responseMessage.text
+              };
+            }
+            return contact;
+          });
           
-          setSelectedContact(contactWithResponse);
-          setFilteredContacts(
-            filteredContacts.map(contact => 
-              contact.id === selectedContact.id ? contactWithResponse : contact
-            )
+          setContactsData(updatedContactsWithResponse);
+          
+          const contactWithResponse = updatedContactsWithResponse.find(
+            contact => contact.id === selectedContact.id
           );
+          
+          if (contactWithResponse) {
+            setSelectedContact(contactWithResponse);
+            setFilteredContacts(
+              filteredContacts.map(contact => 
+                contact.id === selectedContact.id ? contactWithResponse : contact
+              )
+            );
+          }
         }
       }, 1000);
     }
   };
 
   const handleGoBack = () => {
-    setSelectedContact(null);
-    navigate('/messages', { replace: true });
+    if (selectedContact) {
+      setSelectedContact(null);
+      navigate('/messages', { 
+        replace: true,
+        state: { from: fromLocation } 
+      });
+    } else {
+      navigate(fromLocation, { replace: true });
+    }
   };
 
   const formatTime = (timeString: string) => {
@@ -330,6 +359,14 @@ const Messages = () => {
   return (
     <div className="fixed inset-0 bg-background flex flex-col h-screen w-screen">
       <div className="h-16 border-b bg-card flex items-center px-4 flex-shrink-0">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleGoBack} 
+          className="mr-2"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <h1 className="text-xl font-semibold">Messages</h1>
       </div>
       

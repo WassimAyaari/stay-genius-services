@@ -16,42 +16,52 @@ const Layout = ({
 }: LayoutProps) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isMessagePage = location.pathname === '/messages' || location.pathname.startsWith('/messages?');
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2 w-[100px]">
-              {!isHomePage && (
-                <Link to="/" className="hover:bg-gray-100 p-2.5 rounded-full transition-colors">
-                  <ChevronLeft className="h-5 w-5 text-secondary" />
-                </Link>
-              )}
-              {/* Only show MainMenu on the home page */}
-              {isHomePage && <MainMenu />}
-            </div>
+      {!isMessagePage && (
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center gap-2 w-[100px]">
+                {!isHomePage && (
+                  <Link 
+                    to={location.state?.from || "/"} 
+                    className="hover:bg-gray-100 p-2.5 rounded-full transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-secondary" />
+                  </Link>
+                )}
+                {/* Only show MainMenu on the home page */}
+                {isHomePage && <MainMenu />}
+              </div>
 
-            <Link to="/" className="flex-1 flex justify-center items-center">
-              <span className="text-xl font-bold text-secondary hover:opacity-80 transition-opacity">
-                Hotel Genius
-              </span>
-            </Link>
-            
-            <div className="flex items-center gap-3 w-[100px] justify-end">
-              <UserMenu username="Emma Watson" roomNumber="401" />
-              <Link to="/messages" className="relative hover:bg-gray-100 p-2.5 rounded-full transition-colors">
-                <MessageCircle className="h-5 w-5 text-secondary" />
-                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
-                  2
+              <Link to="/" className="flex-1 flex justify-center items-center">
+                <span className="text-xl font-bold text-secondary hover:opacity-80 transition-opacity">
+                  Hotel Genius
                 </span>
               </Link>
+              
+              <div className="flex items-center gap-3 w-[100px] justify-end">
+                <UserMenu username="Emma Watson" roomNumber="401" />
+                <Link 
+                  to="/messages" 
+                  state={{ from: location.pathname }}
+                  className="relative hover:bg-gray-100 p-2.5 rounded-full transition-colors"
+                >
+                  <MessageCircle className="h-5 w-5 text-secondary" />
+                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
+                    2
+                  </span>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="container mx-auto pt-16 pb-24 px-[9px]">
+      <main className={cn("container mx-auto px-[9px]", !isMessagePage && "pt-16 pb-24")}>
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
@@ -62,9 +72,12 @@ const Layout = ({
         </motion.div>
       </main>
 
-      <BottomNav />
+      {!isMessagePage && <BottomNav />}
     </div>
   );
 };
+
+// Make sure to import cn from utils
+import { cn } from '@/lib/utils';
 
 export default Layout;
