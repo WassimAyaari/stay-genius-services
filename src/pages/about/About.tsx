@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { History, Building2, Users, Award, ChevronRight, Phone, Map, Book, Info } from 'lucide-react';
 const About = () => {
   return <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-[21px] py-0">
         {/* Hero Section */}
         <div className="relative mb-8 rounded-3xl overflow-hidden">
           <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Hotel Facade" className="w-full h-64 object-cover" />
@@ -150,19 +150,14 @@ const About = () => {
 
         {/* Mission & Vision */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Our Mission & Vision</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">Our Mission</h2>
           <Card className="p-6 rounded-xl mb-4">
-            <h3 className="text-lg font-semibold mb-2">Mission</h3>
+            
             <p className="text-gray-600">
               To provide exceptional hospitality experiences by creating memorable moments for our guests through personalized service, luxurious accommodations, and innovative offerings.
             </p>
           </Card>
-          <Card className="p-6 rounded-xl">
-            <h3 className="text-lg font-semibold mb-2">Vision</h3>
-            <p className="text-gray-600">
-              To be recognized as the leading luxury hotel brand, setting new standards in hospitality and inspiring others through our commitment to excellence.
-            </p>
-          </Card>
+          
         </div>
 
         {/* Learn More Section */}
