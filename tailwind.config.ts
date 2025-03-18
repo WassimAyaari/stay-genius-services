@@ -34,6 +34,7 @@ export default {
         secondary: {
           DEFAULT: "#2C3E50",
           foreground: "#FFFFFF",
+          light: "#3D5466",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -44,8 +45,8 @@ export default {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#F8F9FA",
+          foreground: "#2C3E50",
         },
         card: {
           DEFAULT: "#FFFFFF",
