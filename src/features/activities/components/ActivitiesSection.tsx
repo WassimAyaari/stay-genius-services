@@ -43,16 +43,16 @@ const ActivitiesSection = () => {
     },
     {
       id: '3',
-      name: 'Cooking Class',
-      description: 'Learn to cook local cuisine',
-      date: '2024-03-16',
-      time: '14:00',
-      duration: '3 hours',
-      location: 'Main Kitchen',
-      price: 95,
-      capacity: 8,
-      image: '/placeholder.svg',
-      category: 'culture',
+      name: 'Treasure Hunt Adventure',
+      description: 'An exciting treasure hunt around the hotel grounds',
+      date: '2024-03-20',
+      time: '10:00 AM',
+      duration: '1.5 hours',
+      location: 'Hotel Garden',
+      price: 45,
+      capacity: 20,
+      image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      category: 'entertainment',
       status: 'upcoming'
     }
   ];

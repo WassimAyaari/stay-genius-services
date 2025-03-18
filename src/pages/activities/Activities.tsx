@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ const Activities = () => {
       location: 'Hotel Garden',
       price: 45,
       capacity: 20,
-      image: '/lovable-uploads/044dc763-e0b0-462e-8c6e-788f35efcd0c.png',
+      image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
       category: 'entertainment',
       status: 'upcoming'
     },
@@ -123,13 +122,11 @@ const Activities = () => {
 
   return (
     <Layout>
-      {/* Header Section */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Things To Do</h1>
         <p className="text-gray-600">Discover activities and experiences</p>
       </div>
 
-      {/* Filter Buttons */}
       <div className="flex flex-wrap gap-4 mb-8 justify-center">
         <Button 
           variant={activeFilter === 'all' ? 'default' : 'outline'} 
@@ -168,7 +165,6 @@ const Activities = () => {
         </Button>
       </div>
 
-      {/* Activities Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredActivities.map((activity) => (
           <ActivityCard 
