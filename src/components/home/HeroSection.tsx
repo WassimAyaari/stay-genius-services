@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -15,8 +14,8 @@ import { toast } from '@/components/ui/use-toast';
 import { 
   UtensilsCrossed, BedDouble, Heart, Calendar, Phone, 
   Map, ShoppingBag, Compass, Info, Coffee, Utensils,
-  Bath, Spa, Dumbbell, Pool, Wifi, Bell, Clock, 
-  ShieldCheck, CreditCard, Shirt
+  Shirt, Wifi, Bell, Clock, ShieldCheck, CreditCard,
+  Droplets, Dumbbell, Waves
 } from 'lucide-react';
 
 const HeroSection = () => {
@@ -183,14 +182,14 @@ function getSearchResults(query: string) {
           title: "Swimming Pool", 
           path: "/wellness/pool",
           keywords: ["pool", "swim", "jacuzzi", "sauna", "water"],
-          icon: <Pool className="h-4 w-4" /> 
+          icon: <Waves className="h-4 w-4" /> 
         },
         { 
           id: "thermal-baths", 
           title: "Thermal Baths", 
           path: "/wellness/thermal",
           keywords: ["bath", "thermal", "hot springs", "relaxation"],
-          icon: <Bath className="h-4 w-4" /> 
+          icon: <Droplets className="h-4 w-4" /> 
         }
       ]
     },

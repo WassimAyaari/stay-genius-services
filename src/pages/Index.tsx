@@ -1,5 +1,5 @@
 
-import React, { Suspense, ErrorBoundary } from 'react';
+import React, { Suspense } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import MainServicesSection from '@/components/home/MainServicesSection';
 import FeaturedExperienceSection from '@/components/home/FeaturedExperienceSection';
@@ -103,7 +103,7 @@ const Index = () => {
 
       {/* Additional Services */}
       <SectionWrapper id="additional-services">
-        <Suspense fallback={<div className="p-6 text-center">Loading additional services...</div>}>
+        <Suspense fallback={<div className="p-6 text-center">Loading services...</div>}>
           <AdditionalServicesSection />
         </Suspense>
       </SectionWrapper>
