@@ -2,8 +2,9 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, UtensilsCrossed } from 'lucide-react';
+import { Clock, MapPin, UtensilsCrossed, Calendar, BookText } from 'lucide-react';
 import { Restaurant } from '../types';
+import { Link } from 'react-router-dom';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -45,12 +46,21 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
           </div>
         </div>
         <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
-        <Button 
-          onClick={() => onBookTable(restaurant.id)}
-          className="w-full bg-primary hover:bg-primary-dark"
-        >
-          Book a Table
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => onBookTable(restaurant.id)}
+            className="flex-1"
+          >
+            <Calendar size={16} className="mr-1" />
+            Book a Table
+          </Button>
+          <Link to={`/dining/${restaurant.id}`} className="flex-1">
+            <Button variant="outline" className="w-full">
+              <BookText size={16} className="mr-1" />
+              Details
+            </Button>
+          </Link>
+        </div>
       </div>
     </Card>
   );

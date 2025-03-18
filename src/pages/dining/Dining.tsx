@@ -2,12 +2,14 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UtensilsCrossed, Clock, Coffee, Pizza, Wine, ChefHat, MapPin } from 'lucide-react';
+import { UtensilsCrossed, Clock, Coffee, Pizza, Wine, ChefHat, MapPin, Calendar, BookText } from 'lucide-react';
 import Layout from '@/components/Layout';
 import DiningSection from '@/features/dining/components/DiningSection';
+import { Link } from 'react-router-dom';
+import { Restaurant } from '@/features/dining/types';
 
 const Dining = () => {
-  const restaurants = [{
+  const restaurants: Restaurant[] = [{
     id: '5',
     name: 'In-Room Dining',
     description: 'Private dining experience in the comfort of your room',
@@ -119,9 +121,18 @@ const Dining = () => {
                 <span>{restaurant.location}</span>
               </div>
               <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
-              {restaurant.id === '5' && (
-                <Button className="w-full">Get The Menu</Button>
-              )}
+              <div className="flex gap-2">
+                <Button className="flex-1" variant="default">
+                  <Calendar size={16} />
+                  Book a Table
+                </Button>
+                <Link to={`/dining/${restaurant.id}`} className="flex-1">
+                  <Button variant="outline" className="w-full">
+                    <BookText size={16} />
+                    Details
+                  </Button>
+                </Link>
+              </div>
             </div>
           </Card>)}
       </div>

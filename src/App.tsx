@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import RoomDetails from "./pages/rooms/RoomDetails";
 import MyRoom from "./pages/my-room/MyRoom";
 import Dining from "./pages/dining/Dining";
+import RestaurantDetail from "./pages/dining/RestaurantDetail";
 import Spa from "./pages/spa/Spa";
 import Activities from "./pages/activities/Activities";
 import Services from "./pages/services/Services";
@@ -39,6 +40,7 @@ const AnimatedRoutes = () => {
           <Route path="/rooms/:id" element={<RoomDetails />} />
           <Route path="/my-room" element={<MyRoom />} />
           <Route path="/dining" element={<Dining />} />
+          <Route path="/dining/:id" element={<RestaurantDetail />} />
           <Route path="/spa" element={<Spa />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/services" element={<Services />} />
