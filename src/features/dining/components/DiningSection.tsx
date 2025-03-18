@@ -22,7 +22,7 @@ const DiningSection = () => {
           name: 'The Grand Bistro',
           description: 'Experience fine dining with a modern twist',
           cuisine: 'International',
-          images: ['/placeholder.svg'],
+          images: ['https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&auto=format&fit=crop&w=1074&q=80'],
           openHours: '7:00 AM - 11:00 PM',
           location: 'Ground Floor',
           status: 'open' as const
@@ -32,7 +32,7 @@ const DiningSection = () => {
           name: 'Sakura Japanese',
           description: 'Authentic Japanese cuisine and sushi',
           cuisine: 'Japanese',
-          images: ['/placeholder.svg'],
+          images: ['https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
           openHours: '12:00 PM - 10:00 PM',
           location: 'Level 2',
           status: 'open' as const

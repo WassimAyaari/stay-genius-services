@@ -21,7 +21,7 @@ const Dining = () => {
       name: 'In-Room Dining',
       description: 'Private dining experience in the comfort of your room',
       cuisine: 'Room Service',
-      images: ['https://images.unsplash.com/photo-1625584681890-6774cf3c96a0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
+      images: ['https://images.unsplash.com/photo-1635320514247-71bc21ef2c83?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
       openHours: '24 Hours',
       location: 'Available in all rooms',
       status: 'open' as const
@@ -31,7 +31,7 @@ const Dining = () => {
       name: 'Ocean View Restaurant',
       description: 'Enjoy international cuisine with breathtaking ocean views',
       cuisine: 'International',
-      images: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
+      images: ['https://images.unsplash.com/photo-1578474846511-04ba529f0b88?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
       openHours: '7:00 AM - 11:00 PM',
       location: 'Main Building, Ground Floor',
       status: 'open' as const
@@ -41,7 +41,7 @@ const Dining = () => {
       name: 'Sunrise Buffet',
       description: 'Extensive breakfast and dinner buffet with global flavors',
       cuisine: 'Buffet',
-      images: ['https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80'],
+      images: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1174&q=80'],
       openHours: '6:30 AM - 10:30 AM, 6:00 PM - 10:30 PM',
       location: 'Main Building, First Floor',
       status: 'open' as const
@@ -51,7 +51,7 @@ const Dining = () => {
       name: 'Seaside Grill',
       description: 'Fresh seafood and premium steaks by the beach',
       cuisine: 'Steakhouse & Seafood',
-      images: ['https://images.unsplash.com/photo-1501188628168-1bf756efe9a8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
+      images: ['https://images.unsplash.com/photo-1560611588-163f49a6c9fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
       openHours: '12:00 PM - 3:00 PM, 6:00 PM - 10:00 PM',
       location: 'Beach Area',
       status: 'open' as const
@@ -61,7 +61,7 @@ const Dining = () => {
       name: 'Poolside Bar & Bistro',
       description: 'Light meals and refreshing drinks by the pool',
       cuisine: 'Snacks & Beverages',
-      images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1168&q=80'],
+      images: ['https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
       openHours: '10:00 AM - 8:00 PM',
       location: 'Pool Area',
       status: 'open' as const
