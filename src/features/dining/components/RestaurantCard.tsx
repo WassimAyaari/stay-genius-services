@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, MapPin, UtensilsCrossed, Calendar, BookText } from 'lucide-react';
 import { Restaurant } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -12,6 +12,8 @@ interface RestaurantCardProps {
 }
 
 const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
+  const navigate = useNavigate();
+  
   return (
     <Card className="w-full snap-center animate-fade-in">
       <div className="aspect-video relative overflow-hidden rounded-t-lg">
@@ -46,20 +48,22 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
           </div>
         </div>
         <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <Button 
             onClick={() => onBookTable(restaurant.id)}
-            className="flex-1"
+            className="w-full flex items-center justify-center gap-1"
           >
-            <Calendar size={16} className="mr-1" />
+            <Calendar size={16} />
             Book a Table
           </Button>
-          <Link to={`/dining/${restaurant.id}`} className="flex-1">
-            <Button variant="outline" className="w-full">
-              <BookText size={16} className="mr-1" />
-              Details
-            </Button>
-          </Link>
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-1"
+            onClick={() => navigate(`/dining/${restaurant.id}`)}
+          >
+            <BookText size={16} />
+            View Details
+          </Button>
         </div>
       </div>
     </Card>
