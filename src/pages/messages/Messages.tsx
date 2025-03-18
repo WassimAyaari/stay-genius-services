@@ -209,7 +209,7 @@ const Messages = () => {
   }
   return <Layout>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 min-h-[calc(100vh-16rem)]">
-        <div className="space-y-4 my-6">
+        <div className="space-y-4 mx-[11px] my-0">
           <div className="flex items-center justify-between mb-6">
             
           </div>
