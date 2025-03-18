@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ const Dining = () => {
     images: [
       'https://images.unsplash.com/photo-1635320514247-71bc21ef2c83?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
       'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1721322800607-8c38375eef04?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
+      'https://images.unsplash.com/photo-1513639776629-7b40d632a6a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
     ],
     openHours: '24 Hours',
     location: 'Available in all rooms',
@@ -24,7 +25,7 @@ const Dining = () => {
     name: 'Ocean View Restaurant',
     description: 'Enjoy international cuisine with breathtaking ocean views',
     cuisine: 'International',
-    images: ['https://images.unsplash.com/photo-1578474846511-04ba529f0b88?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
+    images: ['https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
     openHours: '7:00 AM - 11:00 PM',
     location: 'Main Building, Ground Floor',
     status: 'open' as const
@@ -33,7 +34,7 @@ const Dining = () => {
     name: 'Sunrise Buffet',
     description: 'Extensive breakfast and dinner buffet with global flavors',
     cuisine: 'Buffet',
-    images: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1174&q=80'],
+    images: ['https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&auto=format&fit=crop&w=1174&q=80'],
     openHours: '6:30 AM - 10:30 AM, 6:00 PM - 10:30 PM',
     location: 'Main Building, First Floor',
     status: 'open' as const
@@ -42,7 +43,11 @@ const Dining = () => {
     name: 'Seaside Grill',
     description: 'Fresh seafood and premium steaks by the beach',
     cuisine: 'Steakhouse & Seafood',
-    images: ['https://images.unsplash.com/photo-1560611588-163f49a6c9fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
+    images: [
+      'https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
+    ],
     openHours: '12:00 PM - 3:00 PM, 6:00 PM - 10:00 PM',
     location: 'Beach Area',
     status: 'open' as const
@@ -51,7 +56,7 @@ const Dining = () => {
     name: 'Poolside Bar & Bistro',
     description: 'Light meals and refreshing drinks by the pool',
     cuisine: 'Snacks & Beverages',
-    images: ['https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
+    images: ['https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
     openHours: '10:00 AM - 8:00 PM',
     location: 'Pool Area',
     status: 'open' as const
@@ -68,7 +73,7 @@ const Dining = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {restaurants.map(restaurant => <Card key={restaurant.id} className="overflow-hidden animate-fade-in">
             <div className="relative">
-              {restaurant.id === '5' ? (
+              {restaurant.images.length > 1 ? (
                 <div className="relative w-full h-48 overflow-hidden">
                   <div className="flex transition-transform duration-300 hover:translate-x-[-33.33%] cursor-pointer h-full">
                     {restaurant.images.map((image, index) => (
@@ -116,7 +121,9 @@ const Dining = () => {
                 <span>{restaurant.location}</span>
               </div>
               <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
-              <Button className="w-full">Get The Menu</Button>
+              {restaurant.id === '5' && (
+                <Button className="w-full">Get The Menu</Button>
+              )}
             </div>
           </Card>)}
       </div>
