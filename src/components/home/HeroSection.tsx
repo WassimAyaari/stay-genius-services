@@ -12,6 +12,12 @@ import {
   CommandItem 
 } from '@/components/ui/command';
 import { toast } from '@/components/ui/use-toast';
+import { 
+  UtensilsCrossed, BedDouble, Heart, Calendar, Phone, 
+  Map, ShoppingBag, Compass, Info, Coffee, Utensils,
+  Bath, Spa, Dumbbell, Pool, Wifi, Bell, Clock, 
+  ShieldCheck, CreditCard, Shirt
+} from 'lucide-react';
 
 const HeroSection = () => {
   const [open, setOpen] = useState(false);
@@ -113,14 +119,6 @@ const HeroSection = () => {
 
 // Search results processor
 function getSearchResults(query: string) {
-  // Import icons directly to avoid React hook rules violation
-  const { 
-    UtensilsCrossed, BedDouble, Heart, Calendar, Phone, 
-    Map, ShoppingBag, Compass, Info, Coffee, Utensils,
-    Bath, Spa, Dumbbell, Pool, Wifi, Bell, Clock, 
-    ShieldCheck, CreditCard, Shirt
-  } = require('lucide-react');
-
   // Base search categories with their items
   const baseCategories = [
     {

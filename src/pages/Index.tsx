@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, ErrorBoundary } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import MainServicesSection from '@/components/home/MainServicesSection';
 import FeaturedExperienceSection from '@/components/home/FeaturedExperienceSection';
@@ -8,10 +8,53 @@ import TodayHighlightsSection from '@/components/home/TodayHighlightsSection';
 import AdditionalServicesSection from '@/components/home/AdditionalServicesSection';
 import AssistanceSection from '@/components/home/AssistanceSection';
 
+// Custom error boundary fallback component
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
+  <div className="p-6 border-2 border-red-300 rounded-md bg-red-50 m-4">
+    <h2 className="text-xl font-bold text-red-800 mb-2">Something went wrong:</h2>
+    <p className="text-red-600 mb-4">{error.message}</p>
+    <button 
+      onClick={resetErrorBoundary}
+      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+    >
+      Try again
+    </button>
+  </div>
+);
+
+// Error boundary component
+class SectionErrorBoundary extends React.Component<
+  { children: React.ReactNode; id: string },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode; id: string }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error(`Error in section ${this.props.id}:`, error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error!} resetErrorBoundary={() => this.setState({ hasError: false })} />;
+    }
+
+    return this.props.children;
+  }
+}
+
 const SectionWrapper = ({ children, id }: { children: React.ReactNode; id: string }) => {
   return (
     <div id={id} className="section-container">
-      {children}
+      <SectionErrorBoundary id={id}>
+        {children}
+      </SectionErrorBoundary>
     </div>
   );
 };
