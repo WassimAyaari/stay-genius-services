@@ -16,7 +16,7 @@ const experiences = [
     title: 'Wine Tasting',
     description: 'Learn about local wines with our sommelier',
     imageSrc: '/lovable-uploads/044dc763-e0b0-462e-8c6e-788f35efcd0c.png',
-    price: '75',
+    price: 75, // Changed from string to number
     time: '5:00 PM',
     rating: 4.9
   },
@@ -25,7 +25,7 @@ const experiences = [
     title: 'Cooking Class',
     description: 'Learn to cook authentic local cuisine',
     imageSrc: '/lovable-uploads/3cbdcf79-9da5-48bd-90f2-2c1737b76741.png',
-    price: '95',
+    price: 95, // Changed from string to number
     time: '2:00 PM',
     rating: 4.8
   },
@@ -34,7 +34,7 @@ const experiences = [
     title: 'Sunset Sailing',
     description: 'Enjoy the beautiful sunset on a sailboat',
     imageSrc: '/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png',
-    price: '120',
+    price: 120, // Changed from string to number
     time: '6:30 PM',
     rating: 4.9
   }
@@ -75,12 +75,13 @@ const FeaturedExperienceSection = () => {
           {experiences.map((experience) => (
             <CarouselItem key={experience.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
               <ExperienceCard
-                title={experience.title}
+                id={String(experience.id)}
+                name={experience.title}
                 description={experience.description}
-                imageUrl={experience.imageSrc}
+                image={experience.imageSrc}
                 price={experience.price}
-                time={experience.time}
-                rating={experience.rating}
+                capacity={2} // Added default capacity since RoomCard expects it
+                size="Standard" // Added default size since RoomCard expects it
               />
             </CarouselItem>
           ))}
@@ -88,7 +89,10 @@ const FeaturedExperienceSection = () => {
       </Carousel>
       
       <div className="flex justify-center mt-4">
-        <SwipeIndicator count={experiences.length} activeIndex={currentIndex} />
+        <SwipeIndicator 
+          selectedIndex={currentIndex} 
+          totalSlides={experiences.length} 
+        />
       </div>
     </section>
   );
