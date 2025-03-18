@@ -13,9 +13,7 @@ const Dining = () => {
     description: 'Private dining experience in the comfort of your room',
     cuisine: 'Room Service',
     images: [
-      'https://images.unsplash.com/photo-1635320514247-71bc21ef2c83?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1513639776629-7b40d632a6a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
+      'https://images.unsplash.com/photo-1635320514247-71bc21ef2c83?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
     ],
     openHours: '24 Hours',
     location: 'Available in all rooms',
