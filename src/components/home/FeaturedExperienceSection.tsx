@@ -5,9 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import SwipeIndicator from '@/components/ui/swipe-indicator';
 import { motion } from 'framer-motion';
+import useEmblaCarousel from 'embla-carousel-react';
 
 const FeaturedExperienceSection = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  
+  React.useEffect(() => {
+    if (!emblaApi) return;
+    
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
+    
+    emblaApi.on('select', onSelect);
+    
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
   
   const featuredExperiences = [
     {
@@ -31,16 +47,8 @@ const FeaturedExperienceSection = () => {
   return (
     <section className="px-6 mb-10">
       <h2 className="text-2xl font-bold text-secondary mb-4">Featured Experience</h2>
-      <Carousel
-        opts={{ loop: true }}
-        className="w-full"
-        onSelect={(api) => {
-          if (api) {
-            setSelectedIndex(api.selectedScrollSnap());
-          }
-        }}
-      >
-        <CarouselContent>
+      <Carousel className="w-full">
+        <CarouselContent ref={emblaRef}>
           {featuredExperiences.map((experience, index) => (
             <CarouselItem key={experience.id}>
               <motion.div
