@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef, useNavigate, useLocation } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Bell, Briefcase, ArrowLeft, Send, Paperclip, Smile, Mic } from 'lucide-react';
 import Layout from '@/components/Layout';
