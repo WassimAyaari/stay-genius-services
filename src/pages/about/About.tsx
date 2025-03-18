@@ -1,21 +1,14 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { History, Building2, Users, Award, ChevronRight, Phone, Map, Book, Info } from 'lucide-react';
-
 const About = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="relative mb-8 rounded-3xl overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-            alt="Hotel Facade" 
-            className="w-full h-64 object-cover"
-          />
+          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Hotel Facade" className="w-full h-64 object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
           <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
             <h1 className="text-3xl font-bold mb-2">About Hotel Genius</h1>
@@ -174,25 +167,10 @@ const About = () => {
 
         {/* Learn More Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Discover More</h2>
-          <div className="space-y-3">
-            <Button variant="outline" className="w-full justify-between p-4 text-left">
-              <span>About Our Services</span>
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-            <Button variant="outline" className="w-full justify-between p-4 text-left">
-              <span>Sustainability Initiatives</span>
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-            <Button variant="outline" className="w-full justify-between p-4 text-left">
-              <span>Careers at Hotel Genius</span>
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
+          
+          
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default About;
