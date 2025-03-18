@@ -39,16 +39,16 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className={cn("relative", buttonClassName)}
+          className={cn("relative p-2.5 rounded-full", buttonClassName)}
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5 text-secondary" />
           <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-full sm:max-w-full">
         <div className="flex flex-col h-full">
           <SheetHeader className="p-6 bg-gradient-to-br from-primary-light to-white">
-            <SheetTitle className="text-2xl">Menu</SheetTitle>
+            <SheetTitle className="text-2xl text-secondary">Menu</SheetTitle>
           </SheetHeader>
           <ScrollArea className="flex-1 h-[calc(100vh-80px)]">
             <div className="grid gap-2 p-4">
@@ -59,8 +59,8 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
                   className="w-full justify-start gap-3 p-4 rounded-xl hover:bg-primary/10 transition-colors"
                   onClick={() => navigate(item.path)}
                 >
-                  {item.icon}
-                  <span className="font-medium">{item.label}</span>
+                  <span className="text-secondary">{item.icon}</span>
+                  <span className="font-medium text-secondary">{item.label}</span>
                 </Button>
               ))}
             </div>
