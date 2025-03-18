@@ -1,11 +1,13 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import { supabase } from '@/integrations/supabase/client';
 import ActivityCard from './ActivityCard';
 import { Activity } from '../types';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const ActivitiesSection = () => {
   const { toast } = useToast();
@@ -74,33 +76,44 @@ const ActivitiesSection = () => {
   };
 
   return (
-    <Carousel
-      opts={{
-        align: "start",
-        loop: true,
-      }}
-      className="w-full"
-    >
-      <div className="relative w-full">
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/50 animate-pulse hidden md:block">
-          <ChevronRight className="w-6 h-6" />
-        </div>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-secondary">Activities</h2>
+        <Link to="/activities">
+          <Button variant="ghost" className="text-primary flex items-center gap-1">
+            View All <ChevronRight className="w-4 h-4" />
+          </Button>
+        </Link>
       </div>
-      <CarouselContent className="-ml-4">
-        {activities.map((activity) => (
-          <CarouselItem key={activity.id} className="md:basis-2/5 lg:basis-[30%] pl-4">
-            <div className="px-2">
-              <ActivityCard
-                activity={activity}
-                onBook={handleBookActivity}
-              />
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious className="hidden sm:flex" />
-      <CarouselNext className="hidden sm:flex" />
-    </Carousel>
+      
+      <Carousel
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <div className="relative w-full">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/50 animate-pulse hidden md:block">
+            <ChevronRight className="w-6 h-6" />
+          </div>
+        </div>
+        <CarouselContent className="-ml-4">
+          {activities.map((activity) => (
+            <CarouselItem key={activity.id} className="md:basis-2/5 lg:basis-[30%] pl-4">
+              <div className="px-2">
+                <ActivityCard
+                  activity={activity}
+                  onBook={handleBookActivity}
+                />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="hidden sm:flex" />
+        <CarouselNext className="hidden sm:flex" />
+      </Carousel>
+    </div>
   );
 };
 

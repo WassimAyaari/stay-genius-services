@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Users } from 'lucide-react';
+import { Clock, MapPin, Users, Calendar } from 'lucide-react';
 import { Activity } from '../types';
 
 interface ActivityCardProps {
@@ -19,16 +19,16 @@ const ActivityCard = ({ activity, onBook }: ActivityCardProps) => {
   };
 
   return (
-    <Card className="w-full snap-center animate-fade-in">
+    <Card className="w-full overflow-hidden h-full transition-all hover:shadow-md animate-fade-in">
       <div className="aspect-video relative overflow-hidden rounded-t-lg">
         <img 
           src={activity.image} 
           alt={activity.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform hover:scale-105"
         />
         <div className="absolute top-2 right-2">
-          <span className={`px-2 py-1 rounded-full text-xs ${statusColors[activity.status]}`}>
-            {activity.status}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[activity.status]}`}>
+            {activity.status === 'upcoming' ? 'Available' : activity.status}
           </span>
         </div>
       </div>
@@ -39,8 +39,12 @@ const ActivityCard = ({ activity, onBook }: ActivityCardProps) => {
         </div>
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Calendar className="w-4 h-4" />
+            {activity.date}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
             <Clock className="w-4 h-4" />
-            {activity.time} - {activity.duration}
+            {activity.time} ({activity.duration})
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <MapPin className="w-4 h-4" />
@@ -54,7 +58,7 @@ const ActivityCard = ({ activity, onBook }: ActivityCardProps) => {
         <p className="text-sm text-gray-600 mb-4">{activity.description}</p>
         <Button 
           onClick={() => onBook(activity.id)}
-          className="w-full bg-primary hover:bg-primary-dark"
+          className="w-full bg-primary hover:bg-primary/90 transition-colors"
           disabled={activity.status === 'full' || activity.status === 'cancelled'}
         >
           Book Activity
