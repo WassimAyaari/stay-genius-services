@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,11 @@ const Dining = () => {
     name: 'Seaside Grill',
     description: 'Fresh seafood and premium steaks by the beach',
     cuisine: 'Steakhouse & Seafood',
-    images: ['https://images.unsplash.com/photo-1560611588-163f49a6c9fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
+    images: [
+      'https://images.unsplash.com/photo-1560611588-163f49a6c9fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1534604973900-c43ab4fdeca8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
+    ],
     openHours: '12:00 PM - 3:00 PM, 6:00 PM - 10:00 PM',
     location: 'Beach Area',
     status: 'open' as const
@@ -68,7 +73,7 @@ const Dining = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {restaurants.map(restaurant => <Card key={restaurant.id} className="overflow-hidden animate-fade-in">
             <div className="relative">
-              {restaurant.id === '5' ? (
+              {(restaurant.id === '5' || restaurant.id === '3') && restaurant.images.length > 1 ? (
                 <div className="relative w-full h-48 overflow-hidden">
                   <div className="flex transition-transform duration-300 hover:translate-x-[-33.33%] cursor-pointer h-full">
                     {restaurant.images.map((image, index) => (
@@ -116,7 +121,9 @@ const Dining = () => {
                 <span>{restaurant.location}</span>
               </div>
               <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
-              <Button className="w-full">Get The Menu</Button>
+              {restaurant.id === '5' && (
+                <Button className="w-full">Get The Menu</Button>
+              )}
             </div>
           </Card>)}
       </div>
