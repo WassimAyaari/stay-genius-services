@@ -4,13 +4,18 @@ import { Button } from '@/components/ui/button';
 import { UtensilsCrossed, Clock, Coffee, Pizza, Wine, ChefHat, MapPin } from 'lucide-react';
 import Layout from '@/components/Layout';
 import DiningSection from '@/features/dining/components/DiningSection';
+
 const Dining = () => {
   const restaurants = [{
     id: '5',
     name: 'In-Room Dining',
     description: 'Private dining experience in the comfort of your room',
     cuisine: 'Room Service',
-    images: ['https://images.unsplash.com/photo-1635320514247-71bc21ef2c83?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'],
+    images: [
+      'https://images.unsplash.com/photo-1635320514247-71bc21ef2c83?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1721322800607-8c38375eef04?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80'
+    ],
     openHours: '24 Hours',
     location: 'Available in all rooms',
     status: 'open' as const
@@ -51,6 +56,7 @@ const Dining = () => {
     location: 'Pool Area',
     status: 'open' as const
   }];
+
   return <Layout>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Dining Experiences</h1>
@@ -62,7 +68,30 @@ const Dining = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {restaurants.map(restaurant => <Card key={restaurant.id} className="overflow-hidden animate-fade-in">
             <div className="relative">
-              <img src={restaurant.images[0]} alt={restaurant.name} className="w-full h-48 object-cover" />
+              {restaurant.id === '5' ? (
+                <div className="relative w-full h-48 overflow-hidden">
+                  <div className="flex transition-transform duration-300 hover:translate-x-[-33.33%] cursor-pointer h-full">
+                    {restaurant.images.map((image, index) => (
+                      <img 
+                        key={index} 
+                        src={image} 
+                        alt={`${restaurant.name} - image ${index + 1}`} 
+                        className="w-full h-48 object-cover flex-shrink-0"
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                    {restaurant.images.map((_, index) => (
+                      <span 
+                        key={index} 
+                        className="h-1.5 w-1.5 rounded-full bg-white opacity-60"
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <img src={restaurant.images[0]} alt={restaurant.name} className="w-full h-48 object-cover" />
+              )}
               <div className="absolute top-2 right-2">
                 <span className={`
                   px-2 py-1 rounded-full text-xs font-medium
@@ -98,4 +127,5 @@ const Dining = () => {
       </div>
     </Layout>;
 };
+
 export default Dining;
