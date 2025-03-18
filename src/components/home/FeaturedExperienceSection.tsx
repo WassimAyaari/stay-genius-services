@@ -36,8 +36,7 @@ const FeaturedExperienceSection = () => {
         className="w-full"
         onSelect={(api) => {
           if (api) {
-            const currentIndex = api.selectedScrollSnap();
-            setSelectedIndex(currentIndex);
+            setSelectedIndex(api.selectedScrollSnap());
           }
         }}
       >
