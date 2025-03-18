@@ -35,8 +35,10 @@ const FeaturedExperienceSection = () => {
         opts={{ loop: true }}
         className="w-full"
         onSelect={(api) => {
-          const currentIndex = api?.selectedScrollSnap() || 0;
-          setSelectedIndex(currentIndex);
+          if (api) {
+            const currentIndex = api.selectedScrollSnap();
+            setSelectedIndex(currentIndex);
+          }
         }}
       >
         <CarouselContent>
