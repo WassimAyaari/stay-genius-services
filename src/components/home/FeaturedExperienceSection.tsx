@@ -77,11 +77,10 @@ const FeaturedExperienceSection = () => {
               <ExperienceCard
                 id={String(experience.id)}
                 name={experience.title}
-                description={experience.description}
                 image={experience.imageSrc}
                 price={experience.price}
-                capacity={2} // Added default capacity since RoomCard expects it
-                size="Standard" // Added default size since RoomCard expects it
+                capacity={2}
+                size="Standard"
               />
             </CarouselItem>
           ))}
