@@ -4,7 +4,7 @@ import { UtensilsCrossed, Heart, Info, Phone } from 'lucide-react';
 import ServiceCard from './ServiceCard';
 import { supabase } from '@/integrations/supabase/client';
 
-// Type pour les données de About Us
+// Types for the data
 interface HotelAbout {
   id: string;
   hotel_id: string;
@@ -16,7 +16,7 @@ interface HotelAbout {
   status: string;
 }
 
-// Types pour les services
+// Types for services
 interface HotelService {
   id: string;
   hotel_id: string;
@@ -30,7 +30,7 @@ interface HotelService {
   display_order: number;
 }
 
-// Fonction utilitaire pour obtenir l'icône Lucide correspondante
+// Function to get the corresponding Lucide icon
 const getIconComponent = (iconName: string) => {
   switch (iconName) {
     case 'Info':
@@ -47,57 +47,57 @@ const getIconComponent = (iconName: string) => {
 };
 
 const MainServicesSection = () => {
-  // État pour stocker les données
+  // State to store data
   const [aboutUs, setAboutUs] = useState<HotelAbout | null>(null);
   const [services, setServices] = useState<HotelService[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Fonction pour charger les données
+  // Function to load data
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Pour l'instant, on utilise un hôtel fixe (pour test)
-        // Dans une implémentation complète, cet ID serait déterminé
-        // en fonction de l'utilisateur connecté ou d'un paramètre d'URL
-        const hotelId = '00000000-0000-0000-0000-000000000000'; // À remplacer par un ID réel lors du test
+        // For now, we use a fixed hotel (for testing)
+        // In a complete implementation, this ID would be determined
+        // based on the logged-in user or a URL parameter
+        const hotelId = '00000000-0000-0000-0000-000000000000'; // To be replaced with a real ID during testing
         
-        // Récupérer les données About Us
-        const { data: aboutData, error: aboutError } = await supabase
-          .from('hotel_about')
-          .select('*')
-          .eq('hotel_id', hotelId)
-          .single();
-          
-        if (aboutError) {
-          console.error('Erreur lors de la récupération des données About Us:', aboutError);
-          // Si aucune donnée n'existe encore, on continue sans erreur
-          if (aboutError.code !== 'PGRST116') {
-            setError(aboutError.message);
+        // Try to get About Us data
+        const aboutResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/hotel_about?hotel_id=eq.${hotelId}&select=*`, {
+          headers: {
+            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${supabase.supabaseKey}`
           }
+        });
+        
+        if (!aboutResponse.ok) {
+          console.error('Error fetching About Us data:', aboutResponse.statusText);
         } else {
-          setAboutUs(aboutData);
+          const aboutData = await aboutResponse.json();
+          if (aboutData && aboutData.length > 0) {
+            setAboutUs(aboutData[0]);
+          }
         }
         
-        // Récupérer les services principaux
-        const { data: servicesData, error: servicesError } = await supabase
-          .from('hotel_services')
-          .select('*')
-          .eq('hotel_id', hotelId)
-          .eq('type', 'main')
-          .order('display_order', { ascending: true });
-          
-        if (servicesError) {
-          console.error('Erreur lors de la récupération des services:', servicesError);
-          setError(servicesError.message);
+        // Try to get main services
+        const servicesResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/hotel_services?hotel_id=eq.${hotelId}&type=eq.main&select=*&order=display_order.asc`, {
+          headers: {
+            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          }
+        });
+        
+        if (!servicesResponse.ok) {
+          console.error('Error fetching services:', servicesResponse.statusText);
         } else {
+          const servicesData = await servicesResponse.json();
           setServices(servicesData || []);
         }
       } catch (err) {
-        console.error('Erreur inattendue:', err);
-        setError('Une erreur est survenue lors du chargement des données');
+        console.error('Unexpected error:', err);
+        setError('An error occurred while loading data');
       } finally {
         setLoading(false);
       }
@@ -106,7 +106,7 @@ const MainServicesSection = () => {
     fetchData();
   }, []);
   
-  // Afficher un loader pendant le chargement
+  // Display a loader during loading
   if (loading) {
     return (
       <section className="px-6 mb-10">
@@ -120,13 +120,13 @@ const MainServicesSection = () => {
     );
   }
   
-  // Afficher un message d'erreur si nécessaire
+  // Display an error message if necessary
   if (error) {
-    console.log("Erreur lors du chargement des données:", error);
+    console.log("Error loading data:", error);
   }
   
-  // Si nous n'avons pas encore de données dans la base, utiliser des valeurs par défaut
-  // C'est utile pour le développement et pour éviter les erreurs lors du premier déploiement
+  // If we don't have data in the database yet, use default values
+  // This is useful for development and to avoid errors during first deployment
   const defaultServices = [
     {
       icon: 'Info',
@@ -162,7 +162,7 @@ const MainServicesSection = () => {
     }
   ];
   
-  // Combiner les données de la base avec les valeurs par défaut si nécessaire
+  // Combine database data with default values if necessary
   const servicesWithDefaults = services.length > 0 
     ? services 
     : defaultServices.map((service, index) => ({
@@ -178,13 +178,13 @@ const MainServicesSection = () => {
         display_order: index
       }));
       
-  // Ajouter About Us au début si disponible
+  // Add About Us at the beginning if available
   if (aboutUs) {
-    // Vérifier si about us existe déjà dans les services
+    // Check if about us already exists in the services
     const aboutExists = servicesWithDefaults.some(s => s.title === aboutUs.title);
     
     if (!aboutExists) {
-      // Remplacer le premier service (qui serait généralement About Us) par les données de la base
+      // Replace the first service (which would typically be About Us) with data from the database
       servicesWithDefaults[0] = {
         id: aboutUs.id,
         hotel_id: aboutUs.hotel_id,
