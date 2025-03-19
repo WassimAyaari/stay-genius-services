@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Edit, Building, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Edit, Building, ArrowLeft, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +52,6 @@ const HotelManagement = () => {
     }
   });
   
-  // Fetch hotels from Supabase
   useEffect(() => {
     const fetchHotels = async () => {
       setLoading(true);
@@ -79,7 +77,6 @@ const HotelManagement = () => {
     fetchHotels();
   }, []);
   
-  // Add a new hotel
   const onSubmit = async (data: HotelFormData) => {
     setLoading(true);
     try {
@@ -112,7 +109,6 @@ const HotelManagement = () => {
     }
   };
   
-  // Delete a hotel
   const deleteHotel = async (id: string) => {
     setLoading(true);
     try {
@@ -136,9 +132,12 @@ const HotelManagement = () => {
     }
   };
   
-  // Navigate to edit page
   const editHotel = (id: string) => {
     navigate(`/admin/hotels/${id}/edit`);
+  };
+  
+  const configureHotelInterface = (id: string) => {
+    navigate(`/admin/hotels/${id}/interface`);
   };
   
   return (
@@ -270,13 +269,31 @@ const HotelManagement = () => {
                 {hotel.contact_phone && <p className="text-sm">Tél: {hotel.contact_phone}</p>}
               </CardContent>
               <CardFooter className="flex justify-end gap-2">
-                <Button size="sm" variant="outline" 
-                  onClick={() => editHotel(hotel.id)}>
-                  <Edit className="w-4 h-4 mr-1" />
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => configureHotelInterface(hotel.id)}
+                  className="gap-1"
+                >
+                  <Palette className="w-4 h-4" />
+                  Interface
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => editHotel(hotel.id)}
+                  className="gap-1"
+                >
+                  <Edit className="w-4 h-4" />
                   Éditer
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => setDeleteDialog({ open: true, hotelId: hotel.id })}>
-                  <Trash2 className="w-4 h-4 mr-1" />
+                <Button 
+                  size="sm" 
+                  variant="destructive" 
+                  onClick={() => setDeleteDialog({ open: true, hotelId: hotel.id })}
+                  className="gap-1"
+                >
+                  <Trash2 className="w-4 h-4" />
                   Supprimer
                 </Button>
               </CardFooter>
