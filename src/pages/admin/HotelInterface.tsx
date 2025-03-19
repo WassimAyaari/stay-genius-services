@@ -154,7 +154,6 @@ const HotelInterface = () => {
     }
   };
 
-  // Fonctions de sauvegarde pour chaque type de contenu
   const handleSaveAbout = async (about: HotelAbout) => {
     setLoading(true);
     try {
@@ -548,7 +547,6 @@ const HotelInterface = () => {
     }
   };
 
-  // Fonctions de suppression pour chaque type de contenu
   const handleDeleteAbout = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette section ?')) return;
     
@@ -659,7 +657,6 @@ const HotelInterface = () => {
     }
   };
 
-  // Composants de formulaire pour chaque type de contenu
   const AboutForm = ({ about, onSave, onCancel }: { 
     about: HotelAbout, 
     onSave: (about: HotelAbout) => void, 
@@ -918,4 +915,33 @@ const HotelInterface = () => {
         </div>
         
         <div>
-          <label className="block text-sm font-medium mb-1">Texte placeholder de recherche
+          <label className="block text-sm font-medium mb-1">Texte placeholder de recherche</label>
+          <Input 
+            name="search_placeholder" 
+            value={form.search_placeholder} 
+            onChange={handleChange} 
+            placeholder="Rechercher..." 
+            required 
+          />
+        </div>
+        
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Enregistrement...' : 'Enregistrer'}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  return (
+    <div>
+      {/* Add your component's render logic here */}
+    </div>
+  );
+};
+
+export default HotelInterface;
