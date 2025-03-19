@@ -1,121 +1,108 @@
 
-import React, { Suspense } from 'react';
-import HeroSection from '@/components/home/HeroSection';
-import MainServicesSection from '@/components/home/MainServicesSection';
-import FeaturedExperienceSection from '@/components/home/FeaturedExperienceSection';
-import EventsStories from '@/components/EventsStories';
+import React from 'react';
+import { motion } from 'framer-motion';
 import TodayHighlightsSection from '@/components/home/TodayHighlightsSection';
-import AdditionalServicesSection from '@/components/home/AdditionalServicesSection';
-import AssistanceSection from '@/components/home/AssistanceSection';
+import FeaturedExperienceSection from '@/components/home/FeaturedExperienceSection';
+import { useActiveHotel } from '@/hooks/useActiveHotel';
+import AboutSection from '@/components/home/AboutSection';
+import HomeServicesSection from '@/components/home/HomeServicesSection';
+import { Skeleton } from '@/components/ui/skeleton';
+import HeroSectionWithProps from '@/components/home/HeroSectionWithProps';
 
-// Custom error boundary fallback component
-const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
-  <div className="p-6 border-2 border-red-300 rounded-md bg-red-50 m-4">
-    <h2 className="text-xl font-bold text-red-800 mb-2">Something went wrong:</h2>
-    <p className="text-red-600 mb-4">{error.message}</p>
-    <button 
-      onClick={resetErrorBoundary}
-      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+const HomePage = () => {
+  const { hotel, aboutSections, services, loading } = useActiveHotel();
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8 py-8">
+        <Skeleton className="h-[400px] w-full" />
+        <div className="container mx-auto">
+          <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
+          <Skeleton className="h-6 w-1/2 mx-auto mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col min-h-screen"
     >
-      Try again
-    </button>
-  </div>
-);
+      <motion.div variants={itemVariants}>
+        <HeroSectionWithProps
+          title={hotel?.name || "Bienvenue à l'hôtel"}
+          subtitle={hotel?.address || "Votre séjour de luxe vous attend"}
+        />
+      </motion.div>
 
-// Error boundary component
-class SectionErrorBoundary extends React.Component<
-  { children: React.ReactNode; id: string },
-  { hasError: boolean; error: Error | null }
-> {
-  constructor(props: { children: React.ReactNode; id: string }) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+      <motion.div variants={itemVariants}>
+        <TodayHighlightsSection />
+      </motion.div>
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
+      {aboutSections.length > 0 && (
+        <motion.div variants={itemVariants}>
+          <AboutSection sections={aboutSections} />
+        </motion.div>
+      )}
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error(`Error in section ${this.props.id}:`, error, errorInfo);
-  }
+      {services.length > 0 && (
+        <>
+          <motion.div variants={itemVariants}>
+            <HomeServicesSection 
+              services={services} 
+              type="main" 
+              title="Nos Services" 
+              description="Découvrez nos services exclusifs pour rendre votre séjour inoubliable" 
+            />
+          </motion.div>
 
-  render() {
-    if (this.state.hasError) {
-      return <ErrorFallback error={this.state.error!} resetErrorBoundary={() => this.setState({ hasError: false })} />;
-    }
+          <motion.div variants={itemVariants}>
+            <HomeServicesSection 
+              services={services} 
+              type="additional" 
+              title="Services Additionnels" 
+              description="Des options supplémentaires pour personnaliser votre expérience" 
+              className="bg-gray-50" 
+            />
+          </motion.div>
+        </>
+      )}
 
-    return this.props.children;
-  }
-}
-
-const SectionWrapper = ({ children, id }: { children: React.ReactNode; id: string }) => {
-  return (
-    <div id={id} className="section-container">
-      <SectionErrorBoundary id={id}>
-        {children}
-      </SectionErrorBoundary>
-    </div>
+      <motion.div variants={itemVariants}>
+        <FeaturedExperienceSection />
+      </motion.div>
+    </motion.div>
   );
 };
 
-const Index = () => {
-  console.log("Index page rendering started");
-  
-  return (
-    <div className="pb-20">
-      {/* Hero Section */}
-      <SectionWrapper id="hero-section">
-        <Suspense fallback={<div className="p-6 text-center">Loading hero section...</div>}>
-          <HeroSection />
-        </Suspense>
-      </SectionWrapper>
-
-      {/* Main Services Section */}
-      <SectionWrapper id="main-services">
-        <Suspense fallback={<div className="p-6 text-center">Loading services...</div>}>
-          <MainServicesSection />
-        </Suspense>
-      </SectionWrapper>
-
-      {/* Featured Experience */}
-      <SectionWrapper id="featured-experience">
-        <Suspense fallback={<div className="p-6 text-center">Loading experiences...</div>}>
-          <FeaturedExperienceSection />
-        </Suspense>
-      </SectionWrapper>
-
-      {/* Instagram-style Stories Section */}
-      <SectionWrapper id="events-stories">
-        <Suspense fallback={<div className="p-6 text-center">Loading events...</div>}>
-          <section className="px-6 mb-10">
-            <EventsStories />
-          </section>
-        </Suspense>
-      </SectionWrapper>
-
-      {/* Today's Highlights Section */}
-      <SectionWrapper id="highlights">
-        <Suspense fallback={<div className="p-6 text-center">Loading highlights...</div>}>
-          <TodayHighlightsSection />
-        </Suspense>
-      </SectionWrapper>
-
-      {/* Additional Services */}
-      <SectionWrapper id="additional-services">
-        <Suspense fallback={<div className="p-6 text-center">Loading services...</div>}>
-          <AdditionalServicesSection />
-        </Suspense>
-      </SectionWrapper>
-
-      {/* Need Assistance */}
-      <SectionWrapper id="assistance">
-        <Suspense fallback={<div className="p-6 text-center">Loading assistance section...</div>}>
-          <AssistanceSection />
-        </Suspense>
-      </SectionWrapper>
-    </div>
-  );
-};
-
-export default Index;
+export default HomePage;
