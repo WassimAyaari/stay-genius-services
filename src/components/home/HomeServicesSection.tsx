@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import ServiceCard from '@/components/home/ServiceCard';
 import { 
   Coffee, Utensils, Wifi, MapPin, Leaf, 
-  HeartPulse, BedDouble, Dumbbell, ParkingSquare
+  HeartPulse, BedDouble, Dumbbell, ParkingSquare,
+  Info, UtensilsCrossed, Phone, Heart
 } from 'lucide-react';
 
 // Map of icon names to Lucide React components
@@ -20,6 +21,10 @@ const iconComponents: Record<string, React.ReactNode> = {
   bed: <BedDouble className="h-6 w-6 text-primary" />,
   gym: <Dumbbell className="h-6 w-6 text-primary" />,
   parking: <ParkingSquare className="h-6 w-6 text-primary" />,
+  Info: <Info className="h-6 w-6 text-primary" />,
+  UtensilsCrossed: <UtensilsCrossed className="h-6 w-6 text-primary" />,
+  Phone: <Phone className="h-6 w-6 text-primary" />,
+  Heart: <Heart className="h-6 w-6 text-primary" />,
 };
 
 interface HomeServicesSectionProps {
@@ -45,27 +50,29 @@ const HomeServicesSection: React.FC<HomeServicesSectionProps> = ({
   }
 
   return (
-    <section className={`py-12 ${className}`}>
+    <section className={`py-6 ${className}`}>
       <Container>
-        <div className="text-center mb-12">
+        <div className="mb-6">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-3xl font-bold mb-4"
+            className="text-2xl font-bold text-secondary mb-2"
           >
             {title}
           </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-muted-foreground max-w-2xl mx-auto"
-          >
-            {description}
-          </motion.p>
+          {description && (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-muted-foreground"
+            >
+              {description}
+            </motion.p>
+          )}
         </div>
 
         <motion.div 
@@ -73,7 +80,7 @@ const HomeServicesSection: React.FC<HomeServicesSectionProps> = ({
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
         >
           {filteredServices.map((service, index) => (
             <motion.div
