@@ -15,12 +15,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from "@/integrations/supabase/client";
 import { 
   HotelAbout, HotelService, HotelHero, HotelExperience, 
-  HotelEvent, HotelStory, HotelAssistance, Hotel,
+  HotelEvent, HotelStory, HotelAssistance, Hotel as HotelType,
   defaultHotelHero, defaultHotelExperience, defaultHotelEvent,
   defaultHotelStory, defaultHotelAssistance  
 } from '@/lib/types';
 
-interface Hotel {
+interface HotelData {
   id: string;
   name: string;
 }
