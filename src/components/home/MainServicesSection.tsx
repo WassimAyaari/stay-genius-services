@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { UtensilsCrossed, Heart, Info, Phone } from 'lucide-react';
 import ServiceCard from './ServiceCard';
-import { supabase } from '@/integrations/supabase/client';
 
 // Types for the data
 interface HotelAbout {
@@ -55,51 +54,16 @@ const MainServicesSection = () => {
   
   // Function to load data
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // For now, we use a fixed hotel (for testing)
-        // In a complete implementation, this ID would be determined
-        // based on the logged-in user or a URL parameter
-        const hotelId = '00000000-0000-0000-0000-000000000000'; // To be replaced with a real ID during testing
-        
-        // Instead of using fetch API directly, we'll use the Supabase client properly
-        // Try to get About Us data
-        const { data: aboutData, error: aboutError } = await supabase
-          .from('hotel_about')
-          .select('*')
-          .eq('hotel_id', hotelId)
-          .limit(1);
-        
-        if (aboutError) {
-          console.error('Error fetching About Us data:', aboutError);
-        } else if (aboutData && aboutData.length > 0) {
-          setAboutUs(aboutData[0] as HotelAbout);
-        }
-        
-        // Try to get main services
-        const { data: servicesData, error: servicesError } = await supabase
-          .from('hotel_services')
-          .select('*')
-          .eq('hotel_id', hotelId)
-          .eq('type', 'main')
-          .order('display_order', { ascending: true });
-        
-        if (servicesError) {
-          console.error('Error fetching services:', servicesError);
-        } else {
-          setServices(servicesData as HotelService[] || []);
-        }
-      } catch (err) {
-        console.error('Unexpected error:', err);
-        setError('An error occurred while loading data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
+    // Simulate loading
+    setTimeout(() => {
+      setLoading(false);
+      
+      // Since we don't have the hotel_about and hotel_services tables in the database,
+      // we'll use the default data directly without trying to query Supabase
+      
+      // If needed, we could use other existing tables in the future
+      // For now, we'll just use the default data
+    }, 1000);
   }, []);
   
   // Display a loader during loading
@@ -121,8 +85,7 @@ const MainServicesSection = () => {
     console.log("Error loading data:", error);
   }
   
-  // If we don't have data in the database yet, use default values
-  // This is useful for development and to avoid errors during first deployment
+  // Default values for development and to avoid errors
   const defaultServices = [
     {
       icon: 'Info',
@@ -158,21 +121,19 @@ const MainServicesSection = () => {
     }
   ];
   
-  // Combine database data with default values if necessary
-  const servicesWithDefaults = services.length > 0 
-    ? services 
-    : defaultServices.map((service, index) => ({
-        id: `default-${index}`,
-        hotel_id: '',
-        title: service.title,
-        description: service.description,
-        icon: service.icon,
-        action_text: service.actionText,
-        action_link: service.actionLink,
-        status: service.status,
-        type: 'main',
-        display_order: index
-      }));
+  // Convert default values to our interface type
+  const servicesWithDefaults: HotelService[] = defaultServices.map((service, index) => ({
+    id: `default-${index}`,
+    hotel_id: '00000000-0000-0000-0000-000000000000',
+    title: service.title,
+    description: service.description,
+    icon: service.icon,
+    action_text: service.actionText,
+    action_link: service.actionLink,
+    status: service.status,
+    type: 'main',
+    display_order: index
+  }));
       
   // Add About Us at the beginning if available
   if (aboutUs) {
