@@ -64,36 +64,32 @@ const MainServicesSection = () => {
         // based on the logged-in user or a URL parameter
         const hotelId = '00000000-0000-0000-0000-000000000000'; // To be replaced with a real ID during testing
         
+        // Instead of using fetch API directly, we'll use the Supabase client properly
         // Try to get About Us data
-        const aboutResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/hotel_about?hotel_id=eq.${hotelId}&select=*`, {
-          headers: {
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`
-          }
-        });
+        const { data: aboutData, error: aboutError } = await supabase
+          .from('hotel_about')
+          .select('*')
+          .eq('hotel_id', hotelId)
+          .limit(1);
         
-        if (!aboutResponse.ok) {
-          console.error('Error fetching About Us data:', aboutResponse.statusText);
-        } else {
-          const aboutData = await aboutResponse.json();
-          if (aboutData && aboutData.length > 0) {
-            setAboutUs(aboutData[0]);
-          }
+        if (aboutError) {
+          console.error('Error fetching About Us data:', aboutError);
+        } else if (aboutData && aboutData.length > 0) {
+          setAboutUs(aboutData[0] as HotelAbout);
         }
         
         // Try to get main services
-        const servicesResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/hotel_services?hotel_id=eq.${hotelId}&type=eq.main&select=*&order=display_order.asc`, {
-          headers: {
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`
-          }
-        });
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('hotel_services')
+          .select('*')
+          .eq('hotel_id', hotelId)
+          .eq('type', 'main')
+          .order('display_order', { ascending: true });
         
-        if (!servicesResponse.ok) {
-          console.error('Error fetching services:', servicesResponse.statusText);
+        if (servicesError) {
+          console.error('Error fetching services:', servicesError);
         } else {
-          const servicesData = await servicesResponse.json();
-          setServices(servicesData || []);
+          setServices(servicesData as HotelService[] || []);
         }
       } catch (err) {
         console.error('Unexpected error:', err);
