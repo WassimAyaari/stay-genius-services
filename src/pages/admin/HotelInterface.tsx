@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Info, Palette, Grid, Layout, Trash2, Edit, Eye, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -518,7 +518,7 @@ const HotelInterface = () => {
             className="gap-2"
           >
             <Eye className="w-4 h-4" />
-            {isPreviewExpanded ? 'Réduire l'aperçu' : 'Agrandir l'aperçu'}
+            {isPreviewExpanded ? "Réduire l'aperçu" : "Agrandir l'aperçu"}
           </Button>
           
           <Button asChild>
