@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import AuthGuard from "@/components/AuthGuard";
 import Layout from './components/Layout';
 import Index from "./pages/Index";
 import RoomDetails from "./pages/rooms/RoomDetails";
@@ -24,9 +25,6 @@ import Shops from './pages/shops/Shops';
 import HotelMap from './pages/map/HotelMap';
 import Feedback from './pages/feedback/Feedback';
 import Events from './pages/events/Events';
-import HotelManagement from './pages/admin/HotelManagement';
-import HotelEdit from './pages/admin/HotelEdit';
-import HotelInterface from './pages/admin/HotelInterface';
 
 const queryClient = new QueryClient();
 
@@ -54,9 +52,6 @@ const AnimatedRoutes = () => {
           <Route path="/map" element={<HotelMap />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/admin/hotels" element={<HotelManagement />} />
-          <Route path="/admin/hotels/:id/edit" element={<HotelEdit />} />
-          <Route path="/admin/hotels/:id/interface" element={<HotelInterface />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
@@ -71,7 +66,9 @@ const App = () => {
         <Toaster />
         <Sonner />
         <Router>
-          <AnimatedRoutes />
+          <AuthGuard>
+            <AnimatedRoutes />
+          </AuthGuard>
         </Router>
       </TooltipProvider>
     </QueryClientProvider>
