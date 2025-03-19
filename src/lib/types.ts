@@ -110,3 +110,74 @@ export interface HotelAssistance {
   background_image: string;
   status: string;
 }
+
+export interface Hotel {
+  id: string;
+  name: string;
+  address: string;
+  logo_url: string | null;
+  contact_email: string;
+  contact_phone: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const defaultHotelHero: HotelHero = {
+  id: '',
+  hotel_id: '',
+  background_image: '/placeholder.svg',
+  title: 'Bienvenue dans notre hôtel',
+  subtitle: 'Découvrez une expérience unique',
+  search_placeholder: 'Rechercher un service...',
+  status: 'active'
+};
+
+export const defaultHotelExperience: HotelExperience = {
+  id: '',
+  hotel_id: '',
+  title: 'Nouvelle expérience',
+  subtitle: 'Découvrez notre nouvelle expérience',
+  description: 'Description de l\'expérience',
+  image: '/placeholder.svg',
+  action_text: 'Explorer',
+  action_link: '#',
+  category: 'général',
+  display_order: 0,
+  status: 'active'
+};
+
+export const defaultHotelEvent: HotelEvent = {
+  id: '',
+  hotel_id: '',
+  title: 'Nouvel événement',
+  description: 'Description de l\'événement',
+  image: '/placeholder.svg',
+  date: new Date().toISOString().split('T')[0],
+  time: '18:00',
+  location: 'Hôtel',
+  action_text: 'Réserver',
+  action_link: '#',
+  display_order: 0,
+  status: 'active'
+};
+
+export const defaultHotelStory: HotelStory = {
+  id: '',
+  hotel_id: '',
+  title: 'Nouvelle story',
+  image: '/placeholder.svg',
+  content: 'Contenu de la story',
+  display_order: 0,
+  status: 'active'
+};
+
+export const defaultHotelAssistance: HotelAssistance = {
+  id: '',
+  hotel_id: '',
+  title: 'Besoin d\'assistance ?',
+  description: 'Notre équipe est disponible 24/7 pour vous aider',
+  action_text: 'Contacter',
+  action_link: '/contact',
+  background_image: '/placeholder.svg',
+  status: 'active'
+};
