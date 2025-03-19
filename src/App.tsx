@@ -25,6 +25,7 @@ import Shops from './pages/shops/Shops';
 import HotelMap from './pages/map/HotelMap';
 import Feedback from './pages/feedback/Feedback';
 import Events from './pages/events/Events';
+import HotelManagement from './pages/admin/HotelManagement';
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const AnimatedRoutes = () => {
           <Route path="/map" element={<HotelMap />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/admin/hotels" element={<HotelManagement />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
