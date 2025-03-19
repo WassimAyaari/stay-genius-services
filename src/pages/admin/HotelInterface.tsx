@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Save, Info, Palette, Grid, Layout, Image, 
   Compass, Star, MessageSquare, Calendar, Film, ShoppingBag, 
-  HeartHandshake, Utensils, PhoneCall, Sparkles, Clock, Map, Plus, Trash2, Edit, Eye
+  HeartHandshake, Utensils, PhoneCall, Sparkles, Clock, Map, Plus, Trash2, Edit, Eye, ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -1377,6 +1377,12 @@ const HotelInterface = () => {
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{hotel?.name || 'Chargement...'}</h1>
+        <Button 
+          variant="external" 
+          onClick={() => window.open(`/hotels/${id}`, '_blank')}
+        >
+          <ExternalLink className="mr-2 h-4 w-4" /> Visualiser le site
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
