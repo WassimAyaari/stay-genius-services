@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -18,51 +17,29 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      
-      navigate('/');
-    } catch (error: any) {
+    // Simulate login without authentication
+    setTimeout(() => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Success",
+        description: "Logged in successfully",
       });
-    } finally {
       setLoading(false);
-    }
+      navigate('/');
+    }, 1000);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      
+    // Simulate signup without authentication
+    setTimeout(() => {
       toast({
         title: "Success",
-        description: "Please check your email to confirm your account.",
+        description: "Account created successfully",
       });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    } finally {
       setLoading(false);
-    }
+    }, 1000);
   };
 
   return (
