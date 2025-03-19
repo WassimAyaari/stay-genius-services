@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -1019,3 +1020,933 @@ const HotelInterface = () => {
               type="number"
               name="display_order" 
               value={form.display_order.toString()}
+              onChange={handleChange} 
+              min={0}
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Texte du bouton</label>
+            <Input 
+              name="action_text" 
+              value={form.action_text} 
+              onChange={handleChange} 
+              placeholder="Explorer" 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Lien du bouton</label>
+            <Input 
+              name="action_link" 
+              value={form.action_link} 
+              onChange={handleChange} 
+              placeholder="/experiences/spa" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Enregistrement...' : 'Enregistrer'}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  const EventForm = ({ event, onSave, onCancel }: { 
+    event: HotelEvent, 
+    onSave: (event: HotelEvent) => void, 
+    onCancel: () => void 
+  }) => {
+    const [form, setForm] = useState<HotelEvent>(event);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      onSave(form);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Titre</label>
+            <Input 
+              name="title" 
+              value={form.title} 
+              onChange={handleChange} 
+              placeholder="Soirée Jazz" 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Image</label>
+            <Input 
+              name="image" 
+              value={form.image} 
+              onChange={handleChange} 
+              placeholder="URL de l'image" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <Textarea 
+            name="description" 
+            value={form.description} 
+            onChange={handleChange} 
+            placeholder="Description de l'événement" 
+            rows={4} 
+            required 
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Date</label>
+            <Input 
+              type="date"
+              name="date" 
+              value={form.date} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Heure</label>
+            <Input 
+              type="time"
+              name="time" 
+              value={form.time} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Lieu</label>
+            <Input 
+              name="location" 
+              value={form.location} 
+              onChange={handleChange} 
+              placeholder="Bar de l'hôtel" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Texte du bouton</label>
+            <Input 
+              name="action_text" 
+              value={form.action_text} 
+              onChange={handleChange} 
+              placeholder="Réserver" 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Lien du bouton</label>
+            <Input 
+              name="action_link" 
+              value={form.action_link} 
+              onChange={handleChange} 
+              placeholder="/events/jazz-night" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Ordre d'affichage</label>
+            <Input 
+              type="number"
+              name="display_order" 
+              value={form.display_order.toString()} 
+              onChange={handleChange} 
+              min={0}
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Enregistrement...' : 'Enregistrer'}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  const StoryForm = ({ story, onSave, onCancel }: { 
+    story: HotelStory, 
+    onSave: (story: HotelStory) => void, 
+    onCancel: () => void 
+  }) => {
+    const [form, setForm] = useState<HotelStory>(story);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      onSave(form);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Titre</label>
+            <Input 
+              name="title" 
+              value={form.title} 
+              onChange={handleChange} 
+              placeholder="Notre histoire" 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Image</label>
+            <Input 
+              name="image" 
+              value={form.image} 
+              onChange={handleChange} 
+              placeholder="URL de l'image" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Contenu</label>
+          <Textarea 
+            name="content" 
+            value={form.content} 
+            onChange={handleChange} 
+            placeholder="Contenu de la story" 
+            rows={6} 
+            required 
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Ordre d'affichage</label>
+          <Input 
+            type="number"
+            name="display_order" 
+            value={form.display_order.toString()} 
+            onChange={handleChange} 
+            min={0}
+            required 
+          />
+        </div>
+        
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Enregistrement...' : 'Enregistrer'}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  const AssistanceForm = ({ assistance, onSave, onCancel }: { 
+    assistance: HotelAssistance, 
+    onSave: (assistance: HotelAssistance) => void, 
+    onCancel: () => void 
+  }) => {
+    const [form, setForm] = useState<HotelAssistance>(assistance);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      onSave(form);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Image d'arrière-plan</label>
+          <Input 
+            name="background_image" 
+            value={form.background_image} 
+            onChange={handleChange} 
+            placeholder="URL de l'image" 
+            required 
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Titre</label>
+          <Input 
+            name="title" 
+            value={form.title} 
+            onChange={handleChange} 
+            placeholder="Besoin d'assistance ?" 
+            required 
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <Textarea 
+            name="description" 
+            value={form.description} 
+            onChange={handleChange} 
+            placeholder="Notre équipe est disponible 24/7 pour vous aider" 
+            rows={4} 
+            required 
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Texte du bouton</label>
+            <Input 
+              name="action_text" 
+              value={form.action_text} 
+              onChange={handleChange} 
+              placeholder="Contacter" 
+              required 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Lien du bouton</label>
+            <Input 
+              name="action_link" 
+              value={form.action_link} 
+              onChange={handleChange} 
+              placeholder="/contact" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Enregistrement...' : 'Enregistrer'}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  // Add the render function here
+  return (
+    <div className="container mx-auto py-6 max-w-7xl">
+      <Button 
+        variant="ghost" 
+        className="mb-6" 
+        onClick={() => navigate('/admin/hotels')}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" /> Retour
+      </Button>
+
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">{hotel?.name || 'Chargement...'}</h1>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4 w-full justify-start overflow-auto">
+          <TabsTrigger value="about">À propos</TabsTrigger>
+          <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsTrigger value="hero">Section Héro</TabsTrigger>
+          <TabsTrigger value="experiences">Expériences</TabsTrigger>
+          <TabsTrigger value="events">Événements</TabsTrigger>
+          <TabsTrigger value="stories">Stories</TabsTrigger>
+          <TabsTrigger value="assistance">Assistance</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="about">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sections À propos</CardTitle>
+              <CardDescription>
+                Gérez les informations à propos de l'hôtel
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingAbout ? (
+                <AboutForm 
+                  about={editingAbout} 
+                  onSave={handleSaveAbout} 
+                  onCancel={() => setEditingAbout(null)} 
+                />
+              ) : (
+                <>
+                  <div className="flex justify-end">
+                    <Button onClick={() => setEditingAbout({
+                      id: '',
+                      hotel_id: id || '',
+                      title: '',
+                      description: '',
+                      icon: 'Info',
+                      action_text: 'En savoir plus',
+                      action_link: '/about',
+                      status: 'active'
+                    })}>
+                      <Plus className="mr-2 h-4 w-4" /> Ajouter une section
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {aboutSections.map((section) => (
+                      <Card key={section.id}>
+                        <CardHeader className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center">
+                              <Info className="h-5 w-5 mr-2" />
+                              <CardTitle className="text-lg">{section.title}</CardTitle>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => setEditingAbout(section)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleDeleteAbout(section.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                          <p className="text-sm text-muted-foreground mb-2">{section.description}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {section.status}
+                            </span>
+                            <Button variant="link" size="sm" className="p-0 h-auto">
+                              {section.action_text}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="services">
+          <Card>
+            <CardHeader>
+              <CardTitle>Services de l'hôtel</CardTitle>
+              <CardDescription>
+                Gérez les services proposés par l'hôtel
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingService ? (
+                <ServiceForm 
+                  service={editingService} 
+                  onSave={handleSaveService} 
+                  onCancel={() => setEditingService(null)} 
+                />
+              ) : (
+                <>
+                  <div className="flex justify-end">
+                    <Button onClick={() => setEditingService({
+                      id: '',
+                      hotel_id: id || '',
+                      title: '',
+                      description: '',
+                      icon: 'Utensils',
+                      action_text: 'Explorer',
+                      action_link: '/services',
+                      status: 'active',
+                      type: 'main',
+                      display_order: services.length
+                    })}>
+                      <Plus className="mr-2 h-4 w-4" /> Ajouter un service
+                    </Button>
+                  </div>
+
+                  <h3 className="text-lg font-medium mb-2">Services principaux</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    {services
+                      .filter(service => service.type === 'main')
+                      .sort((a, b) => a.display_order - b.display_order)
+                      .map((service) => (
+                        <Card key={service.id}>
+                          <CardHeader className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center">
+                                <Utensils className="h-5 w-5 mr-2" />
+                                <CardTitle className="text-lg">{service.title}</CardTitle>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => setEditingService(service)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => handleDeleteService(service.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-0">
+                            <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {service.status}
+                              </span>
+                              <Button variant="link" size="sm" className="p-0 h-auto">
+                                {service.action_text}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+
+                  <h3 className="text-lg font-medium mb-2">Services additionnels</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {services
+                      .filter(service => service.type === 'additional')
+                      .sort((a, b) => a.display_order - b.display_order)
+                      .map((service) => (
+                        <Card key={service.id}>
+                          <CardHeader className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center">
+                                <Sparkles className="h-5 w-5 mr-2" />
+                                <CardTitle className="text-lg">{service.title}</CardTitle>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => setEditingService(service)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => handleDeleteService(service.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-0">
+                            <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {service.status}
+                              </span>
+                              <Button variant="link" size="sm" className="p-0 h-auto">
+                                {service.action_text}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="hero">
+          <Card>
+            <CardHeader>
+              <CardTitle>Section Héro</CardTitle>
+              <CardDescription>
+                Configurez la section héro de la page d'accueil
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {editingHero ? (
+                <HeroForm 
+                  hero={editingHero} 
+                  onSave={handleSaveHero} 
+                  onCancel={() => setEditingHero(null)} 
+                />
+              ) : (
+                <>
+                  {hero ? (
+                    <div className="rounded-lg overflow-hidden bg-gray-100 relative">
+                      <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${hero.background_image})` }}></div>
+                      <div className="relative p-6 md:p-8 text-center max-w-2xl mx-auto">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-2">{hero.title}</h2>
+                        <p className="text-lg mb-4">{hero.subtitle}</p>
+                        <div className="flex items-center justify-center bg-white rounded-lg py-2 px-4 border max-w-md mx-auto">
+                          <span className="text-gray-400">{hero.search_placeholder}</span>
+                        </div>
+                        <div className="mt-4">
+                          <Button onClick={() => setEditingHero(hero)}>
+                            <Edit className="mr-2 h-4 w-4" /> Modifier
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="mb-4">Aucune section héro configurée</p>
+                      <Button onClick={() => setEditingHero({...defaultHotelHero, hotel_id: id || ''})}>
+                        <Plus className="mr-2 h-4 w-4" /> Créer une section héro
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="experiences">
+          <Card>
+            <CardHeader>
+              <CardTitle>Expériences</CardTitle>
+              <CardDescription>
+                Gérez les expériences proposées par l'hôtel
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingExperience ? (
+                <ExperienceForm 
+                  experience={editingExperience} 
+                  onSave={handleSaveExperience} 
+                  onCancel={() => setEditingExperience(null)} 
+                />
+              ) : (
+                <>
+                  <div className="flex justify-end">
+                    <Button onClick={() => setEditingExperience({
+                      ...defaultHotelExperience,
+                      hotel_id: id || '',
+                      display_order: experiences.length
+                    })}>
+                      <Plus className="mr-2 h-4 w-4" /> Ajouter une expérience
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {experiences
+                      .sort((a, b) => a.display_order - b.display_order)
+                      .map((experience) => (
+                        <Card key={experience.id} className="overflow-hidden">
+                          <div className="aspect-video bg-cover bg-center" style={{ backgroundImage: `url(${experience.image})` }}></div>
+                          <CardHeader className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <span className="text-xs text-blue-600 font-medium mb-1 block">{experience.category}</span>
+                                <CardTitle className="text-lg">{experience.title}</CardTitle>
+                                <p className="text-sm text-muted-foreground">{experience.subtitle}</p>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => setEditingExperience(experience)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => handleDeleteExperience(experience.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-0">
+                            <p className="text-sm text-muted-foreground mb-2">{experience.description}</p>
+                            <Button variant="outline" size="sm">
+                              {experience.action_text}
+                            </Button>
+                          </CardContent>
+                          <CardFooter className="p-4 pt-0 flex justify-between items-center">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {experience.status}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Ordre: {experience.display_order}
+                            </span>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="events">
+          <Card>
+            <CardHeader>
+              <CardTitle>Événements</CardTitle>
+              <CardDescription>
+                Gérez les événements de l'hôtel
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingEvent ? (
+                <EventForm 
+                  event={editingEvent} 
+                  onSave={handleSaveEvent} 
+                  onCancel={() => setEditingEvent(null)} 
+                />
+              ) : (
+                <>
+                  <div className="flex justify-end">
+                    <Button onClick={() => setEditingEvent({
+                      ...defaultHotelEvent,
+                      hotel_id: id || '',
+                      display_order: events.length
+                    })}>
+                      <Plus className="mr-2 h-4 w-4" /> Ajouter un événement
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {events
+                      .sort((a, b) => a.display_order - b.display_order)
+                      .map((event) => (
+                        <Card key={event.id} className="overflow-hidden">
+                          <div className="aspect-video bg-cover bg-center" style={{ backgroundImage: `url(${event.image})` }}></div>
+                          <CardHeader className="p-4">
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg">{event.title}</CardTitle>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => setEditingEvent(event)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => handleDeleteEvent(event.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-0">
+                            <div className="flex items-center gap-4 mb-3">
+                              <div className="flex items-center text-sm">
+                                <Calendar className="h-4 w-4 mr-1" />
+                                {event.date}
+                              </div>
+                              <div className="flex items-center text-sm">
+                                <Clock className="h-4 w-4 mr-1" />
+                                {event.time}
+                              </div>
+                              <div className="flex items-center text-sm">
+                                <Map className="h-4 w-4 mr-1" />
+                                {event.location}
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                            <Button variant="outline" size="sm">
+                              {event.action_text}
+                            </Button>
+                          </CardContent>
+                          <CardFooter className="p-4 pt-0 flex justify-between items-center">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {event.status}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Ordre: {event.display_order}
+                            </span>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="stories">
+          <Card>
+            <CardHeader>
+              <CardTitle>Stories</CardTitle>
+              <CardDescription>
+                Gérez les stories de l'hôtel
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingStory ? (
+                <StoryForm 
+                  story={editingStory} 
+                  onSave={handleSaveStory} 
+                  onCancel={() => setEditingStory(null)} 
+                />
+              ) : (
+                <>
+                  <div className="flex justify-end">
+                    <Button onClick={() => setEditingStory({
+                      ...defaultHotelStory,
+                      hotel_id: id || '',
+                      display_order: stories.length
+                    })}>
+                      <Plus className="mr-2 h-4 w-4" /> Ajouter une story
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {stories
+                      .sort((a, b) => a.display_order - b.display_order)
+                      .map((story) => (
+                        <Card key={story.id} className="overflow-hidden">
+                          <div className="aspect-square bg-cover bg-center" style={{ backgroundImage: `url(${story.image})` }}></div>
+                          <CardHeader className="p-4">
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg">{story.title}</CardTitle>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => setEditingStory(story)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => handleDeleteStory(story.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-0">
+                            <p className="text-sm text-muted-foreground">
+                              {story.content.length > 100 
+                                ? `${story.content.substring(0, 100)}...` 
+                                : story.content}
+                            </p>
+                          </CardContent>
+                          <CardFooter className="p-4 pt-0 flex justify-between items-center">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {story.status}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Ordre: {story.display_order}
+                            </span>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="assistance">
+          <Card>
+            <CardHeader>
+              <CardTitle>Section Assistance</CardTitle>
+              <CardDescription>
+                Configurez la section d'assistance de la page d'accueil
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {editingAssistance ? (
+                <AssistanceForm 
+                  assistance={editingAssistance} 
+                  onSave={handleSaveAssistance} 
+                  onCancel={() => setEditingAssistance(null)} 
+                />
+              ) : (
+                <>
+                  {assistance ? (
+                    <div className="rounded-lg overflow-hidden bg-gray-100 relative">
+                      <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${assistance.background_image})` }}></div>
+                      <div className="relative p-6 md:p-8 text-center max-w-2xl mx-auto">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-2">{assistance.title}</h2>
+                        <p className="text-lg mb-4">{assistance.description}</p>
+                        <Button variant="secondary">
+                          <PhoneCall className="mr-2 h-4 w-4" />
+                          {assistance.action_text}
+                        </Button>
+                        <div className="mt-4">
+                          <Button onClick={() => setEditingAssistance(assistance)}>
+                            <Edit className="mr-2 h-4 w-4" /> Modifier
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="mb-4">Aucune section d'assistance configurée</p>
+                      <Button onClick={() => setEditingAssistance({...defaultHotelAssistance, hotel_id: id || ''})}>
+                        <Plus className="mr-2 h-4 w-4" /> Créer une section d'assistance
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default HotelInterface;
