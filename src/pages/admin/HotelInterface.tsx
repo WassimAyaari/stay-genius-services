@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Info, Palette, Grid, Layout, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, Save, Info, Palette, Grid, Layout, Trash2, Edit, Eye, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -12,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveHotel } from '@/hooks/useActiveHotel';
 import { Separator } from '@/components/ui/separator';
+import HotelPreview from '@/components/admin/HotelPreview';
 
 interface Hotel {
   id: string;
@@ -49,12 +49,26 @@ const HotelInterface = () => {
   const { hotel, aboutSections, services, loading: dataLoading } = useActiveHotel(id);
   const [editingAbout, setEditingAbout] = useState<HotelAbout | null>(null);
   const [editingService, setEditingService] = useState<HotelService | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState<string>('/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png');
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+
+  useEffect(() => {
+    const fetchHotelSettings = async () => {
+      if (id) {
+        try {
+        } catch (error) {
+          console.error('Error fetching hotel settings:', error);
+        }
+      }
+    };
+    
+    fetchHotelSettings();
+  }, [id]);
 
   const handleSaveAbout = async (about: HotelAbout) => {
     setLoading(true);
     try {
       if (about.id) {
-        // Update existing about section
         const { error } = await supabase
           .from('hotel_about')
           .update({
@@ -71,7 +85,6 @@ const HotelInterface = () => {
         
         toast.success('Section À propos mise à jour');
       } else {
-        // Create new about section
         const { data, error } = await supabase
           .from('hotel_about')
           .insert({
@@ -92,7 +105,6 @@ const HotelInterface = () => {
       }
       
       setEditingAbout(null);
-      // Rechargement des données
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -108,7 +120,6 @@ const HotelInterface = () => {
     setLoading(true);
     try {
       if (service.id) {
-        // Update existing service
         const { error } = await supabase
           .from('hotel_services')
           .update({
@@ -127,7 +138,6 @@ const HotelInterface = () => {
         
         toast.success('Service mis à jour');
       } else {
-        // Create new service
         const { data, error } = await supabase
           .from('hotel_services')
           .insert({
@@ -150,7 +160,6 @@ const HotelInterface = () => {
       }
       
       setEditingService(null);
-      // Rechargement des données
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -175,7 +184,6 @@ const HotelInterface = () => {
       if (error) throw error;
       
       toast.success('Section supprimée');
-      // Rechargement des données
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -200,7 +208,6 @@ const HotelInterface = () => {
       if (error) throw error;
       
       toast.success('Service supprimé');
-      // Rechargement des données
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -210,6 +217,11 @@ const HotelInterface = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateBackgroundImage = async (imageUrl: string) => {
+    setBackgroundImage(imageUrl);
+    toast.success('Arrière-plan mis à jour');
   };
 
   const AboutForm = ({ about, onSave, onCancel }: { 
@@ -500,8 +512,17 @@ const HotelInterface = () => {
             Éditer l'hôtel
           </Button>
           
-          <Button onClick={() => navigate('/')}>
-            Voir le site
+          <Button 
+            variant="outline"
+            onClick={() => setIsPreviewExpanded(!isPreviewExpanded)}
+            className="gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            {isPreviewExpanded ? 'Réduire l'aperçu' : 'Agrandir l'aperçu'}
+          </Button>
+          
+          <Button asChild>
+            <Link to="/" target="_blank">Voir le site</Link>
           </Button>
         </div>
       </div>
@@ -512,230 +533,281 @@ const HotelInterface = () => {
           <div className="h-40 bg-gray-200 rounded"></div>
         </div>
       ) : (
-        <Tabs defaultValue="about">
-          <TabsList className="mb-6">
-            <TabsTrigger value="about" className="gap-2">
-              <Info className="w-4 h-4" />
-              Sections À propos
-            </TabsTrigger>
-            <TabsTrigger value="services" className="gap-2">
-              <Grid className="w-4 h-4" />
-              Services
-            </TabsTrigger>
-            <TabsTrigger value="appearance" className="gap-2">
-              <Palette className="w-4 h-4" />
-              Apparence
-            </TabsTrigger>
-            <TabsTrigger value="layout" className="gap-2">
-              <Layout className="w-4 h-4" />
-              Mise en page
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className={isPreviewExpanded ? "col-span-full order-first" : "lg:col-span-1 order-last lg:order-first"}>
+            <HotelPreview 
+              hotelName={hotel?.name || ''}
+              hotelAddress={hotel?.address || ''}
+              aboutSections={aboutSections}
+              backgroundImage={backgroundImage}
+              className="sticky top-20"
+            />
+          </div>
           
-          <TabsContent value="about" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sections À propos</CardTitle>
-                <CardDescription>
-                  Gérez les sections d'informations qui apparaissent sur votre page d'accueil.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {aboutSections.length === 0 && !editingAbout ? (
-                  <div className="text-center py-6">
-                    <Info className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-lg text-gray-500 mb-4">Aucune section À propos pour le moment</p>
-                    <Button onClick={() => setEditingAbout(newAboutTemplate)}>
-                      Ajouter une section
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    {!editingAbout && (
-                      <div className="mb-6">
+          <div className={isPreviewExpanded ? "col-span-full" : "lg:col-span-2"}>
+            <Tabs defaultValue="about">
+              <TabsList className="mb-6">
+                <TabsTrigger value="about" className="gap-2">
+                  <Info className="w-4 h-4" />
+                  Sections À propos
+                </TabsTrigger>
+                <TabsTrigger value="services" className="gap-2">
+                  <Grid className="w-4 h-4" />
+                  Services
+                </TabsTrigger>
+                <TabsTrigger value="appearance" className="gap-2">
+                  <Palette className="w-4 h-4" />
+                  Apparence
+                </TabsTrigger>
+                <TabsTrigger value="layout" className="gap-2">
+                  <Layout className="w-4 h-4" />
+                  Mise en page
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="about" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Sections À propos</CardTitle>
+                    <CardDescription>
+                      Gérez les sections d'informations qui apparaissent sur votre page d'accueil.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {aboutSections.length === 0 && !editingAbout ? (
+                      <div className="text-center py-6">
+                        <Info className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-lg text-gray-500 mb-4">Aucune section À propos pour le moment</p>
                         <Button onClick={() => setEditingAbout(newAboutTemplate)}>
                           Ajouter une section
                         </Button>
                       </div>
+                    ) : (
+                      <>
+                        {!editingAbout && (
+                          <div className="mb-6">
+                            <Button onClick={() => setEditingAbout(newAboutTemplate)}>
+                              Ajouter une section
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {editingAbout ? (
+                          <Card className="mb-6 border-primary">
+                            <CardHeader>
+                              <CardTitle>{editingAbout.id ? 'Modifier' : 'Ajouter'} une section</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <AboutForm 
+                                about={editingAbout} 
+                                onSave={handleSaveAbout} 
+                                onCancel={() => setEditingAbout(null)} 
+                              />
+                            </CardContent>
+                          </Card>
+                        ) : null}
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {aboutSections.map((section) => (
+                            <Card key={section.id} className="overflow-hidden">
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <span className="p-2 bg-primary/10 rounded">
+                                    <Info className="w-4 h-4 text-primary" />
+                                  </span>
+                                  {section.title}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-sm text-gray-500 line-clamp-3 mb-4">{section.description}</p>
+                                <div className="flex justify-end gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => setEditingAbout(section)}
+                                  >
+                                    <Edit className="w-4 h-4 mr-1" /> Modifier
+                                  </Button>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm" 
+                                    onClick={() => handleDeleteAbout(section.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-1" /> Supprimer
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </>
                     )}
-                    
-                    {editingAbout ? (
-                      <Card className="mb-6 border-primary">
-                        <CardHeader>
-                          <CardTitle>{editingAbout.id ? 'Modifier' : 'Ajouter'} une section</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <AboutForm 
-                            about={editingAbout} 
-                            onSave={handleSaveAbout} 
-                            onCancel={() => setEditingAbout(null)} 
-                          />
-                        </CardContent>
-                      </Card>
-                    ) : null}
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {aboutSections.map((section) => (
-                        <Card key={section.id} className="overflow-hidden">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <span className="p-2 bg-primary/10 rounded">
-                                <Info className="w-4 h-4 text-primary" />
-                              </span>
-                              {section.title}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-gray-500 line-clamp-3 mb-4">{section.description}</p>
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => setEditingAbout(section)}
-                              >
-                                <Edit className="w-4 h-4 mr-1" /> Modifier
-                              </Button>
-                              <Button 
-                                variant="destructive" 
-                                size="sm" 
-                                onClick={() => handleDeleteAbout(section.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1" /> Supprimer
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="services" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Services de l'hôtel</CardTitle>
-                <CardDescription>
-                  Gérez les services proposés par votre hôtel qui apparaissent sur votre page d'accueil.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {services.length === 0 && !editingService ? (
-                  <div className="text-center py-6">
-                    <Grid className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-lg text-gray-500 mb-4">Aucun service pour le moment</p>
-                    <Button onClick={() => setEditingService(newServiceTemplate)}>
-                      Ajouter un service
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    {!editingService && (
-                      <div className="mb-6">
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="services" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Services de l'hôtel</CardTitle>
+                    <CardDescription>
+                      Gérez les services proposés par votre hôtel qui apparaissent sur votre page d'accueil.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {services.length === 0 && !editingService ? (
+                      <div className="text-center py-6">
+                        <Grid className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-lg text-gray-500 mb-4">Aucun service pour le moment</p>
                         <Button onClick={() => setEditingService(newServiceTemplate)}>
                           Ajouter un service
                         </Button>
                       </div>
+                    ) : (
+                      <>
+                        {!editingService && (
+                          <div className="mb-6">
+                            <Button onClick={() => setEditingService(newServiceTemplate)}>
+                              Ajouter un service
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {editingService ? (
+                          <Card className="mb-6 border-primary">
+                            <CardHeader>
+                              <CardTitle>{editingService.id ? 'Modifier' : 'Ajouter'} un service</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ServiceForm 
+                                service={editingService} 
+                                onSave={handleSaveService} 
+                                onCancel={() => setEditingService(null)} 
+                              />
+                            </CardContent>
+                          </Card>
+                        ) : null}
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {services.map(service => (
+                            <Card key={service.id} className="overflow-hidden">
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <span className="p-2 bg-primary/10 rounded">
+                                    <Grid className="w-4 h-4 text-primary" />
+                                  </span>
+                                  {service.title}
+                                </CardTitle>
+                                <CardDescription>
+                                  <Badge className="mr-1">
+                                    {service.type === 'main' ? 'Principal' : 'Additionnel'}
+                                  </Badge>
+                                  <Badge variant="outline">
+                                    Ordre: {service.display_order}
+                                  </Badge>
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-sm text-gray-500 line-clamp-3 mb-4">{service.description}</p>
+                                <div className="flex justify-end gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => setEditingService(service)}
+                                  >
+                                    <Edit className="w-4 h-4 mr-1" /> Modifier
+                                  </Button>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm" 
+                                    onClick={() => handleDeleteService(service.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-1" /> Supprimer
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </>
                     )}
-                    
-                    {editingService ? (
-                      <Card className="mb-6 border-primary">
-                        <CardHeader>
-                          <CardTitle>{editingService.id ? 'Modifier' : 'Ajouter'} un service</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ServiceForm 
-                            service={editingService} 
-                            onSave={handleSaveService} 
-                            onCancel={() => setEditingService(null)} 
-                          />
-                        </CardContent>
-                      </Card>
-                    ) : null}
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {services.map(service => (
-                        <Card key={service.id} className="overflow-hidden">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <span className="p-2 bg-primary/10 rounded">
-                                <Grid className="w-4 h-4 text-primary" />
-                              </span>
-                              {service.title}
-                            </CardTitle>
-                            <CardDescription>
-                              <Badge className="mr-1">
-                                {service.type === 'main' ? 'Principal' : 'Additionnel'}
-                              </Badge>
-                              <Badge variant="outline">
-                                Ordre: {service.display_order}
-                              </Badge>
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-gray-500 line-clamp-3 mb-4">{service.description}</p>
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => setEditingService(service)}
-                              >
-                                <Edit className="w-4 h-4 mr-1" /> Modifier
-                              </Button>
-                              <Button 
-                                variant="destructive" 
-                                size="sm" 
-                                onClick={() => handleDeleteService(service.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1" /> Supprimer
-                              </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="appearance">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Apparence</CardTitle>
+                    <CardDescription>
+                      Personnalisez l'apparence visuelle de votre site d'hôtel.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Image d'arrière-plan</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          {[
+                            '/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png',
+                            '/lovable-uploads/044dc763-e0b0-462e-8c6e-788f35efcd0c.png',
+                            '/lovable-uploads/3cbdcf79-9da5-48bd-90f2-2c1737b76741.png',
+                            '/lovable-uploads/ad4ef1bb-ac95-4aaf-87df-6e874d0fcf46.png'
+                          ].map((img, index) => (
+                            <div 
+                              key={index} 
+                              className={`relative cursor-pointer rounded-lg overflow-hidden h-40 ${
+                                backgroundImage === img ? 'ring-2 ring-primary' : ''
+                              }`}
+                              onClick={() => handleUpdateBackgroundImage(img)}
+                            >
+                              <img 
+                                src={img} 
+                                alt={`Background ${index + 1}`} 
+                                className="w-full h-full object-cover"
+                              />
+                              {backgroundImage === img && (
+                                <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                  <div className="bg-white rounded-full p-1">
+                                    <Image className="w-6 h-6 text-primary" />
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <div className="text-center py-6">
+                        <Palette className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-lg text-gray-500">D'autres options de personnalisation seront bientôt disponibles</p>
+                      </div>
                     </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="appearance">
-            <Card>
-              <CardHeader>
-                <CardTitle>Apparence</CardTitle>
-                <CardDescription>
-                  Personnalisez l'apparence visuelle de votre site d'hôtel.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-10">
-                  <Palette className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg text-gray-500">Cette fonctionnalité sera bientôt disponible</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="layout">
-            <Card>
-              <CardHeader>
-                <CardTitle>Mise en page</CardTitle>
-                <CardDescription>
-                  Configurez la disposition des éléments sur votre site d'hôtel.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-10">
-                  <Layout className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg text-gray-500">Cette fonctionnalité sera bientôt disponible</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="layout">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Mise en page</CardTitle>
+                    <CardDescription>
+                      Configurez la disposition des éléments sur votre site d'hôtel.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-10">
+                      <Layout className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-lg text-gray-500">Cette fonctionnalité sera bientôt disponible</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       )}
     </div>
   );
