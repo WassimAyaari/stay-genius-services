@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Hotel {
   id: string;
@@ -41,7 +42,6 @@ const HotelManagement = () => {
     open: false,
     hotelId: null
   });
-  const [currentUser, setCurrentUser] = useState<string | null>("demo-user-id");
   const navigate = useNavigate();
   
   const form = useForm<HotelFormData>({
@@ -53,32 +53,27 @@ const HotelManagement = () => {
     }
   });
   
-  // Mock data for hotels
+  // Fetch hotels from Supabase
   useEffect(() => {
-    const fetchHotels = () => {
+    const fetchHotels = async () => {
       setLoading(true);
-      // Mock data
-      const mockHotels: Hotel[] = [
-        {
-          id: '1',
-          name: 'Grand Hotel Paris',
-          address: '1 Rue de Rivoli, 75001 Paris',
-          contact_email: 'contact@grandhotel.com',
-          contact_phone: '+33 1 23 45 67 89',
-          logo_url: null
-        },
-        {
-          id: '2',
-          name: 'Luxury Resort London',
-          address: '10 Baker Street, London',
-          contact_email: 'info@luxuryresort.com',
-          contact_phone: '+44 20 1234 5678',
-          logo_url: null
+      try {
+        const { data, error } = await supabase
+          .from('hotels')
+          .select('*')
+          .order('name');
+          
+        if (error) {
+          throw error;
         }
-      ];
-      
-      setHotels(mockHotels);
-      setLoading(false);
+        
+        setHotels(data || []);
+      } catch (error) {
+        console.error('Error fetching hotels:', error);
+        toast.error('Erreur lors du chargement des hôtels');
+      } finally {
+        setLoading(false);
+      }
     };
     
     fetchHotels();
@@ -87,37 +82,58 @@ const HotelManagement = () => {
   // Add a new hotel
   const onSubmit = async (data: HotelFormData) => {
     setLoading(true);
-    
-    // Simulate adding a hotel
-    setTimeout(() => {
-      const newHotel: Hotel = {
-        id: Date.now().toString(),
-        name: data.name,
-        address: data.address,
-        contact_email: data.contact_email,
-        contact_phone: data.contact_phone,
-        logo_url: null
-      };
+    try {
+      const { data: newHotel, error } = await supabase
+        .from('hotels')
+        .insert([
+          {
+            name: data.name,
+            address: data.address,
+            contact_email: data.contact_email || null,
+            contact_phone: data.contact_phone || null,
+          }
+        ])
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
       
       setHotels([...hotels, newHotel]);
       toast.success('Hôtel ajouté avec succès');
       form.reset();
       setIsAdding(false);
+    } catch (error) {
+      console.error('Error adding hotel:', error);
+      toast.error('Erreur lors de l\'ajout de l\'hôtel');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
   
   // Delete a hotel
   const deleteHotel = async (id: string) => {
     setLoading(true);
-    
-    // Simulate deleting a hotel
-    setTimeout(() => {
+    try {
+      const { error } = await supabase
+        .from('hotels')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        throw error;
+      }
+      
       setHotels(hotels.filter(hotel => hotel.id !== id));
       toast.success('Hôtel supprimé avec succès');
+    } catch (error) {
+      console.error('Error deleting hotel:', error);
+      toast.error('Erreur lors de la suppression de l\'hôtel');
+    } finally {
       setLoading(false);
       setDeleteDialog({ open: false, hotelId: null });
-    }, 1000);
+    }
   };
   
   // Navigate to edit page
@@ -215,8 +231,8 @@ const HotelManagement = () => {
                   <Button type="button" variant="outline" onClick={() => setIsAdding(false)}>
                     Annuler
                   </Button>
-                  <Button type="submit">
-                    Enregistrer
+                  <Button type="submit" disabled={loading}>
+                    {loading ? 'Enregistrement...' : 'Enregistrer'}
                   </Button>
                 </div>
               </form>
@@ -226,7 +242,7 @@ const HotelManagement = () => {
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
+        {loading && hotels.length === 0 ? (
           Array.from({ length: 3 }).map((_, index) => (
             <Card key={index} className="animate-pulse">
               <CardContent className="h-40 flex items-center justify-center">
@@ -281,8 +297,8 @@ const HotelManagement = () => {
             <Button variant="outline" onClick={() => setDeleteDialog({ open: false, hotelId: null })}>
               Annuler
             </Button>
-            <Button variant="destructive" onClick={() => deleteDialog.hotelId && deleteHotel(deleteDialog.hotelId)}>
-              Supprimer
+            <Button variant="destructive" onClick={() => deleteDialog.hotelId && deleteHotel(deleteDialog.hotelId)} disabled={loading}>
+              {loading ? 'Suppression...' : 'Supprimer'}
             </Button>
           </DialogFooter>
         </DialogContent>

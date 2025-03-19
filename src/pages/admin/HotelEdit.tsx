@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { supabase } from "@/integrations/supabase/client";
 
 interface HotelFormData {
   name: string;
@@ -31,61 +32,76 @@ const HotelEdit = () => {
     }
   });
   
-  // Fetch hotel data
+  // Fetch hotel data from Supabase
   useEffect(() => {
-    const fetchHotel = () => {
+    const fetchHotel = async () => {
+      if (!id) return;
+      
       setLoading(true);
-      
-      // Mock data for hotels
-      const mockHotels = [
-        {
-          id: '1',
-          name: 'Grand Hotel Paris',
-          address: '1 Rue de Rivoli, 75001 Paris',
-          contact_email: 'contact@grandhotel.com',
-          contact_phone: '+33 1 23 45 67 89',
-          logo_url: null
-        },
-        {
-          id: '2',
-          name: 'Luxury Resort London',
-          address: '10 Baker Street, London',
-          contact_email: 'info@luxuryresort.com',
-          contact_phone: '+44 20 1234 5678',
-          logo_url: null
+      try {
+        const { data, error } = await supabase
+          .from('hotels')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          if (error.code === 'PGRST116') {
+            setNotFound(true);
+            toast.error("Hôtel non trouvé");
+          } else {
+            throw error;
+          }
+          return;
         }
-      ];
-      
-      // Find the hotel with the matching ID
-      const hotel = mockHotels.find(h => h.id === id);
-      
-      if (hotel) {
-        form.reset({
-          name: hotel.name,
-          address: hotel.address,
-          contact_email: hotel.contact_email || '',
-          contact_phone: hotel.contact_phone || '',
-        });
-      } else {
-        setNotFound(true);
-        toast.error("Hôtel non trouvé");
+        
+        if (data) {
+          form.reset({
+            name: data.name,
+            address: data.address,
+            contact_email: data.contact_email || '',
+            contact_phone: data.contact_phone || '',
+          });
+        } else {
+          setNotFound(true);
+          toast.error("Hôtel non trouvé");
+        }
+      } catch (error) {
+        console.error('Error fetching hotel:', error);
+        toast.error("Erreur lors du chargement de l'hôtel");
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
     
     fetchHotel();
   }, [id, form]);
   
   const onSubmit = async (data: HotelFormData) => {
-    setLoading(true);
+    if (!id) return;
     
-    // Simulate updating a hotel
-    setTimeout(() => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('hotels')
+        .update({
+          name: data.name,
+          address: data.address,
+          contact_email: data.contact_email || null,
+          contact_phone: data.contact_phone || null,
+        })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
       toast.success('Hôtel mis à jour avec succès');
-      setLoading(false);
       navigate('/admin/hotels');
-    }, 1000);
+    } catch (error) {
+      console.error('Error updating hotel:', error);
+      toast.error("Erreur lors de la mise à jour de l'hôtel");
+    } finally {
+      setLoading(false);
+    }
   };
   
   if (notFound) {
