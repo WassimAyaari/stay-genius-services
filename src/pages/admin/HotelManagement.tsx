@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { supabase } from '@/integrations/supabase/client';
 
 interface Hotel {
   id: string;
@@ -28,10 +27,9 @@ interface HotelFormData {
 
 const HotelManagement = () => {
   const [hotels, setHotels] = useState<Hotel[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<string | null>("demo-user-id");
   const navigate = useNavigate();
   
   const form = useForm<HotelFormData>({
@@ -43,140 +41,75 @@ const HotelManagement = () => {
     }
   });
   
-  // Vérifier si l'utilisateur est un super admin
+  // Mock data for hotels
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const fetchHotels = () => {
+      setLoading(true);
+      // Mock data
+      const mockHotels: Hotel[] = [
+        {
+          id: '1',
+          name: 'Grand Hotel Paris',
+          address: '1 Rue de Rivoli, 75001 Paris',
+          contact_email: 'contact@grandhotel.com',
+          contact_phone: '+33 1 23 45 67 89',
+          logo_url: null
+        },
+        {
+          id: '2',
+          name: 'Luxury Resort London',
+          address: '10 Baker Street, London',
+          contact_email: 'info@luxuryresort.com',
+          contact_phone: '+44 20 1234 5678',
+          logo_url: null
+        }
+      ];
       
-      if (!session) {
-        navigate('/auth/login');
-        return;
-      }
-      
-      setCurrentUser(session.user.id);
-      
-      // Vérifier si l'utilisateur est un super admin
-      const { data, error } = await supabase.rpc('is_super_admin', {
-        user_id: session.user.id
-      });
-      
-      if (error) {
-        console.error('Erreur lors de la vérification des droits:', error);
-        toast.error('Impossible de vérifier vos droits d\'accès');
-        navigate('/');
-        return;
-      }
-      
-      setIsSuperAdmin(data);
-      
-      if (!data) {
-        toast.error('Vous n\'avez pas les droits pour accéder à cette page');
-        navigate('/');
-        return;
-      }
-      
-      fetchHotels();
+      setHotels(mockHotels);
+      setLoading(false);
     };
     
-    checkAuth();
-  }, [navigate]);
+    fetchHotels();
+  }, []);
   
-  // Récupérer la liste des hôtels
-  const fetchHotels = async () => {
+  // Add a new hotel
+  const onSubmit = async (data: HotelFormData) => {
     setLoading(true);
     
-    try {
-      const { data, error } = await supabase
-        .from('hotels')
-        .select('*')
-        .order('name');
-        
-      if (error) {
-        throw error;
-      }
+    // Simulate adding a hotel
+    setTimeout(() => {
+      const newHotel: Hotel = {
+        id: Date.now().toString(),
+        name: data.name,
+        address: data.address,
+        contact_email: data.contact_email,
+        contact_phone: data.contact_phone,
+        logo_url: null
+      };
       
-      setHotels(data || []);
-    } catch (error) {
-      console.error('Erreur lors de la récupération des hôtels:', error);
-      toast.error('Impossible de récupérer la liste des hôtels');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Ajouter un nouvel hôtel
-  const onSubmit = async (data: HotelFormData) => {
-    try {
-      const { data: newHotel, error } = await supabase
-        .from('hotels')
-        .insert([
-          {
-            name: data.name,
-            address: data.address,
-            contact_email: data.contact_email || null,
-            contact_phone: data.contact_phone || null,
-          }
-        ])
-        .select();
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Créer l'admin de l'hôtel (l'utilisateur courant devient admin de cet hôtel)
-      if (newHotel && newHotel.length > 0) {
-        const { error: adminError } = await supabase
-          .from('hotel_admins')
-          .insert([
-            {
-              user_id: currentUser,
-              hotel_id: newHotel[0].id
-            }
-          ]);
-          
-        if (adminError) {
-          console.error('Erreur lors de la création de l\'admin:', adminError);
-          toast.error('L\'hôtel a été créé mais vous n\'avez pas été ajouté comme administrateur');
-        }
-      }
-      
+      setHotels([...hotels, newHotel]);
       toast.success('Hôtel ajouté avec succès');
       form.reset();
       setIsAdding(false);
-      fetchHotels();
-    } catch (error: any) {
-      console.error('Erreur lors de l\'ajout de l\'hôtel:', error);
-      toast.error(error.message || 'Une erreur est survenue lors de l\'ajout de l\'hôtel');
-    }
+      setLoading(false);
+    }, 1000);
   };
   
-  // Supprimer un hôtel
+  // Delete a hotel
   const deleteHotel = async (id: string) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet hôtel ? Cette action est irréversible.')) {
       return;
     }
     
-    try {
-      const { error } = await supabase
-        .from('hotels')
-        .delete()
-        .eq('id', id);
-        
-      if (error) {
-        throw error;
-      }
-      
+    setLoading(true);
+    
+    // Simulate deleting a hotel
+    setTimeout(() => {
+      setHotels(hotels.filter(hotel => hotel.id !== id));
       toast.success('Hôtel supprimé avec succès');
-      fetchHotels();
-    } catch (error: any) {
-      console.error('Erreur lors de la suppression de l\'hôtel:', error);
-      toast.error(error.message || 'Une erreur est survenue lors de la suppression de l\'hôtel');
-    }
+      setLoading(false);
+    }, 1000);
   };
-  
-  if (!isSuperAdmin) {
-    return null; // Page non accessible si l'utilisateur n'est pas super admin
-  }
   
   return (
     <div className="container mx-auto py-10 px-4">
