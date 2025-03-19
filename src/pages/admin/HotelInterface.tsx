@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -11,10 +12,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from '@/components/ui/label';
 import { supabase } from "@/integrations/supabase/client";
 import { 
   HotelAbout, HotelService, HotelHero, HotelExperience, 
-  HotelStory, HotelAssistance, Hotel as HotelType,
+  HotelEvent, HotelStory, HotelAssistance, Hotel,
   defaultHotelHero, defaultHotelExperience, defaultHotelEvent,
   defaultHotelStory, defaultHotelAssistance  
 } from '@/lib/types';
@@ -23,6 +32,849 @@ interface HotelData {
   id: string;
   name: string;
 }
+
+// About Form Component
+const AboutForm = ({ about, onSave, onCancel }: { 
+  about: HotelAbout, 
+  onSave: (data: HotelAbout) => void, 
+  onCancel: () => void 
+}) => {
+  const [formData, setFormData] = useState<HotelAbout>(about);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titre</Label>
+          <Input 
+            id="title" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea 
+            id="description" 
+            name="description" 
+            value={formData.description} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="icon">Icône</Label>
+          <Select 
+            name="icon" 
+            value={formData.icon} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, icon: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une icône" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Info">Info</SelectItem>
+              <SelectItem value="Compass">Compass</SelectItem>
+              <SelectItem value="Star">Star</SelectItem>
+              <SelectItem value="Heart">Heart</SelectItem>
+              <SelectItem value="MessageSquare">MessageSquare</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_text">Texte du bouton</Label>
+          <Input 
+            id="action_text" 
+            name="action_text" 
+            value={formData.action_text} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_link">Lien du bouton</Label>
+          <Input 
+            id="action_link" 
+            name="action_link" 
+            value={formData.action_link} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            name="status" 
+            value={formData.status} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="inactive">Inactif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit">
+          <Save className="mr-2 h-4 w-4" />
+          Enregistrer
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Service Form Component
+const ServiceForm = ({ service, onSave, onCancel }: {
+  service: HotelService,
+  onSave: (data: HotelService) => void,
+  onCancel: () => void
+}) => {
+  const [formData, setFormData] = useState<HotelService>(service);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titre</Label>
+          <Input 
+            id="title" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea 
+            id="description" 
+            name="description" 
+            value={formData.description} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="icon">Icône</Label>
+          <Select 
+            name="icon" 
+            value={formData.icon} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, icon: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une icône" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Utensils">Utensils</SelectItem>
+              <SelectItem value="Sparkles">Sparkles</SelectItem>
+              <SelectItem value="PhoneCall">PhoneCall</SelectItem>
+              <SelectItem value="HeartHandshake">HeartHandshake</SelectItem>
+              <SelectItem value="ShoppingBag">ShoppingBag</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="type">Type</Label>
+          <Select 
+            name="type" 
+            value={formData.type} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="main">Principal</SelectItem>
+              <SelectItem value="additional">Additionnel</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_text">Texte du bouton</Label>
+          <Input 
+            id="action_text" 
+            name="action_text" 
+            value={formData.action_text} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_link">Lien du bouton</Label>
+          <Input 
+            id="action_link" 
+            name="action_link" 
+            value={formData.action_link} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="display_order">Ordre d'affichage</Label>
+          <Input 
+            id="display_order" 
+            name="display_order" 
+            type="number" 
+            value={formData.display_order} 
+            onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) }))} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            name="status" 
+            value={formData.status} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="inactive">Inactif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit">
+          <Save className="mr-2 h-4 w-4" />
+          Enregistrer
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Hero Form Component
+const HeroForm = ({ hero, onSave, onCancel }: {
+  hero: HotelHero,
+  onSave: (data: HotelHero) => void,
+  onCancel: () => void
+}) => {
+  const [formData, setFormData] = useState<HotelHero>(hero);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titre</Label>
+          <Input 
+            id="title" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="subtitle">Sous-titre</Label>
+          <Input 
+            id="subtitle" 
+            name="subtitle" 
+            value={formData.subtitle} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="search_placeholder">Texte du placeholder de recherche</Label>
+          <Input 
+            id="search_placeholder" 
+            name="search_placeholder" 
+            value={formData.search_placeholder} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="background_image">URL de l'image de fond</Label>
+          <Input 
+            id="background_image" 
+            name="background_image" 
+            value={formData.background_image} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            name="status" 
+            value={formData.status} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="inactive">Inactif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit">
+          <Save className="mr-2 h-4 w-4" />
+          Enregistrer
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Experience Form Component
+const ExperienceForm = ({ experience, onSave, onCancel }: {
+  experience: HotelExperience,
+  onSave: (data: HotelExperience) => void,
+  onCancel: () => void
+}) => {
+  const [formData, setFormData] = useState<HotelExperience>(experience);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titre</Label>
+          <Input 
+            id="title" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="subtitle">Sous-titre</Label>
+          <Input 
+            id="subtitle" 
+            name="subtitle" 
+            value={formData.subtitle} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea 
+            id="description" 
+            name="description" 
+            value={formData.description} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="category">Catégorie</Label>
+          <Input 
+            id="category" 
+            name="category" 
+            value={formData.category} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="image">URL de l'image</Label>
+          <Input 
+            id="image" 
+            name="image" 
+            value={formData.image} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_text">Texte du bouton</Label>
+          <Input 
+            id="action_text" 
+            name="action_text" 
+            value={formData.action_text} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_link">Lien du bouton</Label>
+          <Input 
+            id="action_link" 
+            name="action_link" 
+            value={formData.action_link} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="display_order">Ordre d'affichage</Label>
+          <Input 
+            id="display_order" 
+            name="display_order" 
+            type="number" 
+            value={formData.display_order} 
+            onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) }))} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            name="status" 
+            value={formData.status} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="inactive">Inactif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit">
+          <Save className="mr-2 h-4 w-4" />
+          Enregistrer
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Event Form Component
+const EventForm = ({ event, onSave, onCancel }: {
+  event: HotelEvent,
+  onSave: (data: HotelEvent) => void,
+  onCancel: () => void
+}) => {
+  const [formData, setFormData] = useState<HotelEvent>(event);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titre</Label>
+          <Input 
+            id="title" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea 
+            id="description" 
+            name="description" 
+            value={formData.description} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="date">Date</Label>
+          <Input 
+            id="date" 
+            name="date" 
+            type="date" 
+            value={formData.date} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="time">Heure</Label>
+          <Input 
+            id="time" 
+            name="time" 
+            type="time" 
+            value={formData.time} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="location">Lieu</Label>
+          <Input 
+            id="location" 
+            name="location" 
+            value={formData.location} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="image">URL de l'image</Label>
+          <Input 
+            id="image" 
+            name="image" 
+            value={formData.image} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_text">Texte du bouton</Label>
+          <Input 
+            id="action_text" 
+            name="action_text" 
+            value={formData.action_text} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_link">Lien du bouton</Label>
+          <Input 
+            id="action_link" 
+            name="action_link" 
+            value={formData.action_link} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="display_order">Ordre d'affichage</Label>
+          <Input 
+            id="display_order" 
+            name="display_order" 
+            type="number" 
+            value={formData.display_order} 
+            onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) }))} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            name="status" 
+            value={formData.status} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="inactive">Inactif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit">
+          <Save className="mr-2 h-4 w-4" />
+          Enregistrer
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Story Form Component
+const StoryForm = ({ story, onSave, onCancel }: {
+  story: HotelStory,
+  onSave: (data: HotelStory) => void,
+  onCancel: () => void
+}) => {
+  const [formData, setFormData] = useState<HotelStory>(story);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titre</Label>
+          <Input 
+            id="title" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="content">Contenu</Label>
+          <Textarea 
+            id="content" 
+            name="content" 
+            value={formData.content} 
+            onChange={handleChange} 
+            required 
+            className="min-h-[150px]"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="image">URL de l'image</Label>
+          <Input 
+            id="image" 
+            name="image" 
+            value={formData.image} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="display_order">Ordre d'affichage</Label>
+          <Input 
+            id="display_order" 
+            name="display_order" 
+            type="number" 
+            value={formData.display_order} 
+            onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) }))} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            name="status" 
+            value={formData.status} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="inactive">Inactif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit">
+          <Save className="mr-2 h-4 w-4" />
+          Enregistrer
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Assistance Form Component
+const AssistanceForm = ({ assistance, onSave, onCancel }: {
+  assistance: HotelAssistance,
+  onSave: (data: HotelAssistance) => void,
+  onCancel: () => void
+}) => {
+  const [formData, setFormData] = useState<HotelAssistance>(assistance);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titre</Label>
+          <Input 
+            id="title" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea 
+            id="description" 
+            name="description" 
+            value={formData.description} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="background_image">URL de l'image de fond</Label>
+          <Input 
+            id="background_image" 
+            name="background_image" 
+            value={formData.background_image} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_text">Texte du bouton</Label>
+          <Input 
+            id="action_text" 
+            name="action_text" 
+            value={formData.action_text} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="action_link">Lien du bouton</Label>
+          <Input 
+            id="action_link" 
+            name="action_link" 
+            value={formData.action_link} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select 
+            name="status" 
+            value={formData.status} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="inactive">Inactif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit">
+          <Save className="mr-2 h-4 w-4" />
+          Enregistrer
+        </Button>
+      </div>
+    </form>
+  );
+};
 
 const HotelInterface = () => {
   const { id } = useParams<{ id: string }>();
@@ -154,7 +1006,335 @@ const HotelInterface = () => {
     }
   };
 
-  // ... rest of the code remains unchanged
+  // Handlers for About sections
+  const handleSaveAbout = async (data: HotelAbout) => {
+    try {
+      const isNewItem = !data.id;
+      
+      if (isNewItem) {
+        const { data: newData, error } = await supabase
+          .from('hotel_about')
+          .insert([{ ...data, hotel_id: id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setAboutSections(prev => [...prev, newData]);
+        toast.success('Section ajoutée avec succès');
+      } else {
+        const { error } = await supabase
+          .from('hotel_about')
+          .update(data)
+          .eq('id', data.id);
+        
+        if (error) throw error;
+        
+        setAboutSections(prev => prev.map(item => item.id === data.id ? data : item));
+        toast.success('Section mise à jour avec succès');
+      }
+      
+      setEditingAbout(null);
+    } catch (error) {
+      console.error('Error saving about section:', error);
+      toast.error("Erreur lors de l'enregistrement de la section");
+    }
+  };
+  
+  const handleDeleteAbout = async (aboutId: string) => {
+    try {
+      const { error } = await supabase
+        .from('hotel_about')
+        .delete()
+        .eq('id', aboutId);
+      
+      if (error) throw error;
+      
+      setAboutSections(prev => prev.filter(item => item.id !== aboutId));
+      toast.success('Section supprimée avec succès');
+    } catch (error) {
+      console.error('Error deleting about section:', error);
+      toast.error("Erreur lors de la suppression de la section");
+    }
+  };
+
+  // Handlers for Services
+  const handleSaveService = async (data: HotelService) => {
+    try {
+      const isNewItem = !data.id;
+      
+      if (isNewItem) {
+        const { data: newData, error } = await supabase
+          .from('hotel_services')
+          .insert([{ ...data, hotel_id: id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setServices(prev => [...prev, newData]);
+        toast.success('Service ajouté avec succès');
+      } else {
+        const { error } = await supabase
+          .from('hotel_services')
+          .update(data)
+          .eq('id', data.id);
+        
+        if (error) throw error;
+        
+        setServices(prev => prev.map(item => item.id === data.id ? data : item));
+        toast.success('Service mis à jour avec succès');
+      }
+      
+      setEditingService(null);
+    } catch (error) {
+      console.error('Error saving service:', error);
+      toast.error("Erreur lors de l'enregistrement du service");
+    }
+  };
+  
+  const handleDeleteService = async (serviceId: string) => {
+    try {
+      const { error } = await supabase
+        .from('hotel_services')
+        .delete()
+        .eq('id', serviceId);
+      
+      if (error) throw error;
+      
+      setServices(prev => prev.filter(item => item.id !== serviceId));
+      toast.success('Service supprimé avec succès');
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error("Erreur lors de la suppression du service");
+    }
+  };
+
+  // Handlers for Hero section
+  const handleSaveHero = async (data: HotelHero) => {
+    try {
+      const isNewItem = !data.id;
+      
+      if (isNewItem) {
+        const { data: newData, error } = await supabase
+          .from('hotel_hero')
+          .insert([{ ...data, hotel_id: id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setHero(newData);
+        toast.success('Section héro ajoutée avec succès');
+      } else {
+        const { error } = await supabase
+          .from('hotel_hero')
+          .update(data)
+          .eq('id', data.id);
+        
+        if (error) throw error;
+        
+        setHero(data);
+        toast.success('Section héro mise à jour avec succès');
+      }
+      
+      setEditingHero(null);
+    } catch (error) {
+      console.error('Error saving hero section:', error);
+      toast.error("Erreur lors de l'enregistrement de la section héro");
+    }
+  };
+
+  // Handlers for Experiences
+  const handleSaveExperience = async (data: HotelExperience) => {
+    try {
+      const isNewItem = !data.id;
+      
+      if (isNewItem) {
+        const { data: newData, error } = await supabase
+          .from('hotel_experiences')
+          .insert([{ ...data, hotel_id: id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setExperiences(prev => [...prev, newData]);
+        toast.success('Expérience ajoutée avec succès');
+      } else {
+        const { error } = await supabase
+          .from('hotel_experiences')
+          .update(data)
+          .eq('id', data.id);
+        
+        if (error) throw error;
+        
+        setExperiences(prev => prev.map(item => item.id === data.id ? data : item));
+        toast.success('Expérience mise à jour avec succès');
+      }
+      
+      setEditingExperience(null);
+    } catch (error) {
+      console.error('Error saving experience:', error);
+      toast.error("Erreur lors de l'enregistrement de l'expérience");
+    }
+  };
+  
+  const handleDeleteExperience = async (experienceId: string) => {
+    try {
+      const { error } = await supabase
+        .from('hotel_experiences')
+        .delete()
+        .eq('id', experienceId);
+      
+      if (error) throw error;
+      
+      setExperiences(prev => prev.filter(item => item.id !== experienceId));
+      toast.success('Expérience supprimée avec succès');
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+      toast.error("Erreur lors de la suppression de l'expérience");
+    }
+  };
+
+  // Handlers for Events
+  const handleSaveEvent = async (data: HotelEvent) => {
+    try {
+      const isNewItem = !data.id;
+      
+      if (isNewItem) {
+        const { data: newData, error } = await supabase
+          .from('hotel_events')
+          .insert([{ ...data, hotel_id: id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setEvents(prev => [...prev, newData]);
+        toast.success('Événement ajouté avec succès');
+      } else {
+        const { error } = await supabase
+          .from('hotel_events')
+          .update(data)
+          .eq('id', data.id);
+        
+        if (error) throw error;
+        
+        setEvents(prev => prev.map(item => item.id === data.id ? data : item));
+        toast.success('Événement mis à jour avec succès');
+      }
+      
+      setEditingEvent(null);
+    } catch (error) {
+      console.error('Error saving event:', error);
+      toast.error("Erreur lors de l'enregistrement de l'événement");
+    }
+  };
+  
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      const { error } = await supabase
+        .from('hotel_events')
+        .delete()
+        .eq('id', eventId);
+      
+      if (error) throw error;
+      
+      setEvents(prev => prev.filter(item => item.id !== eventId));
+      toast.success('Événement supprimé avec succès');
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast.error("Erreur lors de la suppression de l'événement");
+    }
+  };
+
+  // Handlers for Stories
+  const handleSaveStory = async (data: HotelStory) => {
+    try {
+      const isNewItem = !data.id;
+      
+      if (isNewItem) {
+        const { data: newData, error } = await supabase
+          .from('hotel_stories')
+          .insert([{ ...data, hotel_id: id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setStories(prev => [...prev, newData]);
+        toast.success('Story ajoutée avec succès');
+      } else {
+        const { error } = await supabase
+          .from('hotel_stories')
+          .update(data)
+          .eq('id', data.id);
+        
+        if (error) throw error;
+        
+        setStories(prev => prev.map(item => item.id === data.id ? data : item));
+        toast.success('Story mise à jour avec succès');
+      }
+      
+      setEditingStory(null);
+    } catch (error) {
+      console.error('Error saving story:', error);
+      toast.error("Erreur lors de l'enregistrement de la story");
+    }
+  };
+  
+  const handleDeleteStory = async (storyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('hotel_stories')
+        .delete()
+        .eq('id', storyId);
+      
+      if (error) throw error;
+      
+      setStories(prev => prev.filter(item => item.id !== storyId));
+      toast.success('Story supprimée avec succès');
+    } catch (error) {
+      console.error('Error deleting story:', error);
+      toast.error("Erreur lors de la suppression de la story");
+    }
+  };
+
+  // Handlers for Assistance
+  const handleSaveAssistance = async (data: HotelAssistance) => {
+    try {
+      const isNewItem = !data.id;
+      
+      if (isNewItem) {
+        const { data: newData, error } = await supabase
+          .from('hotel_assistance')
+          .insert([{ ...data, hotel_id: id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setAssistance(newData);
+        toast.success("Section d'assistance ajoutée avec succès");
+      } else {
+        const { error } = await supabase
+          .from('hotel_assistance')
+          .update(data)
+          .eq('id', data.id);
+        
+        if (error) throw error;
+        
+        setAssistance(data);
+        toast.success("Section d'assistance mise à jour avec succès");
+      }
+      
+      setEditingAssistance(null);
+    } catch (error) {
+      console.error('Error saving assistance section:', error);
+      toast.error("Erreur lors de l'enregistrement de la section d'assistance");
+    }
+  };
 
   return (
     <div className="container mx-auto py-6 max-w-7xl">
