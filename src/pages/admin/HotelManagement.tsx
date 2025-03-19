@@ -8,6 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Hotel {
   id: string;
@@ -29,6 +37,10 @@ const HotelManagement = () => {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; hotelId: string | null }>({
+    open: false,
+    hotelId: null
+  });
   const [currentUser, setCurrentUser] = useState<string | null>("demo-user-id");
   const navigate = useNavigate();
   
@@ -97,10 +109,6 @@ const HotelManagement = () => {
   
   // Delete a hotel
   const deleteHotel = async (id: string) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet hôtel ? Cette action est irréversible.')) {
-      return;
-    }
-    
     setLoading(true);
     
     // Simulate deleting a hotel
@@ -108,7 +116,13 @@ const HotelManagement = () => {
       setHotels(hotels.filter(hotel => hotel.id !== id));
       toast.success('Hôtel supprimé avec succès');
       setLoading(false);
+      setDeleteDialog({ open: false, hotelId: null });
     }, 1000);
+  };
+  
+  // Navigate to edit page
+  const editHotel = (id: string) => {
+    navigate(`/admin/hotels/${id}/edit`);
   };
   
   return (
@@ -241,11 +255,11 @@ const HotelManagement = () => {
               </CardContent>
               <CardFooter className="flex justify-end gap-2">
                 <Button size="sm" variant="outline" 
-                  onClick={() => navigate(`/admin/hotels/${hotel.id}`)}>
+                  onClick={() => editHotel(hotel.id)}>
                   <Edit className="w-4 h-4 mr-1" />
                   Éditer
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => deleteHotel(hotel.id)}>
+                <Button size="sm" variant="destructive" onClick={() => setDeleteDialog({ open: true, hotelId: hotel.id })}>
                   <Trash2 className="w-4 h-4 mr-1" />
                   Supprimer
                 </Button>
@@ -254,6 +268,25 @@ const HotelManagement = () => {
           ))
         )}
       </div>
+      
+      <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmation de suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer cet hôtel ? Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, hotelId: null })}>
+              Annuler
+            </Button>
+            <Button variant="destructive" onClick={() => deleteDialog.hotelId && deleteHotel(deleteDialog.hotelId)}>
+              Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
