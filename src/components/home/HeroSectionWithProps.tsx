@@ -8,15 +8,20 @@ import { Link } from 'react-router-dom';
 interface HeroSectionProps {
   title: string;
   subtitle: string;
+  backgroundImage?: string;
 }
 
-const HeroSectionWithProps = ({ title, subtitle }: HeroSectionProps) => {
+const HeroSectionWithProps = ({ 
+  title, 
+  subtitle, 
+  backgroundImage = '/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png' 
+}: HeroSectionProps) => {
   return (
     <div className="relative h-[500px] md:h-[600px] overflow-hidden bg-gray-900">
       <div 
         className="absolute inset-0 bg-cover bg-center" 
         style={{ 
-          backgroundImage: 'url(/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png)',
+          backgroundImage: `url(${backgroundImage})`,
           opacity: 0.6
         }}
       />

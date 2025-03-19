@@ -1,14 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Info, Palette, Grid, Layout } from 'lucide-react';
+import { ArrowLeft, Save, Info, Palette, Grid, Layout, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveHotel } from '@/hooks/useActiveHotel';
+import { Separator } from '@/components/ui/separator';
 
 interface Hotel {
   id: string;
@@ -43,57 +46,9 @@ const HotelInterface = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [hotel, setHotel] = useState<Hotel | null>(null);
-  const [aboutSections, setAboutSections] = useState<HotelAbout[]>([]);
-  const [services, setServices] = useState<HotelService[]>([]);
+  const { hotel, aboutSections, services, loading: dataLoading } = useActiveHotel(id);
   const [editingAbout, setEditingAbout] = useState<HotelAbout | null>(null);
   const [editingService, setEditingService] = useState<HotelService | null>(null);
-
-  useEffect(() => {
-    fetchHotelData();
-  }, [id]);
-
-  const fetchHotelData = async () => {
-    if (!id) return;
-    
-    setLoading(true);
-    try {
-      // Fetch hotel
-      const { data: hotelData, error: hotelError } = await supabase
-        .from('hotels')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (hotelError) throw hotelError;
-      setHotel(hotelData);
-      
-      // Fetch about sections
-      const { data: aboutData, error: aboutError } = await supabase
-        .from('hotel_about')
-        .select('*')
-        .eq('hotel_id', id)
-        .order('title');
-      
-      if (aboutError) throw aboutError;
-      setAboutSections(aboutData || []);
-      
-      // Fetch services
-      const { data: servicesData, error: servicesError } = await supabase
-        .from('hotel_services')
-        .select('*')
-        .eq('hotel_id', id)
-        .order('display_order');
-      
-      if (servicesError) throw servicesError;
-      setServices(servicesData || []);
-    } catch (error) {
-      console.error('Error fetching hotel data:', error);
-      toast.error("Erreur lors du chargement des données de l'hôtel");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSaveAbout = async (about: HotelAbout) => {
     setLoading(true);
@@ -114,10 +69,6 @@ const HotelInterface = () => {
           
         if (error) throw error;
         
-        setAboutSections(aboutSections.map(item => 
-          item.id === about.id ? about : item
-        ));
-        
         toast.success('Section À propos mise à jour');
       } else {
         // Create new about section
@@ -137,11 +88,14 @@ const HotelInterface = () => {
           
         if (error) throw error;
         
-        setAboutSections([...aboutSections, data]);
         toast.success('Section À propos ajoutée');
       }
       
       setEditingAbout(null);
+      // Rechargement des données
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Error saving about section:', error);
       toast.error("Erreur lors de l'enregistrement de la section À propos");
@@ -171,10 +125,6 @@ const HotelInterface = () => {
           
         if (error) throw error;
         
-        setServices(services.map(item => 
-          item.id === service.id ? service : item
-        ));
-        
         toast.success('Service mis à jour');
       } else {
         // Create new service
@@ -196,11 +146,14 @@ const HotelInterface = () => {
           
         if (error) throw error;
         
-        setServices([...services, data]);
         toast.success('Service ajouté');
       }
       
       setEditingService(null);
+      // Rechargement des données
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Error saving service:', error);
       toast.error("Erreur lors de l'enregistrement du service");
@@ -221,8 +174,11 @@ const HotelInterface = () => {
         
       if (error) throw error;
       
-      setAboutSections(aboutSections.filter(item => item.id !== id));
       toast.success('Section supprimée');
+      // Rechargement des données
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Error deleting about section:', error);
       toast.error("Erreur lors de la suppression de la section");
@@ -243,8 +199,11 @@ const HotelInterface = () => {
         
       if (error) throw error;
       
-      setServices(services.filter(item => item.id !== id));
       toast.success('Service supprimé');
+      // Rechargement des données
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Error deleting service:', error);
       toast.error("Erreur lors de la suppression du service");
@@ -482,7 +441,7 @@ const HotelInterface = () => {
     display_order: services.length
   };
 
-  if (!hotel && !loading) {
+  if (!hotel && !dataLoading) {
     return (
       <div className="container mx-auto py-10 px-4">
         <div className="flex items-center mb-8">
@@ -540,10 +499,14 @@ const HotelInterface = () => {
           >
             Éditer l'hôtel
           </Button>
+          
+          <Button onClick={() => navigate('/')}>
+            Voir le site
+          </Button>
         </div>
       </div>
       
-      {loading && !hotel ? (
+      {dataLoading ? (
         <div className="animate-pulse space-y-4">
           <div className="h-10 bg-gray-200 rounded"></div>
           <div className="h-40 bg-gray-200 rounded"></div>
@@ -612,7 +575,7 @@ const HotelInterface = () => {
                     ) : null}
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {aboutSections.map(section => (
+                      {aboutSections.map((section) => (
                         <Card key={section.id} className="overflow-hidden">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -630,14 +593,14 @@ const HotelInterface = () => {
                                 size="sm" 
                                 onClick={() => setEditingAbout(section)}
                               >
-                                Modifier
+                                <Edit className="w-4 h-4 mr-1" /> Modifier
                               </Button>
                               <Button 
                                 variant="destructive" 
                                 size="sm" 
                                 onClick={() => handleDeleteAbout(section.id)}
                               >
-                                Supprimer
+                                <Trash2 className="w-4 h-4 mr-1" /> Supprimer
                               </Button>
                             </div>
                           </CardContent>
@@ -703,7 +666,12 @@ const HotelInterface = () => {
                               {service.title}
                             </CardTitle>
                             <CardDescription>
-                              Type: {service.type === 'main' ? 'Principal' : 'Additionnel'} (Ordre: {service.display_order})
+                              <Badge className="mr-1">
+                                {service.type === 'main' ? 'Principal' : 'Additionnel'}
+                              </Badge>
+                              <Badge variant="outline">
+                                Ordre: {service.display_order}
+                              </Badge>
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
@@ -714,14 +682,14 @@ const HotelInterface = () => {
                                 size="sm" 
                                 onClick={() => setEditingService(service)}
                               >
-                                Modifier
+                                <Edit className="w-4 h-4 mr-1" /> Modifier
                               </Button>
                               <Button 
                                 variant="destructive" 
                                 size="sm" 
                                 onClick={() => handleDeleteService(service.id)}
                               >
-                                Supprimer
+                                <Trash2 className="w-4 h-4 mr-1" /> Supprimer
                               </Button>
                             </div>
                           </CardContent>

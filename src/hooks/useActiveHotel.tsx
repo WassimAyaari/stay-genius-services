@@ -43,7 +43,7 @@ interface UseActiveHotelReturn {
   error: Error | null;
 }
 
-export const useActiveHotel = (): UseActiveHotelReturn => {
+export const useActiveHotel = (hotelId?: string): UseActiveHotelReturn => {
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [aboutSections, setAboutSections] = useState<HotelAbout[]>([]);
   const [services, setServices] = useState<HotelService[]>([]);
@@ -54,40 +54,83 @@ export const useActiveHotel = (): UseActiveHotelReturn => {
     const fetchActiveHotel = async () => {
       setLoading(true);
       try {
-        // First, get all hotels and use the first one as active
-        const { data: hotelsData, error: hotelsError } = await supabase
-          .from('hotels')
-          .select('*')
-          .order('name')
-          .limit(1);
-        
-        if (hotelsError) throw hotelsError;
-        
-        if (hotelsData && hotelsData.length > 0) {
-          const activeHotel = hotelsData[0];
-          setHotel(activeHotel);
-          
-          // Fetch about sections for this hotel
-          const { data: aboutData, error: aboutError } = await supabase
-            .from('hotel_about')
+        // If hotelId is provided, fetch that specific hotel
+        if (hotelId) {
+          const { data: hotelData, error: hotelError } = await supabase
+            .from('hotels')
             .select('*')
-            .eq('hotel_id', activeHotel.id)
-            .eq('status', 'active')
-            .order('title');
+            .eq('id', hotelId)
+            .single();
           
-          if (aboutError) throw aboutError;
-          setAboutSections(aboutData || []);
+          if (hotelError) throw hotelError;
           
-          // Fetch services for this hotel
-          const { data: servicesData, error: servicesError } = await supabase
-            .from('hotel_services')
+          if (hotelData) {
+            setHotel(hotelData);
+            
+            // Fetch about sections for this hotel
+            const { data: aboutData, error: aboutError } = await supabase
+              .from('hotel_about')
+              .select('*')
+              .eq('hotel_id', hotelData.id)
+              .eq('status', 'active')
+              .order('title');
+            
+            if (aboutError) throw aboutError;
+            setAboutSections(aboutData || []);
+            
+            // Fetch services for this hotel
+            const { data: servicesData, error: servicesError } = await supabase
+              .from('hotel_services')
+              .select('*')
+              .eq('hotel_id', hotelData.id)
+              .eq('status', 'active')
+              .order('display_order');
+            
+            if (servicesError) throw servicesError;
+            setServices(servicesData.map(service => ({
+              ...service,
+              type: service.type as 'main' | 'additional'
+            })));
+          }
+        } else {
+          // First, get all hotels and use the first one as active
+          const { data: hotelsData, error: hotelsError } = await supabase
+            .from('hotels')
             .select('*')
-            .eq('hotel_id', activeHotel.id)
-            .eq('status', 'active')
-            .order('display_order');
+            .order('name')
+            .limit(1);
           
-          if (servicesError) throw servicesError;
-          setServices(servicesData || []);
+          if (hotelsError) throw hotelsError;
+          
+          if (hotelsData && hotelsData.length > 0) {
+            const activeHotel = hotelsData[0];
+            setHotel(activeHotel);
+            
+            // Fetch about sections for this hotel
+            const { data: aboutData, error: aboutError } = await supabase
+              .from('hotel_about')
+              .select('*')
+              .eq('hotel_id', activeHotel.id)
+              .eq('status', 'active')
+              .order('title');
+            
+            if (aboutError) throw aboutError;
+            setAboutSections(aboutData || []);
+            
+            // Fetch services for this hotel
+            const { data: servicesData, error: servicesError } = await supabase
+              .from('hotel_services')
+              .select('*')
+              .eq('hotel_id', activeHotel.id)
+              .eq('status', 'active')
+              .order('display_order');
+            
+            if (servicesError) throw servicesError;
+            setServices(servicesData.map(service => ({
+              ...service,
+              type: service.type as 'main' | 'additional'
+            })));
+          }
         }
       } catch (error) {
         console.error('Error fetching active hotel data:', error);
@@ -98,7 +141,7 @@ export const useActiveHotel = (): UseActiveHotelReturn => {
     };
     
     fetchActiveHotel();
-  }, []);
+  }, [hotelId]);
 
   return { hotel, aboutSections, services, loading, error };
 };

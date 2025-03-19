@@ -1,6 +1,16 @@
 
 import React from 'react';
-import { Info } from 'lucide-react';
+import { 
+  Info, 
+  Coffee, 
+  Landmark, 
+  Wifi, 
+  Utensils, 
+  MapPin, 
+  Award, 
+  History, 
+  Heart 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -10,6 +20,14 @@ import { HotelAbout } from '@/hooks/useActiveHotel';
 // Mapping des noms d'icônes de chaîne vers les composants Lucide
 const iconMap: Record<string, React.ReactNode> = {
   info: <Info className="h-10 w-10 text-primary" />,
+  coffee: <Coffee className="h-10 w-10 text-primary" />,
+  landmark: <Landmark className="h-10 w-10 text-primary" />,
+  wifi: <Wifi className="h-10 w-10 text-primary" />,
+  utensils: <Utensils className="h-10 w-10 text-primary" />,
+  map: <MapPin className="h-10 w-10 text-primary" />,
+  award: <Award className="h-10 w-10 text-primary" />,
+  history: <History className="h-10 w-10 text-primary" />,
+  heart: <Heart className="h-10 w-10 text-primary" />,
   // Ajoutez d'autres icônes au besoin
 };
 
