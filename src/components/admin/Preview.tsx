@@ -20,25 +20,30 @@ export const Preview = ({ data, type }: PreviewProps) => {
 };
 
 const HeroPreview = ({ data }: { data: HotelHero }) => {
+  // Use a placeholder image if the background_image is not set or invalid
+  const backgroundImage = data.background_image && data.background_image.trim() !== '' 
+    ? data.background_image 
+    : '/placeholder.svg';
+  
   return (
     <Card className="overflow-hidden">
       <div 
         className="relative h-[300px] w-full bg-cover bg-center" 
-        style={{ backgroundImage: `url(${data.background_image})` }}
+        style={{ backgroundImage: `url(${backgroundImage})` }}
       >
         <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white p-6">
-          <h1 className="text-3xl font-bold mb-2">{data.title}</h1>
-          <p className="text-xl mb-8">{data.subtitle}</p>
+          <h1 className="text-3xl font-bold mb-2">{data.title || 'Titre'}</h1>
+          <p className="text-xl mb-8">{data.subtitle || 'Sous-titre'}</p>
           <div className="relative max-w-md w-full">
             <input
               type="text"
-              placeholder={data.search_placeholder}
+              placeholder={data.search_placeholder || 'Rechercher...'}
               className="w-full px-4 py-2 rounded-lg text-gray-800"
               readOnly
             />
           </div>
           <div className="mt-4 text-sm">
-            <span className="px-2 py-1 rounded bg-green-500 text-white">
+            <span className={`px-2 py-1 rounded ${data.status === 'active' ? 'bg-green-500' : 'bg-gray-500'} text-white`}>
               {data.status === 'active' ? 'Actif' : 'Inactif'}
             </span>
           </div>

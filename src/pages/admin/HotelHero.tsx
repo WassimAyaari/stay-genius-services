@@ -26,21 +26,53 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
         throw new Error("ID de l'hôtel manquant");
       }
 
-      // Création d'un nouvel objet pour les données à envoyer
-      const heroData: Omit<HotelHero, 'id'> = {
-        hotel_id: hotelId,
-        background_image: data.background_image,
-        title: data.title,
-        subtitle: data.subtitle,
-        search_placeholder: data.search_placeholder,
-        status: data.status
-      };
+      console.log("Données à envoyer:", data);
       
-      let result;
-      
-      if (data.id && data.id.trim() !== '') {
+      // Pour l'insertion, on ne doit pas envoyer l'ID, on doit le laisser générer par la base de données
+      if (!data.id || data.id.trim() === '') {
+        // Création d'un nouvel héro - ne pas inclure l'ID vide
+        const heroData = {
+          hotel_id: hotelId,
+          background_image: data.background_image,
+          title: data.title,
+          subtitle: data.subtitle,
+          search_placeholder: data.search_placeholder,
+          status: data.status
+        };
+        
+        console.log("Création d'une nouvelle section héro avec les données:", heroData);
+        
+        const { data: newData, error } = await supabase
+          .from('hotel_hero')
+          .insert(heroData)
+          .select()
+          .single();
+
+        if (error) {
+          console.error("Erreur lors de la création:", error);
+          throw error;
+        }
+        
+        console.log("Nouvelle section héro créée:", newData);
+        setHero(newData);
+        
+        toast({
+          title: "Succès",
+          description: "Section héro créée",
+        });
+      } else {
         // Mise à jour d'un héro existant
-        console.log("Mise à jour de la section hero avec ID:", data.id);
+        console.log("Mise à jour de la section héro avec ID:", data.id);
+        
+        const heroData = {
+          hotel_id: hotelId,
+          background_image: data.background_image,
+          title: data.title,
+          subtitle: data.subtitle,
+          search_placeholder: data.search_placeholder,
+          status: data.status
+        };
+        
         const { data: updatedData, error } = await supabase
           .from('hotel_hero')
           .update(heroData)
@@ -53,37 +85,13 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
           throw error;
         }
         
-        result = updatedData;
-        console.log("Section hero mise à jour:", updatedData);
+        console.log("Section héro mise à jour:", updatedData);
+        setHero(updatedData);
+        
         toast({
           title: "Succès",
           description: "Section héro mise à jour",
         });
-      } else {
-        // Création d'un nouveau héro - IMPORTANT: ne pas inclure l'ID
-        console.log("Création d'une nouvelle section hero avec les données:", heroData);
-        const { data: newData, error } = await supabase
-          .from('hotel_hero')
-          .insert(heroData)
-          .select()
-          .single();
-
-        if (error) {
-          console.error("Erreur lors de la création:", error);
-          throw error;
-        }
-        
-        result = newData;
-        console.log("Nouvelle section hero créée:", newData);
-        toast({
-          title: "Succès",
-          description: "Section héro créée",
-        });
-      }
-
-      // Mettre à jour l'état local avec les données retournées par Supabase
-      if (result) {
-        setHero(result);
       }
 
       if (onSave) onSave();
