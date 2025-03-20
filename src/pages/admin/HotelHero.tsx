@@ -30,28 +30,24 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
 
       console.log("Données à envoyer:", data);
       console.log("Hotel ID:", hotelId);
-      console.log("Type de Hotel ID:", typeof hotelId);
       
       // Determine if this is a create or update operation
       const isNewHero = !data.id || data.id === '';
       console.log("Est un nouveau héro:", isNewHero);
       
       if (isNewHero) {
-        // For creation, completely remove the id field from the data
-        const heroData = {
-          hotel_id: hotelId,
-          background_image: data.background_image,
-          title: data.title,
-          subtitle: data.subtitle,
-          search_placeholder: data.search_placeholder,
-          status: data.status
-        };
-        
-        console.log("Création d'une nouvelle section héro avec données:", heroData);
-        
+        // Pour la création, nous omettons complètement le champ id
+        // et n'envoyons que les champs nécessaires
         const { data: newData, error } = await supabase
           .from('hotel_hero')
-          .insert(heroData)
+          .insert({
+            hotel_id: hotelId,
+            background_image: data.background_image,
+            title: data.title,
+            subtitle: data.subtitle,
+            search_placeholder: data.search_placeholder,
+            status: data.status
+          })
           .select();
 
         if (error) {
@@ -71,7 +67,7 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
           throw new Error("Aucune donnée retournée après la création");
         }
       } else {
-        // For update
+        // Pour la mise à jour
         console.log("Mise à jour d'une section héro existante, ID:", data.id);
         
         const { data: updatedData, error } = await supabase
