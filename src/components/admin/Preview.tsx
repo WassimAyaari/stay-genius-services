@@ -20,6 +20,17 @@ export const Preview = ({ data, type }: PreviewProps) => {
 };
 
 const HeroPreview = ({ data }: { data: HotelHero }) => {
+  // Make sure we have valid data object
+  if (!data) {
+    return (
+      <Card className="overflow-hidden">
+        <div className="h-[300px] w-full bg-gray-200 flex items-center justify-center">
+          <p className="text-gray-500">Aucune donnée disponible</p>
+        </div>
+      </Card>
+    );
+  }
+  
   // Use a placeholder image if the background_image is not set or invalid
   const backgroundImage = data.background_image && data.background_image.trim() !== '' 
     ? data.background_image 
