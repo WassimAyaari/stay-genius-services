@@ -3,7 +3,7 @@ import React from 'react';
 import { 
   Utensils, 
   BedDouble, 
-  Spa, 
+  Heart, // Replacing Spa with Heart icon
   Map, 
   ShoppingBag, 
   Dumbbell, 
@@ -93,7 +93,7 @@ export const getSearchResults = (query: string): SearchResultGroup[] => {
           id: 'spa',
           title: 'Spa Services',
           path: '/spa',
-          icon: React.createElement(Spa, { size: 16 })
+          icon: React.createElement(Heart, { size: 16 }) // Use Heart icon instead of Spa
         },
         {
           id: 'gym',
