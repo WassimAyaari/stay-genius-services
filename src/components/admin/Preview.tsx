@@ -8,13 +8,21 @@ interface PreviewProps {
 }
 
 export const Preview = ({ data, type }: PreviewProps) => {
+  if (!data) {
+    return (
+      <div className="p-4 border rounded-md bg-gray-50">
+        <p className="text-sm text-center text-gray-500">Aucune donnée à prévisualiser</p>
+      </div>
+    );
+  }
+  
   if (type === 'hero') {
     return <HeroPreview data={data as HotelHero} />;
   }
   
   return (
     <div className="p-4 border rounded-md bg-gray-50">
-      <p className="text-sm text-center text-gray-500">Prévisualisation non disponible</p>
+      <p className="text-sm text-center text-gray-500">Prévisualisation non disponible pour ce type</p>
     </div>
   );
 };

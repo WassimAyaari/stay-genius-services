@@ -7,6 +7,8 @@ import HeroForm from '@/components/admin/HeroForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Preview } from '@/components/admin/Preview';
+import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
 
 interface HotelHeroSectionProps {
   hotelId: string;
@@ -35,19 +37,21 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
       console.log("Est un nouveau héro:", isNewHero);
       
       if (isNewHero) {
-        // For creation, only send necessary fields without ID
-        console.log("Création d'une nouvelle section héro");
+        // For creation, completely remove the id field from the data
+        const heroData = {
+          hotel_id: hotelId,
+          background_image: data.background_image,
+          title: data.title,
+          subtitle: data.subtitle,
+          search_placeholder: data.search_placeholder,
+          status: data.status
+        };
+        
+        console.log("Création d'une nouvelle section héro avec données:", heroData);
         
         const { data: newData, error } = await supabase
           .from('hotel_hero')
-          .insert({
-            hotel_id: hotelId,
-            background_image: data.background_image,
-            title: data.title,
-            subtitle: data.subtitle,
-            search_placeholder: data.search_placeholder,
-            status: data.status
-          })
+          .insert(heroData)
           .select();
 
         if (error) {
@@ -121,14 +125,24 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
     setActiveTab(value);
   };
 
+  const viewFullPreview = () => {
+    window.open(`/hotels/${hotelId}`, '_blank');
+  };
+
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Section Héro</CardTitle>
-          <CardDescription>
-            Configurez l'en-tête principal de votre page d'accueil
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Section Héro</CardTitle>
+            <CardDescription>
+              Configurez l'en-tête principal de votre page d'accueil
+            </CardDescription>
+          </div>
+          <Button variant="outline" onClick={viewFullPreview} className="gap-2">
+            <Eye size={16} />
+            Voir le site complet
+          </Button>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
