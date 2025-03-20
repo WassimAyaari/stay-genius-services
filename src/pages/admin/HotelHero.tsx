@@ -27,8 +27,13 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
         hotel_id: hotelId,
       };
 
+      // Remove the id field if it's empty to let the database generate it
+      if (heroData.id === '') {
+        delete heroData.id;
+      }
+
       let result;
-      if (data.id) {
+      if (data.id && data.id !== '') {
         // Update existing hero
         const { data: updatedData, error } = await supabase
           .from('hotel_hero')
