@@ -1,289 +1,185 @@
 
 import React from 'react';
 import { 
-  UtensilsCrossed, BedDouble, Heart, Calendar, Phone, 
-  Map, ShoppingBag, Compass, Info, Coffee, Utensils,
-  Shirt, Wifi, Bell, Clock, ShieldCheck, CreditCard,
-  Droplets, Dumbbell, Waves
+  Utensils, 
+  BedDouble, 
+  Spa, 
+  Map, 
+  ShoppingBag, 
+  Dumbbell, 
+  Calendar, 
+  Coffee, 
+  Phone, 
+  Info, 
+  MessageSquare 
 } from 'lucide-react';
 
-// Define the search result item structure
-export interface SearchResultItem {
+// Define the structure of a search result item
+interface SearchResultItem {
   id: string;
   title: string;
   path: string;
-  keywords: string[];
   icon: React.ReactNode;
 }
 
-// Define the search result group structure
-export interface SearchResultGroup {
+// Define the structure of a search result group
+interface SearchResultGroup {
   category: string;
   items: SearchResultItem[];
 }
 
-// Search results processor
-export function getSearchResults(query: string): SearchResultGroup[] {
-  // Base search categories with their items
-  const baseCategories: SearchResultGroup[] = [
+// Function to get search results based on a query
+export const getSearchResults = (query: string): SearchResultGroup[] => {
+  const lowerQuery = query.toLowerCase();
+
+  // Define all available search items
+  const allItems: SearchResultGroup[] = [
     {
-      category: "Dining",
+      category: 'Rooms & Suites',
       items: [
-        { 
-          id: "restaurant-grand-bistro", 
-          title: "The Grand Bistro", 
-          path: "/dining/1",
-          keywords: ["food", "restaurant", "bistro", "dining", "eat", "breakfast", "lunch", "dinner", "meal"],
-          icon: <UtensilsCrossed className="h-4 w-4" /> 
+        {
+          id: 'deluxe-room',
+          title: 'Deluxe Room',
+          path: '/rooms/deluxe',
+          icon: <BedDouble size={16} />
         },
-        { 
-          id: "restaurant-sakura", 
-          title: "Sakura Japanese", 
-          path: "/dining/2",
-          keywords: ["food", "restaurant", "japanese", "sushi", "asian", "dining", "eat"],
-          icon: <UtensilsCrossed className="h-4 w-4" /> 
+        {
+          id: 'suite',
+          title: 'Executive Suite',
+          path: '/rooms/suite',
+          icon: <BedDouble size={16} />
         },
-        { 
-          id: "dining-all", 
-          title: "All Restaurants", 
-          path: "/dining",
-          keywords: ["food", "restaurants", "dining", "eat", "all restaurants"],
-          icon: <UtensilsCrossed className="h-4 w-4" /> 
+        {
+          id: 'presidential',
+          title: 'Presidential Suite',
+          path: '/rooms/presidential',
+          icon: <BedDouble size={16} />
         },
-        { 
-          id: "breakfast-service", 
-          title: "Breakfast Service", 
-          path: "/dining/breakfast",
-          keywords: ["breakfast", "morning", "coffee", "buffet", "continental"],
-          icon: <Coffee className="h-4 w-4" /> 
-        },
-        { 
-          id: "room-service", 
-          title: "Room Service", 
-          path: "/my-room/dining",
-          keywords: ["room service", "in-room dining", "delivery", "private dining"],
-          icon: <Utensils className="h-4 w-4" /> 
+        {
+          id: 'my-room',
+          title: 'My Room',
+          path: '/my-room',
+          icon: <BedDouble size={16} />
         }
       ]
     },
     {
-      category: "Wellness",
+      category: 'Dining',
       items: [
-        { 
-          id: "spa-services", 
-          title: "Spa Services", 
-          path: "/spa",
-          keywords: ["spa", "massage", "wellness", "relax", "facial", "treatment"],
-          icon: <Heart className="h-4 w-4" /> 
+        {
+          id: 'restaurant',
+          title: 'Main Restaurant',
+          path: '/dining/restaurant',
+          icon: <Utensils size={16} />
         },
-        { 
-          id: "fitness-center", 
-          title: "Fitness Center", 
-          path: "/wellness/fitness",
-          keywords: ["gym", "workout", "fitness", "exercise", "training"],
-          icon: <Dumbbell className="h-4 w-4" /> 
+        {
+          id: 'bar',
+          title: 'Lobby Bar',
+          path: '/dining/bar',
+          icon: <Coffee size={16} />
         },
-        { 
-          id: "swimming-pool", 
-          title: "Swimming Pool", 
-          path: "/wellness/pool",
-          keywords: ["pool", "swim", "jacuzzi", "sauna", "water"],
-          icon: <Waves className="h-4 w-4" /> 
-        },
-        { 
-          id: "thermal-baths", 
-          title: "Thermal Baths", 
-          path: "/wellness/thermal",
-          keywords: ["bath", "thermal", "hot springs", "relaxation"],
-          icon: <Droplets className="h-4 w-4" /> 
+        {
+          id: 'room-service',
+          title: 'Room Service',
+          path: '/dining/room-service',
+          icon: <Utensils size={16} />
         }
       ]
     },
     {
-      category: "Accommodation",
+      category: 'Wellness',
       items: [
-        { 
-          id: "my-room", 
-          title: "My Room", 
-          path: "/my-room",
-          keywords: ["room", "suite", "bed", "sleep", "accommodation", "my room", "housekeeping"],
-          icon: <BedDouble className="h-4 w-4" /> 
+        {
+          id: 'spa',
+          title: 'Spa Services',
+          path: '/spa',
+          icon: <Spa size={16} />
         },
-        { 
-          id: "housekeeping", 
-          title: "Housekeeping", 
-          path: "/services/housekeeping",
-          keywords: ["cleaning", "housekeeping", "towels", "room service", "laundry"],
-          icon: <Shirt className="h-4 w-4" /> 
-        },
-        { 
-          id: "wifi-access", 
-          title: "Wi-Fi Access", 
-          path: "/services/wifi",
-          keywords: ["wifi", "internet", "connection", "network"],
-          icon: <Wifi className="h-4 w-4" /> 
-        },
-        { 
-          id: "room-service-general", 
-          title: "Room Service", 
-          path: "/services/room-service",
-          keywords: ["service", "room", "assistance", "help", "request"],
-          icon: <Bell className="h-4 w-4" /> 
+        {
+          id: 'gym',
+          title: 'Fitness Center',
+          path: '/fitness',
+          icon: <Dumbbell size={16} />
         }
       ]
     },
     {
-      category: "Activities",
+      category: 'Hotel Services',
       items: [
-        { 
-          id: "activities-all", 
-          title: "All Activities", 
-          path: "/activities",
-          keywords: ["activity", "events", "entertainment", "things to do", "fun"],
-          icon: <Calendar className="h-4 w-4" /> 
+        {
+          id: 'concierge',
+          title: 'Concierge',
+          path: '/services/concierge',
+          icon: <Info size={16} />
         },
-        { 
-          id: "hotel-map", 
-          title: "Hotel Map", 
-          path: "/map",
-          keywords: ["map", "directions", "location", "find", "navigation"],
-          icon: <Map className="h-4 w-4" /> 
+        {
+          id: 'housekeeping',
+          title: 'Housekeeping',
+          path: '/services/housekeeping',
+          icon: <BedDouble size={16} />
         },
-        { 
-          id: "daily-schedule", 
-          title: "Daily Schedule", 
-          path: "/activities/schedule",
-          keywords: ["schedule", "program", "agenda", "timetable", "daily"],
-          icon: <Clock className="h-4 w-4" /> 
+        {
+          id: 'events',
+          title: 'Events',
+          path: '/events',
+          icon: <Calendar size={16} />
+        },
+        {
+          id: 'shops',
+          title: 'Hotel Shops',
+          path: '/shops',
+          icon: <ShoppingBag size={16} />
+        },
+        {
+          id: 'map',
+          title: 'Hotel Map',
+          path: '/map',
+          icon: <Map size={16} />
         }
       ]
     },
     {
-      category: "Hotel Information",
+      category: 'Help & Contact',
       items: [
-        { 
-          id: "services", 
-          title: "Services", 
-          path: "/services",
-          keywords: ["service", "assistance", "help", "concierge", "support"],
-          icon: <Phone className="h-4 w-4" /> 
+        {
+          id: 'help',
+          title: 'Help Center',
+          path: '/help',
+          icon: <Info size={16} />
         },
-        { 
-          id: "about", 
-          title: "About The Hotel", 
-          path: "/about",
-          keywords: ["about", "hotel", "information", "history", "details"],
-          icon: <Info className="h-4 w-4" /> 
+        {
+          id: 'contact',
+          title: 'Contact Us',
+          path: '/contact',
+          icon: <Phone size={16} />
         },
-        { 
-          id: "shops", 
-          title: "Hotel Shops", 
-          path: "/shops",
-          keywords: ["shop", "shopping", "retail", "buy", "purchase", "gift", "souvenir"],
-          icon: <ShoppingBag className="h-4 w-4" /> 
-        },
-        { 
-          id: "destination", 
-          title: "Local Destination", 
-          path: "/destination",
-          keywords: ["destination", "local", "attractions", "sightseeing", "tour", "explore"],
-          icon: <Compass className="h-4 w-4" /> 
-        },
-        { 
-          id: "security", 
-          title: "Security Information", 
-          path: "/services/security",
-          keywords: ["security", "safety", "emergency", "help", "assistance"],
-          icon: <ShieldCheck className="h-4 w-4" /> 
-        },
-        { 
-          id: "payment", 
-          title: "Payment Options", 
-          path: "/services/payment",
-          keywords: ["payment", "bill", "invoice", "credit card", "cash", "checkout"],
-          icon: <CreditCard className="h-4 w-4" /> 
+        {
+          id: 'feedback',
+          title: 'Feedback',
+          path: '/feedback',
+          icon: <MessageSquare size={16} />
         }
       ]
     }
   ];
 
-  // If no query, return all categories
-  if (!query || query.length === 0) {
-    return baseCategories;
+  // If no query, return all items
+  if (!query || query.trim() === '') {
+    return allItems;
   }
 
-  // Search in keywords and title
-  const normalizedQuery = query.toLowerCase().trim();
-  
-  // Context-aware mapping for common hotel queries
-  const contextMap: Record<string, string[]> = {
-    // Food and dining related
-    "hungry": ["food", "restaurant", "dining"],
-    "eat": ["food", "restaurant", "dining"],
-    "breakfast": ["food", "restaurant", "dining", "breakfast"],
-    "lunch": ["food", "restaurant", "dining"],
-    "dinner": ["food", "restaurant", "dining"],
-    "meal": ["food", "restaurant", "dining"],
+  // Filter items based on the query
+  const filteredGroups = allItems.map(group => {
+    const filteredItems = group.items.filter(item => 
+      item.title.toLowerCase().includes(lowerQuery) || 
+      group.category.toLowerCase().includes(lowerQuery)
+    );
     
-    // Room related
-    "sleep": ["room", "bed", "accommodation"],
-    "rest": ["room", "spa", "relax"],
-    "clean": ["housekeeping", "room", "service"],
-    "towel": ["housekeeping", "room", "service"],
-    "pillow": ["housekeeping", "room", "service"],
-    
-    // Activities
-    "bored": ["activity", "entertainment", "things to do"],
-    "fun": ["activity", "entertainment", "events"],
-    
-    // Services
-    "help": ["service", "assistance", "concierge"],
-    "need": ["service", "assistance", "concierge"],
-    "broken": ["service", "assistance", "maintenance"],
-    
-    // Spa related
-    "relax": ["spa", "massage", "wellness"],
-    "tired": ["spa", "massage", "wellness", "room"],
-    
-    // Specific needs
-    "internet": ["wifi", "connection"],
-    "workout": ["gym", "fitness"],
-    "swim": ["pool", "spa"],
-    "pay": ["checkout", "bill", "payment"],
-    "emergency": ["security", "help", "assistance"],
-    "checkout": ["payment", "reception", "bill"],
-    "tours": ["destination", "activities", "local"],
-    "buy": ["shops", "shopping", "purchase"]
-  };
+    return {
+      ...group,
+      items: filteredItems
+    };
+  }).filter(group => group.items.length > 0);
 
-  // Expand query with context terms
-  let searchTerms = [normalizedQuery];
-  
-  // Add contextual related terms if they exist
-  Object.entries(contextMap).forEach(([contextTerm, relatedTerms]) => {
-    if (normalizedQuery.includes(contextTerm)) {
-      searchTerms = [...searchTerms, ...relatedTerms];
-    }
-  });
-
-  // Filter categories and items based on expanded search terms
-  const filteredCategories = baseCategories
-    .map(category => {
-      // Filter items in each category
-      const filteredItems = category.items.filter(item => {
-        return searchTerms.some(term => 
-          item.title.toLowerCase().includes(term) || 
-          item.keywords.some(keyword => keyword.includes(term))
-        );
-      });
-      
-      // Return category with filtered items
-      return {
-        ...category,
-        items: filteredItems
-      };
-    })
-    .filter(category => category.items.length > 0); // Keep only categories with matching items
-
-  return filteredCategories;
-}
+  return filteredGroups;
+};
