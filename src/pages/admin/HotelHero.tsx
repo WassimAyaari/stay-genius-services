@@ -31,41 +31,45 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
       console.log("Type de Hotel ID:", typeof hotelId);
       
       // Determine if this is a create or update operation
-      const isNewHero = !data.id || data.id.trim() === '';
+      const isNewHero = !data.id || data.id === '';
+      console.log("Est un nouveau héro:", isNewHero);
       
       if (isNewHero) {
-        // For creation, prepare data WITHOUT the ID field at all
-        const heroData = {
-          hotel_id: hotelId,
-          background_image: data.background_image,
-          title: data.title,
-          subtitle: data.subtitle,
-          search_placeholder: data.search_placeholder,
-          status: data.status
-        };
-        
-        console.log("Création d'une nouvelle section héro avec les données:", heroData);
+        // For creation, only send necessary fields without ID
+        console.log("Création d'une nouvelle section héro");
         
         const { data: newData, error } = await supabase
           .from('hotel_hero')
-          .insert(heroData)
-          .select()
-          .single();
+          .insert({
+            hotel_id: hotelId,
+            background_image: data.background_image,
+            title: data.title,
+            subtitle: data.subtitle,
+            search_placeholder: data.search_placeholder,
+            status: data.status
+          })
+          .select();
 
         if (error) {
           console.error("Erreur lors de la création:", error);
           throw error;
         }
         
-        console.log("Nouvelle section héro créée:", newData);
-        setHero(newData);
-        
-        toast({
-          title: "Succès",
-          description: "Section héro créée",
-        });
+        if (newData && newData.length > 0) {
+          console.log("Nouvelle section héro créée:", newData[0]);
+          setHero(newData[0]);
+          
+          toast({
+            title: "Succès",
+            description: "Section héro créée",
+          });
+        } else {
+          throw new Error("Aucune donnée retournée après la création");
+        }
       } else {
-        // For update, we can include the ID
+        // For update
+        console.log("Mise à jour d'une section héro existante, ID:", data.id);
+        
         const { data: updatedData, error } = await supabase
           .from('hotel_hero')
           .update({
@@ -77,21 +81,24 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
             status: data.status
           })
           .eq('id', data.id)
-          .select()
-          .single();
+          .select();
 
         if (error) {
           console.error("Erreur lors de la mise à jour:", error);
           throw error;
         }
         
-        console.log("Section héro mise à jour:", updatedData);
-        setHero(updatedData);
-        
-        toast({
-          title: "Succès",
-          description: "Section héro mise à jour",
-        });
+        if (updatedData && updatedData.length > 0) {
+          console.log("Section héro mise à jour:", updatedData[0]);
+          setHero(updatedData[0]);
+          
+          toast({
+            title: "Succès",
+            description: "Section héro mise à jour",
+          });
+        } else {
+          throw new Error("Aucune donnée retournée après la mise à jour");
+        }
       }
 
       if (onSave) onSave();
