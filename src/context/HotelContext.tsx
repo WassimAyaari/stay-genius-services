@@ -105,14 +105,20 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children, hotelId 
     if (!hotel) return;
 
     try {
+      // Préparer la configuration mise à jour en fusionnant l'existante avec les nouvelles valeurs
       const updatedConfig: HotelConfig = {
         ...hotel.config,
         ...newConfig
       };
 
+      console.log('Updating config with:', updatedConfig);
+
+      // Assurez-vous que updatedConfig est un objet JSON valide pour Supabase
       const { error } = await supabase
         .from('hotels')
-        .update({ config: updatedConfig as any })
+        .update({ 
+          config: updatedConfig
+        })
         .eq('id', hotel.id);
 
       if (error) {
@@ -125,6 +131,7 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children, hotelId 
         return;
       }
 
+      // Mettre à jour l'état local
       setHotel({
         ...hotel,
         config: updatedConfig
