@@ -27,44 +27,52 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
         hotel_id: hotelId,
       };
 
-      // Remove the id field if it's empty to let the database generate it
-      if (heroData.id === '') {
+      // Supprimer complètement la propriété id si elle est vide
+      if (!heroData.id || heroData.id === '') {
         delete heroData.id;
-      }
-
-      let result;
-      if (data.id && data.id !== '') {
-        // Update existing hero
-        const { data: updatedData, error } = await supabase
-          .from('hotel_hero')
-          .update(heroData)
-          .eq('id', data.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        result = updatedData;
-        toast({
-          title: "Succès",
-          description: "Section héro mise à jour",
-        });
-      } else {
-        // Create new hero
+        
+        // Création d'un nouveau hero
+        console.log("Création d'une nouvelle section hero avec les données:", heroData);
         const { data: newData, error } = await supabase
           .from('hotel_hero')
-          .insert({ ...heroData })
+          .insert(heroData)
           .select()
           .single();
 
-        if (error) throw error;
-        result = newData;
+        if (error) {
+          console.error("Erreur lors de la création:", error);
+          throw error;
+        }
+        
+        console.log("Nouvelle section hero créée:", newData);
+        setHero(newData);
         toast({
           title: "Succès",
           description: "Section héro créée",
         });
+      } else {
+        // Mise à jour d'un hero existant
+        console.log("Mise à jour de la section hero avec ID:", heroData.id);
+        const { data: updatedData, error } = await supabase
+          .from('hotel_hero')
+          .update(heroData)
+          .eq('id', heroData.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error("Erreur lors de la mise à jour:", error);
+          throw error;
+        }
+        
+        console.log("Section hero mise à jour:", updatedData);
+        setHero(updatedData);
+        toast({
+          title: "Succès",
+          description: "Section héro mise à jour",
+        });
       }
 
-      setHero(result);
       if (onSave) onSave();
     } catch (error) {
       console.error("Error saving hero section:", error);
@@ -80,7 +88,7 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
 
   return (
     <div>
-      <HeroForm initialData={hero} onSubmit={handleSaveHero} />
+      <HeroForm initialData={hero} onSubmit={handleSaveHero} isSubmitting={isSubmitting} />
     </div>
   );
 };

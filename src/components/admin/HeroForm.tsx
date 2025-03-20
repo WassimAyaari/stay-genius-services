@@ -20,11 +20,10 @@ const heroSchema = z.object({
 interface HeroFormProps {
   initialData: HotelHero;
   onSubmit: (data: HotelHero) => void;
+  isSubmitting?: boolean;
 }
 
-const HeroForm = ({ initialData = defaultHotelHero, onSubmit }: HeroFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+const HeroForm = ({ initialData = defaultHotelHero, onSubmit, isSubmitting = false }: HeroFormProps) => {
   const form = useForm<z.infer<typeof heroSchema>>({
     resolver: zodResolver(heroSchema),
     defaultValues: {
@@ -37,15 +36,10 @@ const HeroForm = ({ initialData = defaultHotelHero, onSubmit }: HeroFormProps) =
   });
 
   const handleSubmit = async (data: z.infer<typeof heroSchema>) => {
-    setIsSubmitting(true);
-    try {
-      await onSubmit({
-        ...initialData,
-        ...data,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    await onSubmit({
+      ...initialData,
+      ...data,
+    });
   };
 
   return (
