@@ -41,25 +41,25 @@ export const getSearchResults = (query: string): SearchResultGroup[] => {
           id: 'deluxe-room',
           title: 'Deluxe Room',
           path: '/rooms/deluxe',
-          icon: <BedDouble size={16} />
+          icon: React.createElement(BedDouble, { size: 16 })
         },
         {
           id: 'suite',
           title: 'Executive Suite',
           path: '/rooms/suite',
-          icon: <BedDouble size={16} />
+          icon: React.createElement(BedDouble, { size: 16 })
         },
         {
           id: 'presidential',
           title: 'Presidential Suite',
           path: '/rooms/presidential',
-          icon: <BedDouble size={16} />
+          icon: React.createElement(BedDouble, { size: 16 })
         },
         {
           id: 'my-room',
           title: 'My Room',
           path: '/my-room',
-          icon: <BedDouble size={16} />
+          icon: React.createElement(BedDouble, { size: 16 })
         }
       ]
     },
@@ -70,19 +70,19 @@ export const getSearchResults = (query: string): SearchResultGroup[] => {
           id: 'restaurant',
           title: 'Main Restaurant',
           path: '/dining/restaurant',
-          icon: <Utensils size={16} />
+          icon: React.createElement(Utensils, { size: 16 })
         },
         {
           id: 'bar',
           title: 'Lobby Bar',
           path: '/dining/bar',
-          icon: <Coffee size={16} />
+          icon: React.createElement(Coffee, { size: 16 })
         },
         {
           id: 'room-service',
           title: 'Room Service',
           path: '/dining/room-service',
-          icon: <Utensils size={16} />
+          icon: React.createElement(Utensils, { size: 16 })
         }
       ]
     },
@@ -93,13 +93,13 @@ export const getSearchResults = (query: string): SearchResultGroup[] => {
           id: 'spa',
           title: 'Spa Services',
           path: '/spa',
-          icon: <Spa size={16} />
+          icon: React.createElement(Spa, { size: 16 })
         },
         {
           id: 'gym',
           title: 'Fitness Center',
           path: '/fitness',
-          icon: <Dumbbell size={16} />
+          icon: React.createElement(Dumbbell, { size: 16 })
         }
       ]
     },
@@ -110,31 +110,31 @@ export const getSearchResults = (query: string): SearchResultGroup[] => {
           id: 'concierge',
           title: 'Concierge',
           path: '/services/concierge',
-          icon: <Info size={16} />
+          icon: React.createElement(Info, { size: 16 })
         },
         {
           id: 'housekeeping',
           title: 'Housekeeping',
           path: '/services/housekeeping',
-          icon: <BedDouble size={16} />
+          icon: React.createElement(BedDouble, { size: 16 })
         },
         {
           id: 'events',
           title: 'Events',
           path: '/events',
-          icon: <Calendar size={16} />
+          icon: React.createElement(Calendar, { size: 16 })
         },
         {
           id: 'shops',
           title: 'Hotel Shops',
           path: '/shops',
-          icon: <ShoppingBag size={16} />
+          icon: React.createElement(ShoppingBag, { size: 16 })
         },
         {
           id: 'map',
           title: 'Hotel Map',
           path: '/map',
-          icon: <Map size={16} />
+          icon: React.createElement(Map, { size: 16 })
         }
       ]
     },
@@ -145,19 +145,19 @@ export const getSearchResults = (query: string): SearchResultGroup[] => {
           id: 'help',
           title: 'Help Center',
           path: '/help',
-          icon: <Info size={16} />
+          icon: React.createElement(Info, { size: 16 })
         },
         {
           id: 'contact',
           title: 'Contact Us',
           path: '/contact',
-          icon: <Phone size={16} />
+          icon: React.createElement(Phone, { size: 16 })
         },
         {
           id: 'feedback',
           title: 'Feedback',
           path: '/feedback',
-          icon: <MessageSquare size={16} />
+          icon: React.createElement(MessageSquare, { size: 16 })
         }
       ]
     }
