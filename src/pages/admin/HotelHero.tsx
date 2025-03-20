@@ -30,18 +30,13 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
       console.log("Hotel ID:", hotelId);
       console.log("Type de Hotel ID:", typeof hotelId);
       
-      // S'assurer que hotel_id est défini et valide
-      if (!data.hotel_id || data.hotel_id.trim() === '') {
-        data.hotel_id = hotelId;
-      }
-      
       // Determine if this is a create or update operation
       const isNewHero = !data.id || data.id.trim() === '';
       
       if (isNewHero) {
-        // For creation, prepare data WITHOUT the ID field
+        // For creation, prepare data WITHOUT the ID field at all
         const heroData = {
-          hotel_id: hotelId, // Utiliser directement hotelId ici pour être sûr
+          hotel_id: hotelId,
           background_image: data.background_image,
           title: data.title,
           subtitle: data.subtitle,
@@ -70,19 +65,17 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
           description: "Section héro créée",
         });
       } else {
-        // For update, use the existing ID
-        const heroData = {
-          hotel_id: hotelId, // Utiliser directement hotelId ici pour être sûr
-          background_image: data.background_image,
-          title: data.title,
-          subtitle: data.subtitle,
-          search_placeholder: data.search_placeholder,
-          status: data.status
-        };
-        
+        // For update, we can include the ID
         const { data: updatedData, error } = await supabase
           .from('hotel_hero')
-          .update(heroData)
+          .update({
+            hotel_id: hotelId,
+            background_image: data.background_image,
+            title: data.title,
+            subtitle: data.subtitle,
+            search_placeholder: data.search_placeholder,
+            status: data.status
+          })
           .eq('id', data.id)
           .select()
           .single();
