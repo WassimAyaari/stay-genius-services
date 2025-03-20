@@ -4,23 +4,27 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Loader2, Phone, Mail, MapPin } from 'lucide-react';
-import HeroSection from '@/components/home/HeroSection';
-import MainServicesSection from '@/components/home/MainServicesSection';
-import AdditionalServicesSection from '@/components/home/AdditionalServicesSection';
-import FeaturedExperienceSection from '@/components/home/FeaturedExperienceSection';
-import TodayHighlightsSection from '@/components/home/TodayHighlightsSection';
-import AssistanceSection from '@/components/home/AssistanceSection';
+import { toast } from '@/hooks/use-toast';
+import {
+  Hotel,
+  HotelHero,
+  HotelService,
+  HotelExperience,
+  HotelEvent,
+  HotelAssistance,
+  defaultHotelHero
+} from '@/lib/types';
 
 const HotelView = () => {
   const { id } = useParams<{ id: string }>();
-  const [hotel, setHotel] = useState<any>(null);
+  const [hotel, setHotel] = useState<Hotel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [heroData, setHeroData] = useState<any>(null);
-  const [mainServices, setMainServices] = useState<any[]>([]);
-  const [additionalServices, setAdditionalServices] = useState<any[]>([]);
-  const [experiences, setExperiences] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
-  const [assistance, setAssistance] = useState<any>(null);
+  const [heroData, setHeroData] = useState<HotelHero | null>(null);
+  const [mainServices, setMainServices] = useState<HotelService[]>([]);
+  const [additionalServices, setAdditionalServices] = useState<HotelService[]>([]);
+  const [experiences, setExperiences] = useState<HotelExperience[]>([]);
+  const [events, setEvents] = useState<HotelEvent[]>([]);
+  const [assistance, setAssistance] = useState<HotelAssistance | null>(null);
 
   useEffect(() => {
     const fetchHotelData = async () => {
@@ -101,6 +105,11 @@ const HotelView = () => {
 
       } catch (error) {
         console.error('Error fetching hotel data:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger les données de l'hôtel",
+        });
       } finally {
         setLoading(false);
       }
