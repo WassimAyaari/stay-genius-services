@@ -28,6 +28,12 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
 
       console.log("Données à envoyer:", data);
       console.log("Hotel ID:", hotelId);
+      console.log("Type de Hotel ID:", typeof hotelId);
+      
+      // S'assurer que hotel_id est défini et valide
+      if (!data.hotel_id || data.hotel_id.trim() === '') {
+        data.hotel_id = hotelId;
+      }
       
       // Determine if this is a create or update operation
       const isNewHero = !data.id || data.id.trim() === '';
@@ -35,7 +41,7 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
       if (isNewHero) {
         // For creation, prepare data WITHOUT the ID field
         const heroData = {
-          hotel_id: hotelId,
+          hotel_id: hotelId, // Utiliser directement hotelId ici pour être sûr
           background_image: data.background_image,
           title: data.title,
           subtitle: data.subtitle,
@@ -66,7 +72,7 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
       } else {
         // For update, use the existing ID
         const heroData = {
-          hotel_id: hotelId,
+          hotel_id: hotelId, // Utiliser directement hotelId ici pour être sûr
           background_image: data.background_image,
           title: data.title,
           subtitle: data.subtitle,
