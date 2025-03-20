@@ -27,6 +27,7 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
       }
 
       console.log("Données à envoyer:", data);
+      console.log("Hotel ID:", hotelId);
       
       // Determine if this is a create or update operation
       const isNewHero = !data.id || data.id.trim() === '';
