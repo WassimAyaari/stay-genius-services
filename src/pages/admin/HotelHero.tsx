@@ -22,16 +22,39 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
         throw new Error("ID de l'hôtel manquant");
       }
 
+      // Create a new object without modifying the original data
       const heroData = {
-        ...data,
         hotel_id: hotelId,
+        background_image: data.background_image,
+        title: data.title,
+        subtitle: data.subtitle,
+        search_placeholder: data.search_placeholder,
+        status: data.status
       };
+      
+      if (data.id && data.id.trim() !== '') {
+        // Updating existing hero
+        console.log("Mise à jour de la section hero avec ID:", data.id);
+        const { data: updatedData, error } = await supabase
+          .from('hotel_hero')
+          .update(heroData)
+          .eq('id', data.id)
+          .select()
+          .single();
 
-      // Supprimer complètement la propriété id si elle est vide
-      if (!heroData.id || heroData.id === '') {
-        delete heroData.id;
+        if (error) {
+          console.error("Erreur lors de la mise à jour:", error);
+          throw error;
+        }
         
-        // Création d'un nouveau hero
+        console.log("Section hero mise à jour:", updatedData);
+        setHero(updatedData);
+        toast({
+          title: "Succès",
+          description: "Section héro mise à jour",
+        });
+      } else {
+        // Creating new hero - do NOT include the ID field at all
         console.log("Création d'une nouvelle section hero avec les données:", heroData);
         const { data: newData, error } = await supabase
           .from('hotel_hero')
@@ -49,27 +72,6 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
         toast({
           title: "Succès",
           description: "Section héro créée",
-        });
-      } else {
-        // Mise à jour d'un hero existant
-        console.log("Mise à jour de la section hero avec ID:", heroData.id);
-        const { data: updatedData, error } = await supabase
-          .from('hotel_hero')
-          .update(heroData)
-          .eq('id', heroData.id)
-          .select()
-          .single();
-
-        if (error) {
-          console.error("Erreur lors de la mise à jour:", error);
-          throw error;
-        }
-        
-        console.log("Section hero mise à jour:", updatedData);
-        setHero(updatedData);
-        toast({
-          title: "Succès",
-          description: "Section héro mise à jour",
         });
       }
 
