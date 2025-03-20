@@ -28,6 +28,25 @@ interface HotelProviderProps {
   hotelId?: string;
 }
 
+// Function to safely convert Json to HotelConfig
+const parseHotelConfig = (config: any): HotelConfig => {
+  if (!config) {
+    // Return default config if config is null or undefined
+    return {
+      theme: { primary: '#1e40af', secondary: '#4f46e5' },
+      enabled_features: []
+    };
+  }
+  
+  return {
+    theme: {
+      primary: config.theme?.primary || '#1e40af',
+      secondary: config.theme?.secondary || '#4f46e5'
+    },
+    enabled_features: Array.isArray(config.enabled_features) ? config.enabled_features : []
+  };
+};
+
 export const HotelProvider: React.FC<HotelProviderProps> = ({ children, hotelId }) => {
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,10 +81,10 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children, hotelId 
             description: "Impossible de charger les données de l'hôtel",
           });
         } else {
-          // Convertir le JSON brut en un objet HotelConfig typé
+          // Convertir le JSON brut en un objet HotelConfig typé avec sécurité
           const typedHotel: Hotel = {
             ...data,
-            config: data.config as HotelConfig
+            config: parseHotelConfig(data.config)
           };
           setHotel(typedHotel);
         }

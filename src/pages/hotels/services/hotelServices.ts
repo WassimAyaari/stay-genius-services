@@ -23,6 +23,25 @@ interface HotelData {
   error: boolean;
 }
 
+// Function to safely convert Json to HotelConfig
+const parseHotelConfig = (config: any): HotelConfig => {
+  if (!config) {
+    // Return default config if config is null or undefined
+    return {
+      theme: { primary: '#1e40af', secondary: '#4f46e5' },
+      enabled_features: []
+    };
+  }
+  
+  return {
+    theme: {
+      primary: config.theme?.primary || '#1e40af',
+      secondary: config.theme?.secondary || '#4f46e5'
+    },
+    enabled_features: Array.isArray(config.enabled_features) ? config.enabled_features : []
+  };
+};
+
 export const fetchHotelData = async (hotelId: string): Promise<HotelData> => {
   try {
     // Fetch hotel information
@@ -34,10 +53,10 @@ export const fetchHotelData = async (hotelId: string): Promise<HotelData> => {
 
     if (hotelError) throw hotelError;
 
-    // Convert raw JSON to typed HotelConfig
+    // Convert raw JSON to typed HotelConfig with safety checks
     const typedHotel: Hotel = {
       ...hotelData,
-      config: hotelData.config as HotelConfig
+      config: parseHotelConfig(hotelData.config)
     };
 
     // Fetch hero section data
@@ -133,10 +152,10 @@ export const fetchHotelBySubdomain = async (subdomain: string): Promise<Hotel | 
 
     if (error) throw error;
     
-    // Convert raw JSON to typed HotelConfig
+    // Convert raw JSON to typed HotelConfig with safety checks
     const typedHotel: Hotel = {
       ...data,
-      config: data.config as HotelConfig
+      config: parseHotelConfig(data.config)
     };
     
     return typedHotel;
