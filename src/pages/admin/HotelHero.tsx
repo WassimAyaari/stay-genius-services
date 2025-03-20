@@ -4,6 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { HotelHero, defaultHotelHero } from '@/lib/types';
 import HeroForm from '@/components/admin/HeroForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Preview } from '@/components/admin/Preview';
 
 interface HotelHeroSectionProps {
   hotelId: string;
@@ -14,6 +17,7 @@ interface HotelHeroSectionProps {
 const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hero, setHero] = useState<HotelHero>(initialData || { ...defaultHotelHero, hotel_id: hotelId });
+  const [activeTab, setActiveTab] = useState("edit");
 
   const handleSaveHero = async (data: HotelHero) => {
     setIsSubmitting(true);
@@ -22,8 +26,8 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
         throw new Error("ID de l'hôtel manquant");
       }
 
-      // Create a new object without modifying the original data
-      const heroData = {
+      // Création d'un nouvel objet pour les données à envoyer
+      const heroData: Omit<HotelHero, 'id'> = {
         hotel_id: hotelId,
         background_image: data.background_image,
         title: data.title,
@@ -32,8 +36,10 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
         status: data.status
       };
       
+      let result;
+      
       if (data.id && data.id.trim() !== '') {
-        // Updating existing hero
+        // Mise à jour d'un héro existant
         console.log("Mise à jour de la section hero avec ID:", data.id);
         const { data: updatedData, error } = await supabase
           .from('hotel_hero')
@@ -47,14 +53,14 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
           throw error;
         }
         
+        result = updatedData;
         console.log("Section hero mise à jour:", updatedData);
-        setHero(updatedData);
         toast({
           title: "Succès",
           description: "Section héro mise à jour",
         });
       } else {
-        // Creating new hero - do NOT include the ID field at all
+        // Création d'un nouveau héro - IMPORTANT: ne pas inclure l'ID
         console.log("Création d'une nouvelle section hero avec les données:", heroData);
         const { data: newData, error } = await supabase
           .from('hotel_hero')
@@ -67,15 +73,23 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
           throw error;
         }
         
+        result = newData;
         console.log("Nouvelle section hero créée:", newData);
-        setHero(newData);
         toast({
           title: "Succès",
           description: "Section héro créée",
         });
       }
 
+      // Mettre à jour l'état local avec les données retournées par Supabase
+      if (result) {
+        setHero(result);
+      }
+
       if (onSave) onSave();
+      
+      // Passer à l'onglet de prévisualisation après l'enregistrement
+      setActiveTab("preview");
     } catch (error) {
       console.error("Error saving hero section:", error);
       toast({
@@ -88,9 +102,36 @@ const HotelHeroSection = ({ hotelId, initialData, onSave }: HotelHeroSectionProp
     }
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
-    <div>
-      <HeroForm initialData={hero} onSubmit={handleSaveHero} isSubmitting={isSubmitting} />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Section Héro</CardTitle>
+          <CardDescription>
+            Configurez l'en-tête principal de votre page d'accueil
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="edit">Modifier</TabsTrigger>
+              <TabsTrigger value="preview">Prévisualiser</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="edit">
+              <HeroForm initialData={hero} onSubmit={handleSaveHero} isSubmitting={isSubmitting} />
+            </TabsContent>
+            
+            <TabsContent value="preview">
+              <Preview data={hero} type="hero" />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
