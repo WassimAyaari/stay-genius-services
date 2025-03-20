@@ -1,4 +1,3 @@
-
 export interface Profile {
   id: string;
   first_name: string | null;
@@ -120,6 +119,35 @@ export interface Hotel {
   contact_phone: string;
   created_at: string;
   updated_at: string;
+  subdomain: string | null;
+  config: HotelConfig;
+}
+
+export interface HotelUserRole {
+  id: string;
+  user_id: string;
+  hotel_id: string;
+  role: 'admin' | 'manager' | 'staff' | 'guest';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HotelTheme {
+  primary: string;
+  secondary: string;
+}
+
+export interface FeatureFlags {
+  rooms: boolean;
+  dining: boolean;
+  spa: boolean;
+  events: boolean;
+  [key: string]: boolean;
+}
+
+export interface HotelConfig {
+  theme: HotelTheme;
+  enabled_features: string[];
 }
 
 export const defaultHotelHero: HotelHero = {

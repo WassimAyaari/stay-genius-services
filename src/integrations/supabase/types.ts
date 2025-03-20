@@ -531,35 +531,76 @@ export type Database = {
           },
         ]
       }
+      hotel_user_roles: {
+        Row: {
+          created_at: string
+          hotel_id: string
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hotel_id: string
+          id?: string
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hotel_id?: string
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_user_roles_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hotels: {
         Row: {
           address: string
+          config: Json | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
           id: string
           logo_url: string | null
           name: string
+          subdomain: string | null
           updated_at: string
         }
         Insert: {
           address: string
+          config?: Json | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           id?: string
           logo_url?: string | null
           name: string
+          subdomain?: string | null
           updated_at?: string
         }
         Update: {
           address?: string
+          config?: Json | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           id?: string
           logo_url?: string | null
           name?: string
+          subdomain?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -644,6 +685,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           guest_id: string | null
+          hotel_id: string | null
           id: string
           room_id: string | null
           status: string | null
@@ -654,6 +696,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
+          hotel_id?: string | null
           id?: string
           room_id?: string | null
           status?: string | null
@@ -664,6 +707,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
+          hotel_id?: string | null
           id?: string
           room_id?: string | null
           status?: string | null
@@ -676,6 +720,13 @@ export type Database = {
             columns: ["guest_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
             referencedColumns: ["id"]
           },
           {
@@ -713,6 +764,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_hotels: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          hotel_id: string
+          role: string
+        }[]
+      }
+      has_hotel_role: {
+        Args: {
+          user_id: string
+          hotel_id: string
+          required_role: string
+        }
+        Returns: boolean
+      }
       is_hotel_admin: {
         Args: {
           user_id: string

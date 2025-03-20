@@ -114,3 +114,36 @@ export const fetchHotelData = async (hotelId: string): Promise<HotelData> => {
     };
   }
 };
+
+// Nouvelle fonction pour charger un hôtel par son sous-domaine
+export const fetchHotelBySubdomain = async (subdomain: string): Promise<Hotel | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('hotels')
+      .select('*')
+      .eq('subdomain', subdomain)
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching hotel by subdomain:', error);
+    return null;
+  }
+};
+
+// Mise à jour de la configuration d'un hôtel
+export const updateHotelConfig = async (hotelId: string, config: any): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('hotels')
+      .update({ config })
+      .eq('id', hotelId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error updating hotel config:', error);
+    return false;
+  }
+};

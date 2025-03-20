@@ -28,6 +28,17 @@ import HotelManagement from './pages/admin/HotelManagement';
 import HotelEdit from './pages/admin/HotelEdit';
 import HotelInterface from './pages/admin/HotelInterface';
 import HotelView from './pages/hotels/HotelView';
+import HotelAdminGate from './components/HotelAdminGate';
+import Unauthorized from './pages/Unauthorized';
+
+// Pages d'administration d'hôtel
+import HotelDashboard from './pages/hotels/admin/HotelDashboard';
+import HotelRooms from './pages/hotels/admin/HotelRooms';
+import HotelServices from './pages/hotels/admin/HotelServices';
+import HotelDining from './pages/hotels/admin/HotelDining';
+import HotelEvents from './pages/hotels/admin/HotelEvents';
+import HotelStaff from './pages/hotels/admin/HotelStaff';
+import HotelSettings from './pages/hotels/admin/HotelSettings';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +49,9 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/auth/login" element={<Login />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        
+        {/* Routes publiques */}
         <Route element={<Layout><Outlet /></Layout>}>
           <Route path="/" element={<Index />} />
           <Route path="/rooms/:id" element={<RoomDetails />} />
@@ -60,6 +74,18 @@ const AnimatedRoutes = () => {
           <Route path="/admin/hotels/:id/edit" element={<HotelEdit />} />
           <Route path="/admin/hotels/:id/interface" element={<HotelInterface />} />
           <Route path="*" element={<NotFound />} />
+        </Route>
+        
+        {/* Routes d'administration d'hôtel (multi-tenancy) */}
+        <Route path="/admin/hotels/:hotelId" element={<HotelAdminGate />}>
+          <Route index element={<HotelDashboard />} />
+          <Route path="interface" element={<HotelDashboard />} />
+          <Route path="rooms" element={<HotelRooms />} />
+          <Route path="services" element={<HotelServices />} />
+          <Route path="dining" element={<HotelDining />} />
+          <Route path="events" element={<HotelEvents />} />
+          <Route path="staff" element={<HotelStaff />} />
+          <Route path="settings" element={<HotelSettings />} />
         </Route>
       </Routes>
     </AnimatePresence>
