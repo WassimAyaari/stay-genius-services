@@ -62,7 +62,12 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children, hotelId 
             description: "Impossible de charger les données de l'hôtel",
           });
         } else {
-          setHotel(data);
+          // Convertir le JSON brut en un objet HotelConfig typé
+          const typedHotel: Hotel = {
+            ...data,
+            config: data.config as HotelConfig
+          };
+          setHotel(typedHotel);
         }
       } catch (err) {
         console.error('Error in fetchHotel:', err);
@@ -81,14 +86,14 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children, hotelId 
     if (!hotel) return;
 
     try {
-      const updatedConfig = {
+      const updatedConfig: HotelConfig = {
         ...hotel.config,
         ...newConfig
       };
 
       const { error } = await supabase
         .from('hotels')
-        .update({ config: updatedConfig })
+        .update({ config: updatedConfig as any })
         .eq('id', hotel.id);
 
       if (error) {

@@ -7,7 +7,8 @@ import {
   HotelService, 
   HotelExperience, 
   HotelEvent, 
-  HotelAssistance 
+  HotelAssistance,
+  HotelConfig
 } from '@/lib/types';
 
 interface HotelData {
@@ -32,6 +33,12 @@ export const fetchHotelData = async (hotelId: string): Promise<HotelData> => {
       .single();
 
     if (hotelError) throw hotelError;
+
+    // Convert raw JSON to typed HotelConfig
+    const typedHotel: Hotel = {
+      ...hotelData,
+      config: hotelData.config as HotelConfig
+    };
 
     // Fetch hero section data
     const { data: heroData, error: heroError } = await supabase
@@ -84,7 +91,7 @@ export const fetchHotelData = async (hotelId: string): Promise<HotelData> => {
       .maybeSingle();
 
     return {
-      hotel: hotelData,
+      hotel: typedHotel,
       heroData: !heroError && heroData ? heroData : null,
       mainServices: !mainServicesError ? mainServicesData || [] : [],
       additionalServices: !additionalServicesError ? additionalServicesData || [] : [],
@@ -125,7 +132,14 @@ export const fetchHotelBySubdomain = async (subdomain: string): Promise<Hotel | 
       .single();
 
     if (error) throw error;
-    return data;
+    
+    // Convert raw JSON to typed HotelConfig
+    const typedHotel: Hotel = {
+      ...data,
+      config: data.config as HotelConfig
+    };
+    
+    return typedHotel;
   } catch (error) {
     console.error('Error fetching hotel by subdomain:', error);
     return null;
