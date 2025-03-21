@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useHotel } from '@/context/HotelContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,13 +66,11 @@ const HotelServices = () => {
       let result;
       
       if (service.id) {
-        // Update existing service
         result = await supabase
           .from('hotel_services')
           .update(serviceData)
           .eq('id', service.id);
       } else {
-        // Create new service
         result = await supabase
           .from('hotel_services')
           .insert({
@@ -92,7 +89,6 @@ const HotelServices = () => {
         description: service.id ? "Service mis à jour" : "Service créé",
       });
       
-      // Refresh services list
       fetchServices();
       setEditingService(null);
     } catch (error) {
@@ -115,7 +111,6 @@ const HotelServices = () => {
     try {
       setIsSaving(true);
       
-      // Soft delete by setting status to 'inactive'
       const { error } = await supabase
         .from('hotel_services')
         .update({ status: 'inactive' })
@@ -130,7 +125,6 @@ const HotelServices = () => {
         description: "Service supprimé",
       });
       
-      // Refresh services list
       fetchServices();
     } catch (error) {
       console.error('Error deleting service:', error);
@@ -143,6 +137,19 @@ const HotelServices = () => {
       setIsSaving(false);
     }
   };
+
+  const createEmptyService = (): HotelService => ({
+    id: '',
+    hotel_id: hotel.id,
+    title: '',
+    description: '',
+    icon: 'coffee',
+    action_text: 'En savoir plus',
+    action_link: '#',
+    type: 'main',
+    display_order: services.length,
+    status: 'active'
+  });
 
   if (loading || isLoading) {
     return (
@@ -160,20 +167,7 @@ const HotelServices = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gestion des services</h1>
-        <Button onClick={() => setEditingService({
-          id: '',
-          hotel_id: hotel.id,
-          title: '',
-          description: '',
-          icon: 'coffee',
-          action_text: 'En savoir plus',
-          action_link: '#',
-          type: 'main',
-          display_order: services.length,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })}>
+        <Button onClick={() => setEditingService(createEmptyService())}>
           <Plus className="mr-2 h-4 w-4" />
           Ajouter un service
         </Button>
@@ -304,20 +298,7 @@ const HotelServices = () => {
           <Button 
             variant="outline" 
             className="mt-4"
-            onClick={() => setEditingService({
-              id: '',
-              hotel_id: hotel.id,
-              title: '',
-              description: '',
-              icon: 'coffee',
-              action_text: 'En savoir plus',
-              action_link: '#',
-              type: 'main',
-              display_order: 0,
-              status: 'active',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            })}
+            onClick={() => setEditingService(createEmptyService())}
           >
             <Plus className="mr-2 h-4 w-4" />
             Ajouter votre premier service

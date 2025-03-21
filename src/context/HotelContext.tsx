@@ -113,11 +113,18 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children, hotelId 
 
       console.log('Updating config with:', updatedConfig);
 
-      // Assurez-vous que updatedConfig est un objet JSON valide pour Supabase
+      // Convertir HotelConfig en un objet JSON simple pour Supabase
+      // Cette conversion explicite résout l'erreur de type
+      const configForDb = {
+        theme: updatedConfig.theme,
+        enabled_features: updatedConfig.enabled_features
+      };
+
+      // Envoyer vers Supabase
       const { error } = await supabase
         .from('hotels')
         .update({ 
-          config: updatedConfig
+          config: configForDb
         })
         .eq('id', hotel.id);
 
