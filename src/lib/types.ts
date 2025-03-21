@@ -26,3 +26,16 @@ export interface ServiceRequest {
   status: string;
   created_at: string;
 }
+
+export interface HotelConfig {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  primary_color: string;
+  secondary_color: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  address: string | null;
+  created_at: string;
+  updated_at: string;
+}

@@ -149,6 +149,462 @@ export type Database = {
           },
         ]
       }
+      hotel_about: {
+        Row: {
+          action_link: string
+          action_text: string
+          created_at: string
+          description: string
+          hotel_id: string | null
+          icon: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_link: string
+          action_text: string
+          created_at?: string
+          description: string
+          hotel_id?: string | null
+          icon: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_link?: string
+          action_text?: string
+          created_at?: string
+          description?: string
+          hotel_id?: string | null
+          icon?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_about_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_admins: {
+        Row: {
+          created_at: string
+          hotel_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hotel_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hotel_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_admins_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_assistance: {
+        Row: {
+          action_link: string
+          action_text: string
+          background_image: string
+          created_at: string
+          description: string
+          hotel_id: string | null
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_link: string
+          action_text: string
+          background_image: string
+          created_at?: string
+          description: string
+          hotel_id?: string | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_link?: string
+          action_text?: string
+          background_image?: string
+          created_at?: string
+          description?: string
+          hotel_id?: string | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_assistance_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_events: {
+        Row: {
+          action_link: string
+          action_text: string
+          created_at: string
+          date: string
+          description: string
+          display_order: number
+          hotel_id: string | null
+          id: string
+          image: string
+          location: string
+          status: string
+          time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_link: string
+          action_text: string
+          created_at?: string
+          date: string
+          description: string
+          display_order?: number
+          hotel_id?: string | null
+          id?: string
+          image: string
+          location: string
+          status?: string
+          time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_link?: string
+          action_text?: string
+          created_at?: string
+          date?: string
+          description?: string
+          display_order?: number
+          hotel_id?: string | null
+          id?: string
+          image?: string
+          location?: string
+          status?: string
+          time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_events_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_experiences: {
+        Row: {
+          action_link: string
+          action_text: string
+          category: string
+          created_at: string
+          description: string
+          display_order: number
+          hotel_id: string | null
+          id: string
+          image: string
+          status: string
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_link: string
+          action_text: string
+          category: string
+          created_at?: string
+          description: string
+          display_order?: number
+          hotel_id?: string | null
+          id?: string
+          image: string
+          status?: string
+          subtitle: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_link?: string
+          action_text?: string
+          category?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          hotel_id?: string | null
+          id?: string
+          image?: string
+          status?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_experiences_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_hero: {
+        Row: {
+          background_image: string
+          created_at: string
+          hotel_id: string | null
+          id: string
+          search_placeholder: string
+          status: string
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          background_image: string
+          created_at?: string
+          hotel_id?: string | null
+          id?: string
+          search_placeholder: string
+          status?: string
+          subtitle: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          background_image?: string
+          created_at?: string
+          hotel_id?: string | null
+          id?: string
+          search_placeholder?: string
+          status?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_hero_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_services: {
+        Row: {
+          action_link: string
+          action_text: string
+          created_at: string
+          description: string
+          display_order: number
+          hotel_id: string | null
+          icon: string
+          id: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          action_link: string
+          action_text: string
+          created_at?: string
+          description: string
+          display_order?: number
+          hotel_id?: string | null
+          icon: string
+          id?: string
+          status?: string
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          action_link?: string
+          action_text?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          hotel_id?: string | null
+          icon?: string
+          id?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_services_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_stories: {
+        Row: {
+          content: string
+          created_at: string
+          display_order: number
+          hotel_id: string | null
+          id: string
+          image: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          display_order?: number
+          hotel_id?: string | null
+          id?: string
+          image: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_order?: number
+          hotel_id?: string | null
+          id?: string
+          image?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_stories_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_user_roles: {
+        Row: {
+          created_at: string
+          hotel_id: string
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hotel_id: string
+          id?: string
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hotel_id?: string
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_user_roles_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotels: {
+        Row: {
+          address: string
+          config: Json | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          subdomain: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          config?: Json | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          subdomain?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          config?: Json | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          subdomain?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -229,6 +685,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           guest_id: string | null
+          hotel_id: string | null
           id: string
           room_id: string | null
           status: string | null
@@ -239,6 +696,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
+          hotel_id?: string | null
           id?: string
           room_id?: string | null
           status?: string | null
@@ -249,6 +707,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
+          hotel_id?: string | null
           id?: string
           room_id?: string | null
           status?: string | null
@@ -264,6 +723,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "service_requests_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "service_requests_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
@@ -272,12 +738,62 @@ export type Database = {
           },
         ]
       }
+      super_admins: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_hotels: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          hotel_id: string
+          role: string
+        }[]
+      }
+      has_hotel_role: {
+        Args: {
+          user_id: string
+          hotel_id: string
+          required_role: string
+        }
+        Returns: boolean
+      }
+      is_hotel_admin: {
+        Args: {
+          user_id: string
+          hotel_id: string
+        }
+        Returns: boolean
+      }
+      is_super_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
