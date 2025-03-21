@@ -275,6 +275,45 @@ export type Database = {
           },
         ]
       }
+      hotel_config: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       hotel_events: {
         Row: {
           action_link: string
@@ -685,7 +724,6 @@ export type Database = {
           created_at: string | null
           description: string | null
           guest_id: string | null
-          hotel_id: string | null
           id: string
           room_id: string | null
           status: string | null
@@ -696,7 +734,6 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
-          hotel_id?: string | null
           id?: string
           room_id?: string | null
           status?: string | null
@@ -707,7 +744,6 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
-          hotel_id?: string | null
           id?: string
           room_id?: string | null
           status?: string | null
@@ -720,13 +756,6 @@ export type Database = {
             columns: ["guest_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_requests_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
             referencedColumns: ["id"]
           },
           {
@@ -778,6 +807,12 @@ export type Database = {
           user_id: string
           hotel_id: string
           required_role: string
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: {
+          user_id: string
         }
         Returns: boolean
       }
