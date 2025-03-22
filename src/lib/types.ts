@@ -58,7 +58,7 @@ export interface HotelAbout {
 
 export interface InfoItem {
   label: string;
-  value: string;
+  value: string | number | boolean;
 }
 
 export interface FeatureItem {

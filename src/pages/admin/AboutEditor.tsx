@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { History, Building2, Users, Award, Save, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
+import { InfoItem, FeatureItem } from '@/lib/types';
 
 const AboutEditor = () => {
   const { aboutData, isLoadingAbout, updateAboutData } = useHotelConfig();
@@ -224,7 +225,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={item.value || ''} 
+                          value={String(item.value) || ''} 
                           onChange={(e) => handleInfoItemChange('important_numbers', index, 'value', e.target.value)}
                           className="flex-1"
                         />
@@ -258,7 +259,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={item.value || ''} 
+                          value={String(item.value) || ''} 
                           onChange={(e) => handleInfoItemChange('hotel_policies', index, 'value', e.target.value)}
                           className="flex-1"
                         />
@@ -292,7 +293,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={item.value || ''} 
+                          value={String(item.value) || ''} 
                           onChange={(e) => handleInfoItemChange('facilities', index, 'value', e.target.value)}
                           className="flex-1"
                         />
@@ -326,7 +327,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={item.value || ''} 
+                          value={String(item.value) || ''} 
                           onChange={(e) => handleInfoItemChange('additional_info', index, 'value', e.target.value)}
                           className="flex-1"
                         />

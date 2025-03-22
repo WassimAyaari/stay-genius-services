@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { HotelConfig } from '@/lib/types';
+import { HotelConfig, HotelAbout } from '@/lib/types';
 import { toast } from 'sonner';
 
 export const useHotelConfig = () => {
@@ -52,7 +52,7 @@ export const useHotelConfig = () => {
     return data;
   };
 
-  const updateHotelAbout = async (aboutData) => {
+  const updateHotelAbout = async (aboutData: any) => {
     const { data, error } = await supabase
       .from('hotel_about')
       .update(aboutData)

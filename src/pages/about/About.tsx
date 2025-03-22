@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { History, Building2, Users, Award, ChevronRight, Phone, Map, Book, Info } from 'lucide-react';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
+import { InfoItem, FeatureItem } from '@/lib/types';
 
 const About = () => {
   const { aboutData, isLoadingAbout } = useHotelConfig();
@@ -88,7 +89,7 @@ const About = () => {
                   <h3 className="font-semibold mb-1">Important Numbers</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
                     {importantNumbers.map((item, index) => (
-                      <li key={index}>{item.label}: {item.value}</li>
+                      <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
                 </div>
@@ -104,7 +105,7 @@ const About = () => {
                   <h3 className="font-semibold mb-1">Hotel Policies</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
                     {hotelPolicies.map((item, index) => (
-                      <li key={index}>{item.label}: {item.value}</li>
+                      <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
                 </div>
@@ -120,7 +121,7 @@ const About = () => {
                   <h3 className="font-semibold mb-1">Facilities & Amenities</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
                     {facilities.map((item, index) => (
-                      <li key={index}>{item.label}: {item.value}</li>
+                      <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
                 </div>
@@ -136,7 +137,7 @@ const About = () => {
                   <h3 className="font-semibold mb-1">Additional Information</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
                     {additionalInfo.map((item, index) => (
-                      <li key={index}>{item.label}: {item.value}</li>
+                      <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
                 </div>
