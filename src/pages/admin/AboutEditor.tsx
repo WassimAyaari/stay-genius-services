@@ -225,7 +225,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={String(item.value) || ''} 
+                          value={String(item.value || '')} 
                           onChange={(e) => handleInfoItemChange('important_numbers', index, 'value', e.target.value)}
                           className="flex-1"
                         />
@@ -259,7 +259,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={String(item.value) || ''} 
+                          value={String(item.value || '')} 
                           onChange={(e) => handleInfoItemChange('hotel_policies', index, 'value', e.target.value)}
                           className="flex-1"
                         />
@@ -293,7 +293,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={String(item.value) || ''} 
+                          value={String(item.value || '')} 
                           onChange={(e) => handleInfoItemChange('facilities', index, 'value', e.target.value)}
                           className="flex-1"
                         />
@@ -327,7 +327,7 @@ const AboutEditor = () => {
                         />
                         <Input 
                           placeholder="Value"
-                          value={String(item.value) || ''} 
+                          value={String(item.value || '')} 
                           onChange={(e) => handleInfoItemChange('additional_info', index, 'value', e.target.value)}
                           className="flex-1"
                         />
