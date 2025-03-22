@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from "rea
 import { AnimatePresence } from "framer-motion";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from './components/Layout';
+import AdminLayout from './components/AdminLayout';
 import Index from "./pages/Index";
 import RoomDetails from "./pages/rooms/RoomDetails";
 import MyRoom from "./pages/my-room/MyRoom";
@@ -25,6 +26,8 @@ import Shops from './pages/shops/Shops';
 import HotelMap from './pages/map/HotelMap';
 import Feedback from './pages/feedback/Feedback';
 import Events from './pages/events/Events';
+import AdminDashboard from './pages/admin/Dashboard';
+import ConfigPage from './pages/admin/ConfigPage';
 
 const queryClient = new QueryClient();
 
@@ -35,6 +38,15 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/auth/login" element={<Login />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="config" element={<ConfigPage />} />
+          {/* Additional admin routes will be added here */}
+        </Route>
+        
+        {/* Client Routes */}
         <Route element={<Layout><Outlet /></Layout>}>
           <Route path="/" element={<Index />} />
           <Route path="/rooms/:id" element={<RoomDetails />} />
