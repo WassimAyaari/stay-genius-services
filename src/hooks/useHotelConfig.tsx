@@ -38,9 +38,44 @@ export const useHotelConfig = () => {
     return data as HotelConfig;
   };
 
+  const fetchHotelAbout = async () => {
+    const { data, error } = await supabase
+      .from('hotel_about')
+      .select('*')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching hotel about:', error);
+      throw error;
+    }
+
+    return data;
+  };
+
+  const updateHotelAbout = async (aboutData) => {
+    const { data, error } = await supabase
+      .from('hotel_about')
+      .update(aboutData)
+      .eq('id', aboutData.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating hotel about:', error);
+      throw error;
+    }
+
+    return data;
+  };
+
   const { data: hotelConfig, isLoading, error } = useQuery({
     queryKey: ['hotel-config'],
     queryFn: fetchHotelConfig,
+  });
+
+  const { data: aboutData, isLoading: isLoadingAbout, error: aboutError } = useQuery({
+    queryKey: ['hotel-about'],
+    queryFn: fetchHotelAbout,
   });
 
   const mutation = useMutation({
@@ -55,11 +90,30 @@ export const useHotelConfig = () => {
     },
   });
 
+  const aboutMutation = useMutation({
+    mutationFn: updateHotelAbout,
+    onSuccess: (data) => {
+      queryClient.setQueryData(['hotel-about'], data);
+      toast.success('About section updated successfully');
+    },
+    onError: (error) => {
+      console.error('Error updating about section:', error);
+      toast.error('Failed to update about section');
+    },
+  });
+
   return {
     hotelConfig,
     isLoading,
     error,
     updateHotelConfig: mutation.mutate,
     isUpdating: mutation.isPending,
+    
+    // About section data and functions
+    aboutData,
+    isLoadingAbout,
+    aboutError,
+    updateAboutData: aboutMutation.mutate,
+    isUpdatingAbout: aboutMutation.isPending,
   };
 };

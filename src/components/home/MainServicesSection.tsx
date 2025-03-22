@@ -1,12 +1,27 @@
 
 import React from 'react';
-import { UtensilsCrossed, Heart, Info, Phone } from 'lucide-react';
+import { UtensilsCrossed, Heart, Info, Phone, Settings } from 'lucide-react';
 import ServiceCard from './ServiceCard';
+import { useLocation } from 'react-router-dom';
 
 const MainServicesSection = () => {
+  const location = useLocation();
+  const isAdmin = location.pathname.includes('/admin');
+  
   return (
     <section className="px-6 mb-10">
-      <h2 className="text-2xl font-bold text-secondary mb-4">Main Services</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-secondary">Main Services</h2>
+        {/* Admin button to edit About page */}
+        {!isAdmin && (
+          <a 
+            href="/admin/about" 
+            className="text-xs flex items-center gap-1 text-primary hover:underline"
+          >
+            <Settings className="w-3 h-3" /> Admin
+          </a>
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <ServiceCard 
           icon={<Info className="w-6 h-6 text-primary" />}

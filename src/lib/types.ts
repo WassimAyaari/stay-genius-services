@@ -39,3 +39,30 @@ export interface HotelConfig {
   created_at: string;
   updated_at: string;
 }
+
+export interface HotelAbout {
+  id: string;
+  welcome_title: string;
+  welcome_description: string;
+  welcome_description_extended: string;
+  directory_title: string;
+  important_numbers: InfoItem[];
+  hotel_policies: InfoItem[];
+  facilities: InfoItem[];
+  additional_info: InfoItem[];
+  features: FeatureItem[];
+  mission: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InfoItem {
+  label: string;
+  value: string;
+}
+
+export interface FeatureItem {
+  title: string;
+  description: string;
+  icon: string;
+}

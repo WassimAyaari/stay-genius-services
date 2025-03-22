@@ -1,10 +1,58 @@
+
 import React from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { History, Building2, Users, Award, ChevronRight, Phone, Map, Book, Info } from 'lucide-react';
+import { useHotelConfig } from '@/hooks/useHotelConfig';
+
 const About = () => {
-  return <Layout>
+  const { aboutData, isLoadingAbout } = useHotelConfig();
+
+  if (isLoadingAbout || !aboutData) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-[21px] py-6">
+          <h1 className="text-xl font-bold mb-4">Loading About Information...</h1>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Parse JSON data if needed
+  const importantNumbers = Array.isArray(aboutData.important_numbers) 
+    ? aboutData.important_numbers 
+    : JSON.parse(aboutData.important_numbers || '[]');
+  
+  const hotelPolicies = Array.isArray(aboutData.hotel_policies) 
+    ? aboutData.hotel_policies 
+    : JSON.parse(aboutData.hotel_policies || '[]');
+  
+  const facilities = Array.isArray(aboutData.facilities) 
+    ? aboutData.facilities 
+    : JSON.parse(aboutData.facilities || '[]');
+  
+  const additionalInfo = Array.isArray(aboutData.additional_info) 
+    ? aboutData.additional_info 
+    : JSON.parse(aboutData.additional_info || '[]');
+  
+  const features = Array.isArray(aboutData.features) 
+    ? aboutData.features 
+    : JSON.parse(aboutData.features || '[]');
+
+  // Helper function to get icon component
+  const getIconComponent = (iconName, className = "h-6 w-6 text-primary") => {
+    switch (iconName) {
+      case 'History': return <History className={className} />;
+      case 'Building2': return <Building2 className={className} />;
+      case 'Users': return <Users className={className} />;
+      case 'Award': return <Award className={className} />;
+      default: return <Info className={className} />;
+    }
+  };
+
+  return (
+    <Layout>
       <div className="container mx-auto px-[21px] py-0">
         {/* Hero Section */}
         <div className="relative mb-8 rounded-3xl overflow-hidden">
@@ -18,18 +66,18 @@ const About = () => {
 
         {/* Welcome Section */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Welcome to Our Hotel</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">{aboutData.welcome_title}</h2>
           <p className="text-gray-600 mb-4">
-            Hotel Genius is a luxury hotel located in the heart of the city. We pride ourselves on providing exceptional service and an unforgettable experience for all our guests.
+            {aboutData.welcome_description}
           </p>
           <p className="text-gray-600 mb-4">
-            Since our establishment in 2010, we have been committed to creating a home away from home for our guests, combining modern amenities with classic hospitality.
+            {aboutData.welcome_description_extended}
           </p>
         </div>
 
         {/* Hotel Directory and Information */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Hotel Directory & Information</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">{aboutData.directory_title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card className="p-4 rounded-xl">
               <div className="flex items-start gap-3">
@@ -39,11 +87,9 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Important Numbers</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    <li>Reception: Dial 0</li>
-                    <li>Room Service: Dial 1</li>
-                    <li>Concierge: Dial 2</li>
-                    <li>Housekeeping: Dial 3</li>
-                    <li>Emergency: Dial 9</li>
+                    {importantNumbers.map((item, index) => (
+                      <li key={index}>{item.label}: {item.value}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -57,11 +103,9 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Hotel Policies</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    <li>Check-in: 3:00 PM</li>
-                    <li>Check-out: 12:00 PM</li>
-                    <li>Breakfast: 6:30 AM - 10:30 AM</li>
-                    <li>Pool Hours: 7:00 AM - 10:00 PM</li>
-                    <li>Pet Policy: Pet-friendly rooms available</li>
+                    {hotelPolicies.map((item, index) => (
+                      <li key={index}>{item.label}: {item.value}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -75,11 +119,9 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Facilities & Amenities</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    <li>Swimming Pool: Level 5</li>
-                    <li>Fitness Center: Level 3</li>
-                    <li>Spa & Wellness: Level 4</li>
-                    <li>Business Center: Level 2</li>
-                    <li>Restaurants: Lobby & Level 20</li>
+                    {facilities.map((item, index) => (
+                      <li key={index}>{item.label}: {item.value}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -93,11 +135,9 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Additional Information</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    <li>Wi-Fi: Network "HotelGenius" - Password provided at check-in</li>
-                    <li>Parking: Valet service available</li>
-                    <li>Airport Transfer: Contact concierge</li>
-                    <li>Currency Exchange: Available at reception</li>
-                    <li>Medical Services: Contact reception for assistance</li>
+                    {additionalInfo.map((item, index) => (
+                      <li key={index}>{item.label}: {item.value}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -107,65 +147,31 @@ const About = () => {
 
         {/* Features Grid */}
         <div className="grid grid-cols-2 gap-4 mb-10">
-          <Card className="p-4 rounded-xl">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-primary/10 p-3 rounded-full mb-3">
-                <History className="h-6 w-6 text-primary" />
+          {features.map((feature, index) => (
+            <Card key={index} className="p-4 rounded-xl">
+              <div className="flex flex-col items-center text-center">
+                <div className="bg-primary/10 p-3 rounded-full mb-3">
+                  {getIconComponent(feature.icon)}
+                </div>
+                <h3 className="font-semibold mb-1">{feature.title}</h3>
+                <p className="text-sm text-gray-600">{feature.description}</p>
               </div>
-              <h3 className="font-semibold mb-1">Our History</h3>
-              <p className="text-sm text-gray-600">Established in 2010 with a rich heritage</p>
-            </div>
-          </Card>
-
-          <Card className="p-4 rounded-xl">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-primary/10 p-3 rounded-full mb-3">
-                <Building2 className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-1">Our Property</h3>
-              <p className="text-sm text-gray-600">250 luxury rooms and premium facilities</p>
-            </div>
-          </Card>
-
-          <Card className="p-4 rounded-xl">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-primary/10 p-3 rounded-full mb-3">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-1">Our Team</h3>
-              <p className="text-sm text-gray-600">Dedicated staff committed to excellence</p>
-            </div>
-          </Card>
-
-          <Card className="p-4 rounded-xl">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-primary/10 p-3 rounded-full mb-3">
-                <Award className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-1">Our Awards</h3>
-              <p className="text-sm text-gray-600">Recognized for outstanding service</p>
-            </div>
-          </Card>
+            </Card>
+          ))}
         </div>
 
         {/* Mission & Vision */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-secondary mb-4">Our Mission</h2>
           <Card className="p-6 rounded-xl mb-4">
-            
             <p className="text-gray-600">
-              To provide exceptional hospitality experiences by creating memorable moments for our guests through personalized service, luxurious accommodations, and innovative offerings.
+              {aboutData.mission}
             </p>
           </Card>
-          
-        </div>
-
-        {/* Learn More Section */}
-        <div className="mb-8">
-          
-          
         </div>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default About;

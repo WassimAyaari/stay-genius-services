@@ -153,38 +153,68 @@ export type Database = {
         Row: {
           action_link: string
           action_text: string
+          additional_info: Json | null
           created_at: string
           description: string
+          directory_title: string | null
+          facilities: Json | null
+          features: Json | null
           hotel_id: string | null
+          hotel_policies: Json | null
           icon: string
           id: string
+          important_numbers: Json | null
+          mission: string | null
           status: string
           title: string
           updated_at: string
+          welcome_description: string | null
+          welcome_description_extended: string | null
+          welcome_title: string | null
         }
         Insert: {
           action_link: string
           action_text: string
+          additional_info?: Json | null
           created_at?: string
           description: string
+          directory_title?: string | null
+          facilities?: Json | null
+          features?: Json | null
           hotel_id?: string | null
+          hotel_policies?: Json | null
           icon: string
           id?: string
+          important_numbers?: Json | null
+          mission?: string | null
           status?: string
           title: string
           updated_at?: string
+          welcome_description?: string | null
+          welcome_description_extended?: string | null
+          welcome_title?: string | null
         }
         Update: {
           action_link?: string
           action_text?: string
+          additional_info?: Json | null
           created_at?: string
           description?: string
+          directory_title?: string | null
+          facilities?: Json | null
+          features?: Json | null
           hotel_id?: string | null
+          hotel_policies?: Json | null
           icon?: string
           id?: string
+          important_numbers?: Json | null
+          mission?: string | null
           status?: string
           title?: string
           updated_at?: string
+          welcome_description?: string | null
+          welcome_description_extended?: string | null
+          welcome_title?: string | null
         }
         Relationships: [
           {
