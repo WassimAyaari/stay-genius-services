@@ -116,7 +116,10 @@ const AboutEditor = () => {
     return (
       <Layout>
         <div className="container py-8">
-          <h1 className="text-2xl font-bold mb-4">Loading About Section Editor...</h1>
+          <h1 className="text-2xl font-bold mb-4">Chargement de l'éditeur...</h1>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
         </div>
       </Layout>
     );
@@ -126,17 +129,17 @@ const AboutEditor = () => {
     <Layout>
       <div className="container py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Edit About Section</h1>
+          <h1 className="text-2xl font-bold">Modifier la section À Propos</h1>
           <Button onClick={handleSubmit} className="flex items-center gap-2">
-            <Save className="h-4 w-4" /> Save Changes
+            <Save className="h-4 w-4" /> Sauvegarder
           </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-4 w-full mb-6">
-            <TabsTrigger value="welcome">Welcome</TabsTrigger>
-            <TabsTrigger value="directory">Directory</TabsTrigger>
-            <TabsTrigger value="features">Features</TabsTrigger>
+            <TabsTrigger value="welcome">Accueil</TabsTrigger>
+            <TabsTrigger value="directory">Répertoire</TabsTrigger>
+            <TabsTrigger value="features">Caractéristiques</TabsTrigger>
             <TabsTrigger value="mission">Mission</TabsTrigger>
           </TabsList>
 
