@@ -1,15 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { History, Building2, Users, Award, Save, Plus, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Save } from 'lucide-react';
 import Layout from '@/components/Layout';
+import WelcomeSection from '@/components/admin/about/WelcomeSection';
+import DirectorySection from '@/components/admin/about/DirectorySection';
+import FeaturesSection from '@/components/admin/about/FeaturesSection';
+import MissionSection from '@/components/admin/about/MissionSection';
 import { InfoItem, FeatureItem } from '@/lib/types';
 
 const AboutEditor = () => {
@@ -95,7 +94,7 @@ const AboutEditor = () => {
   const addFeature = () => {
     setFormData(prev => ({
       ...prev,
-      features: [...prev.features, { title: '', description: '', icon: 'Info' }]
+      features: [...prev.features, { title: '', description: '', icon: 'History' }]
     }));
   };
 
@@ -111,16 +110,6 @@ const AboutEditor = () => {
     if (!formData) return;
 
     updateAboutData(formData);
-  };
-
-  const getIconComponent = (iconName) => {
-    switch (iconName) {
-      case 'History': return <History />;
-      case 'Building2': return <Building2 />;
-      case 'Users': return <Users />;
-      case 'Award': return <Award />;
-      default: return <History />;
-    }
   };
 
   if (isLoadingAbout || !formData) {
@@ -152,283 +141,42 @@ const AboutEditor = () => {
           </TabsList>
 
           <TabsContent value="welcome" className="space-y-4">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Welcome Section</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="welcome_title">Section Title</Label>
-                  <Input 
-                    id="welcome_title" 
-                    name="welcome_title" 
-                    value={formData.welcome_title || ''} 
-                    onChange={handleTextChange}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="welcome_description">Main Description</Label>
-                  <Textarea 
-                    id="welcome_description" 
-                    name="welcome_description" 
-                    value={formData.welcome_description || ''} 
-                    onChange={handleTextChange}
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="welcome_description_extended">Extended Description</Label>
-                  <Textarea 
-                    id="welcome_description_extended" 
-                    name="welcome_description_extended" 
-                    value={formData.welcome_description_extended || ''} 
-                    onChange={handleTextChange}
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </Card>
+            <WelcomeSection
+              welcomeTitle={formData.welcome_title}
+              welcomeDescription={formData.welcome_description}
+              welcomeDescriptionExtended={formData.welcome_description_extended}
+              handleTextChange={handleTextChange}
+            />
           </TabsContent>
 
           <TabsContent value="directory" className="space-y-4">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Directory & Information</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="directory_title">Section Title</Label>
-                  <Input 
-                    id="directory_title" 
-                    name="directory_title" 
-                    value={formData.directory_title || ''} 
-                    onChange={handleTextChange}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium">Important Numbers</h3>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addInfoItem('important_numbers')}>
-                        <Plus className="h-4 w-4 mr-1" /> Add
-                      </Button>
-                    </div>
-                    
-                    {formData.important_numbers.map((item, index) => (
-                      <div key={index} className="flex gap-2 mb-2">
-                        <Input 
-                          placeholder="Label"
-                          value={item.label || ''} 
-                          onChange={(e) => handleInfoItemChange('important_numbers', index, 'label', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Input 
-                          placeholder="Value"
-                          value={String(item.value || '')} 
-                          onChange={(e) => handleInfoItemChange('important_numbers', index, 'value', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => removeInfoItem('important_numbers', index)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium">Hotel Policies</h3>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addInfoItem('hotel_policies')}>
-                        <Plus className="h-4 w-4 mr-1" /> Add
-                      </Button>
-                    </div>
-                    
-                    {formData.hotel_policies.map((item, index) => (
-                      <div key={index} className="flex gap-2 mb-2">
-                        <Input 
-                          placeholder="Label"
-                          value={item.label || ''} 
-                          onChange={(e) => handleInfoItemChange('hotel_policies', index, 'label', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Input 
-                          placeholder="Value"
-                          value={String(item.value || '')} 
-                          onChange={(e) => handleInfoItemChange('hotel_policies', index, 'value', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => removeInfoItem('hotel_policies', index)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium">Facilities & Amenities</h3>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addInfoItem('facilities')}>
-                        <Plus className="h-4 w-4 mr-1" /> Add
-                      </Button>
-                    </div>
-                    
-                    {formData.facilities.map((item, index) => (
-                      <div key={index} className="flex gap-2 mb-2">
-                        <Input 
-                          placeholder="Label"
-                          value={item.label || ''} 
-                          onChange={(e) => handleInfoItemChange('facilities', index, 'label', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Input 
-                          placeholder="Value"
-                          value={String(item.value || '')} 
-                          onChange={(e) => handleInfoItemChange('facilities', index, 'value', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => removeInfoItem('facilities', index)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium">Additional Information</h3>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addInfoItem('additional_info')}>
-                        <Plus className="h-4 w-4 mr-1" /> Add
-                      </Button>
-                    </div>
-                    
-                    {formData.additional_info.map((item, index) => (
-                      <div key={index} className="flex gap-2 mb-2">
-                        <Input 
-                          placeholder="Label"
-                          value={item.label || ''} 
-                          onChange={(e) => handleInfoItemChange('additional_info', index, 'label', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Input 
-                          placeholder="Value"
-                          value={String(item.value || '')} 
-                          onChange={(e) => handleInfoItemChange('additional_info', index, 'value', e.target.value)}
-                          className="flex-1"
-                        />
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => removeInfoItem('additional_info', index)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <DirectorySection
+              directoryTitle={formData.directory_title}
+              importantNumbers={formData.important_numbers}
+              hotelPolicies={formData.hotel_policies}
+              facilities={formData.facilities}
+              additionalInfo={formData.additional_info}
+              handleTextChange={handleTextChange}
+              addInfoItem={addInfoItem}
+              removeInfoItem={removeInfoItem}
+              handleInfoItemChange={handleInfoItemChange}
+            />
           </TabsContent>
 
           <TabsContent value="features" className="space-y-4">
-            <Card className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Features Grid</h2>
-                <Button type="button" variant="outline" onClick={addFeature}>
-                  <Plus className="h-4 w-4 mr-1" /> Add Feature
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {formData.features.map((feature, index) => (
-                  <Card key={index} className="p-4 relative">
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="icon" 
-                      className="absolute top-2 right-2"
-                      onClick={() => removeFeature(index)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-
-                    <div className="flex flex-col items-center gap-2 mt-4">
-                      <div className="bg-primary/10 p-3 rounded-full mb-3">
-                        {getIconComponent(feature.icon)}
-                      </div>
-                      
-                      <Input 
-                        placeholder="Title"
-                        value={feature.title || ''} 
-                        onChange={(e) => handleFeatureChange(index, 'title', e.target.value)}
-                        className="text-center"
-                      />
-                      
-                      <Textarea 
-                        placeholder="Description"
-                        value={feature.description || ''} 
-                        onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
-                        className="text-center text-sm"
-                        rows={2}
-                      />
-                      
-                      <div className="w-full mt-2">
-                        <Label htmlFor={`icon-${index}`}>Icon</Label>
-                        <select 
-                          id={`icon-${index}`}
-                          value={feature.icon || 'History'} 
-                          onChange={(e) => handleFeatureChange(index, 'icon', e.target.value)}
-                          className="w-full rounded-md border border-input bg-background px-3 py-2"
-                        >
-                          <option value="History">History</option>
-                          <option value="Building2">Building</option>
-                          <option value="Users">Team</option>
-                          <option value="Award">Award</option>
-                        </select>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </Card>
+            <FeaturesSection
+              features={formData.features}
+              addFeature={addFeature}
+              removeFeature={removeFeature}
+              handleFeatureChange={handleFeatureChange}
+            />
           </TabsContent>
 
           <TabsContent value="mission" className="space-y-4">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Mission Statement</h2>
-              
-              <div>
-                <Label htmlFor="mission">Mission</Label>
-                <Textarea 
-                  id="mission" 
-                  name="mission" 
-                  value={formData.mission || ''} 
-                  onChange={handleTextChange}
-                  rows={5}
-                  className="mb-2"
-                />
-                <p className="text-sm text-gray-500">
-                  A concise statement that defines the purpose and values of the hotel.
-                </p>
-              </div>
-            </Card>
+            <MissionSection
+              mission={formData.mission}
+              handleTextChange={handleTextChange}
+            />
           </TabsContent>
         </Tabs>
       </div>
