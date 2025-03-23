@@ -71,6 +71,14 @@ export const useHotelConfig = () => {
   const createInitialAboutData = async () => {
     // Données par défaut pour la section "À Propos"
     const defaultAboutData = {
+      // Champs obligatoires qui manquaient
+      title: "À Propos de l'Hôtel",
+      description: "Découvrez notre histoire et nos services",
+      icon: "Info",
+      action_text: "En savoir plus",
+      action_link: "/about",
+      
+      // Champs existants
       welcome_title: "Bienvenue à notre hôtel",
       welcome_description: "Hotel Genius est un hôtel de luxe situé au cœur de la ville. Nous sommes fiers de fournir un service exceptionnel et une expérience inoubliable à tous nos clients.",
       welcome_description_extended: "Depuis notre création en 2010, nous nous sommes engagés à créer un chez-soi loin de chez soi pour nos clients, en combinant des équipements modernes avec une hospitalité classique.",
@@ -125,7 +133,8 @@ export const useHotelConfig = () => {
           description: "Reconnu pour un service exceptionnel", 
           icon: "Award" 
         }
-      ]
+      ],
+      status: "active"
     };
 
     console.log("Tentative de création des données initiales");
