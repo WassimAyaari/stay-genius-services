@@ -23,23 +23,23 @@ const About = () => {
   // Parse JSON data if needed
   const importantNumbers: InfoItem[] = Array.isArray(aboutData.important_numbers) 
     ? aboutData.important_numbers 
-    : JSON.parse(aboutData.important_numbers || '[]');
+    : JSON.parse(typeof aboutData.important_numbers === 'string' ? aboutData.important_numbers || '[]' : '[]');
   
   const hotelPolicies: InfoItem[] = Array.isArray(aboutData.hotel_policies) 
     ? aboutData.hotel_policies 
-    : JSON.parse(aboutData.hotel_policies || '[]');
+    : JSON.parse(typeof aboutData.hotel_policies === 'string' ? aboutData.hotel_policies || '[]' : '[]');
   
   const facilities: InfoItem[] = Array.isArray(aboutData.facilities) 
     ? aboutData.facilities 
-    : JSON.parse(aboutData.facilities || '[]');
+    : JSON.parse(typeof aboutData.facilities === 'string' ? aboutData.facilities || '[]' : '[]');
   
   const additionalInfo: InfoItem[] = Array.isArray(aboutData.additional_info) 
     ? aboutData.additional_info 
-    : JSON.parse(aboutData.additional_info || '[]');
+    : JSON.parse(typeof aboutData.additional_info === 'string' ? aboutData.additional_info || '[]' : '[]');
   
   const features: FeatureItem[] = Array.isArray(aboutData.features) 
     ? aboutData.features 
-    : JSON.parse(aboutData.features || '[]');
+    : JSON.parse(typeof aboutData.features === 'string' ? aboutData.features || '[]' : '[]');
 
   // Helper function to get icon component
   const getIconComponent = (iconName: string, className = "h-6 w-6 text-primary") => {

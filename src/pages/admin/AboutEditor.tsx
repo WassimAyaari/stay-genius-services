@@ -23,19 +23,19 @@ const AboutEditor = () => {
         ...aboutData,
         important_numbers: Array.isArray(aboutData.important_numbers) 
           ? aboutData.important_numbers 
-          : JSON.parse(aboutData.important_numbers || '[]'),
+          : JSON.parse(typeof aboutData.important_numbers === 'string' ? aboutData.important_numbers || '[]' : '[]'),
         hotel_policies: Array.isArray(aboutData.hotel_policies) 
           ? aboutData.hotel_policies 
-          : JSON.parse(aboutData.hotel_policies || '[]'),
+          : JSON.parse(typeof aboutData.hotel_policies === 'string' ? aboutData.hotel_policies || '[]' : '[]'),
         facilities: Array.isArray(aboutData.facilities) 
           ? aboutData.facilities 
-          : JSON.parse(aboutData.facilities || '[]'),
+          : JSON.parse(typeof aboutData.facilities === 'string' ? aboutData.facilities || '[]' : '[]'),
         additional_info: Array.isArray(aboutData.additional_info) 
           ? aboutData.additional_info 
-          : JSON.parse(aboutData.additional_info || '[]'),
+          : JSON.parse(typeof aboutData.additional_info === 'string' ? aboutData.additional_info || '[]' : '[]'),
         features: Array.isArray(aboutData.features) 
           ? aboutData.features 
-          : JSON.parse(aboutData.features || '[]'),
+          : JSON.parse(typeof aboutData.features === 'string' ? aboutData.features || '[]' : '[]'),
       };
       setFormData(parsedData);
     }
