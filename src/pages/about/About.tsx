@@ -21,28 +21,28 @@ const About = () => {
   }
 
   // Parse JSON data if needed
-  const importantNumbers = Array.isArray(aboutData.important_numbers) 
+  const importantNumbers: InfoItem[] = Array.isArray(aboutData.important_numbers) 
     ? aboutData.important_numbers 
     : JSON.parse(aboutData.important_numbers || '[]');
   
-  const hotelPolicies = Array.isArray(aboutData.hotel_policies) 
+  const hotelPolicies: InfoItem[] = Array.isArray(aboutData.hotel_policies) 
     ? aboutData.hotel_policies 
     : JSON.parse(aboutData.hotel_policies || '[]');
   
-  const facilities = Array.isArray(aboutData.facilities) 
+  const facilities: InfoItem[] = Array.isArray(aboutData.facilities) 
     ? aboutData.facilities 
     : JSON.parse(aboutData.facilities || '[]');
   
-  const additionalInfo = Array.isArray(aboutData.additional_info) 
+  const additionalInfo: InfoItem[] = Array.isArray(aboutData.additional_info) 
     ? aboutData.additional_info 
     : JSON.parse(aboutData.additional_info || '[]');
   
-  const features = Array.isArray(aboutData.features) 
+  const features: FeatureItem[] = Array.isArray(aboutData.features) 
     ? aboutData.features 
     : JSON.parse(aboutData.features || '[]');
 
   // Helper function to get icon component
-  const getIconComponent = (iconName, className = "h-6 w-6 text-primary") => {
+  const getIconComponent = (iconName: string, className = "h-6 w-6 text-primary") => {
     switch (iconName) {
       case 'History': return <History className={className} />;
       case 'Building2': return <Building2 className={className} />;
