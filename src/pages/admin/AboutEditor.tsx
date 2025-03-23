@@ -3,18 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save } from 'lucide-react';
+import { Save, AlertTriangle } from 'lucide-react';
 import Layout from '@/components/Layout';
 import WelcomeSection from '@/components/admin/about/WelcomeSection';
 import DirectorySection from '@/components/admin/about/DirectorySection';
 import FeaturesSection from '@/components/admin/about/FeaturesSection';
 import MissionSection from '@/components/admin/about/MissionSection';
-import { InfoItem, FeatureItem } from '@/lib/types';
+import { toast } from 'sonner';
 
 const AboutEditor = () => {
-  const { aboutData, isLoadingAbout, updateAboutData } = useHotelConfig();
+  const { aboutData, isLoadingAbout, aboutError, updateAboutData, createInitialAboutData } = useHotelConfig();
   const [formData, setFormData] = useState(null);
   const [activeTab, setActiveTab] = useState('welcome');
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     if (aboutData) {
@@ -40,6 +41,19 @@ const AboutEditor = () => {
       setFormData(parsedData);
     }
   }, [aboutData]);
+
+  const handleCreateInitialData = async () => {
+    setIsCreating(true);
+    try {
+      await createInitialAboutData();
+      toast.success("Données initiales créées avec succès!");
+    } catch (error) {
+      console.error("Erreur lors de la création des données initiales:", error);
+      toast.error("Erreur lors de la création des données initiales");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleTextChange = (e) => {
     const { name, value } = e.target;
@@ -112,11 +126,53 @@ const AboutEditor = () => {
     updateAboutData(formData);
   };
 
-  if (isLoadingAbout || !formData) {
+  // Loading state
+  if (isLoadingAbout) {
     return (
       <Layout>
         <div className="container py-8">
           <h1 className="text-2xl font-bold mb-4">Chargement de l'éditeur...</h1>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Error state or no data
+  if (aboutError || (!isLoadingAbout && !aboutData)) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div className="flex items-start">
+              <AlertTriangle className="h-6 w-6 text-yellow-400 mr-3" />
+              <div>
+                <h3 className="text-lg font-medium text-yellow-800">Aucune donnée trouvée</h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  Les données de la section "À Propos" n'existent pas encore dans la base de données.
+                </p>
+                <Button 
+                  onClick={handleCreateInitialData} 
+                  className="mt-3"
+                  disabled={isCreating}
+                >
+                  {isCreating ? 'Création en cours...' : 'Créer les données initiales'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!formData) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <h1 className="text-2xl font-bold mb-4">Préparation des données...</h1>
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
