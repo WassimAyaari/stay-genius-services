@@ -88,7 +88,7 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Important Numbers</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    {importantNumbers.map((item, index) => (
+                    {importantNumbers.map((item: InfoItem, index: number) => (
                       <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
@@ -104,7 +104,7 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Hotel Policies</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    {hotelPolicies.map((item, index) => (
+                    {hotelPolicies.map((item: InfoItem, index: number) => (
                       <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
@@ -120,7 +120,7 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Facilities & Amenities</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    {facilities.map((item, index) => (
+                    {facilities.map((item: InfoItem, index: number) => (
                       <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
@@ -136,7 +136,7 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold mb-1">Additional Information</h3>
                   <ul className="text-sm text-gray-600 space-y-2">
-                    {additionalInfo.map((item, index) => (
+                    {additionalInfo.map((item: InfoItem, index: number) => (
                       <li key={index}>{item.label}: {String(item.value)}</li>
                     ))}
                   </ul>
@@ -148,7 +148,7 @@ const About = () => {
 
         {/* Features Grid */}
         <div className="grid grid-cols-2 gap-4 mb-10">
-          {features.map((feature, index) => (
+          {features.map((feature: FeatureItem, index: number) => (
             <Card key={index} className="p-4 rounded-xl">
               <div className="flex flex-col items-center text-center">
                 <div className="bg-primary/10 p-3 rounded-full mb-3">
