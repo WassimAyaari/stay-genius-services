@@ -1,11 +1,14 @@
 
 import React, { useState } from 'react';
-import { useRestaurants } from '@/hooks/useRestaurants';
-import { Restaurant } from '@/features/dining/types';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, Edit, Trash2, Menu, Calendar } from 'lucide-react';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -15,313 +18,448 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
+import { useRestaurants } from '@/hooks/useRestaurants';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Restaurant } from '@/features/dining/types';
+import { Pencil, Trash2, Plus, Image } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Link } from 'react-router-dom';
 
-const RestaurantManager = () => {
-  const { restaurants, isLoading, createRestaurant, updateRestaurant, deleteRestaurant } = useRestaurants();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Restaurant name must be at least 2 characters.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+  cuisine: z.string().min(2, {
+    message: "Cuisine type is required.",
+  }),
+  openHours: z.string().min(2, {
+    message: "Opening hours are required.",
+  }),
+  location: z.string().min(2, {
+    message: "Location is required.",
+  }),
+  status: z.enum(['open', 'closed']),
+  images: z.array(z.string()).min(1, {
+    message: "At least one image is required.",
+  }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const RestaurantManager: React.FC = () => {
+  const { toast } = useToast();
+  const { data: restaurants, isLoading, error, updateRestaurant, addRestaurant, deleteRestaurant } = useRestaurants();
   const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
-  const navigate = useNavigate();
-  
-  const form = useForm({
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newImageUrl, setNewImageUrl] = useState("");
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      cuisine: '',
-      openHours: '',
-      location: '',
-      status: 'open',
-      images: [''] // at least one image URL is required
-    }
+      name: "",
+      description: "",
+      cuisine: "",
+      openHours: "",
+      location: "",
+      status: "open" as const,
+      images: [""],
+    },
   });
 
-  // Update form when editing a restaurant
-  React.useEffect(() => {
-    if (editingRestaurant) {
-      form.reset({
-        name: editingRestaurant.name,
-        description: editingRestaurant.description,
-        cuisine: editingRestaurant.cuisine,
-        openHours: editingRestaurant.openHours,
-        location: editingRestaurant.location,
-        status: editingRestaurant.status,
-        images: editingRestaurant.images.length > 0 ? editingRestaurant.images : ['']
+  const handleSubmit = async (values: FormValues) => {
+    try {
+      if (editingRestaurant) {
+        await updateRestaurant({
+          ...values,
+          id: editingRestaurant.id,
+          status: values.status,
+        });
+        toast({
+          title: "Restaurant updated",
+          description: "The restaurant has been updated successfully.",
+        });
+      } else {
+        await addRestaurant({
+          ...values,
+          status: values.status,
+        });
+        toast({
+          title: "Restaurant added",
+          description: "The restaurant has been added successfully.",
+        });
+      }
+      setIsDialogOpen(false);
+      form.reset();
+      setEditingRestaurant(null);
+    } catch (error) {
+      console.error("Error saving restaurant:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was a problem saving the restaurant.",
       });
     }
-  }, [editingRestaurant, form]);
+  };
 
-  const handleAddRestaurant = () => {
-    setEditingRestaurant(null);
+  const handleEdit = (restaurant: Restaurant) => {
+    setEditingRestaurant(restaurant);
     form.reset({
-      name: '',
-      description: '',
-      cuisine: '',
-      openHours: '',
-      location: '',
-      status: 'open',
-      images: ['']
+      name: restaurant.name,
+      description: restaurant.description,
+      cuisine: restaurant.cuisine,
+      openHours: restaurant.openHours,
+      location: restaurant.location,
+      status: restaurant.status,
+      images: restaurant.images,
     });
     setIsDialogOpen(true);
   };
 
-  const handleEditRestaurant = (restaurant: Restaurant) => {
-    setEditingRestaurant(restaurant);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteRestaurant(id);
+      toast({
+        title: "Restaurant deleted",
+        description: "The restaurant has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error("Error deleting restaurant:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was a problem deleting the restaurant.",
+      });
+    }
+  };
+
+  const handleAddImage = () => {
+    if (newImageUrl) {
+      const currentImages = form.getValues("images") || [];
+      form.setValue("images", [...currentImages, newImageUrl]);
+      setNewImageUrl("");
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const currentImages = form.getValues("images") || [];
+    form.setValue("images", currentImages.filter((_, i) => i !== index));
+  };
+
+  const handleDialogOpen = () => {
+    form.reset({
+      name: "",
+      description: "",
+      cuisine: "",
+      openHours: "",
+      location: "",
+      status: "open" as const,
+      images: [],
+    });
+    setEditingRestaurant(null);
     setIsDialogOpen(true);
   };
 
-  const handleDeleteRestaurant = (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) {
-      deleteRestaurant(id);
-    }
-  };
-
-  const handleSubmit = form.handleSubmit((data) => {
-    const filteredImages = data.images.filter(img => img.trim() !== '');
-    
-    if (filteredImages.length === 0) {
-      toast.error('Au moins une image est requise');
-      return;
-    }
-    
-    const restaurantData = {
-      ...data,
-      images: filteredImages
-    };
-    
-    if (editingRestaurant) {
-      updateRestaurant({ id: editingRestaurant.id, ...restaurantData });
-    } else {
-      createRestaurant(restaurantData);
-    }
-    
-    setIsDialogOpen(false);
-  });
-
-  const handleAddImageField = () => {
-    const images = form.getValues('images');
-    form.setValue('images', [...images, '']);
-  };
-
-  const handleRemoveImageField = (index: number) => {
-    const images = form.getValues('images');
-    if (images.length > 1) {
-      form.setValue('images', images.filter((_, i) => i !== index));
-    }
-  };
-
-  if (isLoading) {
-    return <div className="p-8 text-center">Chargement des restaurants...</div>;
-  }
+  if (isLoading) return <div className="p-8 text-center">Loading restaurants...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">Error loading restaurants: {error.message}</div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold">Gestion des Restaurants</h1>
-        <Button onClick={handleAddRestaurant}>
-          <Plus className="mr-2 h-4 w-4" /> Ajouter un Restaurant
-        </Button>
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {restaurants?.map((restaurant) => (
-          <Card key={restaurant.id} className="overflow-hidden">
-            <div className="relative aspect-video">
-              <img 
-                src={restaurant.images[0]} 
-                alt={restaurant.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-2 right-2">
-                <span className={`
-                  px-2 py-1 rounded-full text-xs font-medium
-                  ${restaurant.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
-                `}>
-                  {restaurant.status}
-                </span>
-              </div>
-            </div>
-            <CardHeader>
-              <CardTitle>{restaurant.name}</CardTitle>
-              <CardDescription>{restaurant.cuisine}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4">{restaurant.description}</p>
-              <div className="flex flex-wrap gap-2 mt-4">
-                <Button size="sm" variant="outline" onClick={() => handleEditRestaurant(restaurant)}>
-                  <Edit className="mr-2 h-4 w-4" /> Modifier
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => navigate(`/admin/restaurants/${restaurant.id}/menu`)}>
-                  <Menu className="mr-2 h-4 w-4" /> Menu
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => navigate(`/admin/restaurants/${restaurant.id}/reservations`)}>
-                  <Calendar className="mr-2 h-4 w-4" /> Réservations
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDeleteRestaurant(restaurant.id)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{editingRestaurant ? 'Modifier le Restaurant' : 'Ajouter un Restaurant'}</DialogTitle>
-            <DialogDescription>
-              {editingRestaurant 
-                ? 'Modifiez les détails du restaurant ci-dessous.' 
-                : 'Entrez les détails du nouveau restaurant.'}
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Nom du restaurant" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="cuisine"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cuisine</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Type de cuisine" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Description" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Emplacement</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Emplacement dans l'hôtel" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="openHours"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Heures d'ouverture</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Heures d'ouverture" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Statut</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
+        <h1 className="text-2xl font-bold">Restaurant Manager</h1>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="default" onClick={handleDialogOpen}>
+              <Plus className="mr-2 h-4 w-4" /> Add Restaurant
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>{editingRestaurant ? "Edit Restaurant" : "Add New Restaurant"}</DialogTitle>
+              <DialogDescription>
+                {editingRestaurant 
+                  ? "Update the restaurant details below." 
+                  : "Fill out the form below to add a new restaurant."}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionnez un statut" />
-                        </SelectTrigger>
+                        <Input placeholder="Restaurant name" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="open">Ouvert</SelectItem>
-                        <SelectItem value="closed">Fermé</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="space-y-2">
-                <FormLabel>Images</FormLabel>
-                {form.watch('images').map((_, index) => (
-                  <div key={index} className="flex gap-2">
-                    <FormField
-                      control={form.control}
-                      name={`images.${index}`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Restaurant description" 
+                          {...field} 
+                          className="min-h-[100px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cuisine"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cuisine</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Cuisine type" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="openHours"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Opening Hours</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. 9:00 AM - 10:00 PM" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Restaurant location" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}>
                           <FormControl>
-                            <Input {...field} placeholder="URL de l'image" />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => handleRemoveImageField(index)}
-                      disabled={form.watch('images').length <= 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleAddImageField}
-                >
-                  Ajouter une image
-                </Button>
-              </div>
-              
-              <DialogFooter>
-                <Button type="submit">
-                  {editingRestaurant ? 'Enregistrer' : 'Ajouter'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                          <SelectContent>
+                            <SelectItem value="open">Open</SelectItem>
+                            <SelectItem value="closed">Closed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>Images</FormLabel>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            placeholder="Image URL" 
+                            value={newImageUrl}
+                            onChange={(e) => setNewImageUrl(e.target.value)}
+                          />
+                          <Button 
+                            type="button"
+                            variant="outline"
+                            onClick={handleAddImage}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 mt-2">
+                          {form.watch("images")?.map((url, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <div className="flex-1 truncate border p-2 rounded text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Image className="h-4 w-4 shrink-0" />
+                                  <span className="truncate">{url}</span>
+                                </div>
+                              </div>
+                              <Button 
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleRemoveImage(index)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button type="submit">{editingRestaurant ? "Update" : "Create"}</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Restaurants</CardTitle>
+          <CardDescription>Manage your hotel's restaurants.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Cuisine</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {restaurants?.length ? (
+                restaurants.map((restaurant) => (
+                  <TableRow key={restaurant.id}>
+                    <TableCell className="font-medium">{restaurant.name}</TableCell>
+                    <TableCell>{restaurant.cuisine}</TableCell>
+                    <TableCell>{restaurant.location}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        restaurant.status === "open" 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                        {restaurant.status === "open" ? "Open" : "Closed"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEdit(restaurant)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                        >
+                          <Link to={`/admin/restaurants/${restaurant.id}/menu`}>
+                            Menu
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                        >
+                          <Link to={`/admin/restaurants/${restaurant.id}/reservations`}>
+                            Reservations
+                          </Link>
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the
+                                restaurant and all associated menus and reservations.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(restaurant.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-4">
+                    No restaurants found. Add your first restaurant to get started.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

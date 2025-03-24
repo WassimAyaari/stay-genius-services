@@ -1,12 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useRestaurants } from '@/hooks/useRestaurants';
-import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
-import { MenuItem } from '@/features/dining/types';
+import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -14,349 +17,430 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
+import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
+import { useRestaurants } from '@/hooks/useRestaurants';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { MenuItem } from '@/features/dining/types';
+import { Pencil, Trash2, Plus, Image, ArrowLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
-const CATEGORIES = [
-  'Entrée',
-  'Plat Principal',
-  'Dessert',
-  'Boisson',
-  'Petit-déjeuner',
-  'Déjeuner',
-  'Dîner',
-  'Spécialité',
-  'Végétarien',
-  'Vegan',
-  'Sans Gluten'
-];
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Menu item name must be at least 2 characters.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+  price: z.coerce.number().min(0, {
+    message: "Price must be a positive number.",
+  }),
+  category: z.string().min(2, {
+    message: "Category is required.",
+  }),
+  image: z.string().url({
+    message: "Please enter a valid URL for the image.",
+  }).optional().or(z.literal('')),
+  isFeatured: z.boolean().default(false),
+  status: z.enum(['available', 'unavailable']),
+});
 
-const RestaurantMenuManager = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { fetchRestaurantById } = useRestaurants();
-  const { menuItems, isLoading, createMenuItem, updateMenuItem, deleteMenuItem } = useRestaurantMenus(id);
-  
-  const [restaurant, setRestaurant] = useState<any>(null);
+type FormValues = z.infer<typeof formSchema>;
+
+const RestaurantMenuManager: React.FC = () => {
+  const { id: restaurantId } = useParams<{ id: string }>();
+  const { toast } = useToast();
+  const { 
+    data: menuItems, 
+    isLoading, 
+    error, 
+    updateMenuItem, 
+    addMenuItem, 
+    deleteMenuItem 
+  } = useRestaurantMenus(restaurantId || '');
+  const { data: restaurants } = useRestaurants();
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
-  
-  const form = useForm({
+
+  const restaurant = restaurants?.find(r => r.id === restaurantId);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       price: 0,
-      category: '',
-      image: '',
+      category: "",
+      image: "",
       isFeatured: false,
-      status: 'available'
-    }
+      status: "available" as const,
+    },
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchRestaurantById(id)
-        .then(data => setRestaurant(data))
-        .catch(err => console.error("Erreur lors du chargement du restaurant:", err));
-    }
-  }, [id, fetchRestaurantById]);
-
-  // Update form when editing a menu item
-  React.useEffect(() => {
-    if (editingMenuItem) {
-      form.reset({
-        name: editingMenuItem.name,
-        description: editingMenuItem.description,
-        price: editingMenuItem.price,
-        category: editingMenuItem.category,
-        image: editingMenuItem.image || '',
-        isFeatured: editingMenuItem.isFeatured,
-        status: editingMenuItem.status
+  const handleSubmit = async (values: FormValues) => {
+    if (!restaurantId) return;
+    
+    try {
+      if (editingItem) {
+        await updateMenuItem({
+          ...values,
+          id: editingItem.id,
+          restaurantId,
+          status: values.status,
+        });
+        toast({
+          title: "Menu item updated",
+          description: "The menu item has been updated successfully.",
+        });
+      } else {
+        await addMenuItem({
+          ...values,
+          restaurantId,
+          status: values.status,
+        });
+        toast({
+          title: "Menu item added",
+          description: "The menu item has been added successfully.",
+        });
+      }
+      setIsDialogOpen(false);
+      form.reset();
+      setEditingItem(null);
+    } catch (error) {
+      console.error("Error saving menu item:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was a problem saving the menu item.",
       });
     }
-  }, [editingMenuItem, form]);
+  };
 
-  const handleAddMenuItem = () => {
-    setEditingMenuItem(null);
+  const handleEdit = (item: MenuItem) => {
+    setEditingItem(item);
     form.reset({
-      name: '',
-      description: '',
-      price: 0,
-      category: '',
-      image: '',
-      isFeatured: false,
-      status: 'available'
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+      image: item.image || "",
+      isFeatured: item.isFeatured,
+      status: item.status,
     });
     setIsDialogOpen(true);
   };
 
-  const handleEditMenuItem = (menuItem: MenuItem) => {
-    setEditingMenuItem(menuItem);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMenuItem(id);
+      toast({
+        title: "Menu item deleted",
+        description: "The menu item has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error("Error deleting menu item:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was a problem deleting the menu item.",
+      });
+    }
+  };
+
+  const handleDialogOpen = () => {
+    form.reset({
+      name: "",
+      description: "",
+      price: 0,
+      category: "",
+      image: "",
+      isFeatured: false,
+      status: "available" as const,
+    });
+    setEditingItem(null);
     setIsDialogOpen(true);
   };
 
-  const handleDeleteMenuItem = (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce plat du menu ?')) {
-      deleteMenuItem(id);
-    }
-  };
-
-  const handleSubmit = form.handleSubmit((data) => {
-    if (editingMenuItem) {
-      updateMenuItem({ 
-        id: editingMenuItem.id, 
-        restaurantId: id!, 
-        ...data 
-      });
-    } else {
-      createMenuItem({ 
-        restaurantId: id!, 
-        ...data 
-      });
-    }
-    
-    setIsDialogOpen(false);
-  });
-
-  if (isLoading || !restaurant) {
-    return <div className="p-8 text-center">Chargement du menu...</div>;
-  }
+  if (isLoading) return <div className="p-8 text-center">Loading menu items...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">Error loading menu items: {error.message}</div>;
+  if (!restaurant) return <div className="p-8 text-center text-red-500">Restaurant not found</div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center mb-4">
-        <Button variant="outline" size="sm" onClick={() => navigate('/admin/restaurants')}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Retour
-        </Button>
-      </div>
-      
+    <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-semibold">{restaurant.name}</h1>
-          <p className="text-gray-600">Gestion du Menu</p>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin/restaurants">
+              <ArrowLeft className="h-4 w-4 mr-1" /> Back
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold">{restaurant.name} Menu</h1>
         </div>
-        <Button onClick={handleAddMenuItem}>
-          <Plus className="mr-2 h-4 w-4" /> Ajouter un Plat
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="default" onClick={handleDialogOpen}>
+              <Plus className="mr-2 h-4 w-4" /> Add Menu Item
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>{editingItem ? "Edit Menu Item" : "Add New Menu Item"}</DialogTitle>
+              <DialogDescription>
+                {editingItem 
+                  ? "Update the menu item details below." 
+                  : "Fill out the form below to add a new menu item."}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Menu item name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Item description" 
+                          {...field} 
+                          className="min-h-[100px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="0.00" 
+                            {...field} 
+                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Appetizers, Main Course" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Image URL" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Optional: Add an image URL for the menu item.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="isFeatured"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>Featured Item</FormLabel>
+                          <FormDescription>
+                            Featured items appear in special sections.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="available">Available</SelectItem>
+                            <SelectItem value="unavailable">Unavailable</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button type="submit">{editingItem ? "Update" : "Create"}</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {menuItems?.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground mb-4">Aucun plat dans le menu</p>
-          <Button onClick={handleAddMenuItem}>
-            <Plus className="mr-2 h-4 w-4" /> Ajouter un Plat
-          </Button>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {menuItems?.map((menuItem) => (
-            <Card key={menuItem.id} className="overflow-hidden">
-              {menuItem.image && (
-                <div className="relative aspect-video">
-                  <img 
-                    src={menuItem.image} 
-                    alt={menuItem.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {menuItem.isFeatured && (
-                    <div className="absolute top-2 left-2">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                        Recommandé
+      <Card>
+        <CardHeader>
+          <CardTitle>Menu Items</CardTitle>
+          <CardDescription>Manage menu items for {restaurant.name}.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Featured</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {menuItems?.length ? (
+                menuItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>{item.category}</TableCell>
+                    <TableCell>${item.price.toFixed(2)}</TableCell>
+                    <TableCell>
+                      {item.isFeatured ? (
+                        <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                          Featured
+                        </span>
+                      ) : null}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        item.status === "available" 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                        {item.status === "available" ? "Available" : "Unavailable"}
                       </span>
-                    </div>
-                  )}
-                  <div className="absolute top-2 right-2">
-                    <span className={`
-                      px-2 py-1 rounded-full text-xs font-medium
-                      ${menuItem.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
-                    `}>
-                      {menuItem.status === 'available' ? 'Disponible' : 'Indisponible'}
-                    </span>
-                  </div>
-                </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEdit(item)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the
+                                menu item.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(item.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    No menu items found. Add your first item to get started.
+                  </TableCell>
+                </TableRow>
               )}
-              <CardHeader>
-                <CardTitle>{menuItem.name}</CardTitle>
-                <CardDescription>{menuItem.category} - {menuItem.price} €</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4">{menuItem.description}</p>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <Button size="sm" variant="outline" onClick={() => handleEditMenuItem(menuItem)}>
-                    <Edit className="mr-2 h-4 w-4" /> Modifier
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDeleteMenuItem(menuItem.id)}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{editingMenuItem ? 'Modifier le Plat' : 'Ajouter un Plat'}</DialogTitle>
-            <DialogDescription>
-              {editingMenuItem 
-                ? 'Modifiez les détails du plat ci-dessous.' 
-                : 'Entrez les détails du nouveau plat.'}
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Nom du plat" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Description" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prix (€)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                        placeholder="Prix" 
-                        required 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Catégorie</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionnez une catégorie" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {CATEGORIES.map(category => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="image"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="URL de l'image" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="isFeatured"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        checked={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Recommandé</FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Mettre en avant ce plat comme recommandé
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Statut</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionnez un statut" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="available">Disponible</SelectItem>
-                        <SelectItem value="unavailable">Indisponible</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <DialogFooter>
-                <Button type="submit">
-                  {editingMenuItem ? 'Enregistrer' : 'Ajouter'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };
