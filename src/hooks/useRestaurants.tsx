@@ -95,39 +95,76 @@ export const useRestaurants = () => {
 
   const updateRestaurant = async (restaurant: Restaurant): Promise<Restaurant> => {
     console.log('Updating restaurant with data:', restaurant);
-    // Convert from camelCase to snake_case
-    const { data, error } = await supabase
-      .from('restaurants')
-      .update({
-        name: restaurant.name,
-        description: restaurant.description,
-        cuisine: restaurant.cuisine,
-        images: restaurant.images,
-        open_hours: restaurant.openHours,
-        location: restaurant.location,
-        status: restaurant.status
-      })
-      .eq('id', restaurant.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating restaurant:', error);
-      throw error;
+    
+    // Vérification des données avant l'envoi
+    if (!restaurant.name || !restaurant.description || !restaurant.cuisine || 
+        !restaurant.openHours || !restaurant.location || !restaurant.status) {
+      throw new Error("Certains champs obligatoires sont manquants");
     }
 
-    console.log('Updated restaurant:', data);
-    // Convert from snake_case to camelCase for the returned data
-    return {
-      id: data.id,
-      name: data.name,
-      description: data.description,
-      cuisine: data.cuisine,
-      images: data.images,
-      openHours: data.open_hours,
-      location: data.location,
-      status: data.status as 'open' | 'closed'
-    };
+    try {
+      // Convert from camelCase to snake_case
+      const { data, error } = await supabase
+        .from('restaurants')
+        .update({
+          name: restaurant.name,
+          description: restaurant.description,
+          cuisine: restaurant.cuisine,
+          images: restaurant.images,
+          open_hours: restaurant.openHours,
+          location: restaurant.location,
+          status: restaurant.status
+        })
+        .eq('id', restaurant.id)
+        .select();
+
+      if (error) {
+        console.error('Error updating restaurant:', error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.error('No data returned from update');
+        // Récupérer les données à jour directement
+        const { data: fetchedData, error: fetchError } = await supabase
+          .from('restaurants')
+          .select('*')
+          .eq('id', restaurant.id)
+          .single();
+          
+        if (fetchError) {
+          throw fetchError;
+        }
+        
+        console.log('Fetched updated restaurant:', fetchedData);
+        return {
+          id: fetchedData.id,
+          name: fetchedData.name,
+          description: fetchedData.description,
+          cuisine: fetchedData.cuisine,
+          images: fetchedData.images,
+          openHours: fetchedData.open_hours,
+          location: fetchedData.location,
+          status: fetchedData.status as 'open' | 'closed'
+        };
+      }
+
+      console.log('Updated restaurant:', data[0]);
+      // Convert from snake_case to camelCase for the returned data
+      return {
+        id: data[0].id,
+        name: data[0].name,
+        description: data[0].description,
+        cuisine: data[0].cuisine,
+        images: data[0].images,
+        openHours: data[0].open_hours,
+        location: data[0].location,
+        status: data[0].status as 'open' | 'closed'
+      };
+    } catch (error) {
+      console.error('Error in updateRestaurant:', error);
+      throw error;
+    }
   };
 
   const deleteRestaurant = async (id: string): Promise<void> => {
