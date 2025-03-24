@@ -77,14 +77,14 @@ const RestaurantMenuManager: React.FC = () => {
   const { id: restaurantId } = useParams<{ id: string }>();
   const { toast } = useToast();
   const { 
-    data: menuItems, 
+    menuItems, 
     isLoading, 
     error, 
     updateMenuItem, 
-    addMenuItem, 
+    createMenuItem, 
     deleteMenuItem 
   } = useRestaurantMenus(restaurantId || '');
-  const { data: restaurants } = useRestaurants();
+  const { restaurants } = useRestaurants();
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -119,7 +119,7 @@ const RestaurantMenuManager: React.FC = () => {
           description: "The menu item has been updated successfully.",
         });
       } else {
-        await addMenuItem({
+        await createMenuItem({
           ...values,
           restaurantId,
           status: values.status,

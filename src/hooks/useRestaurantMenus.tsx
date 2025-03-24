@@ -150,7 +150,7 @@ export const useRestaurantMenus = (restaurantId?: string) => {
   };
 
   // Use React Query for data fetching and caching
-  const { data: menuItems, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['menuItems', restaurantId],
     queryFn: fetchMenuItems,
     enabled: restaurantId !== undefined
@@ -193,7 +193,7 @@ export const useRestaurantMenus = (restaurantId?: string) => {
   });
 
   return {
-    menuItems,
+    menuItems: data,
     isLoading,
     error,
     fetchMenuItemById,

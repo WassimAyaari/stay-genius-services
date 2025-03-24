@@ -75,7 +75,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const RestaurantManager: React.FC = () => {
   const { toast } = useToast();
-  const { data: restaurants, isLoading, error, updateRestaurant, addRestaurant, deleteRestaurant } = useRestaurants();
+  const { restaurants, isLoading, error, updateRestaurant, createRestaurant, deleteRestaurant } = useRestaurants();
   const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState("");
@@ -106,7 +106,7 @@ const RestaurantManager: React.FC = () => {
           description: "The restaurant has been updated successfully.",
         });
       } else {
-        await addRestaurant({
+        await createRestaurant({
           ...values,
           status: values.status,
         });
