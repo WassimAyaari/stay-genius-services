@@ -701,6 +701,95 @@ export type Database = {
         }
         Relationships: []
       }
+      restaurant_menus: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          id: string
+          image: string | null
+          is_featured: boolean | null
+          name: string
+          price: number
+          restaurant_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          name: string
+          price: number
+          restaurant_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number
+          restaurant_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_menus_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurants: {
+        Row: {
+          created_at: string | null
+          cuisine: string
+          description: string
+          id: string
+          images: string[]
+          location: string
+          name: string
+          open_hours: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cuisine: string
+          description: string
+          id?: string
+          images?: string[]
+          location: string
+          name: string
+          open_hours: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cuisine?: string
+          description?: string
+          id?: string
+          images?: string[]
+          location?: string
+          name?: string
+          open_hours?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       rooms: {
         Row: {
           amenities: string[] | null
@@ -817,6 +906,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      table_reservations: {
+        Row: {
+          created_at: string | null
+          date: string
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          guests: number
+          id: string
+          restaurant_id: string | null
+          special_requests: string | null
+          status: string
+          time: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests: number
+          id?: string
+          restaurant_id?: string | null
+          special_requests?: string | null
+          status?: string
+          time: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests?: number
+          id?: string
+          restaurant_id?: string | null
+          special_requests?: string | null
+          status?: string
+          time?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "table_reservations_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
