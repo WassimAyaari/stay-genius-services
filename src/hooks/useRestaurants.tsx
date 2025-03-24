@@ -58,6 +58,7 @@ export const useRestaurants = () => {
   };
 
   const createRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Promise<Restaurant> => {
+    console.log('Creating restaurant with data:', restaurant);
     // Convert from camelCase to snake_case
     const { data, error } = await supabase
       .from('restaurants')
@@ -78,6 +79,7 @@ export const useRestaurants = () => {
       throw error;
     }
 
+    console.log('Created restaurant:', data);
     // Convert from snake_case to camelCase for the returned data
     return {
       id: data.id,
@@ -92,6 +94,7 @@ export const useRestaurants = () => {
   };
 
   const updateRestaurant = async (restaurant: Restaurant): Promise<Restaurant> => {
+    console.log('Updating restaurant with data:', restaurant);
     // Convert from camelCase to snake_case
     const { data, error } = await supabase
       .from('restaurants')
@@ -113,6 +116,7 @@ export const useRestaurants = () => {
       throw error;
     }
 
+    console.log('Updated restaurant:', data);
     // Convert from snake_case to camelCase for the returned data
     return {
       id: data.id,
