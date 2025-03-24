@@ -1,0 +1,85 @@
+
+import React from 'react';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UseFormReturn } from 'react-hook-form';
+
+interface RestaurantDetailsProps {
+  form: UseFormReturn<any>;
+}
+
+const RestaurantDetails = ({ form }: RestaurantDetailsProps) => {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="cuisine"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cuisine</FormLabel>
+              <FormControl>
+                <Input placeholder="Cuisine type" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="openHours"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Opening Hours</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. 9:00 AM - 10:00 PM" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <Input placeholder="Restaurant location" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </>
+  );
+};
+
+export default RestaurantDetails;
