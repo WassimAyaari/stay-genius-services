@@ -109,9 +109,14 @@ const RestaurantMenuManager: React.FC = () => {
     try {
       if (editingItem) {
         await updateMenuItem({
-          ...values,
           id: editingItem.id,
           restaurantId,
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          category: values.category,
+          image: values.image || undefined,
+          isFeatured: values.isFeatured,
           status: values.status,
         });
         toast({
@@ -120,8 +125,13 @@ const RestaurantMenuManager: React.FC = () => {
         });
       } else {
         await createMenuItem({
-          ...values,
           restaurantId,
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          category: values.category,
+          image: values.image || undefined,
+          isFeatured: values.isFeatured,
           status: values.status,
         });
         toast({

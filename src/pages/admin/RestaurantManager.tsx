@@ -89,7 +89,7 @@ const RestaurantManager: React.FC = () => {
       openHours: "",
       location: "",
       status: "open" as const,
-      images: [""],
+      images: [],
     },
   });
 
@@ -97,9 +97,14 @@ const RestaurantManager: React.FC = () => {
     try {
       if (editingRestaurant) {
         await updateRestaurant({
-          ...values,
-          id: editingRestaurant.id,
+          ...editingRestaurant,
+          name: values.name,
+          description: values.description,
+          cuisine: values.cuisine,
+          openHours: values.openHours,
+          location: values.location,
           status: values.status,
+          images: values.images,
         });
         toast({
           title: "Restaurant updated",
@@ -107,8 +112,13 @@ const RestaurantManager: React.FC = () => {
         });
       } else {
         await createRestaurant({
-          ...values,
+          name: values.name,
+          description: values.description,
+          cuisine: values.cuisine,
+          openHours: values.openHours,
+          location: values.location,
           status: values.status,
+          images: values.images,
         });
         toast({
           title: "Restaurant added",
