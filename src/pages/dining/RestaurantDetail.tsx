@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -10,10 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Restaurant } from '@/features/dining/types';
 import { Clock, MapPin, UtensilsCrossed, Calendar } from 'lucide-react';
 import ReservationForm from '@/components/ReservationForm';
+import { toast } from 'sonner';
 
 const RestaurantDetail = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const openBookingFromNavigation = location.state?.openBooking || false;
   
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -25,12 +26,20 @@ const RestaurantDetail = () => {
   const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(id);
   
   useEffect(() => {
-    if (id) {
+    if (id && id !== ':id') {
       fetchRestaurantById(id)
         .then(data => setRestaurant(data))
-        .catch(err => console.error("Error fetching restaurant:", err));
+        .catch(err => {
+          console.error("Error fetching restaurant:", err);
+          toast.error("Erreur lors du chargement du restaurant");
+          navigate('/dining');
+        });
+    } else {
+      // Handle invalid ID
+      toast.error("ID de restaurant invalide");
+      navigate('/dining');
     }
-  }, [id, fetchRestaurantById]);
+  }, [id, fetchRestaurantById, navigate]);
   
   const handleReservationSuccess = () => {
     setIsBookingOpen(false);
@@ -192,7 +201,9 @@ const RestaurantDetail = () => {
               Remplissez le formulaire ci-dessous pour réserver une table.
             </DialogDescription>
           </DialogHeader>
-          <ReservationForm restaurantId={id!} onSuccess={handleReservationSuccess} />
+          {id && id !== ':id' && (
+            <ReservationForm restaurantId={id} onSuccess={handleReservationSuccess} />
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -14,7 +14,8 @@ export const useTableReservations = (restaurantId?: string) => {
       .order('date', { ascending: true })
       .order('time', { ascending: true });
     
-    if (restaurantId) {
+    // Only apply the restaurant_id filter if a valid UUID is provided
+    if (restaurantId && restaurantId !== ':id') {
       query = query.eq('restaurant_id', restaurantId);
     }
 
@@ -43,6 +44,11 @@ export const useTableReservations = (restaurantId?: string) => {
   };
 
   const createReservation = async (reservation: Omit<TableReservation, 'id' | 'createdAt'>): Promise<TableReservation> => {
+    // Validate restaurantId to ensure it's a valid UUID
+    if (!reservation.restaurantId || reservation.restaurantId === ':id') {
+      throw new Error('Invalid restaurant ID');
+    }
+    
     // Convert from camelCase to snake_case
     const { data, error } = await supabase
       .from('table_reservations')
@@ -98,7 +104,9 @@ export const useTableReservations = (restaurantId?: string) => {
   // Use React Query for data fetching and caching
   const { data: reservations, isLoading, error } = useQuery({
     queryKey: ['tableReservations', restaurantId],
-    queryFn: fetchReservations
+    queryFn: fetchReservations,
+    // Skip the query if restaurantId is invalid (":id")
+    enabled: !restaurantId || restaurantId !== ':id'
   });
 
   const createMutation = useMutation({
