@@ -16,7 +16,9 @@ export const useRestaurants = () => {
   // Use React Query for data fetching and caching
   const { data, isLoading, error } = useQuery({
     queryKey: ['restaurants'],
-    queryFn: fetchRestaurants
+    queryFn: fetchRestaurants,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
   });
 
   const createMutation = useMutation({
