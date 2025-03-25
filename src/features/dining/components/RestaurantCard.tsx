@@ -54,7 +54,7 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
             className="w-full flex items-center justify-center gap-1"
           >
             <Calendar size={16} />
-            Book a Table
+            {restaurant.actionText || "Book a Table"}
           </Button>
           <Button 
             variant="outline" 

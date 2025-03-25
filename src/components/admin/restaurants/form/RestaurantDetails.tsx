@@ -78,6 +78,22 @@ const RestaurantDetails = ({ form }: RestaurantDetailsProps) => {
           )}
         />
       </div>
+      <FormField
+        control={form.control}
+        name="actionText"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Action Button Text</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="e.g. Book a Table, Order Now, etc." 
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   );
 };

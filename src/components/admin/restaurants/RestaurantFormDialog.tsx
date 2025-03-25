@@ -41,6 +41,7 @@ const RestaurantFormDialog = ({
       openHours: "",
       location: "",
       status: "open",
+      actionText: "Book a Table",
       images: [],
     },
   });
@@ -55,6 +56,7 @@ const RestaurantFormDialog = ({
         openHours: editingRestaurant.openHours,
         location: editingRestaurant.location,
         status: editingRestaurant.status,
+        actionText: editingRestaurant.actionText || "Book a Table",
         images: editingRestaurant.images,
       });
     } else if (isOpen && !editingRestaurant) {
@@ -66,6 +68,7 @@ const RestaurantFormDialog = ({
         openHours: "",
         location: "",
         status: "open",
+        actionText: "Book a Table",
         images: [],
       });
     }

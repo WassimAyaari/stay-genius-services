@@ -22,6 +22,7 @@ type FormValues = {
   openHours: string;
   location: string;
   status: 'open' | 'closed';
+  actionText: string;
   images: string[];
 };
 
@@ -42,6 +43,7 @@ const RestaurantManager: React.FC = () => {
           openHours: values.openHours,
           location: values.location,
           status: values.status,
+          actionText: values.actionText,
           images: values.images,
         });
         toast({
@@ -56,6 +58,7 @@ const RestaurantManager: React.FC = () => {
           openHours: values.openHours,
           location: values.location,
           status: values.status,
+          actionText: values.actionText,
           images: values.images,
         });
         toast({
