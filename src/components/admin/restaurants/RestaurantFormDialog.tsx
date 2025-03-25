@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { restaurantFormSchema, RestaurantFormValues } from './form/RestaurantFormSchema';
 import RestaurantBasicInfo from './form/RestaurantBasicInfo';
 import RestaurantDetails from './form/RestaurantDetails';
@@ -46,7 +47,7 @@ const RestaurantFormDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{editingRestaurant ? "Edit Restaurant" : "Add New Restaurant"}</DialogTitle>
           <DialogDescription>
@@ -55,16 +56,18 @@ const RestaurantFormDialog = ({
               : "Fill out the form below to add a new restaurant."}
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <RestaurantBasicInfo form={form} />
-            <RestaurantDetails form={form} />
-            <ImageUploader form={form} />
-            <DialogFooter>
-              <Button type="submit">{editingRestaurant ? "Update" : "Create"}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <ScrollArea className="max-h-[calc(90vh-180px)] pr-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <RestaurantBasicInfo form={form} />
+              <RestaurantDetails form={form} />
+              <ImageUploader form={form} />
+              <DialogFooter className="pt-4">
+                <Button type="submit">{editingRestaurant ? "Update" : "Create"}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
