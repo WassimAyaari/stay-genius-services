@@ -8,6 +8,7 @@ export interface Restaurant {
   openHours: string;
   location: string;
   status: 'open' | 'closed';
+  actionText?: string;
 }
 
 export interface DiningReservation {
