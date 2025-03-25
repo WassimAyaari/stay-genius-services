@@ -47,10 +47,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { MenuItem } from '@/features/dining/types';
-import { Pencil, Trash2, Plus, Image, ArrowLeft } from 'lucide-react';
+import { Pencil, Trash2, Plus, Image, ArrowLeft, Upload } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { compressAndConvertToWebP } from '@/lib/imageUtils';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -65,9 +67,7 @@ const formSchema = z.object({
   category: z.string().min(2, {
     message: "Category is required.",
   }),
-  image: z.string().url({
-    message: "Please enter a valid URL for the image.",
-  }).optional().or(z.literal('')),
+  image: z.string().optional(),
   isFeatured: z.boolean().default(false),
   status: z.enum(['available', 'unavailable']),
 });
@@ -88,6 +88,8 @@ const RestaurantMenuManager: React.FC = () => {
   const { restaurants } = useRestaurants();
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const restaurant = restaurants?.find(r => r.id === restaurantId);
 
@@ -206,6 +208,62 @@ const RestaurantMenuManager: React.FC = () => {
     setIsDialogOpen(true);
   };
 
+  const handleFileUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Only image files are accepted.",
+      });
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const compressedImageDataUrl = await compressAndConvertToWebP(file);
+      form.setValue("image", compressedImageDataUrl);
+    } catch (error) {
+      console.error("Error processing image:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was a problem processing the image.",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleInputFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      await handleFileUpload(files[0]);
+      // Reset the input value so the same file can be selected again
+      e.target.value = '';
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
   if (isLoading) return <div className="p-8 text-center">Loading menu items...</div>;
   if (error) return <div className="p-8 text-center text-red-500">Error loading menu items: {error.message}</div>;
   if (!restaurant) return <div className="p-8 text-center text-red-500">Restaurant not found</div>;
@@ -302,22 +360,89 @@ const RestaurantMenuManager: React.FC = () => {
                       )}
                     />
                   </div>
+                  
                   <FormField
                     control={form.control}
                     name="image"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Image URL</FormLabel>
+                        <FormLabel>Image</FormLabel>
+                        
+                        {/* URL Input */}
                         <FormControl>
-                          <Input placeholder="Image URL" {...field} />
+                          <Input 
+                            placeholder="Image URL (optional)" 
+                            {...field} 
+                            value={field.value || ""}
+                            disabled={isProcessing}
+                          />
                         </FormControl>
+                        
+                        {/* File upload area */}
+                        <div 
+                          className={cn(
+                            "border-2 border-dashed rounded-md p-6 mt-2 flex flex-col items-center justify-center cursor-pointer transition-colors",
+                            dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/20 hover:border-muted-foreground/50",
+                            isProcessing && "opacity-50 cursor-not-allowed"
+                          )}
+                          onDragEnter={handleDrag}
+                          onDragOver={handleDrag}
+                          onDragLeave={handleDrag}
+                          onDrop={handleDrop}
+                          onClick={() => !isProcessing && document.getElementById('menu-image-upload')?.click()}
+                        >
+                          <input
+                            id="menu-image-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleInputFileChange}
+                            disabled={isProcessing}
+                          />
+                          <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground text-center mb-1">
+                            Drop an image here or click to browse
+                          </p>
+                          <p className="text-xs text-muted-foreground text-center">
+                            Images will be compressed to ~30KB and converted to WebP
+                          </p>
+                          {isProcessing && (
+                            <p className="text-xs text-primary mt-2 animate-pulse">
+                              Processing image...
+                            </p>
+                          )}
+                        </div>
+                        
+                        {/* Image preview */}
+                        {field.value && !isProcessing && (
+                          <div className="mt-2 relative">
+                            <div className="relative aspect-video rounded-md overflow-hidden border">
+                              <img 
+                                src={field.value} 
+                                alt="Menu item preview" 
+                                className="object-cover w-full h-full"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                                onClick={() => form.setValue("image", "")}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
                         <FormDescription>
-                          Optional: Add an image URL for the menu item.
+                          Upload an image or provide a URL for the menu item.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
