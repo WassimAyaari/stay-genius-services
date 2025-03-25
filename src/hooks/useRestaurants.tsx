@@ -5,6 +5,7 @@ import { Restaurant } from '@/features/dining/types';
 import { 
   fetchRestaurants, 
   fetchRestaurantById, 
+  fetchFeaturedRestaurants,
   createRestaurant as createRestaurantService, 
   updateRestaurant as updateRestaurantService, 
   deleteRestaurant as deleteRestaurantService 
@@ -21,10 +22,21 @@ export const useRestaurants = () => {
     refetchOnWindowFocus: true,
   });
 
+  const { 
+    data: featuredRestaurants,
+    isLoading: isFeaturedLoading
+  } = useQuery({
+    queryKey: ['featuredRestaurants'],
+    queryFn: fetchFeaturedRestaurants,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
+  });
+
   const createMutation = useMutation({
     mutationFn: createRestaurantService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+      queryClient.invalidateQueries({ queryKey: ['featuredRestaurants'] });
       toast.success('Restaurant créé avec succès');
     },
     onError: (error) => {
@@ -37,6 +49,7 @@ export const useRestaurants = () => {
     mutationFn: updateRestaurantService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+      queryClient.invalidateQueries({ queryKey: ['featuredRestaurants'] });
       toast.success('Restaurant mis à jour avec succès');
     },
     onError: (error) => {
@@ -49,6 +62,7 @@ export const useRestaurants = () => {
     mutationFn: deleteRestaurantService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+      queryClient.invalidateQueries({ queryKey: ['featuredRestaurants'] });
       toast.success('Restaurant supprimé avec succès');
     },
     onError: (error) => {
@@ -59,7 +73,9 @@ export const useRestaurants = () => {
 
   return {
     restaurants: data,
+    featuredRestaurants,
     isLoading,
+    isFeaturedLoading,
     error,
     fetchRestaurantById,
     createRestaurant: createMutation.mutate,

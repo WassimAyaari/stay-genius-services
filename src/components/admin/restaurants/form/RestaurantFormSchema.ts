@@ -21,6 +21,7 @@ export const restaurantFormSchema = z.object({
   actionText: z.string().min(2, {
     message: "Action button text is required.",
   }).default("Book a Table"),
+  isFeatured: z.boolean().default(false),
   images: z.array(z.string()).min(1, {
     message: "At least one image is required.",
   }),

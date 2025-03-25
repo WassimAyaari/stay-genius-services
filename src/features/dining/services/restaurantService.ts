@@ -26,7 +26,8 @@ export const fetchRestaurants = async (): Promise<Restaurant[]> => {
     openHours: item.open_hours,
     location: item.location,
     status: item.status as 'open' | 'closed',
-    actionText: item.action_text || "Book a Table" // Add default if not present
+    actionText: item.action_text || "Book a Table", // Add default if not present
+    isFeatured: item.is_featured || false
   }));
 };
 
@@ -55,8 +56,39 @@ export const fetchRestaurantById = async (id: string): Promise<Restaurant> => {
     openHours: data.open_hours,
     location: data.location,
     status: data.status as 'open' | 'closed',
-    actionText: data.action_text || "Book a Table" // Add default if not present
+    actionText: data.action_text || "Book a Table", // Add default if not present
+    isFeatured: data.is_featured || false
   };
+};
+
+/**
+ * Fetches featured restaurants from the database
+ */
+export const fetchFeaturedRestaurants = async (): Promise<Restaurant[]> => {
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('*')
+    .eq('is_featured', true)
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching featured restaurants:', error);
+    throw error;
+  }
+
+  // Convert from snake_case to camelCase
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    cuisine: item.cuisine,
+    images: item.images,
+    openHours: item.open_hours,
+    location: item.location,
+    status: item.status as 'open' | 'closed',
+    actionText: item.action_text || "Book a Table", // Add default if not present
+    isFeatured: true
+  }));
 };
 
 /**
@@ -76,7 +108,8 @@ export const createRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Prom
       open_hours: restaurant.openHours,
       location: restaurant.location,
       status: restaurant.status,
-      action_text: restaurant.actionText // Add the action_text field
+      action_text: restaurant.actionText, // Add the action_text field
+      is_featured: restaurant.isFeatured || false // Add the is_featured field
     })
     .select()
     .single();
@@ -97,7 +130,8 @@ export const createRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Prom
     openHours: data.open_hours,
     location: data.location,
     status: data.status as 'open' | 'closed',
-    actionText: data.action_text || "Book a Table" // Add default if not present
+    actionText: data.action_text || "Book a Table", // Add default if not present
+    isFeatured: data.is_featured || false
   };
 };
 
@@ -125,7 +159,8 @@ export const updateRestaurant = async (restaurant: Restaurant): Promise<Restaura
         open_hours: restaurant.openHours,
         location: restaurant.location,
         status: restaurant.status,
-        action_text: restaurant.actionText // Add the action_text field
+        action_text: restaurant.actionText, // Add the action_text field
+        is_featured: restaurant.isFeatured || false // Add the is_featured field
       })
       .eq('id', restaurant.id)
       .select();
@@ -158,7 +193,8 @@ export const updateRestaurant = async (restaurant: Restaurant): Promise<Restaura
         openHours: fetchedData.open_hours,
         location: fetchedData.location,
         status: fetchedData.status as 'open' | 'closed',
-        actionText: fetchedData.action_text || "Book a Table" // Add default if not present
+        actionText: fetchedData.action_text || "Book a Table", // Add default if not present
+        isFeatured: fetchedData.is_featured || false
       };
     }
 
@@ -173,7 +209,8 @@ export const updateRestaurant = async (restaurant: Restaurant): Promise<Restaura
       openHours: data[0].open_hours,
       location: data[0].location,
       status: data[0].status as 'open' | 'closed',
-      actionText: data[0].action_text || "Book a Table" // Add default if not present
+      actionText: data[0].action_text || "Book a Table", // Add default if not present
+      isFeatured: data[0].is_featured || false
     };
   } catch (error) {
     console.error('Error in updateRestaurant:', error);

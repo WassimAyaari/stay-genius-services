@@ -1,4 +1,3 @@
-
 export interface Restaurant {
   id: string;
   name: string;
@@ -9,6 +8,7 @@ export interface Restaurant {
   location: string;
   status: 'open' | 'closed';
   actionText?: string;
+  isFeatured?: boolean;
 }
 
 export interface DiningReservation {

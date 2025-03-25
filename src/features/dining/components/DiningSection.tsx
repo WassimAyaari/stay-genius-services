@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const DiningSection = () => {
   const { toast } = useToast();
-  const { restaurants, isLoading } = useRestaurants();
+  const { featuredRestaurants, isFeaturedLoading } = useRestaurants();
 
   const handleBookTable = async (restaurantId: string) => {
     try {
@@ -29,18 +29,18 @@ const DiningSection = () => {
     }
   };
 
-  if (isLoading) {
+  if (isFeaturedLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-pulse text-gray-400">Loading restaurants...</div>
+        <div className="animate-pulse text-gray-400">Loading featured restaurants...</div>
       </div>
     );
   }
 
-  if (!restaurants || restaurants.length === 0) {
+  if (!featuredRestaurants || featuredRestaurants.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-gray-400">No restaurants available at the moment.</div>
+        <div className="text-gray-400">No featured restaurants available at the moment.</div>
       </div>
     );
   }
@@ -59,7 +59,7 @@ const DiningSection = () => {
         </div>
       </div>
       <CarouselContent className="-ml-4">
-        {restaurants?.map((restaurant) => (
+        {featuredRestaurants?.map((restaurant) => (
           <CarouselItem key={restaurant.id} className="md:basis-2/5 lg:basis-[30%] pl-4">
             <div className="px-2">
               <RestaurantCard

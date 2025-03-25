@@ -753,11 +753,13 @@ export type Database = {
       }
       restaurants: {
         Row: {
+          action_text: string | null
           created_at: string | null
           cuisine: string
           description: string
           id: string
           images: string[]
+          is_featured: boolean | null
           location: string
           name: string
           open_hours: string
@@ -765,11 +767,13 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          action_text?: string | null
           created_at?: string | null
           cuisine: string
           description: string
           id?: string
           images?: string[]
+          is_featured?: boolean | null
           location: string
           name: string
           open_hours: string
@@ -777,11 +781,13 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          action_text?: string | null
           created_at?: string | null
           cuisine?: string
           description?: string
           id?: string
           images?: string[]
+          is_featured?: boolean | null
           location?: string
           name?: string
           open_hours?: string
