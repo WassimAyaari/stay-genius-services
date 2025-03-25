@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Restaurant } from "@/features/dining/types";
-import { PenSquare, Trash2, BookCopy, Clipboard, BookOpen } from "lucide-react";
+import { PenSquare, Trash2, BookCopy, Clipboard, BookOpen, UtensilsCrossed } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface RestaurantTableProps {
@@ -67,7 +67,7 @@ const RestaurantTable = ({ restaurants, onEdit, onDelete }: RestaurantTableProps
                       size="icon"
                       title="Gérer le menu"
                     >
-                      <Clipboard className="h-4 w-4" />
+                      <UtensilsCrossed className="h-4 w-4" />
                     </Button>
                   </Link>
                   <Link to={`/admin/restaurants/${restaurant.id}/reservations`}>
