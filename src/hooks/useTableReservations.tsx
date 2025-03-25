@@ -49,12 +49,16 @@ export const useTableReservations = (restaurantId?: string) => {
       throw new Error('Invalid restaurant ID');
     }
     
+    // Get current user's ID if authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || null;
+    
     // Convert from camelCase to snake_case
     const { data, error } = await supabase
       .from('table_reservations')
       .insert({
         restaurant_id: reservation.restaurantId,
-        user_id: reservation.userId,
+        user_id: userId, // Set to null for anonymous users
         guest_name: reservation.guestName,
         guest_email: reservation.guestEmail,
         guest_phone: reservation.guestPhone,
@@ -117,7 +121,7 @@ export const useTableReservations = (restaurantId?: string) => {
     },
     onError: (error) => {
       console.error('Error creating reservation:', error);
-      toast.error('Erreur lors de la création de la réservation');
+      toast.error('Erreur lors de la création de la réservation: ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
     }
   });
 
