@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -103,6 +104,32 @@ const RestaurantMenuManager: React.FC = () => {
     },
   });
 
+  // Update form when editing item changes or dialog opens
+  useEffect(() => {
+    if (isDialogOpen && editingItem) {
+      form.reset({
+        name: editingItem.name,
+        description: editingItem.description,
+        price: editingItem.price,
+        category: editingItem.category,
+        image: editingItem.image || "",
+        isFeatured: editingItem.isFeatured,
+        status: editingItem.status,
+      });
+    } else if (isDialogOpen && !editingItem) {
+      // Reset form when opening for a new menu item
+      form.reset({
+        name: "",
+        description: "",
+        price: 0,
+        category: "",
+        image: "",
+        isFeatured: false,
+        status: "available" as const,
+      });
+    }
+  }, [isDialogOpen, editingItem, form]);
+
   const handleSubmit = async (values: FormValues) => {
     if (!restaurantId) return;
     
@@ -154,15 +181,6 @@ const RestaurantMenuManager: React.FC = () => {
 
   const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
-    form.reset({
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      category: item.category,
-      image: item.image || "",
-      isFeatured: item.isFeatured,
-      status: item.status,
-    });
     setIsDialogOpen(true);
   };
 
@@ -184,15 +202,6 @@ const RestaurantMenuManager: React.FC = () => {
   };
 
   const handleDialogOpen = () => {
-    form.reset({
-      name: "",
-      description: "",
-      price: 0,
-      category: "",
-      image: "",
-      isFeatured: false,
-      status: "available" as const,
-    });
     setEditingItem(null);
     setIsDialogOpen(true);
   };

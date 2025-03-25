@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Restaurant } from '@/features/dining/types';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,15 +35,41 @@ const RestaurantFormDialog = ({
   const form = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantFormSchema),
     defaultValues: {
-      name: editingRestaurant?.name || "",
-      description: editingRestaurant?.description || "",
-      cuisine: editingRestaurant?.cuisine || "",
-      openHours: editingRestaurant?.openHours || "",
-      location: editingRestaurant?.location || "",
-      status: editingRestaurant?.status || "open",
-      images: editingRestaurant?.images || [],
+      name: "",
+      description: "",
+      cuisine: "",
+      openHours: "",
+      location: "",
+      status: "open",
+      images: [],
     },
   });
+  
+  // Update form values when editing restaurant changes or dialog opens
+  useEffect(() => {
+    if (isOpen && editingRestaurant) {
+      form.reset({
+        name: editingRestaurant.name,
+        description: editingRestaurant.description,
+        cuisine: editingRestaurant.cuisine,
+        openHours: editingRestaurant.openHours,
+        location: editingRestaurant.location,
+        status: editingRestaurant.status,
+        images: editingRestaurant.images,
+      });
+    } else if (isOpen && !editingRestaurant) {
+      // Reset form when opening for a new restaurant
+      form.reset({
+        name: "",
+        description: "",
+        cuisine: "",
+        openHours: "",
+        location: "",
+        status: "open",
+        images: [],
+      });
+    }
+  }, [isOpen, editingRestaurant, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
