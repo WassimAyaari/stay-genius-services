@@ -25,7 +25,8 @@ export const fetchRestaurants = async (): Promise<Restaurant[]> => {
     images: item.images,
     openHours: item.open_hours,
     location: item.location,
-    status: item.status as 'open' | 'closed'
+    status: item.status as 'open' | 'closed',
+    actionText: item.action_text || "Book a Table" // Add default if not present
   }));
 };
 
@@ -53,7 +54,8 @@ export const fetchRestaurantById = async (id: string): Promise<Restaurant> => {
     images: data.images,
     openHours: data.open_hours,
     location: data.location,
-    status: data.status as 'open' | 'closed'
+    status: data.status as 'open' | 'closed',
+    actionText: data.action_text || "Book a Table" // Add default if not present
   };
 };
 
@@ -73,7 +75,8 @@ export const createRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Prom
       images: restaurant.images,
       open_hours: restaurant.openHours,
       location: restaurant.location,
-      status: restaurant.status
+      status: restaurant.status,
+      action_text: restaurant.actionText // Add the action_text field
     })
     .select()
     .single();
@@ -93,7 +96,8 @@ export const createRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Prom
     images: data.images,
     openHours: data.open_hours,
     location: data.location,
-    status: data.status as 'open' | 'closed'
+    status: data.status as 'open' | 'closed',
+    actionText: data.action_text || "Book a Table" // Add default if not present
   };
 };
 
@@ -120,7 +124,8 @@ export const updateRestaurant = async (restaurant: Restaurant): Promise<Restaura
         images: restaurant.images,
         open_hours: restaurant.openHours,
         location: restaurant.location,
-        status: restaurant.status
+        status: restaurant.status,
+        action_text: restaurant.actionText // Add the action_text field
       })
       .eq('id', restaurant.id)
       .select();
@@ -152,7 +157,8 @@ export const updateRestaurant = async (restaurant: Restaurant): Promise<Restaura
         images: fetchedData.images,
         openHours: fetchedData.open_hours,
         location: fetchedData.location,
-        status: fetchedData.status as 'open' | 'closed'
+        status: fetchedData.status as 'open' | 'closed',
+        actionText: fetchedData.action_text || "Book a Table" // Add default if not present
       };
     }
 
@@ -166,7 +172,8 @@ export const updateRestaurant = async (restaurant: Restaurant): Promise<Restaura
       images: data[0].images,
       openHours: data[0].open_hours,
       location: data[0].location,
-      status: data[0].status as 'open' | 'closed'
+      status: data[0].status as 'open' | 'closed',
+      actionText: data[0].action_text || "Book a Table" // Add default if not present
     };
   } catch (error) {
     console.error('Error in updateRestaurant:', error);
