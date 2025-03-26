@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UtensilsCrossed, Clock, Coffee, Pizza, Wine, ChefHat, MapPin, Calendar, BookText } from 'lucide-react';
 import Layout from '@/components/Layout';
-import DiningSection from '@/features/dining/components/DiningSection';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useToast } from '@/hooks/use-toast';
@@ -74,7 +73,7 @@ const Dining = () => {
                     className="w-full flex items-center justify-center gap-1"
                   >
                     <Calendar size={16} />
-                    Book a Table
+                    {restaurant.actionText || "Book a Table"}
                   </Button>
                   <Button 
                     variant="outline" 
@@ -90,11 +89,6 @@ const Dining = () => {
           ))}
         </div>
       )}
-
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold text-secondary mb-6">Featured Restaurants</h2>
-        <DiningSection />
-      </div>
     </Layout>;
 };
 
