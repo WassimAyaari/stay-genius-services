@@ -36,7 +36,6 @@ const RestaurantDetail = () => {
           navigate('/dining');
         });
     } else {
-      // Handle invalid ID
       toast.error("ID de restaurant invalide");
       navigate('/dining');
     }
@@ -49,6 +48,8 @@ const RestaurantDetail = () => {
   if (isLoadingRestaurant || !restaurant) {
     return <div className="p-8 text-center">Chargement du restaurant...</div>;
   }
+
+  const buttonText = restaurant.actionText || "Book a Table";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -118,7 +119,7 @@ const RestaurantDetail = () => {
             disabled={restaurant.status !== 'open'}
           >
             <Calendar className="mr-2 h-5 w-5" />
-            {restaurant.actionText || "Book a Table"}
+            {buttonText}
           </Button>
         </div>
       </div>
@@ -151,7 +152,6 @@ const RestaurantDetail = () => {
             </div>
           ) : (
             <div className="space-y-8">
-              {/* Group menu items by category */}
               {(() => {
                 const categories = menuItems ? [...new Set(menuItems.map(item => item.category))] : [];
                 return categories.map(category => (
@@ -205,7 +205,11 @@ const RestaurantDetail = () => {
           <ScrollArea className="max-h-[80vh]">
             <div className="p-6 pt-2">
               {id && id !== ':id' && (
-                <ReservationForm restaurantId={id} onSuccess={handleReservationSuccess} />
+                <ReservationForm 
+                  restaurantId={id} 
+                  onSuccess={handleReservationSuccess}
+                  buttonText={buttonText}
+                />
               )}
             </div>
           </ScrollArea>

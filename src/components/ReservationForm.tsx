@@ -19,6 +19,7 @@ import { CalendarIcon, Clock } from 'lucide-react';
 interface ReservationFormProps {
   restaurantId: string;
   onSuccess?: () => void;
+  buttonText?: string; // Nouvelle prop pour le texte du bouton
 }
 
 const TIME_SLOTS = [
@@ -28,7 +29,7 @@ const TIME_SLOTS = [
 
 const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-const ReservationForm = ({ restaurantId, onSuccess }: ReservationFormProps) => {
+const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une table" }: ReservationFormProps) => {
   const { createReservation, isCreating } = useTableReservations(restaurantId);
   const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(restaurantId);
   
@@ -301,7 +302,7 @@ const ReservationForm = ({ restaurantId, onSuccess }: ReservationFormProps) => {
         />
         
         <Button type="submit" className="w-full" disabled={isCreating}>
-          {isCreating ? 'Réservation en cours...' : 'Réserver une table'}
+          {isCreating ? 'Réservation en cours...' : buttonText}
         </Button>
       </form>
     </Form>
