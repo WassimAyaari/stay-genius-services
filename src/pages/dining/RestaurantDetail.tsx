@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
@@ -117,7 +118,7 @@ const RestaurantDetail = () => {
             disabled={restaurant.status !== 'open'}
           >
             <Calendar className="mr-2 h-5 w-5" />
-            Réserver une table
+            {restaurant.actionText || "Book a Table"}
           </Button>
         </div>
       </div>
