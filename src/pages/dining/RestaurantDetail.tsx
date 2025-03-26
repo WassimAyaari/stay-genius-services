@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
@@ -7,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Restaurant } from '@/features/dining/types';
 import { Clock, MapPin, UtensilsCrossed, Calendar } from 'lucide-react';
 import ReservationForm from '@/components/ReservationForm';
@@ -195,16 +195,20 @@ const RestaurantDetail = () => {
       </Tabs>
       
       <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[500px] p-0">
+          <DialogHeader className="p-6 pb-2">
             <DialogTitle>Réserver une table - {restaurant.name}</DialogTitle>
             <DialogDescription>
               Remplissez le formulaire ci-dessous pour réserver une table.
             </DialogDescription>
           </DialogHeader>
-          {id && id !== ':id' && (
-            <ReservationForm restaurantId={id} onSuccess={handleReservationSuccess} />
-          )}
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-6 pt-2">
+              {id && id !== ':id' && (
+                <ReservationForm restaurantId={id} onSuccess={handleReservationSuccess} />
+              )}
+            </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
