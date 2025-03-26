@@ -251,7 +251,7 @@ const ReservationForm = ({ restaurantId, onSuccess }: ReservationFormProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="max-h-80">
-                  <SelectItem value="">Aucun menu pré-sélectionné</SelectItem>
+                  <SelectItem key="no-menu" value="no-menu">Aucun menu pré-sélectionné</SelectItem>
                   
                   {isLoadingMenuItems ? (
                     <div className="py-2 px-2 text-sm">Chargement des menus...</div>
