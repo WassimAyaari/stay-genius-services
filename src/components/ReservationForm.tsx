@@ -2,6 +2,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTableReservations } from '@/hooks/useTableReservations';
+import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
+import { MenuItem } from '@/features/dining/types';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -28,6 +30,18 @@ const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const ReservationForm = ({ restaurantId, onSuccess }: ReservationFormProps) => {
   const { createReservation, isCreating } = useTableReservations(restaurantId);
+  const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(restaurantId);
+  
+  // Grouper les menus par catégorie pour l'affichage
+  const menuCategories = React.useMemo(() => {
+    if (!menuItems) return [];
+    
+    const categories = [...new Set(menuItems.map(item => item.category))];
+    return categories.map(category => ({
+      category,
+      items: menuItems.filter(item => item.category === category)
+    }));
+  }, [menuItems]);
   
   const form = useForm({
     defaultValues: {
@@ -37,6 +51,7 @@ const ReservationForm = ({ restaurantId, onSuccess }: ReservationFormProps) => {
       date: undefined as Date | undefined,
       time: '',
       guests: 2,
+      menuId: '',
       specialRequests: ''
     }
   });
@@ -55,6 +70,7 @@ const ReservationForm = ({ restaurantId, onSuccess }: ReservationFormProps) => {
       date: format(data.date, 'yyyy-MM-dd'),
       time: data.time,
       guests: data.guests,
+      menuId: data.menuId || undefined,
       specialRequests: data.specialRequests,
       status: 'pending' as const
     };
@@ -216,6 +232,48 @@ const ReservationForm = ({ restaurantId, onSuccess }: ReservationFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        {/* Nouveau champ pour sélectionner un menu */}
+        <FormField
+          control={form.control}
+          name="menuId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Menu (optionnel)</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un menu" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-80">
+                  <SelectItem value="">Aucun menu pré-sélectionné</SelectItem>
+                  
+                  {isLoadingMenuItems ? (
+                    <div className="py-2 px-2 text-sm">Chargement des menus...</div>
+                  ) : (
+                    menuCategories.map(categoryGroup => (
+                      <React.Fragment key={categoryGroup.category}>
+                        <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                          {categoryGroup.category}
+                        </div>
+                        {categoryGroup.items.map(item => (
+                          <SelectItem key={item.id} value={item.id}>
+                            {item.name} - {item.price.toFixed(2)}€
+                          </SelectItem>
+                        ))}
+                      </React.Fragment>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Pré-sélectionnez un plat pour votre réservation (optionnel).
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
