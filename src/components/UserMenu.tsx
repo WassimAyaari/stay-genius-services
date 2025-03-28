@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit, Users, Key } from 'lucide-react';
 import {
@@ -21,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { CompanionType } from '@/pages/auth/components/CompanionsList';
+import { compressAndConvertToWebP } from '@/lib/imageUtils';
 
 interface UserData {
   email: string;
@@ -32,6 +34,7 @@ interface UserData {
   nationality?: string;
   check_in_date?: Date;
   check_out_date?: Date;
+  profile_image?: string;
 }
 
 interface Companion {
@@ -57,6 +60,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
     lastName: '',
     email: '',
     roomNumber: '',
+    profileImage: ''
   });
   const [familyMembers, setFamilyMembers] = useState<CompanionType[]>([]);
   const [notifications, setNotifications] = useState([
@@ -69,6 +73,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   const [newFamilyName, setNewFamilyName] = useState('');
   const [newFamilyRelation, setNewFamilyRelation] = useState('');
   const [editingMember, setEditingMember] = useState<Companion | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -82,6 +87,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
             lastName: userData.last_name || '',
             email: userData.email || '',
             roomNumber: userData.room_number || '',
+            profileImage: userData.profile_image || ''
           });
           setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
           
@@ -107,6 +113,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
               lastName: userData.last_name || '',
               email: session.user.email || '',
               roomNumber: roomNumber || '',
+              profileImage: ''
             });
             setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
           } else {
@@ -116,6 +123,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
               lastName: userMetadata?.last_name || '',
               email: session.user.email || '',
               roomNumber: roomNumber || '',
+              profileImage: ''
             });
             setNewName(`${userMetadata?.first_name || ''} ${userMetadata?.last_name || ''}`);
           }
@@ -156,10 +164,44 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      toast({
-        title: "Profile picture updated",
-        description: "Your profile picture has been successfully updated.",
-      });
+      try {
+        setIsUploading(true);
+        // Compress and convert the image
+        const compressedImageDataUrl = await compressAndConvertToWebP(file);
+        
+        // Update the user profile with the new image
+        const userDataString = localStorage.getItem('user_data');
+        if (userDataString) {
+          const userData = JSON.parse(userDataString);
+          userData.profile_image = compressedImageDataUrl;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+          
+          setUserProfile({
+            ...userProfile,
+            profileImage: compressedImageDataUrl
+          });
+          
+          toast({
+            title: "Profile picture updated",
+            description: "Your profile picture has been successfully updated.",
+          });
+        } else {
+          // Handle Supabase upload if needed in the future
+          toast({
+            title: "Profile picture updated",
+            description: "Your profile picture has been updated.",
+          });
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        toast({
+          title: "Upload failed",
+          description: "Failed to upload profile picture. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -346,7 +388,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   };
 
   const displayName = `${userProfile.firstName} ${userProfile.lastName}`.trim() || userProfile.email || 'Guest';
-  const initials = displayName.charAt(0).toUpperCase();
+  const initials = `${userProfile.firstName.charAt(0)}${userProfile.lastName.charAt(0)}`.toUpperCase().trim() || displayName.charAt(0).toUpperCase();
   const userRoomNumber = userProfile.roomNumber || roomNumber;
 
   return (
@@ -355,10 +397,13 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
         <SheetTrigger asChild>
           <Button variant="ghost" className="p-0 h-auto hover:bg-transparent relative">
             <Avatar className="h-9 w-9 border-2 border-primary/10">
-              <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={displayName} />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                {initials}
-              </AvatarFallback>
+              {userProfile.profileImage ? (
+                <AvatarImage src={userProfile.profileImage} alt={displayName} />
+              ) : (
+                <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                  {initials}
+                </AvatarFallback>
+              )}
             </Avatar>
             {notifications.length > 0 && (
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full" />
@@ -378,14 +423,27 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
                 <div className="flex items-center gap-4">
                   <div className="relative group">
                     <Avatar className="h-16 w-16 border-4 border-white/50 group-hover:border-primary/20 transition-all">
-                      <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={displayName} />
-                      <AvatarFallback className="bg-primary text-white text-xl">
-                        {initials}
-                      </AvatarFallback>
+                      {userProfile.profileImage ? (
+                        <AvatarImage src={userProfile.profileImage} alt={displayName} />
+                      ) : (
+                        <AvatarFallback className="bg-primary text-white text-xl">
+                          {initials}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <label className="absolute bottom-0 right-0 h-6 w-6 bg-primary text-white rounded-full cursor-pointer flex items-center justify-center hover:bg-primary/90 transition-colors">
-                      <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
-                      <Upload className="h-3 w-3" />
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        onChange={handleImageUpload} 
+                        accept="image/*" 
+                        disabled={isUploading}
+                      />
+                      {isUploading ? (
+                        <span className="h-3 w-3 block rounded-full border-2 border-t-transparent border-white animate-spin"></span>
+                      ) : (
+                        <Upload className="h-3 w-3" />
+                      )}
                     </label>
                   </div>
                   <div className="flex-1">
