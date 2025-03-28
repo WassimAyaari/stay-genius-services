@@ -289,6 +289,7 @@ const RequestManager = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Room</TableHead>
+                      <TableHead>Guest</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Created</TableHead>
@@ -300,7 +301,8 @@ const RequestManager = () => {
                     {requests && requests.length > 0 ? (
                       requests.map((request) => (
                         <TableRow key={request.id}>
-                          <TableCell>{request.room_id}</TableCell>
+                          <TableCell>{request.room_number || request.room_id}</TableCell>
+                          <TableCell>{request.guest_name || 'Unknown'}</TableCell>
                           <TableCell className="capitalize">{request.type.replace('_', ' ')}</TableCell>
                           <TableCell>
                             {request.request_items ? (
@@ -358,7 +360,7 @@ const RequestManager = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-4">
+                        <TableCell colSpan={7} className="text-center py-4">
                           No requests found
                         </TableCell>
                       </TableRow>

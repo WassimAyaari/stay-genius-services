@@ -178,12 +178,29 @@ const Services = () => {
     try {
       setIsSubmitting(true);
       
+      const getUserInfo = () => {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (userInfoStr) {
+          try {
+            return JSON.parse(userInfoStr);
+          } catch (error) {
+            console.error("Error parsing user info:", error);
+          }
+        }
+        return { name: 'Guest', roomNumber: room.room_number };
+      };
+      
+      const userInfo = getUserInfo();
+      
       for (const itemId of selectedItems) {
         await requestService(
           room.id, 
           selectedCategory?.name.toLowerCase() as any || 'custom',
           `Request for ${selectedCategory?.name}`,
-          itemId
+          itemId,
+          undefined,
+          userInfo.name,
+          userInfo.roomNumber || room.room_number
         );
       }
       

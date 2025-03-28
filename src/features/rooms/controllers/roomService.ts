@@ -8,7 +8,9 @@ export const requestService = async (
   type: ServiceType, 
   description?: string, 
   requestItemId?: string,
-  categoryId?: string
+  categoryId?: string,
+  guestName?: string,
+  roomNumber?: string
 ) => {
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -23,7 +25,9 @@ export const requestService = async (
       description,
       category_id: categoryId,
       request_item_id: requestItemId,
-      status: 'pending'
+      status: 'pending',
+      guest_name: guestName,
+      room_number: roomNumber
     })
     .select()
     .single();

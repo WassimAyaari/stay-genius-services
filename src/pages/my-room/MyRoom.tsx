@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useRoom } from '@/hooks/useRoom';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
@@ -26,11 +25,23 @@ import { Button } from '@/components/ui/button';
 
 const MyRoom = () => {
   const { data: room, isLoading } = useRoom('401');
-  const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests(room?.id);
+  const { data: serviceRequests = [], isLoading: isLoadingRequests, refetch: refetchRequests } = useServiceRequests(room?.id);
   const { toast } = useToast();
   const [customRequest, setCustomRequest] = useState('');
 
   const form = useForm();
+
+  const getUserInfo = () => {
+    const userInfo = localStorage.getItem('userInfo');
+    if (userInfo) {
+      try {
+        return JSON.parse(userInfo);
+      } catch (error) {
+        console.error("Error parsing user info:", error);
+      }
+    }
+    return { name: 'Guest', roomNumber: room?.room_number || '401' };
+  };
 
   const services: Service[] = [
     { 
@@ -74,12 +85,27 @@ const MyRoom = () => {
   const handleServiceRequest = async (type: ServiceType) => {
     try {
       if (!room) return;
-      await requestService(room.id, type);
+      
+      const userInfo = getUserInfo();
+      
+      await requestService(
+        room.id, 
+        type, 
+        `Request for ${type}`, 
+        undefined, 
+        undefined, 
+        userInfo.name, 
+        userInfo.roomNumber || room.room_number
+      );
+      
       toast({
         title: "Service Requested",
         description: "Your request has been sent successfully.",
       });
+      
+      refetchRequests();
     } catch (error) {
+      console.error("Error requesting service:", error);
       toast({
         title: "Error",
         description: "Failed to request service. Please try again.",
@@ -93,13 +119,27 @@ const MyRoom = () => {
     if (!customRequest.trim() || !room) return;
     
     try {
-      await requestService(room.id, 'custom', customRequest);
+      const userInfo = getUserInfo();
+      
+      await requestService(
+        room.id, 
+        'custom', 
+        customRequest, 
+        undefined, 
+        undefined, 
+        userInfo.name, 
+        userInfo.roomNumber || room.room_number
+      );
+      
       setCustomRequest('');
       toast({
         title: "Custom Request Sent",
         description: "Your custom request has been submitted.",
       });
+      
+      refetchRequests();
     } catch (error) {
+      console.error("Error submitting custom request:", error);
       toast({
         title: "Error",
         description: "Failed to submit request. Please try again.",
@@ -140,7 +180,10 @@ const MyRoom = () => {
         {services.map((service) => (
           <ServiceCard 
             key={service.type}
-            {...service}
+            icon={service.icon}
+            label={service.label}
+            type={service.type}
+            description={service.description}
             onRequest={handleServiceRequest}
           />
         ))}

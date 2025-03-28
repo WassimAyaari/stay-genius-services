@@ -1,34 +1,40 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ServiceType } from '@/features/rooms/controllers/roomService';
 
 interface ServiceCardProps {
   icon: React.ReactNode;
   label: string;
-  description: string;
   type: ServiceType;
+  description: string;
   onRequest: (type: ServiceType) => void;
 }
 
-const ServiceCard = ({ icon, label, description, type, onRequest }: ServiceCardProps) => {
+const ServiceCard = ({ 
+  icon, 
+  label, 
+  type, 
+  description, 
+  onRequest
+}: ServiceCardProps) => {
+  const handleClick = () => {
+    onRequest(type);
+  };
+
   return (
-    <Card className="p-6 rounded-2xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-primary/10 rounded-xl">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold mb-1">{label}</h3>
-          <p className="text-gray-600 text-sm mb-4">{description}</p>
-          <Button 
-            variant="outline"
-            className="w-full rounded-xl"
-            onClick={() => onRequest(type)}
-          >
-            Request Service
-          </Button>
+    <Card 
+      onClick={handleClick}
+      className="p-4 hover:shadow-md transition-shadow cursor-pointer group"
+    >
+      <div className="flex flex-col gap-3">
+        <div className="text-primary text-xl">{icon}</div>
+        <div>
+          <h3 className="font-medium text-secondary">{label}</h3>
+          <p className="text-sm text-gray-600 mt-1">{description}</p>
+          <span className="text-sm text-primary mt-2 inline-block group-hover:underline">
+            Request now
+          </span>
         </div>
       </div>
     </Card>
