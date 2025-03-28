@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader } from 'lucide-react';
+import { 
+  Loader, 
+  MessageCircle, 
+  FileText, 
+  Clock, 
+  Check, 
+  X, 
+  Send, 
+  Paperclip,
+  Headphones as HeadphonesIcon
+} from 'lucide-react';
 import { requestService } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
@@ -11,6 +22,23 @@ import RequestCategoryList from '@/features/services/components/RequestCategoryL
 import RequestItemList from '@/features/services/components/RequestItemList';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { Textarea } from '@/components/ui/textarea';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from '@/components/ui/dialog';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetFooter 
+} from '@/components/ui/sheet';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 
 interface Message {
   id: string;
