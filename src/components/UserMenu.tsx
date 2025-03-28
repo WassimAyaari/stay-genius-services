@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit, Users, Key } from 'lucide-react';
 import {
   Sheet,
@@ -19,20 +19,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserMenuProps {
-  username?: string;
   roomNumber?: string;
 }
 
-const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
+const UserMenu = ({ roomNumber }: UserMenuProps) => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(username);
-  const [familyMembers, setFamilyMembers] = useState([
-    { id: 1, name: "John Watson", relation: "Spouse" },
-    { id: 2, name: "Lily Watson", relation: "Child" },
-  ]);
+  const [newName, setNewName] = useState('');
+  const [userProfile, setUserProfile] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
+  const [familyMembers, setFamilyMembers] = useState([]);
   const [notifications, setNotifications] = useState([
     { id: 1, message: "Your room has been cleaned", time: "2 minutes ago" },
     { id: 2, message: "Spa appointment confirmed", time: "1 hour ago" },
@@ -43,7 +45,52 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
   const [addFamilyOpen, setAddFamilyOpen] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState('');
   const [newFamilyRelation, setNewFamilyRelation] = useState('');
-  const [editingMember, setEditingMember] = useState<null | { id: number, name: string, relation: string }>(null);
+  const [editingMember, setEditingMember] = useState(null);
+
+  // Charger les données de l'utilisateur connecté
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        const { data: userData, error } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', session.user.id)
+          .single();
+
+        if (userData && !error) {
+          setUserProfile({
+            firstName: userData.first_name || '',
+            lastName: userData.last_name || '',
+            email: session.user.email || '',
+          });
+          setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
+        } else {
+          // Si le profil n'existe pas encore, utilisez les données de l'utilisateur
+          const userMetadata = session.user.user_metadata;
+          setUserProfile({
+            firstName: userMetadata?.first_name || '',
+            lastName: userMetadata?.last_name || '',
+            email: session.user.email || '',
+          });
+          setNewName(`${userMetadata?.first_name || ''} ${userMetadata?.last_name || ''}`);
+        }
+
+        // Récupérer les accompagnants
+        const { data: companions } = await supabase
+          .from('companions')
+          .select('*')
+          .eq('user_id', session.user.id);
+
+        if (companions) {
+          setFamilyMembers(companions);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -56,47 +103,115 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
     }
   };
 
-  const handleNameUpdate = () => {
+  const handleNameUpdate = async () => {
     if (newName.trim()) {
-      // Here you would typically update in your backend
-      toast({
-        title: "Profile updated",
-        description: "Your name has been successfully updated.",
-      });
+      const names = newName.trim().split(' ');
+      const firstName = names[0] || '';
+      const lastName = names.slice(1).join(' ') || '';
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        // Mettre à jour le profil
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: session.user.id,
+            first_name: firstName,
+            last_name: lastName
+          });
+
+        if (!error) {
+          setUserProfile({
+            ...userProfile,
+            firstName,
+            lastName
+          });
+          
+          toast({
+            title: "Profile updated",
+            description: "Your name has been successfully updated.",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to update profile.",
+            variant: "destructive",
+          });
+        }
+      }
+      
       setIsEditing(false);
     }
   };
   
-  const handleAddFamilyMember = () => {
+  const handleAddFamilyMember = async () => {
     if (newFamilyName.trim() && newFamilyRelation.trim()) {
-      setFamilyMembers([
-        ...familyMembers,
-        {
-          id: Date.now(),
-          name: newFamilyName,
-          relation: newFamilyRelation
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        const names = newFamilyName.split(' ');
+        const firstName = names[0] || '';
+        const lastName = names.slice(1).join(' ') || '';
+        
+        const { data, error } = await supabase
+          .from('companions')
+          .insert({
+            user_id: session.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            relation: newFamilyRelation
+          })
+          .select();
+          
+        if (!error && data) {
+          setFamilyMembers([...familyMembers, data[0]]);
+          setNewFamilyName('');
+          setNewFamilyRelation('');
+          setAddFamilyOpen(false);
+          
+          toast({
+            title: "Family member added",
+            description: `${newFamilyName} has been added to your family members.`,
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to add family member.",
+            variant: "destructive",
+          });
         }
-      ]);
-      setNewFamilyName('');
-      setNewFamilyRelation('');
-      setAddFamilyOpen(false);
-      toast({
-        title: "Family member added",
-        description: `${newFamilyName} has been added to your family members.`,
-      });
+      }
     }
   };
   
-  const handleEditFamilyMember = () => {
-    if (editingMember && editingMember.name.trim() && editingMember.relation.trim()) {
-      setFamilyMembers(familyMembers.map(member => 
-        member.id === editingMember.id ? editingMember : member
-      ));
-      setEditingMember(null);
-      toast({
-        title: "Family member updated",
-        description: "Family member information has been updated.",
-      });
+  const handleEditFamilyMember = async () => {
+    if (editingMember && editingMember.first_name.trim() && editingMember.relation.trim()) {
+      const { error } = await supabase
+        .from('companions')
+        .update({
+          first_name: editingMember.first_name,
+          last_name: editingMember.last_name,
+          relation: editingMember.relation
+        })
+        .eq('id', editingMember.id);
+        
+      if (!error) {
+        setFamilyMembers(familyMembers.map(member => 
+          member.id === editingMember.id ? editingMember : member
+        ));
+        setEditingMember(null);
+        toast({
+          title: "Family member updated",
+          description: "Family member information has been updated.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update family member.",
+          variant: "destructive",
+        });
+      }
     }
   };
   
@@ -112,15 +227,37 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
     navigate(path);
   };
 
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    
+    if (!error) {
+      toast({
+        title: "Sign out",
+        description: "You have been signed out",
+        variant: "destructive",
+      });
+      navigate('/auth/login');
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const displayName = `${userProfile.firstName} ${userProfile.lastName}`.trim() || userProfile.email || 'Guest';
+  const initials = displayName.charAt(0).toUpperCase();
+
   return (
     <>
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" className="p-0 h-auto hover:bg-transparent relative">
             <Avatar className="h-9 w-9 border-2 border-primary/10">
-              <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={username} />
+              <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={displayName} />
               <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                {username[0]}
+                {initials}
               </AvatarFallback>
             </Avatar>
             {notifications.length > 0 && (
@@ -141,9 +278,9 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
                 <div className="flex items-center gap-4">
                   <div className="relative group">
                     <Avatar className="h-16 w-16 border-4 border-white/50 group-hover:border-primary/20 transition-all">
-                      <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={username} />
+                      <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={displayName} />
                       <AvatarFallback className="bg-primary text-white text-xl">
-                        {username[0]}
+                        {initials}
                       </AvatarFallback>
                     </Avatar>
                     <label className="absolute bottom-0 right-0 h-6 w-6 bg-primary text-white rounded-full cursor-pointer flex items-center justify-center hover:bg-primary/90 transition-colors">
@@ -166,7 +303,7 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <SheetTitle>{username}</SheetTitle>
+                        <SheetTitle>{displayName}</SheetTitle>
                         <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -221,7 +358,7 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="text-sm font-medium">{member.name}</p>
+                              <p className="text-sm font-medium">{`${member.first_name} ${member.last_name || ''}`}</p>
                               <span className="text-xs text-gray-500">{member.relation}</span>
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => setEditingMember(member)}>
@@ -344,14 +481,7 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start gap-3 p-4 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => {
-                        toast({
-                          title: "Sign out",
-                          description: "You have been signed out",
-                          variant: "destructive",
-                        });
-                        navigate('/auth/login');
-                      }}
+                      onClick={handleSignOut}
                     >
                       <LogOut className="h-5 w-5" />
                       Sign out
@@ -408,12 +538,21 @@ const UserMenu = ({ username = "Emma Watson", roomNumber }: UserMenuProps) => {
           {editingMember && (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label htmlFor="edit-name" className="text-sm font-medium">Name</label>
+                <label htmlFor="edit-name" className="text-sm font-medium">First Name</label>
                 <Input
                   id="edit-name"
-                  value={editingMember.name}
-                  onChange={(e) => setEditingMember({...editingMember, name: e.target.value})}
-                  placeholder="Enter name"
+                  value={editingMember.first_name}
+                  onChange={(e) => setEditingMember({...editingMember, first_name: e.target.value})}
+                  placeholder="Enter first name"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="edit-last-name" className="text-sm font-medium">Last Name</label>
+                <Input
+                  id="edit-last-name"
+                  value={editingMember.last_name || ''}
+                  onChange={(e) => setEditingMember({...editingMember, last_name: e.target.value})}
+                  placeholder="Enter last name"
                 />
               </div>
               <div className="space-y-2">

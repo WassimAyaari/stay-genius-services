@@ -3,8 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Outlet, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from './components/Layout';
 import Index from "./pages/Index";
@@ -36,12 +38,39 @@ const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  
+  useEffect(() => {
+    // Vérifier l'état d'authentification initial
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    
+    checkAuth();
+    
+    // S'abonner aux changements d'authentification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  
+  // Attendre que l'état d'authentification soit vérifié
+  if (isAuthenticated === null) {
+    return <div className="flex items-center justify-center h-screen">Chargement...</div>;
+  }
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/auth/login" element={<Login />} />
-        <Route element={<Layout><Outlet /></Layout>}>
+        <Route path="/auth/login" element={
+          isAuthenticated ? <Navigate to="/" /> : <Login />
+        } />
+        <Route element={<AuthGuard><Layout><Outlet /></Layout></AuthGuard>}>
           <Route path="/" element={<Index />} />
           <Route path="/rooms/:id" element={<RoomDetails />} />
           <Route path="/my-room" element={<MyRoom />} />
@@ -78,9 +107,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <Router>
-          <AuthGuard>
-            <AnimatedRoutes />
-          </AuthGuard>
+          <AnimatedRoutes />
         </Router>
       </TooltipProvider>
     </QueryClientProvider>

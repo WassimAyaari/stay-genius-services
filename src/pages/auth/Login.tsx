@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { CalendarIcon, PlusCircle, X } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -31,14 +31,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 // Schema pour le formulaire de connexion
 const loginSchema = z.object({
-  email: z.string().email({ message: "Adresse email invalide" }),
-  password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
+  email: z.string().email({ message: "Adresse email invalide" })
 });
 
 // Schema pour le formulaire d'inscription
 const registerSchema = z.object({
   email: z.string().email({ message: "Adresse email invalide" }),
-  password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
   firstName: z.string().min(2, { message: "Le prénom est requis" }),
   lastName: z.string().min(2, { message: "Le nom est requis" }),
   birthDate: z.date({ required_error: "La date de naissance est requise" }),
@@ -46,15 +44,15 @@ const registerSchema = z.object({
   roomNumber: z.string().min(1, { message: "Le numéro de chambre est requis" }),
   checkInDate: z.date({ required_error: "La date d'arrivée est requise" }),
   checkOutDate: z.date({ required_error: "La date de départ est requise" }),
-  companions: z.array(
-    z.object({
-      firstName: z.string().min(2, { message: "Le prénom est requis" }),
-      lastName: z.string().min(2, { message: "Le nom est requis" }),
-      birthDate: z.date({ required_error: "La date de naissance est requise" }),
-      relation: z.string().min(2, { message: "La relation est requise" }),
-    })
-  ).optional(),
 });
+
+const relationOptions = [
+  { value: "spouse", label: "Conjoint(e)" },
+  { value: "child", label: "Enfant" },
+  { value: "parent", label: "Parent" },
+  { value: "friend", label: "Ami(e)" },
+  { value: "other", label: "Autre" },
+];
 
 type CompanionType = {
   firstName: string;
@@ -70,12 +68,23 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState("login");
   const [companions, setCompanions] = useState<CompanionType[]>([]);
 
+  // Vérifier si l'utilisateur est déjà connecté
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
+
   // Formulaire de connexion
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
@@ -84,12 +93,10 @@ const Login = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
-      password: "",
       firstName: "",
       lastName: "",
       nationality: "",
       roomNumber: "",
-      companions: [],
     },
   });
 
@@ -97,14 +104,19 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithOtp({
         email: values.email,
-        password: values.password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
       });
 
       if (error) throw error;
       
-      navigate('/');
+      toast({
+        title: "Lien de connexion envoyé",
+        description: "Veuillez vérifier votre email pour vous connecter.",
+      });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -120,11 +132,11 @@ const Login = () => {
     setLoading(true);
     
     try {
-      // Enregistrement de l'utilisateur
-      const { error: signUpError, data } = await supabase.auth.signUp({
+      // Enregistrement de l'utilisateur avec OTP
+      const { error } = await supabase.auth.signInWithOtp({
         email: values.email,
-        password: values.password,
         options: {
+          emailRedirectTo: window.location.origin,
           data: {
             first_name: values.firstName,
             last_name: values.lastName,
@@ -138,10 +150,10 @@ const Login = () => {
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (error) throw error;
       
       toast({
-        title: "Inscription réussie",
+        title: "Lien de vérification envoyé",
         description: "Veuillez vérifier votre email pour confirmer votre compte.",
       });
       
@@ -209,22 +221,8 @@ const Login = () => {
                     )}
                   />
                   
-                  <FormField
-                    control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mot de passe</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Mot de passe" {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Chargement...' : 'Se connecter'}
+                    {loading ? 'Envoi en cours...' : 'Recevoir un lien de connexion'}
                   </Button>
                 </form>
               </Form>
@@ -424,35 +422,19 @@ const Login = () => {
                     )}
                   />
                   
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mot de passe</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Mot de passe" {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
                   {companions.length > 0 && (
                     <div className="space-y-4 mt-6">
                       <h3 className="font-medium">Accompagnants</h3>
                       
                       {companions.map((companion, index) => (
                         <div key={index} className="border p-4 rounded-md space-y-4 relative">
-                          <Button 
+                          <button 
                             type="button"
-                            variant="ghost"
-                            size="sm"
                             onClick={() => removeCompanion(index)}
-                            className="absolute top-2 right-2 h-6 w-6 p-0"
+                            className="absolute top-2 right-2 h-6 w-6 p-0 flex items-center justify-center text-gray-500 hover:text-gray-700"
                           >
-                            <X className="h-4 w-4" />
-                          </Button>
+                            ✕
+                          </button>
                           
                           <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -512,11 +494,11 @@ const Login = () => {
                                   <SelectValue placeholder="Sélectionner" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="spouse">Conjoint(e)</SelectItem>
-                                  <SelectItem value="child">Enfant</SelectItem>
-                                  <SelectItem value="parent">Parent</SelectItem>
-                                  <SelectItem value="friend">Ami(e)</SelectItem>
-                                  <SelectItem value="other">Autre</SelectItem>
+                                  {relationOptions.map(option => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -532,12 +514,11 @@ const Login = () => {
                     className="w-full"
                     onClick={addCompanion}
                   >
-                    <PlusCircle className="mr-2 h-4 w-4" />
                     Ajouter un accompagnant
                   </Button>
                   
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Chargement...' : 'Créer un compte'}
+                    {loading ? 'Envoi en cours...' : 'Créer un compte'}
                   </Button>
                 </form>
               </Form>
