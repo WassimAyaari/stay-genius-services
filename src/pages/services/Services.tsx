@@ -100,6 +100,10 @@ const Services = () => {
     window.open('https://wa.me/1234567890', '_blank');
   };
 
+  const handleNavigateToAdminChat = () => {
+    navigate('/admin/chat-messages');
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -157,6 +161,23 @@ const Services = () => {
                   Direct messaging via WhatsApp
                 </p>
                 <Button variant="outline" onClick={handleWhatsAppService}>Message Us</Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Staff Only Section - visible only to staff members in a real implementation */}
+        <div className="mt-12 border-t pt-6">
+          <h2 className="text-xl font-semibold mb-4">Staff Access</h2>
+          <Card className="p-6 bg-muted/30">
+            <div className="flex items-start gap-4">
+              <MessageCircle className="w-6 h-6 text-primary" />
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Chat Management</h3>
+                <p className="text-gray-600 mb-4">
+                  Staff access to view and respond to guest messages
+                </p>
+                <Button variant="outline" onClick={handleNavigateToAdminChat}>Access Chat Portal</Button>
               </div>
             </div>
           </Card>
