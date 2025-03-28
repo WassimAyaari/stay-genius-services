@@ -26,16 +26,16 @@ interface Chat {
   lastActivity: string;
   messages: Message[];
   unread: number;
-  roomNumber?: string; // Added room number field
+  roomNumber?: string;
 }
 
-// Simulated chats for demonstration
+// Simulated chats for demonstration - Update with Emma Watson as first user
 const initialChats: Chat[] = [
   {
     id: '1',
     userId: 'user1',
-    userName: 'John Smith',
-    roomNumber: '302', // Added room number
+    userName: 'Emma Watson',
+    roomNumber: '401', // Updated to match Emma's room number
     lastActivity: '10 min ago',
     unread: 2,
     messages: [
@@ -69,8 +69,8 @@ const initialChats: Chat[] = [
   {
     id: '2',
     userId: 'user2',
-    userName: 'Emma Johnson',
-    roomNumber: '405', // Added room number
+    userName: 'John Smith',
+    roomNumber: '302',
     lastActivity: '2 hrs ago',
     unread: 0,
     messages: [

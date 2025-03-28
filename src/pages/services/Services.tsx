@@ -39,12 +39,23 @@ const Services = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
-  const [userInfo, setUserInfo] = useState<UserInfo>({ name: '', roomNumber: '' });
+  const [userInfo, setUserInfo] = useState<UserInfo>({ name: 'Emma Watson', roomNumber: '401' });
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
 
   const handleStartChat = () => {
-    setIsUserInfoDialogOpen(true);
+    // Auto-fill user info already exists, proceed directly to chat
+    setIsChatOpen(true);
+    
+    // Initialize the chat with a welcome message
+    setMessages([
+      {
+        id: '1',
+        text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: 'staff'
+      }
+    ]);
   };
 
   const handleSubmitUserInfo = () => {
@@ -205,14 +216,14 @@ const Services = () => {
                 <p className="text-gray-600 mb-4">
                   Staff access to view and respond to guest messages
                 </p>
-                <Button variant="outline" onClick={handleNavigateToAdminChat}>Access Chat Portal</Button>
+                <Button variant="outline" onClick={() => handleNavigateToAdminChat()}>Access Chat Portal</Button>
               </div>
             </div>
           </Card>
         </div>
       </div>
 
-      {/* User Information Dialog */}
+      {/* User Information Dialog - No longer needed as we auto-fill user info */}
       <Dialog open={isUserInfoDialogOpen} onOpenChange={setIsUserInfoDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -257,7 +268,9 @@ const Services = () => {
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary/10 text-primary">C</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {userInfo.name.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <SheetTitle>Concierge Chat</SheetTitle>
