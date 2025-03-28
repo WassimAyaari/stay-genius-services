@@ -1,35 +1,20 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    // Vérifier la session actuelle
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session && window.location.pathname !== '/auth/login') {
-        navigate('/auth/login');
-      } else if (session) {
-        setUser(session.user);
-      }
-    });
-
-    // S'abonner aux changements d'état d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session && window.location.pathname !== '/auth/login') {
-        navigate('/auth/login');
-      } else if (session) {
-        setUser(session.user);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    // Vérifier si l'utilisateur est inscrit (a des données dans le localStorage)
+    const userData = localStorage.getItem('user_data');
+    
+    if (!userData && window.location.pathname !== '/auth/login') {
+      navigate('/auth/login');
+    } else if (userData) {
+      setIsAuthenticated(true);
+    }
   }, [navigate]);
 
   return <>{children}</>;
