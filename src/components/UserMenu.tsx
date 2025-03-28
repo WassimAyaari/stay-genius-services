@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit, Users, Key } from 'lucide-react';
 import {
@@ -20,6 +21,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { CompanionType } from '@/pages/auth/components/CompanionsList';
+
+interface UserData {
+  email: string;
+  first_name: string;
+  last_name: string;
+  room_number: string;
+  companions: CompanionType[];
+  birth_date?: Date;
+  nationality?: string;
+  check_in_date?: Date;
+  check_out_date?: Date;
+}
 
 interface Companion {
   id: string;
@@ -43,8 +57,9 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
     firstName: '',
     lastName: '',
     email: '',
+    roomNumber: '',
   });
-  const [familyMembers, setFamilyMembers] = useState<Companion[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<CompanionType[]>([]);
   const [notifications, setNotifications] = useState([
     { id: 1, message: "Your room has been cleaned", time: "2 minutes ago" },
     { id: 2, message: "Spa appointment confirmed", time: "1 hour ago" },
@@ -58,51 +73,77 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      // Récupérer les données utilisateur du localStorage
+      const userDataString = localStorage.getItem('user_data');
       
-      if (session?.user) {
-        const { data: userData, error } = await supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', session.user.id)
-          .single();
-
-        if (userData && !error) {
+      if (userDataString) {
+        try {
+          const userData: UserData = JSON.parse(userDataString);
           setUserProfile({
             firstName: userData.first_name || '',
             lastName: userData.last_name || '',
-            email: session.user.email || '',
+            email: userData.email || '',
+            roomNumber: userData.room_number || '',
           });
           setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
-        } else {
-          const userMetadata = session.user.user_metadata;
-          setUserProfile({
-            firstName: userMetadata?.first_name || '',
-            lastName: userMetadata?.last_name || '',
-            email: session.user.email || '',
-          });
-          setNewName(`${userMetadata?.first_name || ''} ${userMetadata?.last_name || ''}`);
-        }
-
-        try {
-          const { data: companions, error: companionsError } = await supabase
-            .from('companions')
-            .select('*')
-            .eq('user_id', session.user.id);
-
-          if (companions && !companionsError) {
-            setFamilyMembers(companions);
-          } else if (companionsError) {
-            console.error("Error fetching companions:", companionsError);
+          
+          // Récupérer les accompagnants
+          if (userData.companions && Array.isArray(userData.companions)) {
+            setFamilyMembers(userData.companions);
           }
-        } catch (err) {
-          console.error("Error in companions fetch:", err);
+        } catch (error) {
+          console.error("Error parsing user data from localStorage:", error);
+        }
+      } else {
+        // Si pas de données dans localStorage, vérifier Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const { data: userData, error } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', session.user.id)
+            .single();
+
+          if (userData && !error) {
+            setUserProfile({
+              firstName: userData.first_name || '',
+              lastName: userData.last_name || '',
+              email: session.user.email || '',
+              roomNumber: roomNumber || '',
+            });
+            setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
+          } else {
+            const userMetadata = session.user.user_metadata;
+            setUserProfile({
+              firstName: userMetadata?.first_name || '',
+              lastName: userMetadata?.last_name || '',
+              email: session.user.email || '',
+              roomNumber: roomNumber || '',
+            });
+            setNewName(`${userMetadata?.first_name || ''} ${userMetadata?.last_name || ''}`);
+          }
+
+          try {
+            const { data: companions, error: companionsError } = await supabase
+              .from('companions')
+              .select('*')
+              .eq('user_id', session.user.id);
+
+            if (companions && !companionsError) {
+              setFamilyMembers(companions);
+            } else if (companionsError) {
+              console.error("Error fetching companions:", companionsError);
+            }
+          } catch (err) {
+            console.error("Error in companions fetch:", err);
+          }
         }
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [roomNumber]);
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -120,18 +161,15 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
       const firstName = names[0] || '';
       const lastName = names.slice(1).join(' ') || '';
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        const { error } = await supabase
-          .from('profiles')
-          .upsert({ 
-            id: session.user.id,
-            first_name: firstName,
-            last_name: lastName
-          });
-
-        if (!error) {
+      // Mettre à jour dans localStorage
+      const userDataString = localStorage.getItem('user_data');
+      if (userDataString) {
+        try {
+          const userData = JSON.parse(userDataString);
+          userData.first_name = firstName;
+          userData.last_name = lastName;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+          
           setUserProfile({
             ...userProfile,
             firstName,
@@ -142,12 +180,45 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
             title: "Profile updated",
             description: "Your name has been successfully updated.",
           });
-        } else {
+        } catch (error) {
+          console.error("Error updating user data in localStorage:", error);
           toast({
             title: "Error",
             description: "Failed to update profile.",
             variant: "destructive",
           });
+        }
+      } else {
+        // Si pas de données dans localStorage, essayer Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const { error } = await supabase
+            .from('profiles')
+            .upsert({ 
+              id: session.user.id,
+              first_name: firstName,
+              last_name: lastName
+            });
+
+          if (!error) {
+            setUserProfile({
+              ...userProfile,
+              firstName,
+              lastName
+            });
+            
+            toast({
+              title: "Profile updated",
+              description: "Your name has been successfully updated.",
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Failed to update profile.",
+              variant: "destructive",
+            });
+          }
         }
       }
       
@@ -157,89 +228,94 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   
   const handleAddFamilyMember = async () => {
     if (newFamilyName.trim() && newFamilyRelation.trim()) {
-      const { data: { session } } = await supabase.auth.getSession();
+      const names = newFamilyName.split(' ');
+      const firstName = names[0] || '';
+      const lastName = names.slice(1).join(' ') || '';
       
-      if (session?.user) {
-        const names = newFamilyName.split(' ');
-        const firstName = names[0] || '';
-        const lastName = names.slice(1).join(' ') || '';
-        
+      // Générer un ID unique pour le nouveau membre
+      const newMemberId = crypto.randomUUID();
+      
+      // Créer un nouveau membre
+      const newMember: CompanionType = {
+        id: newMemberId,
+        firstName: firstName,
+        lastName: lastName || '',
+        birthDate: new Date(),
+        relation: newFamilyRelation
+      };
+      
+      // Ajouter le membre à la liste des accompagnants
+      const updatedFamilyMembers = [...familyMembers, newMember];
+      setFamilyMembers(updatedFamilyMembers);
+      
+      // Mettre à jour dans localStorage
+      const userDataString = localStorage.getItem('user_data');
+      if (userDataString) {
         try {
-          const { data, error } = await supabase
-            .from('companions')
-            .insert({
-              user_id: session.user.id,
-              first_name: firstName,
-              last_name: lastName,
-              relation: newFamilyRelation
-            })
-            .select();
-            
-          if (!error && data) {
-            setFamilyMembers([...familyMembers, data[0] as Companion]);
-            setNewFamilyName('');
-            setNewFamilyRelation('');
-            setAddFamilyOpen(false);
-            
-            toast({
-              title: "Family member added",
-              description: `${newFamilyName} has been added to your family members.`,
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: "Failed to add family member.",
-              variant: "destructive",
-            });
-          }
-        } catch (err) {
-          console.error("Error adding companion:", err);
+          const userData = JSON.parse(userDataString);
+          userData.companions = updatedFamilyMembers;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+          
+          toast({
+            title: "Family member added",
+            description: `${newFamilyName} has been added to your family members.`,
+          });
+        } catch (error) {
+          console.error("Error updating companions in localStorage:", error);
           toast({
             title: "Error",
-            description: "Failed to add family member due to a system error.",
+            description: "Failed to add family member.",
             variant: "destructive",
           });
         }
       }
+      
+      setNewFamilyName('');
+      setNewFamilyRelation('');
+      setAddFamilyOpen(false);
     }
   };
   
   const handleEditFamilyMember = async () => {
     if (editingMember && editingMember.first_name.trim() && editingMember.relation.trim()) {
-      try {
-        const { error } = await supabase
-          .from('companions')
-          .update({
-            first_name: editingMember.first_name,
-            last_name: editingMember.last_name,
+      // Mettre à jour le membre dans la liste des accompagnants
+      const updatedFamilyMembers = familyMembers.map(member => {
+        if ('id' in member && editingMember.id === member.id) {
+          return {
+            ...member,
+            firstName: editingMember.first_name,
+            lastName: editingMember.last_name || '',
             relation: editingMember.relation
-          })
-          .eq('id', editingMember.id);
+          };
+        }
+        return member;
+      });
+      
+      setFamilyMembers(updatedFamilyMembers);
+      
+      // Mettre à jour dans localStorage
+      const userDataString = localStorage.getItem('user_data');
+      if (userDataString) {
+        try {
+          const userData = JSON.parse(userDataString);
+          userData.companions = updatedFamilyMembers;
+          localStorage.setItem('user_data', JSON.stringify(userData));
           
-        if (!error) {
-          setFamilyMembers(familyMembers.map(member => 
-            member.id === editingMember.id ? editingMember : member
-          ));
-          setEditingMember(null);
           toast({
             title: "Family member updated",
             description: "Family member information has been updated.",
           });
-        } else {
+        } catch (error) {
+          console.error("Error updating companions in localStorage:", error);
           toast({
             title: "Error",
             description: "Failed to update family member.",
             variant: "destructive",
           });
         }
-      } catch (err) {
-        console.error("Error updating companion:", err);
-        toast({
-          title: "Error",
-          description: "Failed to update family member due to a system error.",
-          variant: "destructive",
-        });
       }
+      
+      setEditingMember(null);
     }
   };
   
@@ -256,26 +332,24 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
+    // Supprimer les données utilisateur du localStorage
+    localStorage.removeItem('user_data');
     
-    if (!error) {
-      toast({
-        title: "Sign out",
-        description: "You have been signed out",
-        variant: "destructive",
-      });
-      navigate('/auth/login');
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
-    }
+    // Déconnexion de Supabase (si connecté)
+    await supabase.auth.signOut();
+    
+    toast({
+      title: "Sign out",
+      description: "You have been signed out",
+      variant: "destructive",
+    });
+    
+    navigate('/auth/login');
   };
 
   const displayName = `${userProfile.firstName} ${userProfile.lastName}`.trim() || userProfile.email || 'Guest';
   const initials = displayName.charAt(0).toUpperCase();
+  const userRoomNumber = userProfile.roomNumber || roomNumber;
 
   return (
     <>
@@ -344,14 +418,14 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
               
               <ScrollArea className="flex-1 h-[calc(100vh-120px)]">
                 <div className="p-4 space-y-6">
-                  {roomNumber && (
+                  {userRoomNumber && (
                     <div className="bg-primary/5 p-4 rounded-xl">
                       <div className="flex items-center gap-3 text-primary mb-2">
                         <BedDouble className="h-5 w-5" />
                         <span className="font-medium">Current Stay</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-600">Room {roomNumber}</p>
+                        <p className="text-sm text-gray-600">Room {userRoomNumber}</p>
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -379,17 +453,30 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
                     <div className="space-y-2">
                       {familyMembers.map((member) => (
                         <motion.div
-                          key={member.id}
+                          key={typeof member.id === 'string' ? member.id : member.firstName}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           className="bg-gray-50 p-3 rounded-lg"
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="text-sm font-medium">{`${member.first_name} ${member.last_name || ''}`}</p>
+                              <p className="text-sm font-medium">{`${member.firstName} ${member.lastName || ''}`}</p>
                               <span className="text-xs text-gray-500">{member.relation}</span>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => setEditingMember(member)}>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => {
+                                // Conversion du format CompanionType vers le format attendu par editingMember
+                                setEditingMember({
+                                  id: typeof member.id === 'string' ? member.id : crypto.randomUUID(),
+                                  first_name: member.firstName,
+                                  last_name: member.lastName || null,
+                                  relation: member.relation,
+                                  user_id: '0'
+                                });
+                              }}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                           </div>
@@ -488,10 +575,10 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start gap-3 p-4"
-                      onClick={() => handleNavigate('/rooms/401')}
+                      onClick={() => handleNavigate('/my-room')}
                     >
                       <BookMarked className="h-5 w-5 text-primary" />
-                      My Bookings
+                      My Room
                     </Button>
                     <Button 
                       variant="ghost" 
