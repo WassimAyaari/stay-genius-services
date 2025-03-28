@@ -17,7 +17,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, KeyRound } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -31,12 +31,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 // Schema pour le formulaire de connexion
 const loginSchema = z.object({
-  email: z.string().email({ message: "Adresse email invalide" })
+  email: z.string().email({ message: "Adresse email invalide" }),
+  password: z.string().min(6, { message: "Mot de passe requis (min. 6 caractères)" })
 });
 
 // Schema pour le formulaire d'inscription
 const registerSchema = z.object({
   email: z.string().email({ message: "Adresse email invalide" }),
+  password: z.string().min(6, { message: "Mot de passe requis (min. 6 caractères)" }),
   firstName: z.string().min(2, { message: "Le prénom est requis" }),
   lastName: z.string().min(2, { message: "Le nom est requis" }),
   birthDate: z.date({ required_error: "La date de naissance est requise" }),
@@ -85,6 +87,7 @@ const Login = () => {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
+      password: ""
     },
   });
 
@@ -93,6 +96,7 @@ const Login = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
+      password: "",
       firstName: "",
       lastName: "",
       nationality: "",
@@ -104,19 +108,19 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
-        options: {
-          emailRedirectTo: window.location.origin,
-        },
+        password: values.password,
       });
 
       if (error) throw error;
       
       toast({
-        title: "Lien de connexion envoyé",
-        description: "Veuillez vérifier votre email pour vous connecter.",
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté.",
       });
+      
+      navigate('/');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -132,11 +136,11 @@ const Login = () => {
     setLoading(true);
     
     try {
-      // Enregistrement de l'utilisateur avec OTP
-      const { error } = await supabase.auth.signInWithOtp({
+      // Enregistrement de l'utilisateur avec mot de passe
+      const { error } = await supabase.auth.signUp({
         email: values.email,
+        password: values.password,
         options: {
-          emailRedirectTo: window.location.origin,
           data: {
             first_name: values.firstName,
             last_name: values.lastName,
@@ -153,7 +157,7 @@ const Login = () => {
       if (error) throw error;
       
       toast({
-        title: "Lien de vérification envoyé",
+        title: "Inscription réussie",
         description: "Veuillez vérifier votre email pour confirmer votre compte.",
       });
       
@@ -221,8 +225,23 @@ const Login = () => {
                     )}
                   />
                   
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mot de passe</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Mot de passe" {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Envoi en cours...' : 'Recevoir un lien de connexion'}
+                    {loading ? 'Connexion en cours...' : 'Se connecter directement'}
+                    <KeyRound className="ml-2 h-4 w-4" />
                   </Button>
                 </form>
               </Form>
@@ -422,6 +441,20 @@ const Login = () => {
                     )}
                   />
                   
+                  <FormField
+                    control={registerForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mot de passe</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Mot de passe" {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
                   {companions.length > 0 && (
                     <div className="space-y-4 mt-6">
                       <h3 className="font-medium">Accompagnants</h3>
@@ -518,7 +551,7 @@ const Login = () => {
                   </Button>
                   
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Envoi en cours...' : 'Créer un compte'}
+                    {loading ? 'Inscription en cours...' : 'Créer un compte'}
                   </Button>
                 </form>
               </Form>
