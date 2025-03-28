@@ -1,11 +1,105 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, FileText, Clock, HeadphonesIcon } from 'lucide-react';
+import { MessageCircle, FileText, Clock, HeadphonesIcon, Send, X, Paperclip } from 'lucide-react';
 import Layout from '@/components/Layout';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter
+} from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useToast } from '@/components/ui/use-toast';
+
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'staff';
+  time: string;
+  status?: 'sent' | 'delivered' | 'read';
+}
 
 const Services = () => {
+  const navigate = useNavigate();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [inputMessage, setInputMessage] = useState('');
+  const { toast } = useToast();
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      text: "Welcome to Hotel Genius! How may I assist you today?",
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      sender: 'staff'
+    }
+  ]);
+
+  const handleStartChat = () => {
+    setIsChatOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    setIsChatOpen(false);
+  };
+
+  const handleSendMessage = () => {
+    if (inputMessage.trim() === '') return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      text: inputMessage,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      sender: 'user',
+      status: 'sent'
+    };
+
+    setMessages([...messages, newMessage]);
+    setInputMessage('');
+
+    // Simulate response from staff after a short delay
+    setTimeout(() => {
+      const staffResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Thank you for your message. Our concierge team will assist you shortly.",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: 'staff'
+      };
+      setMessages(prevMessages => [...prevMessages, staffResponse]);
+      
+      toast({
+        title: "New message",
+        description: "You have received a response from our concierge team.",
+      });
+    }, 2000);
+  };
+
+  const handleMessageSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSendMessage();
+  };
+
+  const handleNavigateToRequests = () => {
+    navigate('/messages');
+  };
+
+  const handleNavigateToSupport = () => {
+    navigate('/messages?contact=1');
+  };
+
+  const handleWhatsAppService = () => {
+    // This would ideally open WhatsApp with a predefined number
+    toast({
+      title: "WhatsApp Service",
+      description: "Opening WhatsApp to connect with our concierge team.",
+    });
+    window.open('https://wa.me/1234567890', '_blank');
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -23,7 +117,7 @@ const Services = () => {
                 <p className="text-gray-600 mb-4">
                   Instant messaging with our concierge team
                 </p>
-                <Button variant="outline">Start Chat</Button>
+                <Button variant="outline" onClick={handleStartChat}>Start Chat</Button>
               </div>
             </div>
           </Card>
@@ -36,7 +130,7 @@ const Services = () => {
                 <p className="text-gray-600 mb-4">
                   Submit and track your requests
                 </p>
-                <Button variant="outline">New Request</Button>
+                <Button variant="outline" onClick={handleNavigateToRequests}>New Request</Button>
               </div>
             </div>
           </Card>
@@ -49,7 +143,7 @@ const Services = () => {
                 <p className="text-gray-600 mb-4">
                   Round-the-clock assistance for all your needs
                 </p>
-                <Button variant="outline">Contact Support</Button>
+                <Button variant="outline" onClick={handleNavigateToSupport}>Contact Support</Button>
               </div>
             </div>
           </Card>
@@ -62,12 +156,86 @@ const Services = () => {
                 <p className="text-gray-600 mb-4">
                   Direct messaging via WhatsApp
                 </p>
-                <Button variant="outline">Message Us</Button>
+                <Button variant="outline" onClick={handleWhatsAppService}>Message Us</Button>
               </div>
             </div>
           </Card>
         </div>
       </div>
+
+      {/* Live Chat Sheet */}
+      <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <SheetContent className="sm:max-w-md p-0 flex flex-col h-full">
+          <SheetHeader className="h-16 border-b px-4 flex-shrink-0">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback className="bg-primary/10 text-primary">C</AvatarFallback>
+                </Avatar>
+                <SheetTitle>Concierge Chat</SheetTitle>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleCloseChat}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </SheetHeader>
+          
+          <ScrollArea className="flex-1 px-4 py-3">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div 
+                  key={message.id} 
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div 
+                    className={`max-w-[80%] px-4 py-2 rounded-2xl ${
+                      message.sender === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-tr-none'
+                        : 'bg-muted rounded-tl-none'
+                    }`}
+                  >
+                    <p>{message.text}</p>
+                    <div className="flex justify-end items-center gap-1 mt-1 text-xs opacity-70">
+                      <span>{message.time}</span>
+                      {message.status === 'read' && <span>✓✓</span>}
+                      {message.status === 'delivered' && <span>✓✓</span>}
+                      {message.status === 'sent' && <span>✓</span>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          
+          <SheetFooter className="border-t p-4 mt-auto">
+            <form onSubmit={handleMessageSubmit} className="flex items-center gap-2 w-full">
+              <Button type="button" variant="ghost" size="icon" className="rounded-full">
+                <Paperclip className="h-5 w-5" />
+              </Button>
+              <Textarea 
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="resize-none min-h-0 h-10 py-2 rounded-full"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+              />
+              <Button 
+                type="submit" 
+                size="icon" 
+                className="rounded-full"
+                disabled={!inputMessage.trim()}
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </form>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </Layout>
   );
 };
