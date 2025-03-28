@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit, Users, Key } from 'lucide-react';
 import {
@@ -73,7 +72,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      // Récupérer les données utilisateur du localStorage
       const userDataString = localStorage.getItem('user_data');
       
       if (userDataString) {
@@ -87,7 +85,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
           });
           setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
           
-          // Récupérer les accompagnants
           if (userData.companions && Array.isArray(userData.companions)) {
             setFamilyMembers(userData.companions);
           }
@@ -95,7 +92,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
           console.error("Error parsing user data from localStorage:", error);
         }
       } else {
-        // Si pas de données dans localStorage, vérifier Supabase
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
@@ -131,7 +127,19 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
               .eq('user_id', session.user.id);
 
             if (companions && !companionsError) {
-              setFamilyMembers(companions);
+              const convertedCompanions: CompanionType[] = companions.map(companion => ({
+                id: companion.id,
+                firstName: companion.first_name,
+                lastName: companion.last_name || '',
+                birthDate: new Date(),
+                relation: companion.relation,
+                first_name: companion.first_name,
+                last_name: companion.last_name || '',
+                user_id: companion.user_id,
+                created_at: companion.created_at,
+                updated_at: companion.updated_at
+              }));
+              setFamilyMembers(convertedCompanions);
             } else if (companionsError) {
               console.error("Error fetching companions:", companionsError);
             }
@@ -161,7 +169,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
       const firstName = names[0] || '';
       const lastName = names.slice(1).join(' ') || '';
 
-      // Mettre à jour dans localStorage
       const userDataString = localStorage.getItem('user_data');
       if (userDataString) {
         try {
@@ -189,7 +196,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
           });
         }
       } else {
-        // Si pas de données dans localStorage, essayer Supabase
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
@@ -232,10 +238,8 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
       const firstName = names[0] || '';
       const lastName = names.slice(1).join(' ') || '';
       
-      // Générer un ID unique pour le nouveau membre
       const newMemberId = crypto.randomUUID();
       
-      // Créer un nouveau membre
       const newMember: CompanionType = {
         id: newMemberId,
         firstName: firstName,
@@ -244,11 +248,9 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
         relation: newFamilyRelation
       };
       
-      // Ajouter le membre à la liste des accompagnants
       const updatedFamilyMembers = [...familyMembers, newMember];
       setFamilyMembers(updatedFamilyMembers);
       
-      // Mettre à jour dans localStorage
       const userDataString = localStorage.getItem('user_data');
       if (userDataString) {
         try {
@@ -278,22 +280,23 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   
   const handleEditFamilyMember = async () => {
     if (editingMember && editingMember.first_name.trim() && editingMember.relation.trim()) {
-      // Mettre à jour le membre dans la liste des accompagnants
+      const updatedCompanionForUI: CompanionType = {
+        id: editingMember.id,
+        firstName: editingMember.first_name,
+        lastName: editingMember.last_name || '',
+        birthDate: new Date(),
+        relation: editingMember.relation
+      };
+      
       const updatedFamilyMembers = familyMembers.map(member => {
-        if ('id' in member && editingMember.id === member.id) {
-          return {
-            ...member,
-            firstName: editingMember.first_name,
-            lastName: editingMember.last_name || '',
-            relation: editingMember.relation
-          };
+        if ('id' in member && member.id === editingMember.id) {
+          return updatedCompanionForUI;
         }
         return member;
       });
       
       setFamilyMembers(updatedFamilyMembers);
       
-      // Mettre à jour dans localStorage
       const userDataString = localStorage.getItem('user_data');
       if (userDataString) {
         try {
@@ -332,18 +335,13 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   };
 
   const handleSignOut = async () => {
-    // Supprimer les données utilisateur du localStorage
     localStorage.removeItem('user_data');
-    
-    // Déconnexion de Supabase (si connecté)
     await supabase.auth.signOut();
-    
     toast({
       title: "Sign out",
       description: "You have been signed out",
       variant: "destructive",
     });
-    
     navigate('/auth/login');
   };
 
@@ -453,26 +451,30 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
                     <div className="space-y-2">
                       {familyMembers.map((member) => (
                         <motion.div
-                          key={typeof member.id === 'string' ? member.id : member.firstName}
+                          key={member.id || `${member.firstName}-${member.lastName}`}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           className="bg-gray-50 p-3 rounded-lg"
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="text-sm font-medium">{`${member.firstName} ${member.lastName || ''}`}</p>
+                              <p className="text-sm font-medium">{`${member.firstName || member.first_name} ${member.lastName || member.last_name || ''}`}</p>
                               <span className="text-xs text-gray-500">{member.relation}</span>
                             </div>
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={() => {
-                                // Conversion du format CompanionType vers le format attendu par editingMember
+                                const id = member.id || crypto.randomUUID();
+                                const first_name = member.firstName || member.first_name || '';
+                                const last_name = member.lastName || member.last_name || null;
+                                const relation = member.relation;
+                                
                                 setEditingMember({
-                                  id: typeof member.id === 'string' ? member.id : crypto.randomUUID(),
-                                  first_name: member.firstName,
-                                  last_name: member.lastName || null,
-                                  relation: member.relation,
+                                  id,
+                                  first_name,
+                                  last_name,
+                                  relation,
                                   user_id: '0'
                                 });
                               }}

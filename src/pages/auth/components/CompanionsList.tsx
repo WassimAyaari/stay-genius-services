@@ -14,10 +14,16 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type CompanionType = {
+  id?: string;
   firstName: string;
   lastName: string;
   birthDate: Date;
   relation: string;
+  first_name?: string;
+  last_name?: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 interface CompanionsListProps {
