@@ -149,6 +149,36 @@ export type Database = {
           },
         ]
       }
+      companions: {
+        Row: {
+          created_at: string | null
+          first_name: string
+          id: string
+          last_name: string | null
+          relation: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          first_name: string
+          id?: string
+          last_name?: string | null
+          relation: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string | null
+          relation?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       hotel_about: {
         Row: {
           action_link: string

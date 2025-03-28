@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit, Users, Key } from 'lucide-react';
 import {
@@ -25,8 +24,11 @@ import { supabase } from '@/integrations/supabase/client';
 interface Companion {
   id: string;
   first_name: string;
-  last_name?: string;
+  last_name?: string | null;
   relation: string;
+  user_id: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface UserMenuProps {
@@ -49,13 +51,11 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   ]);
   const { toast } = useToast();
   
-  // New states for dialogs
   const [addFamilyOpen, setAddFamilyOpen] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState('');
   const [newFamilyRelation, setNewFamilyRelation] = useState('');
   const [editingMember, setEditingMember] = useState<Companion | null>(null);
 
-  // Charger les données de l'utilisateur connecté
   useEffect(() => {
     const fetchUserData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -75,7 +75,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
           });
           setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
         } else {
-          // Si le profil n'existe pas encore, utilisez les données de l'utilisateur
           const userMetadata = session.user.user_metadata;
           setUserProfile({
             firstName: userMetadata?.first_name || '',
@@ -85,16 +84,19 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
           setNewName(`${userMetadata?.first_name || ''} ${userMetadata?.last_name || ''}`);
         }
 
-        // Récupérer les accompagnants
-        const { data: companions, error: companionsError } = await supabase
-          .from('companions')
-          .select('*')
-          .eq('user_id', session.user.id);
+        try {
+          const { data: companions, error: companionsError } = await supabase
+            .from('companions')
+            .select('*')
+            .eq('user_id', session.user.id);
 
-        if (companions && !companionsError) {
-          setFamilyMembers(companions);
-        } else if (companionsError) {
-          console.error("Error fetching companions:", companionsError);
+          if (companions && !companionsError) {
+            setFamilyMembers(companions);
+          } else if (companionsError) {
+            console.error("Error fetching companions:", companionsError);
+          }
+        } catch (err) {
+          console.error("Error in companions fetch:", err);
         }
       }
     };
@@ -105,7 +107,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Here you would typically upload to your backend
       toast({
         title: "Profile picture updated",
         description: "Your profile picture has been successfully updated.",
@@ -122,7 +123,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
-        // Mettre à jour le profil
         const { error } = await supabase
           .from('profiles')
           .upsert({ 
@@ -164,30 +164,39 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
         const firstName = names[0] || '';
         const lastName = names.slice(1).join(' ') || '';
         
-        const { data, error } = await supabase
-          .from('companions')
-          .insert({
-            user_id: session.user.id,
-            first_name: firstName,
-            last_name: lastName,
-            relation: newFamilyRelation
-          })
-          .select();
-          
-        if (!error && data) {
-          setFamilyMembers([...familyMembers, data[0]]);
-          setNewFamilyName('');
-          setNewFamilyRelation('');
-          setAddFamilyOpen(false);
-          
-          toast({
-            title: "Family member added",
-            description: `${newFamilyName} has been added to your family members.`,
-          });
-        } else {
+        try {
+          const { data, error } = await supabase
+            .from('companions')
+            .insert({
+              user_id: session.user.id,
+              first_name: firstName,
+              last_name: lastName,
+              relation: newFamilyRelation
+            })
+            .select();
+            
+          if (!error && data) {
+            setFamilyMembers([...familyMembers, data[0] as Companion]);
+            setNewFamilyName('');
+            setNewFamilyRelation('');
+            setAddFamilyOpen(false);
+            
+            toast({
+              title: "Family member added",
+              description: `${newFamilyName} has been added to your family members.`,
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Failed to add family member.",
+              variant: "destructive",
+            });
+          }
+        } catch (err) {
+          console.error("Error adding companion:", err);
           toast({
             title: "Error",
-            description: "Failed to add family member.",
+            description: "Failed to add family member due to a system error.",
             variant: "destructive",
           });
         }
@@ -197,28 +206,37 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   
   const handleEditFamilyMember = async () => {
     if (editingMember && editingMember.first_name.trim() && editingMember.relation.trim()) {
-      const { error } = await supabase
-        .from('companions')
-        .update({
-          first_name: editingMember.first_name,
-          last_name: editingMember.last_name,
-          relation: editingMember.relation
-        })
-        .eq('id', editingMember.id);
-        
-      if (!error) {
-        setFamilyMembers(familyMembers.map(member => 
-          member.id === editingMember.id ? editingMember : member
-        ));
-        setEditingMember(null);
-        toast({
-          title: "Family member updated",
-          description: "Family member information has been updated.",
-        });
-      } else {
+      try {
+        const { error } = await supabase
+          .from('companions')
+          .update({
+            first_name: editingMember.first_name,
+            last_name: editingMember.last_name,
+            relation: editingMember.relation
+          })
+          .eq('id', editingMember.id);
+          
+        if (!error) {
+          setFamilyMembers(familyMembers.map(member => 
+            member.id === editingMember.id ? editingMember : member
+          ));
+          setEditingMember(null);
+          toast({
+            title: "Family member updated",
+            description: "Family member information has been updated.",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to update family member.",
+            variant: "destructive",
+          });
+        }
+      } catch (err) {
+        console.error("Error updating companion:", err);
         toast({
           title: "Error",
-          description: "Failed to update family member.",
+          description: "Failed to update family member due to a system error.",
           variant: "destructive",
         });
       }
@@ -504,7 +522,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
         </SheetContent>
       </Sheet>
       
-      {/* Add Family Member Dialog */}
       <Dialog open={addFamilyOpen} onOpenChange={setAddFamilyOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -539,7 +556,6 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
         </DialogContent>
       </Dialog>
       
-      {/* Edit Family Member Dialog */}
       <Dialog open={!!editingMember} onOpenChange={(open) => !open && setEditingMember(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
