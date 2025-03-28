@@ -16,6 +16,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
+import { useRoom } from '@/hooks/useRoom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface Message {
   id: string;
@@ -25,22 +29,46 @@ interface Message {
   status?: 'sent' | 'delivered' | 'read';
 }
 
+interface UserInfo {
+  name: string;
+  roomNumber: string;
+}
+
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
+  const [userInfo, setUserInfo] = useState<UserInfo>({ name: '', roomNumber: '' });
   const { toast } = useToast();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Welcome to Hotel Genius! How may I assist you today?",
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sender: 'staff'
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const handleStartChat = () => {
+    setIsUserInfoDialogOpen(true);
+  };
+
+  const handleSubmitUserInfo = () => {
+    if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide your name and room number.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUserInfoDialogOpen(false);
     setIsChatOpen(true);
+    
+    // Initialize the chat with a welcome message
+    setMessages([
+      {
+        id: '1',
+        text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: 'staff'
+      }
+    ]);
   };
 
   const handleCloseChat = () => {
@@ -184,6 +212,44 @@ const Services = () => {
         </div>
       </div>
 
+      {/* User Information Dialog */}
+      <Dialog open={isUserInfoDialogOpen} onOpenChange={setIsUserInfoDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Before we start chatting</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Your Name
+              </Label>
+              <Input
+                id="name"
+                value={userInfo.name}
+                onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                className="col-span-3"
+                placeholder="Enter your name"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="roomNumber" className="text-right">
+                Room Number
+              </Label>
+              <Input
+                id="roomNumber"
+                value={userInfo.roomNumber}
+                onChange={(e) => setUserInfo({...userInfo, roomNumber: e.target.value})}
+                className="col-span-3"
+                placeholder="Enter your room number"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSubmitUserInfo}>Start Chat</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Live Chat Sheet */}
       <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
         <SheetContent className="sm:max-w-md p-0 flex flex-col h-full">
@@ -193,7 +259,10 @@ const Services = () => {
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-primary/10 text-primary">C</AvatarFallback>
                 </Avatar>
-                <SheetTitle>Concierge Chat</SheetTitle>
+                <div>
+                  <SheetTitle>Concierge Chat</SheetTitle>
+                  <p className="text-xs text-muted-foreground">Room: {userInfo.roomNumber}</p>
+                </div>
               </div>
               <Button variant="ghost" size="icon" onClick={handleCloseChat}>
                 <X className="h-5 w-5" />

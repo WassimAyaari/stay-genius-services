@@ -26,6 +26,7 @@ interface Chat {
   lastActivity: string;
   messages: Message[];
   unread: number;
+  roomNumber?: string; // Added room number field
 }
 
 // Simulated chats for demonstration
@@ -34,6 +35,7 @@ const initialChats: Chat[] = [
     id: '1',
     userId: 'user1',
     userName: 'John Smith',
+    roomNumber: '302', // Added room number
     lastActivity: '10 min ago',
     unread: 2,
     messages: [
@@ -68,6 +70,7 @@ const initialChats: Chat[] = [
     id: '2',
     userId: 'user2',
     userName: 'Emma Johnson',
+    roomNumber: '405', // Added room number
     lastActivity: '2 hrs ago',
     unread: 0,
     messages: [
@@ -115,7 +118,7 @@ const ChatMessages = () => {
       unread: 0,
       messages: chat.messages.map(msg => {
         if (msg.sender === 'user' && !msg.status) {
-          return { ...msg, status: 'read' };
+          return { ...msg, status: 'read' as const };
         }
         return msg;
       })
@@ -200,7 +203,12 @@ const ChatMessages = () => {
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex justify-between items-center mb-1">
-                          <h3 className="font-medium">{chat.userName}</h3>
+                          <div>
+                            <h3 className="font-medium">{chat.userName}</h3>
+                            {chat.roomNumber && (
+                              <p className="text-xs text-muted-foreground">Room: {chat.roomNumber}</p>
+                            )}
+                          </div>
                           <span className="text-xs text-muted-foreground">{chat.lastActivity}</span>
                         </div>
                         {chat.messages.length > 0 && (
@@ -240,7 +248,12 @@ const ChatMessages = () => {
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex justify-between items-center mb-1">
-                          <h3 className="font-medium">{chat.userName}</h3>
+                          <div>
+                            <h3 className="font-medium">{chat.userName}</h3>
+                            {chat.roomNumber && (
+                              <p className="text-xs text-muted-foreground">Room: {chat.roomNumber}</p>
+                            )}
+                          </div>
                           <span className="text-xs text-muted-foreground">{chat.lastActivity}</span>
                         </div>
                         {chat.messages.length > 0 && (
@@ -277,7 +290,12 @@ const ChatMessages = () => {
             </Avatar>
             <div>
               <h2 className="font-medium">{activeChat.userName}</h2>
-              <p className="text-xs text-muted-foreground">User ID: {activeChat.userId}</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <p>User ID: {activeChat.userId}</p>
+                {activeChat.roomNumber && (
+                  <p className="font-medium text-primary">Room: {activeChat.roomNumber}</p>
+                )}
+              </div>
             </div>
           </div>
           
