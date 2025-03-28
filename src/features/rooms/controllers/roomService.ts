@@ -3,7 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type ServiceType = 'room_service' | 'housekeeping' | 'maintenance' | 'laundry' | 'concierge' | 'wifi' | 'bill' | 'preferences' | 'custom';
 
-export const requestService = async (roomId: string, type: ServiceType, description?: string, requestItemId?: string) => {
+export const requestService = async (
+  roomId: string, 
+  type: ServiceType, 
+  description?: string, 
+  requestItemId?: string,
+  categoryId?: string
+) => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) throw new Error('User not authenticated');
@@ -15,6 +21,7 @@ export const requestService = async (roomId: string, type: ServiceType, descript
       guest_id: user.id,
       type,
       description,
+      category_id: categoryId,
       request_item_id: requestItemId,
       status: 'pending'
     })

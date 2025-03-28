@@ -14,7 +14,7 @@ export const useServiceRequests = (roomId?: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ServiceRequest[];
+      return data as unknown as ServiceRequest[];
     },
     enabled: !!roomId,
   });

@@ -701,6 +701,85 @@ export type Database = {
         }
         Relationships: []
       }
+      request_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "request_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_items: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "request_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_menus: {
         Row: {
           category: string
@@ -846,30 +925,36 @@ export type Database = {
       }
       service_requests: {
         Row: {
+          category_id: string | null
           created_at: string | null
           description: string | null
           guest_id: string | null
           id: string
+          request_item_id: string | null
           room_id: string | null
           status: string | null
           type: string
           updated_at: string | null
         }
         Insert: {
+          category_id?: string | null
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
           id?: string
+          request_item_id?: string | null
           room_id?: string | null
           status?: string | null
           type: string
           updated_at?: string | null
         }
         Update: {
+          category_id?: string | null
           created_at?: string | null
           description?: string | null
           guest_id?: string | null
           id?: string
+          request_item_id?: string | null
           room_id?: string | null
           status?: string | null
           type?: string
@@ -877,10 +962,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "service_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "request_categories"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "service_requests_guest_id_fkey"
             columns: ["guest_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_request_item_id_fkey"
+            columns: ["request_item_id"]
+            isOneToOne: false
+            referencedRelation: "request_items"
             referencedColumns: ["id"]
           },
           {

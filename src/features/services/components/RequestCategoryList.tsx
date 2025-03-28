@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader } from 'lucide-react';
 import { useRequestCategories } from '@/hooks/useRequestCategories';
 import { RequestCategory } from '@/features/rooms/types';
 
@@ -16,7 +15,7 @@ const RequestCategoryList = ({ onSelectCategory }: RequestCategoryListProps) => 
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

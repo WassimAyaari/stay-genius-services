@@ -47,7 +47,7 @@ import {
   useUpdateRequestItem
 } from '@/hooks/useRequestCategories';
 import { RequestCategory, RequestItem, ServiceRequest } from '@/features/rooms/types';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
@@ -83,9 +83,10 @@ const RequestManager = () => {
 
       if (error) throw error;
       
+      const serviceRequests = data as ServiceRequest[];
       const requestsWithItems: ServiceRequestWithItem[] = [];
       
-      for (const request of data) {
+      for (const request of serviceRequests) {
         if (request.request_item_id) {
           const { data: itemData } = await supabase
             .from('request_items')
@@ -95,7 +96,7 @@ const RequestManager = () => {
             
           requestsWithItems.push({
             ...request,
-            request_items: itemData
+            request_items: itemData as unknown as RequestItem
           });
         } else {
           requestsWithItems.push({

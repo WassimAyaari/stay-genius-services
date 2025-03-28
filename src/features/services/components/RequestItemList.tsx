@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ChevronLeft, Check } from 'lucide-react';
+import { Loader, ChevronLeft, Check } from 'lucide-react';
 import { useRequestItems } from '@/hooks/useRequestCategories';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -41,7 +41,7 @@ const RequestItemList = ({
 
       {isLoading ? (
         <div className="flex justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : !items || items.length === 0 ? (
         <div className="text-center py-8">

@@ -14,7 +14,7 @@ export const useRequestCategories = () => {
         .order('name');
 
       if (error) throw error;
-      return data as RequestCategory[];
+      return data as unknown as RequestCategory[];
     },
   });
 };
@@ -35,7 +35,7 @@ export const useRequestItems = (categoryId?: string) => {
       const { data, error } = await query.order('name');
 
       if (error) throw error;
-      return data as RequestItem[];
+      return data as unknown as RequestItem[];
     },
     enabled: !!categoryId,
   });
@@ -53,7 +53,7 @@ export const useCreateRequestCategory = () => {
         .single();
       
       if (error) throw error;
-      return data as RequestCategory;
+      return data as unknown as RequestCategory;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['request-categories'] });
@@ -74,7 +74,7 @@ export const useUpdateRequestCategory = () => {
         .single();
       
       if (error) throw error;
-      return data as RequestCategory;
+      return data as unknown as RequestCategory;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['request-categories'] });
@@ -94,7 +94,7 @@ export const useCreateRequestItem = () => {
         .single();
       
       if (error) throw error;
-      return data as RequestItem;
+      return data as unknown as RequestItem;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['request-items', variables.category_id] });
@@ -115,7 +115,7 @@ export const useUpdateRequestItem = () => {
         .single();
       
       if (error) throw error;
-      return data as RequestItem;
+      return data as unknown as RequestItem;
     },
     onSuccess: (_, variables) => {
       if ('category_id' in variables) {

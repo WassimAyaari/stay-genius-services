@@ -1,29 +1,16 @@
-
 import React, { useState } from 'react';
+import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, FileText, Clock, HeadphonesIcon, Send, X, Paperclip, ChevronLeft, Check, Loader } from 'lucide-react';
-import Layout from '@/components/Layout';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter
-} from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useToast } from '@/components/ui/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader } from 'lucide-react';
+import { requestService } from '@/features/rooms/controllers/roomService';
+import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import RequestCategoryList from '@/features/services/components/RequestCategoryList';
 import RequestItemList from '@/features/services/components/RequestItemList';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
-import { requestService } from '@/features/rooms/controllers/roomService';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Message {
   id: string;
