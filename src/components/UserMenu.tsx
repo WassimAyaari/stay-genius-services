@@ -8,6 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetClose,
+  SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -20,6 +21,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+
+interface Companion {
+  id: string;
+  first_name: string;
+  last_name?: string;
+  relation: string;
+}
 
 interface UserMenuProps {
   roomNumber?: string;
@@ -34,7 +42,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
     lastName: '',
     email: '',
   });
-  const [familyMembers, setFamilyMembers] = useState([]);
+  const [familyMembers, setFamilyMembers] = useState<Companion[]>([]);
   const [notifications, setNotifications] = useState([
     { id: 1, message: "Your room has been cleaned", time: "2 minutes ago" },
     { id: 2, message: "Spa appointment confirmed", time: "1 hour ago" },
@@ -45,7 +53,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   const [addFamilyOpen, setAddFamilyOpen] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState('');
   const [newFamilyRelation, setNewFamilyRelation] = useState('');
-  const [editingMember, setEditingMember] = useState(null);
+  const [editingMember, setEditingMember] = useState<Companion | null>(null);
 
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
@@ -78,13 +86,15 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
         }
 
         // Récupérer les accompagnants
-        const { data: companions } = await supabase
+        const { data: companions, error: companionsError } = await supabase
           .from('companions')
           .select('*')
           .eq('user_id', session.user.id);
 
-        if (companions) {
+        if (companions && !companionsError) {
           setFamilyMembers(companions);
+        } else if (companionsError) {
+          console.error("Error fetching companions:", companionsError);
         }
       }
     };
