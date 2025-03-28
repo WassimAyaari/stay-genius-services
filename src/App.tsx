@@ -30,6 +30,7 @@ import RestaurantManager from './pages/admin/RestaurantManager';
 import RestaurantMenuManager from './pages/admin/RestaurantMenuManager';
 import ReservationManager from './pages/admin/ReservationManager';
 import ChatMessages from './pages/admin/ChatMessages';
+import RequestManager from './pages/admin/RequestManager';
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const AnimatedRoutes = () => {
           <Route path="/admin/restaurants/:id/menu" element={<RestaurantMenuManager />} />
           <Route path="/admin/restaurants/:id/reservations" element={<ReservationManager />} />
           <Route path="/admin/chat-messages" element={<ChatMessages />} />
+          <Route path="/admin/request-manager" element={<RequestManager />} />
           <Route path="/destination" element={<Destination />} />
           <Route path="/shops" element={<Shops />} />
           <Route path="/map" element={<HotelMap />} />

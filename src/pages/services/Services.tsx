@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, FileText, Clock, HeadphonesIcon, Send, X, Paperclip } from 'lucide-react';
+import { MessageCircle, FileText, Clock, HeadphonesIcon, Send, X, Paperclip, ChevronLeft, Check } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -20,6 +19,10 @@ import { useRoom } from '@/hooks/useRoom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import RequestCategoryList from '@/features/services/components/RequestCategoryList';
+import RequestItemList from '@/features/services/components/RequestItemList';
+import { RequestCategory, RequestItem } from '@/features/rooms/types';
+import { requestService } from '@/features/rooms/controllers/roomService';
 
 interface Message {
   id: string;
@@ -42,12 +45,15 @@ const Services = () => {
   const [userInfo, setUserInfo] = useState<UserInfo>({ name: 'Emma Watson', roomNumber: '401' });
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
+  const { data: room } = useRoom(userInfo.roomNumber);
+  
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleStartChat = () => {
-    // Auto-fill user info already exists, proceed directly to chat
     setIsChatOpen(true);
-    
-    // Initialize the chat with a welcome message
     setMessages([
       {
         id: '1',
@@ -70,8 +76,6 @@ const Services = () => {
 
     setIsUserInfoDialogOpen(false);
     setIsChatOpen(true);
-    
-    // Initialize the chat with a welcome message
     setMessages([
       {
         id: '1',
@@ -100,7 +104,6 @@ const Services = () => {
     setMessages([...messages, newMessage]);
     setInputMessage('');
 
-    // Simulate response from staff after a short delay
     setTimeout(() => {
       const staffResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -122,8 +125,74 @@ const Services = () => {
     handleSendMessage();
   };
 
+  const handleOpenRequestDialog = () => {
+    setIsRequestDialogOpen(true);
+    setSelectedCategory(null);
+    setSelectedItems([]);
+  };
+
+  const handleSelectCategory = (category: RequestCategory) => {
+    setSelectedCategory(category);
+    setSelectedItems([]);
+  };
+
+  const handleGoBackToCategories = () => {
+    setSelectedCategory(null);
+    setSelectedItems([]);
+  };
+
+  const handleToggleRequestItem = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const handleSubmitRequests = async () => {
+    if (!selectedItems.length || !room) {
+      toast({
+        title: "No items selected",
+        description: "Please select at least one request item",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      for (const itemId of selectedItems) {
+        await requestService(
+          room.id, 
+          selectedCategory?.name.toLowerCase() as any || 'custom',
+          `Request for ${selectedCategory?.name}`,
+          itemId
+        );
+      }
+      
+      toast({
+        title: "Requests Submitted",
+        description: `${selectedItems.length} request(s) have been sent successfully.`,
+      });
+      
+      setIsRequestDialogOpen(false);
+      setSelectedCategory(null);
+      setSelectedItems([]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit requests. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error submitting requests:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNavigateToRequests = () => {
-    navigate('/messages');
+    handleOpenRequestDialog();
   };
 
   const handleNavigateToSupport = () => {
@@ -131,7 +200,6 @@ const Services = () => {
   };
 
   const handleWhatsAppService = () => {
-    // This would ideally open WhatsApp with a predefined number
     toast({
       title: "WhatsApp Service",
       description: "Opening WhatsApp to connect with our concierge team.",
@@ -141,6 +209,10 @@ const Services = () => {
 
   const handleNavigateToAdminChat = () => {
     navigate('/admin/chat-messages');
+  };
+
+  const handleNavigateToRequestManager = () => {
+    navigate('/admin/request-manager');
   };
 
   return (
@@ -205,63 +277,92 @@ const Services = () => {
           </Card>
         </div>
 
-        {/* Staff Only Section - visible only to staff members in a real implementation */}
         <div className="mt-12 border-t pt-6">
           <h2 className="text-xl font-semibold mb-4">Staff Access</h2>
-          <Card className="p-6 bg-muted/30">
-            <div className="flex items-start gap-4">
-              <MessageCircle className="w-6 h-6 text-primary" />
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Chat Management</h3>
-                <p className="text-gray-600 mb-4">
-                  Staff access to view and respond to guest messages
-                </p>
-                <Button variant="outline" onClick={() => handleNavigateToAdminChat()}>Access Chat Portal</Button>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="p-6 bg-muted/30">
+              <div className="flex items-start gap-4">
+                <MessageCircle className="w-6 h-6 text-primary" />
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Chat Management</h3>
+                  <p className="text-gray-600 mb-4">
+                    Staff access to view and respond to guest messages
+                  </p>
+                  <Button variant="outline" onClick={() => handleNavigateToAdminChat()}>Access Chat Portal</Button>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+            
+            <Card className="p-6 bg-muted/30">
+              <div className="flex items-start gap-4">
+                <FileText className="w-6 h-6 text-primary" />
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Request Management</h3>
+                  <p className="text-gray-600 mb-4">
+                    Manage request categories and track request status
+                  </p>
+                  <Button variant="outline" onClick={handleNavigateToRequestManager}>Manage Requests</Button>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
 
-      {/* User Information Dialog - No longer needed as we auto-fill user info */}
-      <Dialog open={isUserInfoDialogOpen} onOpenChange={setIsUserInfoDialogOpen}>
-        <DialogContent>
+      <Dialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Before we start chatting</DialogTitle>
+            <DialogTitle>
+              {selectedCategory 
+                ? `Select ${selectedCategory.name} Requests` 
+                : "Select Request Category"}
+            </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Your Name
-              </Label>
-              <Input
-                id="name"
-                value={userInfo.name}
-                onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
-                className="col-span-3"
-                placeholder="Enter your name"
+          
+          <div className="py-4">
+            {selectedCategory ? (
+              <RequestItemList
+                category={selectedCategory}
+                onGoBack={handleGoBackToCategories}
+                onSelectItem={() => {}}
+                selectedItems={selectedItems}
+                onToggleItem={handleToggleRequestItem}
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="roomNumber" className="text-right">
-                Room Number
-              </Label>
-              <Input
-                id="roomNumber"
-                value={userInfo.roomNumber}
-                onChange={(e) => setUserInfo({...userInfo, roomNumber: e.target.value})}
-                className="col-span-3"
-                placeholder="Enter your room number"
+            ) : (
+              <RequestCategoryList
+                onSelectCategory={handleSelectCategory}
               />
-            </div>
+            )}
           </div>
+          
           <DialogFooter>
-            <Button onClick={handleSubmitUserInfo}>Start Chat</Button>
+            {selectedCategory && (
+              <div className="flex w-full justify-between items-center">
+                <div className="text-sm">
+                  {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
+                </div>
+                <Button 
+                  onClick={handleSubmitRequests}
+                  disabled={selectedItems.length === 0 || isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Submit Requests
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Live Chat Sheet */}
       <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
         <SheetContent className="sm:max-w-md p-0 flex flex-col h-full">
           <SheetHeader className="h-16 border-b px-4 flex-shrink-0">
