@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import {
   Trash, 
   Check, 
   X, 
-  Loader2,
+  Loader,
   ChevronDown,
   Clock,
   CheckCircle2,
@@ -56,6 +55,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+interface ServiceRequestWithItem extends ServiceRequest {
+  request_items?: RequestItem | null;
+}
+
 const RequestManager = () => {
   const { toast } = useToast();
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -75,14 +78,34 @@ const RequestManager = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_requests')
-        .select(`
-          *,
-          request_items(*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as (ServiceRequest & { request_items: RequestItem | null })[];
+      
+      const requestsWithItems: ServiceRequestWithItem[] = [];
+      
+      for (const request of data) {
+        if (request.request_item_id) {
+          const { data: itemData } = await supabase
+            .from('request_items')
+            .select('*')
+            .eq('id', request.request_item_id)
+            .single();
+            
+          requestsWithItems.push({
+            ...request,
+            request_items: itemData
+          });
+        } else {
+          requestsWithItems.push({
+            ...request,
+            request_items: null
+          });
+        }
+      }
+      
+      return requestsWithItems;
     },
   });
   
@@ -179,7 +202,6 @@ const RequestManager = () => {
     
     try {
       if (isUpdating) {
-        // In a real app, you'd have the current item ID
         toast({
           title: "Error",
           description: "Updating items is not implemented in this demo",
@@ -229,7 +251,7 @@ const RequestManager = () => {
       case 'pending':
         return <Badge variant="outline" className="flex items-center"><Clock className="mr-1 h-3 w-3" /> Pending</Badge>;
       case 'in_progress':
-        return <Badge variant="secondary" className="flex items-center"><Loader2 className="mr-1 h-3 w-3" /> In Progress</Badge>;
+        return <Badge variant="secondary" className="flex items-center"><Loader className="mr-1 h-3 w-3" /> In Progress</Badge>;
       case 'completed':
         return <Badge variant="default" className="bg-green-500 flex items-center"><CheckCircle2 className="mr-1 h-3 w-3" /> Completed</Badge>;
       case 'cancelled':
@@ -257,7 +279,7 @@ const RequestManager = () => {
           
           {isLoadingRequests ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Loader className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <Card>
@@ -311,7 +333,7 @@ const RequestManager = () => {
                                   onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
                                   disabled={request.status === 'in_progress'}
                                 >
-                                  <Loader2 className="mr-2 h-4 w-4" />
+                                  <Loader className="mr-2 h-4 w-4" />
                                   Mark as In Progress
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
@@ -358,7 +380,7 @@ const RequestManager = () => {
           
           {isLoadingCategories ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Loader className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -410,7 +432,7 @@ const RequestManager = () => {
           
           {isLoadingCategories ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Loader className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : categories && categories.length > 0 ? (
             categories.map((category) => (
@@ -428,7 +450,6 @@ const RequestManager = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Category Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -475,7 +496,7 @@ const RequestManager = () => {
             >
               {(createCategoryMutation.isPending || updateCategoryMutation.isPending) ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -486,7 +507,6 @@ const RequestManager = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Item Dialog */}
       <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -530,7 +550,7 @@ const RequestManager = () => {
             >
               {(createItemMutation.isPending || updateItemMutation.isPending) ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -544,7 +564,6 @@ const RequestManager = () => {
   );
 };
 
-// Helper component to display items by category
 const CategoryItemsList = ({ 
   category,
   onAddItem
@@ -571,7 +590,7 @@ const CategoryItemsList = ({
       <div className="p-2">
         {isLoading ? (
           <div className="flex justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <Loader className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : items && items.length > 0 ? (
           <div className="divide-y">

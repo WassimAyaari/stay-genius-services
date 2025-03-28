@@ -5,6 +5,7 @@ export interface ServiceRequest {
   guest_id: string;
   type: 'room_service' | 'housekeeping' | 'maintenance' | 'laundry' | string;
   category_id?: string;
+  request_item_id?: string;
   description?: string;
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   created_at: string;

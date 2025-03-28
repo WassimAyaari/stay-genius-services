@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, FileText, Clock, HeadphonesIcon, Send, X, Paperclip, ChevronLeft, Check } from 'lucide-react';
+import { MessageCircle, FileText, Clock, HeadphonesIcon, Send, X, Paperclip, ChevronLeft, Check, Loader } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -347,7 +348,7 @@ const Services = () => {
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
                       Submitting...
                     </>
                   ) : (
