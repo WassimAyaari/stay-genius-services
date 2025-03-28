@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { User, Settings, LogOut, BedDouble, Bell, Heart, BookMarked, Upload, X, Edit, Users, Key } from 'lucide-react';
 import {
@@ -20,13 +21,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { defaultUser } from '@/data/defaultUser';
 
 interface Companion {
   id: string;
   first_name: string;
   last_name?: string | null;
   relation: string;
-  user_id: string;
+  user_id?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -40,15 +42,12 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [userProfile, setUserProfile] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
+    firstName: defaultUser.firstName,
+    lastName: defaultUser.lastName,
+    email: defaultUser.email,
   });
-  const [familyMembers, setFamilyMembers] = useState<Companion[]>([]);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "Your room has been cleaned", time: "2 minutes ago" },
-    { id: 2, message: "Spa appointment confirmed", time: "1 hour ago" },
-  ]);
+  const [familyMembers, setFamilyMembers] = useState<Companion[]>(defaultUser.companions);
+  const [notifications, setNotifications] = useState(defaultUser.notifications);
   const { toast } = useToast();
   
   const [addFamilyOpen, setAddFamilyOpen] = useState(false);
@@ -61,6 +60,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
+        // If user is authenticated, use their actual data
         const { data: userData, error } = await supabase
           .from('profiles')
           .select('first_name, last_name')
@@ -69,19 +69,19 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
 
         if (userData && !error) {
           setUserProfile({
-            firstName: userData.first_name || '',
-            lastName: userData.last_name || '',
-            email: session.user.email || '',
+            firstName: userData.first_name || defaultUser.firstName,
+            lastName: userData.last_name || defaultUser.lastName,
+            email: session.user.email || defaultUser.email,
           });
           setNewName(`${userData.first_name || ''} ${userData.last_name || ''}`);
         } else {
-          const userMetadata = session.user.user_metadata;
+          // Fallback to default user if no profile found
           setUserProfile({
-            firstName: userMetadata?.first_name || '',
-            lastName: userMetadata?.last_name || '',
-            email: session.user.email || '',
+            firstName: defaultUser.firstName,
+            lastName: defaultUser.lastName,
+            email: defaultUser.email,
           });
-          setNewName(`${userMetadata?.first_name || ''} ${userMetadata?.last_name || ''}`);
+          setNewName(`${defaultUser.firstName} ${defaultUser.lastName}`);
         }
 
         try {
@@ -90,14 +90,25 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
             .select('*')
             .eq('user_id', session.user.id);
 
-          if (companions && !companionsError) {
+          if (companions && !companionsError && companions.length > 0) {
             setFamilyMembers(companions);
-          } else if (companionsError) {
-            console.error("Error fetching companions:", companionsError);
+          } else {
+            // Use default companions if none are found in DB
+            setFamilyMembers(defaultUser.companions);
           }
         } catch (err) {
           console.error("Error in companions fetch:", err);
+          setFamilyMembers(defaultUser.companions);
         }
+      } else {
+        // If not authenticated, use default data
+        setUserProfile({
+          firstName: defaultUser.firstName,
+          lastName: defaultUser.lastName,
+          email: defaultUser.email,
+        });
+        setNewName(`${defaultUser.firstName} ${defaultUser.lastName}`);
+        setFamilyMembers(defaultUser.companions);
       }
     };
 
@@ -149,6 +160,18 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
             variant: "destructive",
           });
         }
+      } else {
+        // Just update the local state for default user
+        setUserProfile({
+          ...userProfile,
+          firstName,
+          lastName
+        });
+        
+        toast({
+          title: "Profile updated",
+          description: "Your name has been successfully updated.",
+        });
       }
       
       setIsEditing(false);
@@ -200,44 +223,76 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
             variant: "destructive",
           });
         }
+      } else {
+        // For demo/default user, just add to local state
+        const newMember: Companion = {
+          id: `temp-${Date.now()}`,
+          first_name: newFamilyName.split(' ')[0],
+          last_name: newFamilyName.split(' ').slice(1).join(' '),
+          relation: newFamilyRelation
+        };
+        
+        setFamilyMembers([...familyMembers, newMember]);
+        setNewFamilyName('');
+        setNewFamilyRelation('');
+        setAddFamilyOpen(false);
+        
+        toast({
+          title: "Family member added",
+          description: `${newFamilyName} has been added to your family members.`,
+        });
       }
     }
   };
   
   const handleEditFamilyMember = async () => {
     if (editingMember && editingMember.first_name.trim() && editingMember.relation.trim()) {
-      try {
-        const { error } = await supabase
-          .from('companions')
-          .update({
-            first_name: editingMember.first_name,
-            last_name: editingMember.last_name,
-            relation: editingMember.relation
-          })
-          .eq('id', editingMember.id);
-          
-        if (!error) {
-          setFamilyMembers(familyMembers.map(member => 
-            member.id === editingMember.id ? editingMember : member
-          ));
-          setEditingMember(null);
-          toast({
-            title: "Family member updated",
-            description: "Family member information has been updated.",
-          });
-        } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user && editingMember.user_id) {
+        try {
+          const { error } = await supabase
+            .from('companions')
+            .update({
+              first_name: editingMember.first_name,
+              last_name: editingMember.last_name,
+              relation: editingMember.relation
+            })
+            .eq('id', editingMember.id);
+            
+          if (!error) {
+            setFamilyMembers(familyMembers.map(member => 
+              member.id === editingMember.id ? editingMember : member
+            ));
+            setEditingMember(null);
+            toast({
+              title: "Family member updated",
+              description: "Family member information has been updated.",
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Failed to update family member.",
+              variant: "destructive",
+            });
+          }
+        } catch (err) {
+          console.error("Error updating companion:", err);
           toast({
             title: "Error",
-            description: "Failed to update family member.",
+            description: "Failed to update family member due to a system error.",
             variant: "destructive",
           });
         }
-      } catch (err) {
-        console.error("Error updating companion:", err);
+      } else {
+        // For demo/default user, just update local state
+        setFamilyMembers(familyMembers.map(member => 
+          member.id === editingMember.id ? editingMember : member
+        ));
+        setEditingMember(null);
         toast({
-          title: "Error",
-          description: "Failed to update family member due to a system error.",
-          variant: "destructive",
+          title: "Family member updated",
+          description: "Family member information has been updated.",
         });
       }
     }
@@ -283,7 +338,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
         <SheetTrigger asChild>
           <Button variant="ghost" className="p-0 h-auto hover:bg-transparent relative">
             <Avatar className="h-9 w-9 border-2 border-primary/10">
-              <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={displayName} />
+              <AvatarImage src={defaultUser.avatarUrl} alt={displayName} />
               <AvatarFallback className="bg-primary/10 text-primary font-medium">
                 {initials}
               </AvatarFallback>
@@ -306,7 +361,7 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
                 <div className="flex items-center gap-4">
                   <div className="relative group">
                     <Avatar className="h-16 w-16 border-4 border-white/50 group-hover:border-primary/20 transition-all">
-                      <AvatarImage src="/lovable-uploads/298d1ba4-d372-413d-9386-a531958ccd9c.png" alt={displayName} />
+                      <AvatarImage src={defaultUser.avatarUrl} alt={displayName} />
                       <AvatarFallback className="bg-primary text-white text-xl">
                         {initials}
                       </AvatarFallback>
@@ -337,21 +392,21 @@ const UserMenu = ({ roomNumber }: UserMenuProps) => {
                         </Button>
                       </div>
                     )}
-                    <p className="text-sm text-gray-600">Premium Guest</p>
+                    <p className="text-sm text-gray-600">{defaultUser.role}</p>
                   </div>
                 </div>
               </SheetHeader>
               
               <ScrollArea className="flex-1 h-[calc(100vh-120px)]">
                 <div className="p-4 space-y-6">
-                  {roomNumber && (
+                  {(roomNumber || defaultUser.roomNumber) && (
                     <div className="bg-primary/5 p-4 rounded-xl">
                       <div className="flex items-center gap-3 text-primary mb-2">
                         <BedDouble className="h-5 w-5" />
                         <span className="font-medium">Current Stay</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-600">Room {roomNumber}</p>
+                        <p className="text-sm text-gray-600">Room {roomNumber || defaultUser.roomNumber}</p>
                         <Button 
                           variant="outline" 
                           size="sm" 
