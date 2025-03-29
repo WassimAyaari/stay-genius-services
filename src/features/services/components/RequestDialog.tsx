@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Room } from '@/hooks/useRoom';
 import { requestService } from '@/features/rooms/controllers/roomService';
 import { v4 as uuidv4 } from 'uuid';
+import { useRequestItems } from '@/hooks/useRequestCategories';
 
 interface RequestDialogProps {
   isOpen: boolean;
@@ -20,29 +21,28 @@ interface RequestDialogProps {
 const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [selectedItemsData, setSelectedItemsData] = useState<Map<string, string>>(new Map());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  
+  // Fetch items for the selected category to have access to their names
+  const { data: categoryItems } = useRequestItems(selectedCategory?.id);
 
   // Reset selected items when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
       setSelectedCategory(null);
       setSelectedItems([]);
-      setSelectedItemsData(new Map());
     }
   }, [isOpen]);
 
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
     setSelectedItems([]);
-    setSelectedItemsData(new Map());
   };
 
   const handleGoBackToCategories = () => {
     setSelectedCategory(null);
     setSelectedItems([]);
-    setSelectedItemsData(new Map());
   };
 
   const handleToggleRequestItem = (itemId: string) => {
@@ -106,10 +106,15 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       for (const itemId of selectedItems) {
         console.log(`Submitting request for item with ID: ${itemId}`);
         
+        // Trouver le nom de l'item pour une meilleure description
+        const itemName = categoryItems?.find(item => item.id === itemId)?.name || 'Unknown Item';
+        const categoryName = selectedCategory?.name || 'Custom Request';
+        const description = `${categoryName} - ${itemName}`;
+        
         await requestService(
           room.id, 
           selectedCategory?.name.toLowerCase() as any || 'custom', 
-          selectedCategory?.name || 'Custom Request', 
+          description, 
           itemId, 
           selectedCategory?.id, 
           currentUserInfo.name, 
@@ -124,7 +129,6 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       onOpenChange(false);
       setSelectedCategory(null);
       setSelectedItems([]);
-      setSelectedItemsData(new Map());
     } catch (error) {
       toast({
         title: "Error",
