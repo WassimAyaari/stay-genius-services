@@ -84,10 +84,10 @@ const ChatMessages = () => {
 
       if (messagesError) throw messagesError;
 
-      // Create a map to deduplicate users
+      // Create a map to deduplicate users - prioritize entries with room numbers
       const uniqueUsers = new Map();
       messagesData?.forEach(msg => {
-        if (msg.user_id && !uniqueUsers.has(msg.user_id)) {
+        if (msg.user_id && (!uniqueUsers.has(msg.user_id) || (!uniqueUsers.get(msg.user_id).roomNumber && msg.room_number))) {
           uniqueUsers.set(msg.user_id, {
             userId: msg.user_id,
             userName: msg.user_name || 'Guest',
@@ -96,16 +96,19 @@ const ChatMessages = () => {
         }
       });
 
+      // Filter out entries without room numbers
+      const filteredUsers = Array.from(uniqueUsers.values()).filter(user => user.roomNumber);
+      
       // For each unique user, fetch their conversation
       const userChats: Chat[] = [];
       
-      for (const [userId, userInfo] of uniqueUsers.entries()) {
+      for (const userInfo of filteredUsers) {
         // Try to fetch additional user information
         let userDetails: UserInfo = {};
         
         try {
           // Attempt to get user data from localStorage (if available)
-          const userData = localStorage.getItem(`user_data_${userId}`);
+          const userData = localStorage.getItem(`user_data_${userInfo.userId}`);
           if (userData) {
             const parsedData = JSON.parse(userData);
             userDetails = {
@@ -121,7 +124,7 @@ const ChatMessages = () => {
         const { data: userMessages, error: userMessagesError } = await supabase
           .from('chat_messages')
           .select('*')
-          .or(`user_id.eq.${userId},recipient_id.eq.${userId}`)
+          .or(`user_id.eq.${userInfo.userId},recipient_id.eq.${userInfo.userId}`)
           .order('created_at', { ascending: true });
 
         if (userMessagesError) {
@@ -152,8 +155,8 @@ const ChatMessages = () => {
         }));
 
         userChats.push({
-          id: userId,
-          userId: userId,
+          id: userInfo.userId,
+          userId: userInfo.userId,
           userName: userInfo.userName,
           roomNumber: userInfo.roomNumber,
           lastActivity: lastActivity,
@@ -350,7 +353,6 @@ const ChatMessages = () => {
                               {chat.roomNumber && (
                                 <p className="text-xs text-primary font-medium">Room: {chat.roomNumber}</p>
                               )}
-                              <p className="text-xs text-muted-foreground">User ID: {chat.userId}</p>
                             </div>
                           </div>
                           <span className="text-xs text-muted-foreground">{chat.lastActivity}</span>
@@ -407,7 +409,6 @@ const ChatMessages = () => {
                               {chat.roomNumber && (
                                 <p className="text-xs text-primary font-medium">Room: {chat.roomNumber}</p>
                               )}
-                              <p className="text-xs text-muted-foreground">User ID: {chat.userId}</p>
                             </div>
                           </div>
                           <span className="text-xs text-muted-foreground">{chat.lastActivity}</span>
@@ -455,7 +456,6 @@ const ChatMessages = () => {
                   : activeChat.userName}
               </h2>
               <div className="flex items-center gap-2 text-xs">
-                <p className="text-muted-foreground">User ID: {activeChat.userId}</p>
                 {activeChat.roomNumber && (
                   <p className="font-medium text-primary">Room: {activeChat.roomNumber}</p>
                 )}
