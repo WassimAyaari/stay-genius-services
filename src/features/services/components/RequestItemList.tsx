@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader, ChevronLeft } from 'lucide-react';
@@ -10,7 +10,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 interface RequestItemListProps {
   category: RequestCategory;
   onGoBack: () => void;
-  onSelectItem: (item: RequestItem) => void;
   selectedItems: string[];
   onToggleItem: (itemId: string) => void;
 }
@@ -18,7 +17,6 @@ interface RequestItemListProps {
 const RequestItemList = ({ 
   category, 
   onGoBack, 
-  onSelectItem, 
   selectedItems,
   onToggleItem
 }: RequestItemListProps) => {
@@ -28,9 +26,6 @@ const RequestItemList = ({
   const isItemSelected = (itemId: string) => {
     return selectedItems.includes(itemId);
   };
-
-  // Debug to check what's happening with selected items
-  console.log("Current selectedItems in RequestItemList:", selectedItems);
 
   return (
     <div>
@@ -59,21 +54,18 @@ const RequestItemList = ({
         <div className="space-y-2">
           {items.map((item) => {
             const checked = isItemSelected(item.id);
-            console.log(`Item ${item.name} (${item.id}): checked=${checked}`);
             
             return (
               <Card 
                 key={item.id}
-                className="p-3 hover:bg-accent/50 transition-colors"
+                className="p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                onClick={() => onToggleItem(item.id)}
               >
                 <div className="flex items-center">
                   <Checkbox 
                     id={`item-${item.id}`}
                     checked={checked}
-                    onCheckedChange={() => {
-                      console.log(`Toggling checkbox for ${item.name} (${item.id}), current checked state: ${checked}`);
-                      onToggleItem(item.id);
-                    }}
+                    onCheckedChange={() => onToggleItem(item.id)}
                     className="mr-3"
                   />
                   <label 

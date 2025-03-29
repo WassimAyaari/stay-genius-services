@@ -6,6 +6,7 @@ import { Loader, Check } from 'lucide-react';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import RequestCategoryList from '@/features/services/components/RequestCategoryList';
 import RequestItemList from '@/features/services/components/RequestItemList';
+import RequestPresetList from '@/features/services/components/RequestPresetList';
 import { useToast } from '@/hooks/use-toast';
 import { Room } from '@/hooks/useRoom';
 import { requestService } from '@/features/rooms/controllers/roomService';
@@ -19,6 +20,7 @@ interface RequestDialogProps {
 }
 
 const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
+  const [view, setView] = useState<'categories' | 'items' | 'presets'>('presets');
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,50 +32,101 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   // Reset state when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
+      setView('presets');
       setSelectedCategory(null);
       setSelectedItems([]);
     }
   }, [isOpen]);
 
-  // Debug log when selectedItems changes
-  useEffect(() => {
-    console.log("selectedItems updated in RequestDialog:", selectedItems);
-  }, [selectedItems]);
-
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
     setSelectedItems([]);
+    setView('items');
   };
 
   const handleGoBackToCategories = () => {
     setSelectedCategory(null);
     setSelectedItems([]);
+    setView('categories');
+  };
+
+  const handleGoBackToPresets = () => {
+    setSelectedCategory(null);
+    setSelectedItems([]);
+    setView('presets');
   };
 
   const handleToggleRequestItem = (itemId: string) => {
-    console.log(`Toggle item called with ID: ${itemId}`);
-    
     setSelectedItems(prevItems => {
       // Check if the item is already selected
       const isAlreadySelected = prevItems.includes(itemId);
       
       // Create a new array based on the selection state
       if (isAlreadySelected) {
-        const result = prevItems.filter(id => id !== itemId);
-        console.log(`Item was already selected, removing it. New selectedItems:`, result);
-        return result;
+        return prevItems.filter(id => id !== itemId);
       } else {
-        const result = [...prevItems, itemId];
-        console.log(`Item was not selected, adding it. New selectedItems:`, result);
-        return result;
+        return [...prevItems, itemId];
       }
     });
   };
 
+  const handlePresetRequest = async (preset: {category: string, description: string, type: string}) => {
+    if (!room) {
+      toast({
+        title: "Room information missing",
+        description: "Unable to submit request without room information.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const userInfo = getUserInfo();
+      
+      await requestService(
+        room.id,
+        preset.type as any,
+        preset.description,
+        undefined,
+        undefined,
+        userInfo.name,
+        userInfo.roomNumber || room.room_number
+      );
+      
+      toast({
+        title: "Request Submitted",
+        description: "Your request has been sent successfully."
+      });
+      
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit request. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getUserInfo = () => {
+    const userInfoStr = localStorage.getItem('user_data');
+    if (userInfoStr) {
+      try {
+        return JSON.parse(userInfoStr);
+      } catch (error) {
+        console.error("Error parsing user info:", error);
+      }
+    }
+    return {
+      name: '',
+      roomNumber: room?.room_number || ''
+    };
+  };
+
   const handleSubmitRequests = async () => {
-    // Log the most up-to-date state to debug
-    console.log("Selected items during submission:", selectedItems);
-    
     if (selectedItems.length === 0 || !room) {
       toast({
         title: "No items selected",
@@ -85,33 +138,10 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
     
     try {
       setIsSubmitting(true);
-      const getUserInfo = () => {
-        const userInfoStr = localStorage.getItem('user_data');
-        if (userInfoStr) {
-          try {
-            return JSON.parse(userInfoStr);
-          } catch (error) {
-            console.error("Error parsing user info:", error);
-          }
-        }
-        return {
-          name: '',
-          roomNumber: room?.room_number || ''
-        };
-      };
-      
-      let userId = localStorage.getItem('user_id');
-      if (!userId) {
-        userId = uuidv4();
-        localStorage.setItem('user_id', userId);
-      }
-      
-      const currentUserInfo = getUserInfo();
+      const userInfo = getUserInfo();
       
       // Submit each selected item
       for (const itemId of selectedItems) {
-        console.log(`Submitting request for item with ID: ${itemId}`);
-        
         // Find the item name for better description
         const itemName = categoryItems?.find(item => item.id === itemId)?.name || 'Unknown Item';
         const categoryName = selectedCategory?.name || 'Custom Request';
@@ -123,8 +153,8 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
           description, 
           itemId, 
           selectedCategory?.id, 
-          currentUserInfo.name, 
-          currentUserInfo.roomNumber || room.room_number
+          userInfo.name, 
+          userInfo.roomNumber || room.room_number
         );
       }
       
@@ -149,36 +179,62 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
     }
   };
 
+  const getDialogTitle = () => {
+    if (view === 'presets') return "Common Requests";
+    if (view === 'categories') return "Select Request Category";
+    if (selectedCategory) return `Select ${selectedCategory.name} Requests`;
+    return "Select Request";
+  };
+
+  const getDialogDescription = () => {
+    if (view === 'presets') return "Choose from common requests or browse all categories";
+    if (view === 'categories') return "Choose a category to see available requests";
+    if (selectedCategory) return "Select the items you'd like to request";
+    return "";
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            {selectedCategory ? `Select ${selectedCategory.name} Requests` : "Select Request Category"}
-          </DialogTitle>
-          <DialogDescription>
-            {selectedCategory 
-              ? "Select the items you'd like to request" 
-              : "Choose a category to see available requests"}
-          </DialogDescription>
+          <DialogTitle>{getDialogTitle()}</DialogTitle>
+          <DialogDescription>{getDialogDescription()}</DialogDescription>
         </DialogHeader>
         
         <div className="py-4">
-          {selectedCategory ? (
+          {view === 'presets' && (
+            <div>
+              <RequestPresetList onSelectPreset={handlePresetRequest} onBrowseAll={() => setView('categories')} />
+            </div>
+          )}
+          
+          {view === 'categories' && (
+            <div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="mb-4"
+                onClick={handleGoBackToPresets}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back to Common Requests
+              </Button>
+              <RequestCategoryList onSelectCategory={handleSelectCategory} />
+            </div>
+          )}
+          
+          {view === 'items' && selectedCategory && (
             <RequestItemList 
               category={selectedCategory} 
               onGoBack={handleGoBackToCategories} 
-              onSelectItem={(item) => {}} 
               selectedItems={selectedItems} 
               onToggleItem={handleToggleRequestItem} 
             />
-          ) : (
-            <RequestCategoryList onSelectCategory={handleSelectCategory} />
           )}
         </div>
         
         <DialogFooter>
-          {selectedCategory && (
+          {view === 'items' && selectedCategory && (
             <div className="flex w-full justify-between items-center">
               <div className="text-sm">
                 {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
