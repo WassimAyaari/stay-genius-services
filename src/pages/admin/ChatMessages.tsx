@@ -67,6 +67,7 @@ const ChatMessages = () => {
 
       // For each unique user, fetch their conversation
       const userChats: Chat[] = [];
+      
       for (const [userId, userInfo] of uniqueUsers.entries()) {
         const { data: userMessages, error: userMessagesError } = await supabase
           .from('chat_messages')
@@ -95,8 +96,8 @@ const ChatMessages = () => {
           id: msg.id,
           text: msg.text,
           time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          sender: msg.sender,
-          status: msg.status
+          sender: msg.sender as 'user' | 'staff',
+          status: msg.status as 'sent' | 'delivered' | 'read' | undefined
         })) || [];
 
         userChats.push({
@@ -153,7 +154,7 @@ const ChatMessages = () => {
         
         // Update the local state
         const updatedMessages = chat.messages.map(msg => {
-          if (msg.sender === 'user' && !msg.status) {
+          if (msg.sender === 'user' && msg.status !== 'read') {
             return { ...msg, status: 'read' as const };
           }
           return msg;
@@ -186,7 +187,7 @@ const ChatMessages = () => {
 
     const newMessage = {
       text: replyMessage,
-      sender: 'staff',
+      sender: 'staff' as const,
       user_id: activeChat.userId,
       user_name: activeChat.userName,
       recipient_id: activeChat.userId,
