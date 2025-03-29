@@ -32,14 +32,6 @@ interface Contact {
 
 const defaultContacts: Contact[] = [
   {
-    id: '1',
-    name: 'Guest Relations',
-    role: 'Available 24/7',
-    icon: <Bell className="h-6 w-6 text-primary" />,
-    isOnline: true,
-    messages: [],
-  },
-  {
     id: '2',
     name: 'Concierge',
     role: 'Available 8AM-10PM',
@@ -77,7 +69,7 @@ const Messages = () => {
         const { data: messagesData, error } = await supabase
           .from('chat_messages')
           .select('*')
-          .eq('user_id', userId)
+          .or(`user_id.eq.${userId},recipient_id.eq.${userId}`)
           .order('created_at', { ascending: true });
 
         if (error) {
@@ -91,38 +83,26 @@ const Messages = () => {
           return;
         }
 
-        // Group messages by category/contact
-        const messagesByContact = new Map<string, Message[]>();
-        
         // Initialize with default contacts
         const updatedContacts = [...defaultContacts];
         
         if (messagesData && messagesData.length > 0) {
-          // Process messages and organize by sender
-          messagesData.forEach(msg => {
-            const contactId = msg.sender === 'user' ? (msg.recipient_id === '1' ? '1' : '2') : (msg.sender === 'staff' ? (msg.user_name?.toLowerCase().includes('guest') ? '1' : '2') : '1');
-            
-            if (!messagesByContact.has(contactId)) {
-              messagesByContact.set(contactId, []);
-            }
-            
-            messagesByContact.get(contactId)?.push({
-              id: msg.id,
-              text: msg.text,
-              time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              sender: msg.sender as 'user' | 'staff',
-              status: msg.status as 'sent' | 'delivered' | 'read'
-            });
-          });
+          // Extract and format all messages for the Concierge contact (id: '2')
+          const conciergeMessages: Message[] = messagesData.map(msg => ({
+            id: msg.id,
+            text: msg.text,
+            time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sender: msg.sender as 'user' | 'staff',
+            status: msg.status as 'sent' | 'delivered' | 'read' | undefined
+          }));
           
-          // Update contacts with messages
-          updatedContacts.forEach(contact => {
-            const messages = messagesByContact.get(contact.id) || [];
-            contact.messages = messages;
-            if (messages.length > 0) {
-              contact.lastMessage = messages[messages.length - 1].text;
-            }
-          });
+          // Update the Concierge contact with messages
+          updatedContacts[0].messages = conciergeMessages;
+          
+          // Set last message if there are messages
+          if (conciergeMessages.length > 0) {
+            updatedContacts[0].lastMessage = conciergeMessages[conciergeMessages.length - 1].text;
+          }
         }
         
         setContactsData(updatedContacts);
@@ -234,13 +214,13 @@ const Messages = () => {
         }
       }
 
-      // Save to Supabase - Fix for recipient_id to be a proper UUID format
+      // Save to Supabase
       try {
         const { error } = await supabase
           .from('chat_messages')
           .insert([{
             user_id: userId,
-            recipient_id: null, // We leave this null since it's a user initiating the conversation
+            recipient_id: null,
             user_name: userName,
             room_number: roomNumber,
             text: inputMessage,
@@ -299,7 +279,7 @@ const Messages = () => {
             .from('chat_messages')
             .insert([{
               user_id: userId,
-              recipient_id: userId, // Here we send it back to the same user
+              recipient_id: userId,
               user_name: selectedContact.name,
               room_number: roomNumber,
               text: responseMessage.text,

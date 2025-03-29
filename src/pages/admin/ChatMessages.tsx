@@ -106,6 +106,7 @@ const ChatMessages = () => {
         }
       });
 
+      // Only include users with room numbers to ensure proper synchronization
       const filteredUsers = Array.from(uniqueUsers.values()).filter(user => user.roomNumber);
       
       const userChats: Chat[] = [];

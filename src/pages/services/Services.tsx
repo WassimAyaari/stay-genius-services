@@ -101,6 +101,13 @@ const Services = () => {
       return;
     }
     
+    // Generate a user ID if not present
+    let userId = localStorage.getItem('user_id');
+    if (!userId) {
+      userId = uuidv4();
+      localStorage.setItem('user_id', userId);
+    }
+    
     setIsChatOpen(true);
     setMessages([
       {
@@ -123,6 +130,13 @@ const Services = () => {
     }
 
     localStorage.setItem('user_data', JSON.stringify(userInfo));
+    
+    // Generate a user ID if not present
+    let userId = localStorage.getItem('user_id');
+    if (!userId) {
+      userId = uuidv4();
+      localStorage.setItem('user_id', userId);
+    }
     
     setIsUserInfoDialogOpen(false);
     setIsChatOpen(true);
