@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -96,8 +95,9 @@ const ChatMessages = () => {
       if (messagesError) throw messagesError;
 
       const uniqueUsers = new Map();
+      
       messagesData?.forEach(msg => {
-        if (msg.user_id && (!uniqueUsers.has(msg.user_id) || (!uniqueUsers.get(msg.user_id).roomNumber && msg.room_number))) {
+        if (msg.user_id && !uniqueUsers.has(msg.user_id)) {
           uniqueUsers.set(msg.user_id, {
             userId: msg.user_id,
             userName: msg.user_name || 'Guest',
@@ -106,8 +106,7 @@ const ChatMessages = () => {
         }
       });
 
-      // Only include users with room numbers to ensure proper synchronization
-      const filteredUsers = Array.from(uniqueUsers.values()).filter(user => user.roomNumber);
+      const filteredUsers = Array.from(uniqueUsers.values()).filter(user => user.userId);
       
       const userChats: Chat[] = [];
       
@@ -158,11 +157,13 @@ const ChatMessages = () => {
           status: msg.status as 'sent' | 'delivered' | 'read' | undefined
         }));
 
+        const displayRoomNumber = userInfo.roomNumber || userDetails.roomNumber || '';
+
         userChats.push({
           id: userInfo.userId,
           userId: userInfo.userId,
           userName: userInfo.userName,
-          roomNumber: userInfo.roomNumber,
+          roomNumber: displayRoomNumber,
           lastActivity: lastActivity,
           messages: formattedMessages,
           unread: unreadCount,
@@ -312,7 +313,6 @@ const ChatMessages = () => {
     if (!chatToDelete) return;
 
     try {
-      // Delete all messages for this user
       const { error } = await supabase
         .from('chat_messages')
         .delete()
@@ -320,12 +320,10 @@ const ChatMessages = () => {
 
       if (error) throw error;
 
-      // If the deleted chat was active, close it
       if (activeChat && activeChat.id === chatToDelete.id) {
         setActiveChat(null);
       }
 
-      // Remove the chat from the state
       setChats(chats.filter(chat => chat.id !== chatToDelete.id));
 
       toast({
