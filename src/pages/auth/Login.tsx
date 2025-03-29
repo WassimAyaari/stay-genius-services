@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import LoginCard from './components/LoginCard';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,8 +27,17 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <LoginCard />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary-light to-white py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <LoginCard />
+      </motion.div>
+      <p className="mt-8 text-center text-sm text-gray-500">
+        Pour une expérience hôtelière personnalisée
+      </p>
     </div>
   );
 };
