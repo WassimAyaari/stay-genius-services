@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader, Check } from 'lucide-react';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
@@ -27,13 +27,12 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   // Fetch items for the selected category to have access to their names
   const { data: categoryItems } = useRequestItems(selectedCategory?.id);
 
-  // Reset selected items when dialog opens/closes
+  // Reset selected items when dialog opens/closes or category changes
   useEffect(() => {
-    if (!isOpen) {
-      setSelectedCategory(null);
+    if (!isOpen || !selectedCategory) {
       setSelectedItems([]);
     }
-  }, [isOpen]);
+  }, [isOpen, selectedCategory]);
 
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
@@ -66,7 +65,7 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   };
 
   const handleSubmitRequests = async () => {
-    // Log the most up-to-date state
+    // Log the most up-to-date state to debug
     console.log("Selected items during submission:", selectedItems);
     
     if (selectedItems.length === 0 || !room) {
@@ -103,10 +102,11 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       
       const currentUserInfo = getUserInfo();
       
+      // Submit each selected item
       for (const itemId of selectedItems) {
         console.log(`Submitting request for item with ID: ${itemId}`);
         
-        // Trouver le nom de l'item pour une meilleure description
+        // Find the item name for better description
         const itemName = categoryItems?.find(item => item.id === itemId)?.name || 'Unknown Item';
         const categoryName = selectedCategory?.name || 'Custom Request';
         const description = `${categoryName} - ${itemName}`;
@@ -126,9 +126,11 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
         title: "Requests Submitted",
         description: `${selectedItems.length} request(s) have been sent successfully.`
       });
-      onOpenChange(false);
-      setSelectedCategory(null);
+      
+      // Clear selections and close dialog after successful submission
       setSelectedItems([]);
+      setSelectedCategory(null);
+      onOpenChange(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -148,6 +150,11 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
           <DialogTitle>
             {selectedCategory ? `Select ${selectedCategory.name} Requests` : "Select Request Category"}
           </DialogTitle>
+          <DialogDescription>
+            {selectedCategory 
+              ? "Select the items you'd like to request" 
+              : "Choose a category to see available requests"}
+          </DialogDescription>
         </DialogHeader>
         
         <div className="py-4">
@@ -155,7 +162,7 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
             <RequestItemList 
               category={selectedCategory} 
               onGoBack={handleGoBackToCategories} 
-              onSelectItem={() => {}} 
+              onSelectItem={(item) => {}} 
               selectedItems={selectedItems} 
               onToggleItem={handleToggleRequestItem} 
             />
