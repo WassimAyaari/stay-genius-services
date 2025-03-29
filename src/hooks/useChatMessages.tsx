@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Chat, ChatMessage, Message } from '@/components/admin/chat/types';
+import { Chat, ChatMessage, Message, UserInfo } from '@/components/admin/chat/types';
 
 export function useChatMessages() {
   const [chats, setChats] = useState<Chat[]>([]);
