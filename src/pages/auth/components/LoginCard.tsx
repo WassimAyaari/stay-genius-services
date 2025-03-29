@@ -5,12 +5,12 @@ import RegistrationForm from './RegistrationForm';
 
 const LoginCard: React.FC = () => {
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
+    <Card className="w-full max-w-md shadow-lg">
+      <CardHeader className="space-y-1">
         <h2 className="text-center text-3xl font-bold text-gray-900">
           Stay Genius
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-gray-600">
           Créez votre compte pour accéder à vos services hôteliers
         </p>
       </CardHeader>
