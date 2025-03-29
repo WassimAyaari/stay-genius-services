@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,7 +75,6 @@ const ChatMessages = () => {
   const fetchChats = async () => {
     setLoading(true);
     try {
-      // Fetch all unique users who have sent messages
       const { data: messagesData, error: messagesError } = await supabase
         .from('chat_messages')
         .select('user_id, user_name, room_number')
@@ -84,7 +82,6 @@ const ChatMessages = () => {
 
       if (messagesError) throw messagesError;
 
-      // Create a map to deduplicate users - prioritize entries with room numbers
       const uniqueUsers = new Map();
       messagesData?.forEach(msg => {
         if (msg.user_id && (!uniqueUsers.has(msg.user_id) || (!uniqueUsers.get(msg.user_id).roomNumber && msg.room_number))) {
@@ -96,18 +93,14 @@ const ChatMessages = () => {
         }
       });
 
-      // Filter out entries without room numbers
       const filteredUsers = Array.from(uniqueUsers.values()).filter(user => user.roomNumber);
       
-      // For each unique user, fetch their conversation
       const userChats: Chat[] = [];
       
       for (const userInfo of filteredUsers) {
-        // Try to fetch additional user information
         let userDetails: UserInfo = {};
         
         try {
-          // Attempt to get user data from localStorage (if available)
           const userData = localStorage.getItem(`user_data_${userInfo.userId}`);
           if (userData) {
             const parsedData = JSON.parse(userData);
@@ -134,18 +127,15 @@ const ChatMessages = () => {
 
         if (!userMessages || userMessages.length === 0) continue;
 
-        // Count unread messages
         const unreadCount = userMessages.filter(
           msg => msg.sender === 'user' && msg.status !== 'read'
         ).length || 0;
 
-        // Get last message timestamp for "last activity"
         const lastMessage = userMessages[userMessages.length - 1];
         const lastActivity = lastMessage 
           ? formatTimeAgo(new Date(lastMessage.created_at))
           : 'No activity';
 
-        // Format messages for our Chat interface
         const formattedMessages: Message[] = userMessages.map(msg => ({
           id: msg.id,
           text: msg.text,
@@ -190,7 +180,6 @@ const ChatMessages = () => {
   };
 
   const handleSelectChat = async (chat: Chat) => {
-    // Mark messages as read when opening the chat
     const unreadMessages = chat.messages.filter(
       msg => msg.sender === 'user' && msg.status !== 'read'
     );
@@ -199,7 +188,6 @@ const ChatMessages = () => {
       try {
         const messageIds = unreadMessages.map(msg => msg.id);
         
-        // Update messages status in the database
         const { error } = await supabase
           .from('chat_messages')
           .update({ status: 'read' })
@@ -207,7 +195,6 @@ const ChatMessages = () => {
           
         if (error) throw error;
         
-        // Update the local state
         const updatedMessages = chat.messages.map(msg => {
           if (msg.sender === 'user' && msg.status !== 'read') {
             return { ...msg, status: 'read' as const };
@@ -239,6 +226,10 @@ const ChatMessages = () => {
 
   const handleSendReply = async () => {
     if (!replyMessage.trim() || !activeChat) return;
+
+    const userName = activeChat.userInfo?.firstName 
+      ? `${activeChat.userInfo.firstName}` 
+      : activeChat.userName;
 
     const newMessage = {
       text: replyMessage,
@@ -281,7 +272,7 @@ const ChatMessages = () => {
 
       toast({
         title: "Message sent",
-        description: "Your reply has been sent to " + activeChat.userName,
+        description: "Your reply has been sent to " + userName,
       });
     } catch (error) {
       console.error('Error sending message:', error);
@@ -482,6 +473,11 @@ const ChatMessages = () => {
                           : "bg-muted rounded-tl-none"
                       )}
                     >
+                      {message.sender === 'user' && (
+                        <div className="text-xs font-medium mb-1 text-muted-foreground">
+                          {activeChat.userInfo?.firstName || activeChat.userName}
+                        </div>
+                      )}
                       <p className="text-sm">{message.text}</p>
                       <div className="flex justify-end items-center gap-1 mt-1 text-xs opacity-70">
                         <span>{message.time}</span>
@@ -505,7 +501,7 @@ const ChatMessages = () => {
             <Textarea 
               value={replyMessage}
               onChange={(e) => setReplyMessage(e.target.value)}
-              placeholder="Type your reply..."
+              placeholder={`Type your reply to ${activeChat.userInfo?.firstName || activeChat.userName}...`}
               className="resize-none min-h-[60px]"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
