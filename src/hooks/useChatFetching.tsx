@@ -48,17 +48,19 @@ export function useChatFetching() {
         }
       });
 
-      // Process service requests
-      serviceRequestsData?.forEach((req: ServiceRequest) => {
-        if (req.guest_id && !uniqueUsers.has(req.guest_id)) {
-          uniqueUsers.set(req.guest_id, {
-            userId: req.guest_id,
-            userName: req.guest_name || 'Guest',
-            roomNumber: req.room_number,
-            type: 'request'
-          });
-        }
-      });
+      // Process service requests - ensure proper type casting
+      if (serviceRequestsData) {
+        serviceRequestsData.forEach((req: any) => {
+          if (req.guest_id && !uniqueUsers.has(req.guest_id)) {
+            uniqueUsers.set(req.guest_id, {
+              userId: req.guest_id,
+              userName: req.guest_name || 'Guest',
+              roomNumber: req.room_number,
+              type: 'request'
+            });
+          }
+        });
+      }
 
       const filteredUsers = Array.from(uniqueUsers.values()).filter(user => user.userId);
       
@@ -119,7 +121,7 @@ export function useChatFetching() {
           })));
         }
         
-        // Add service requests as messages
+        // Add service requests as messages - ensure proper type handling
         if (userRequests && userRequests.length > 0) {
           formattedMessages.push(...userRequests.map(req => ({
             id: req.id,
