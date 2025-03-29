@@ -1,21 +1,10 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Loader, 
-  MessageCircle, 
-  FileText, 
-  Clock, 
-  Check, 
-  X, 
-  Send, 
-  Paperclip,
-  Headphones as HeadphonesIcon
-} from 'lucide-react';
+import { Loader, MessageCircle, FileText, Clock, Check, X, Send, Paperclip, Headphones as HeadphonesIcon } from 'lucide-react';
 import { requestService } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
@@ -23,26 +12,13 @@ import RequestCategoryList from '@/features/services/components/RequestCategoryL
 import RequestItemList from '@/features/services/components/RequestItemList';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
-} from '@/components/ui/dialog';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetFooter 
-} from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-
 interface Message {
   id: string;
   text: string;
@@ -50,28 +26,31 @@ interface Message {
   time: string;
   status?: 'sent' | 'delivered' | 'read';
 }
-
 interface UserInfo {
   name: string;
   roomNumber: string;
 }
-
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
-  const [userInfo, setUserInfo] = useState<UserInfo>({ name: 'Emma Watson', roomNumber: '401' });
-  const { toast } = useToast();
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    name: 'Emma Watson',
+    roomNumber: '401'
+  });
+  const {
+    toast
+  } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
-  const { data: room } = useRoom(userInfo.roomNumber);
+  const {
+    data: room
+  } = useRoom(userInfo.roomNumber);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   useEffect(() => {
     const userData = localStorage.getItem('user_data');
     if (userData) {
@@ -88,37 +67,36 @@ const Services = () => {
       }
     }
   }, []);
-
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({
+        behavior: 'smooth'
+      });
     }
   }, [messages]);
-
   const handleStartChat = () => {
     if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
       setIsUserInfoDialogOpen(true);
       return;
     }
-    
+
     // Generate a user ID if not present
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       userId = uuidv4();
       localStorage.setItem('user_id', userId);
     }
-    
     setIsChatOpen(true);
-    setMessages([
-      {
-        id: '1',
-        text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        sender: 'staff'
-      }
-    ]);
+    setMessages([{
+      id: '1',
+      text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
+      time: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      sender: 'staff'
+    }]);
   };
-
   const handleSubmitUserInfo = () => {
     if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
       toast({
@@ -128,38 +106,36 @@ const Services = () => {
       });
       return;
     }
-
     localStorage.setItem('user_data', JSON.stringify(userInfo));
-    
+
     // Generate a user ID if not present
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       userId = uuidv4();
       localStorage.setItem('user_id', userId);
     }
-    
     setIsUserInfoDialogOpen(false);
     setIsChatOpen(true);
-    setMessages([
-      {
-        id: '1',
-        text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        sender: 'staff'
-      }
-    ]);
+    setMessages([{
+      id: '1',
+      text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
+      time: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      sender: 'staff'
+    }]);
   };
-
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
-
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return;
-
     const currentTime = new Date();
-    const formattedTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
+    const formattedTime = currentTime.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
     const newMessage: Message = {
       id: Date.now().toString(),
       text: inputMessage,
@@ -167,7 +143,6 @@ const Services = () => {
       sender: 'user',
       status: 'sent'
     };
-
     setMessages([...messages, newMessage]);
     setInputMessage('');
 
@@ -177,23 +152,19 @@ const Services = () => {
       userId = uuidv4();
       localStorage.setItem('user_id', userId);
     }
-
     try {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .insert([
-          {
-            user_id: userId,
-            user_name: userInfo.name,
-            room_number: userInfo.roomNumber,
-            text: inputMessage,
-            sender: 'user',
-            status: 'sent',
-            created_at: currentTime.toISOString()
-          }
-        ])
-        .select();
-
+      const {
+        data,
+        error
+      } = await supabase.from('chat_messages').insert([{
+        user_id: userId,
+        user_name: userInfo.name,
+        room_number: userInfo.roomNumber,
+        text: inputMessage,
+        sender: 'user',
+        status: 'sent',
+        created_at: currentTime.toISOString()
+      }]).select();
       if (error) {
         console.error("Error saving message:", error);
         toast({
@@ -203,35 +174,30 @@ const Services = () => {
         });
         return;
       }
-
       setTimeout(async () => {
         const staffResponse: Message = {
           id: (Date.now() + 1).toString(),
           text: "Thank you for your message. Our concierge team will assist you shortly.",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          time: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
           sender: 'staff'
         };
-        
         setMessages(prevMessages => [...prevMessages, staffResponse]);
-        
-        await supabase
-          .from('chat_messages')
-          .insert([
-            {
-              user_id: userId,
-              recipient_id: userId,
-              user_name: "Concierge",
-              room_number: userInfo.roomNumber,
-              text: staffResponse.text,
-              sender: 'staff',
-              status: 'sent',
-              created_at: new Date().toISOString()
-            }
-          ]);
-        
+        await supabase.from('chat_messages').insert([{
+          user_id: userId,
+          recipient_id: userId,
+          user_name: "Concierge",
+          room_number: userInfo.roomNumber,
+          text: staffResponse.text,
+          sender: 'staff',
+          status: 'sent',
+          created_at: new Date().toISOString()
+        }]);
         toast({
           title: "New message",
-          description: "You have received a response from our concierge team.",
+          description: "You have received a response from our concierge team."
         });
       }, 2000);
     } catch (error) {
@@ -243,36 +209,26 @@ const Services = () => {
       });
     }
   };
-
   const handleMessageSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleSendMessage();
   };
-
   const handleOpenRequestDialog = () => {
     setIsRequestDialogOpen(true);
     setSelectedCategory(null);
     setSelectedItems([]);
   };
-
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
     setSelectedItems([]);
   };
-
   const handleGoBackToCategories = () => {
     setSelectedCategory(null);
     setSelectedItems([]);
   };
-
   const handleToggleRequestItem = (itemId: string) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    );
+    setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
   };
-
   const handleSubmitRequests = async () => {
     if (!selectedItems.length || !room) {
       toast({
@@ -282,10 +238,8 @@ const Services = () => {
       });
       return;
     }
-
     try {
       setIsSubmitting(true);
-      
       const getUserInfo = () => {
         const userInfoStr = localStorage.getItem('user_data');
         if (userInfoStr) {
@@ -295,28 +249,19 @@ const Services = () => {
             console.error("Error parsing user info:", error);
           }
         }
-        return { name: userInfo.name, roomNumber: userInfo.roomNumber };
+        return {
+          name: userInfo.name,
+          roomNumber: userInfo.roomNumber
+        };
       };
-      
       const currentUserInfo = getUserInfo();
-      
       for (const itemId of selectedItems) {
-        await requestService(
-          room.id, 
-          selectedCategory?.name.toLowerCase() as any || 'custom',
-          `Request for ${selectedCategory?.name}`,
-          itemId,
-          undefined,
-          currentUserInfo.name,
-          currentUserInfo.roomNumber || room.room_number
-        );
+        await requestService(room.id, selectedCategory?.name.toLowerCase() as any || 'custom', `Request for ${selectedCategory?.name}`, itemId, undefined, currentUserInfo.name, currentUserInfo.roomNumber || room.room_number);
       }
-      
       toast({
         title: "Requests Submitted",
-        description: `${selectedItems.length} request(s) have been sent successfully.`,
+        description: `${selectedItems.length} request(s) have been sent successfully.`
       });
-      
       setIsRequestDialogOpen(false);
       setSelectedCategory(null);
       setSelectedItems([]);
@@ -324,40 +269,33 @@ const Services = () => {
       toast({
         title: "Error",
         description: "Failed to submit requests. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
       console.error("Error submitting requests:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleNavigateToRequests = () => {
     handleOpenRequestDialog();
   };
-
   const handleNavigateToSupport = () => {
     navigate('/messages?contact=1');
   };
-
   const handleWhatsAppService = () => {
     toast({
       title: "WhatsApp Service",
-      description: "Opening WhatsApp to connect with our concierge team.",
+      description: "Opening WhatsApp to connect with our concierge team."
     });
     window.open('https://wa.me/1234567890', '_blank');
   };
-
   const handleNavigateToAdminChat = () => {
     navigate('/admin/chat-messages');
   };
-
   const handleNavigateToRequestManager = () => {
     navigate('/admin/request-manager');
   };
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-semibold text-secondary mb-4">Hotel Services</h1>
@@ -418,88 +356,36 @@ const Services = () => {
           </Card>
         </div>
 
-        <div className="mt-12 border-t pt-6">
-          <h2 className="text-xl font-semibold mb-4">Staff Access</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-6 bg-muted/30">
-              <div className="flex items-start gap-4">
-                <MessageCircle className="w-6 h-6 text-primary" />
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Chat Management</h3>
-                  <p className="text-gray-600 mb-4">
-                    Staff access to view and respond to guest messages
-                  </p>
-                  <Button variant="outline" onClick={() => handleNavigateToAdminChat()}>Access Chat Portal</Button>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="p-6 bg-muted/30">
-              <div className="flex items-start gap-4">
-                <FileText className="w-6 h-6 text-primary" />
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Request Management</h3>
-                  <p className="text-gray-600 mb-4">
-                    Manage request categories and track request status
-                  </p>
-                  <Button variant="outline" onClick={handleNavigateToRequestManager}>Manage Requests</Button>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
+        
       </div>
 
       <Dialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {selectedCategory 
-                ? `Select ${selectedCategory.name} Requests` 
-                : "Select Request Category"}
+              {selectedCategory ? `Select ${selectedCategory.name} Requests` : "Select Request Category"}
             </DialogTitle>
           </DialogHeader>
           
           <div className="py-4">
-            {selectedCategory ? (
-              <RequestItemList
-                category={selectedCategory}
-                onGoBack={handleGoBackToCategories}
-                onSelectItem={() => {}}
-                selectedItems={selectedItems}
-                onToggleItem={handleToggleRequestItem}
-              />
-            ) : (
-              <RequestCategoryList
-                onSelectCategory={handleSelectCategory}
-              />
-            )}
+            {selectedCategory ? <RequestItemList category={selectedCategory} onGoBack={handleGoBackToCategories} onSelectItem={() => {}} selectedItems={selectedItems} onToggleItem={handleToggleRequestItem} /> : <RequestCategoryList onSelectCategory={handleSelectCategory} />}
           </div>
           
           <DialogFooter>
-            {selectedCategory && (
-              <div className="flex w-full justify-between items-center">
+            {selectedCategory && <div className="flex w-full justify-between items-center">
                 <div className="text-sm">
                   {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
                 </div>
-                <Button 
-                  onClick={handleSubmitRequests}
-                  disabled={selectedItems.length === 0 || isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
+                <Button onClick={handleSubmitRequests} disabled={selectedItems.length === 0 || isSubmitting}>
+                  {isSubmitting ? <>
                       <Loader className="mr-2 h-4 w-4 animate-spin" />
                       Submitting...
-                    </>
-                  ) : (
-                    <>
+                    </> : <>
                       <Check className="mr-2 h-4 w-4" />
                       Submit Requests
-                    </>
-                  )}
+                    </>}
                 </Button>
-              </div>
-            )}
+              </div>}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -512,21 +398,17 @@ const Services = () => {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium">Your Name</label>
-              <Input 
-                id="name" 
-                value={userInfo.name} 
-                onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })} 
-                placeholder="Enter your name"
-              />
+              <Input id="name" value={userInfo.name} onChange={e => setUserInfo({
+              ...userInfo,
+              name: e.target.value
+            })} placeholder="Enter your name" />
             </div>
             <div className="space-y-2">
               <label htmlFor="roomNumber" className="text-sm font-medium">Room Number</label>
-              <Input 
-                id="roomNumber" 
-                value={userInfo.roomNumber} 
-                onChange={(e) => setUserInfo({ ...userInfo, roomNumber: e.target.value })} 
-                placeholder="Enter your room number"
-              />
+              <Input id="roomNumber" value={userInfo.roomNumber} onChange={e => setUserInfo({
+              ...userInfo,
+              roomNumber: e.target.value
+            })} placeholder="Enter your room number" />
             </div>
           </div>
           <DialogFooter>
@@ -558,18 +440,8 @@ const Services = () => {
           
           <ScrollArea className="flex-1 px-4 py-3">
             <div className="space-y-4">
-              {messages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-[80%] px-4 py-2 rounded-2xl ${
-                      message.sender === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-tr-none'
-                        : 'bg-muted rounded-tl-none'
-                    }`}
-                  >
+              {messages.map(message => <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] px-4 py-2 rounded-2xl ${message.sender === 'user' ? 'bg-primary text-primary-foreground rounded-tr-none' : 'bg-muted rounded-tl-none'}`}>
                     <p>{message.text}</p>
                     <div className="flex justify-end items-center gap-1 mt-1 text-xs opacity-70">
                       <span>{message.time}</span>
@@ -578,8 +450,7 @@ const Services = () => {
                       {message.status === 'sent' && <span>✓</span>}
                     </div>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </ScrollArea>
           
@@ -588,32 +459,19 @@ const Services = () => {
               <Button type="button" variant="ghost" size="icon" className="rounded-full">
                 <Paperclip className="h-5 w-5" />
               </Button>
-              <Textarea 
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="resize-none min-h-0 h-10 py-2 rounded-full"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-              />
-              <Button 
-                type="submit" 
-                size="icon" 
-                className="rounded-full"
-                disabled={!inputMessage.trim()}
-              >
+              <Textarea value={inputMessage} onChange={e => setInputMessage(e.target.value)} placeholder="Type a message..." className="resize-none min-h-0 h-10 py-2 rounded-full" onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }} />
+              <Button type="submit" size="icon" className="rounded-full" disabled={!inputMessage.trim()}>
                 <Send className="h-5 w-5" />
               </Button>
             </form>
           </SheetFooter>
         </SheetContent>
       </Sheet>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Services;
