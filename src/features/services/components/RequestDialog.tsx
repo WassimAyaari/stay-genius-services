@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader, Check } from 'lucide-react';
+import { Loader, Check, ChevronLeft } from 'lucide-react';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import RequestCategoryList from '@/features/services/components/RequestCategoryList';
 import RequestItemList from '@/features/services/components/RequestItemList';
