@@ -41,14 +41,24 @@ const UserInfoDialog = ({
   }, [isOpen, userInfo]);
 
   const handleSubmit = () => {
-    if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
+    if (!userInfo.name.trim()) {
       toast({
         title: "Missing information",
-        description: "Please provide your name and room number.",
+        description: "Please provide your name.",
         variant: "destructive"
       });
       return;
     }
+
+    if (!userInfo.roomNumber.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide your room number.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     onSubmit();
   };
 
@@ -96,7 +106,7 @@ const UserInfoDialog = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Profile Information Missing</AlertDialogTitle>
             <AlertDialogDescription>
-              We couldn't find your profile information. Please update your profile in user settings for a smoother experience next time.
+              We couldn't find your profile information. Please provide your name and room number to continue. This information will be saved for future requests.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

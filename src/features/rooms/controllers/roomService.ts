@@ -19,6 +19,34 @@ export const requestService = async (
   
   if (!guestId) throw new Error('User identification not available');
   
+  // If roomNumber is not provided but available in localStorage, use it
+  let finalRoomNumber = roomNumber;
+  if (!finalRoomNumber) {
+    try {
+      const userDataStr = localStorage.getItem('user_data');
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        finalRoomNumber = userData.room_number;
+      }
+    } catch (error) {
+      console.error("Error getting room number from localStorage:", error);
+    }
+  }
+  
+  // If guestName is not provided but available in localStorage, use it
+  let finalGuestName = guestName;
+  if (!finalGuestName) {
+    try {
+      const userDataStr = localStorage.getItem('user_data');
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        finalGuestName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+      }
+    } catch (error) {
+      console.error("Error getting guest name from localStorage:", error);
+    }
+  }
+  
   const { data, error } = await supabase
     .from('service_requests')
     .insert({
@@ -29,8 +57,8 @@ export const requestService = async (
       category_id: categoryId,
       request_item_id: requestItemId,
       status: 'pending',
-      guest_name: guestName,
-      room_number: roomNumber
+      guest_name: finalGuestName,
+      room_number: finalRoomNumber
     })
     .select()
     .single();

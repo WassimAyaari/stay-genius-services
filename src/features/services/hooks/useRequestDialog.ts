@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
@@ -36,7 +35,9 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
       try {
         const userData = JSON.parse(userDataString);
         if (userData) {
+          // Format full name from first_name and last_name fields
           const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+          // Get room number from userData or fall back to room prop
           const roomNumber = userData.room_number || room?.room_number || '';
           
           setUserInfo({
@@ -75,6 +76,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
   };
 
   const saveUserInfo = (info: UserInfo) => {
+    // Store user info in local storage with proper fields
     localStorage.setItem('user_data', JSON.stringify({
       first_name: info.name.split(' ')[0],
       last_name: info.name.split(' ').slice(1).join(' '),
@@ -113,13 +115,23 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     });
   };
 
-  // New function to submit requests via chat messages
+  // Function to submit requests via chat messages
   const submitRequestViaChatMessage = async (description: string, type: string) => {
     const userId = localStorage.getItem('user_id');
     if (!userId) {
       toast({
         title: "User ID missing",
         description: "Unable to submit request without user identification.",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    // Make sure we have room number - display error if missing
+    if (!userInfo.roomNumber) {
+      toast({
+        title: "Room information missing",
+        description: "Unable to submit request without room number.",
         variant: "destructive"
       });
       return false;
@@ -132,7 +144,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
         .insert([{
           user_id: userId,
           recipient_id: null,
-          user_name: userInfo.name,
+          user_name: userInfo.name || 'Guest',
           room_number: userInfo.roomNumber,
           text: description,
           sender: 'user',
