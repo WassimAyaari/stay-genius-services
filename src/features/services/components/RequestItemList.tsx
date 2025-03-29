@@ -29,6 +29,9 @@ const RequestItemList = ({
     return selectedItems.includes(itemName);
   };
 
+  // Debug to check what's happening with selected items
+  console.log("Selected items in RequestItemList:", selectedItems);
+
   return (
     <div>
       <div className="mb-4 flex items-center">
@@ -63,13 +66,19 @@ const RequestItemList = ({
                 <Checkbox 
                   id={item.id}
                   checked={isItemSelected(item.name)}
-                  onCheckedChange={() => onToggleItem(item.name)}
+                  onCheckedChange={() => {
+                    console.log(`Toggling item: ${item.name}`);
+                    onToggleItem(item.name);
+                  }}
                   className="mr-3"
                 />
                 <label 
                   htmlFor={item.id}
                   className="flex-1 cursor-pointer"
-                  onClick={() => onToggleItem(item.name)}
+                  onClick={() => {
+                    console.log(`Clicking label for: ${item.name}`);
+                    onToggleItem(item.name);
+                  }}
                 >
                   <div className="font-medium">{item.name}</div>
                   {item.description && (

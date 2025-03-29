@@ -243,6 +243,7 @@ const Services = () => {
 
   const handleSubmitRequests = async () => {
     if (!selectedItems.length || !room) {
+      console.log("Selected items during submission:", selectedItems);
       toast({
         title: "No items selected",
         description: "Please select at least one request item",
@@ -276,6 +277,7 @@ const Services = () => {
       const currentUserInfo = getUserInfo();
       
       for (const itemId of selectedItems) {
+        console.log(`Submitting request for item: ${itemId}`);
         const selectedItem = selectedCategory?.name ? 
           `${selectedCategory.name} - ${itemId}` : 
           itemId;
@@ -407,24 +409,48 @@ const Services = () => {
           </DialogHeader>
           
           <div className="py-4">
-            {selectedCategory ? <RequestItemList category={selectedCategory} onGoBack={handleGoBackToCategories} onSelectItem={() => {}} selectedItems={selectedItems} onToggleItem={handleToggleRequestItem} /> : <RequestCategoryList onSelectCategory={handleSelectCategory} />}
+            {selectedCategory ? (
+              <RequestItemList 
+                category={selectedCategory} 
+                onGoBack={handleGoBackToCategories} 
+                onSelectItem={() => {}} 
+                selectedItems={selectedItems} 
+                onToggleItem={(itemId) => {
+                  console.log(`Toggle item called with: ${itemId}`);
+                  console.log(`Current selectedItems: ${selectedItems.join(', ')}`);
+                  handleToggleRequestItem(itemId);
+                  console.log(`After toggle, selectedItems: ${selectedItems.includes(itemId) ? 'contains' : 'does not contain'} ${itemId}`);
+                }} 
+              />
+            ) : (
+              <RequestCategoryList onSelectCategory={handleSelectCategory} />
+            )}
           </div>
           
           <DialogFooter>
-            {selectedCategory && <div className="flex w-full justify-between items-center">
+            {selectedCategory && (
+              <div className="flex w-full justify-between items-center">
                 <div className="text-sm">
                   {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
                 </div>
-                <Button onClick={handleSubmitRequests} disabled={selectedItems.length === 0 || isSubmitting}>
-                  {isSubmitting ? <>
+                <Button 
+                  onClick={handleSubmitRequests} 
+                  disabled={selectedItems.length === 0 || isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
                       <Loader className="mr-2 h-4 w-4 animate-spin" />
                       Submitting...
-                    </> : <>
+                    </>
+                  ) : (
+                    <>
                       <Check className="mr-2 h-4 w-4" />
                       Submit Requests
-                    </>}
+                    </>
+                  )}
                 </Button>
-              </div>}
+              </div>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
