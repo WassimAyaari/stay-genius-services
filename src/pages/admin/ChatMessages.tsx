@@ -8,6 +8,7 @@ import { Send, ArrowLeft } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -29,133 +30,211 @@ interface Chat {
   roomNumber?: string;
 }
 
-// Simulated chats for demonstration - Update with Emma Watson as first user
-const initialChats: Chat[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    userName: 'Emma Watson',
-    roomNumber: '401', // Updated to match Emma's room number
-    lastActivity: '10 min ago',
-    unread: 2,
-    messages: [
-      {
-        id: '1',
-        text: "Hello, I'd like to request a late check-out tomorrow.",
-        time: '10:30 AM',
-        sender: 'user',
-      },
-      {
-        id: '2',
-        text: "I'll check the availability and get back to you shortly.",
-        time: '10:32 AM',
-        sender: 'staff',
-        status: 'read'
-      },
-      {
-        id: '3',
-        text: "Thank you, I appreciate it.",
-        time: '10:33 AM',
-        sender: 'user',
-      },
-      {
-        id: '4',
-        text: "When do you need to know by?",
-        time: '10:35 AM',
-        sender: 'user',
-      }
-    ]
-  },
-  {
-    id: '2',
-    userId: 'user2',
-    userName: 'John Smith',
-    roomNumber: '302',
-    lastActivity: '2 hrs ago',
-    unread: 0,
-    messages: [
-      {
-        id: '1',
-        text: "I need help with the Wi-Fi connection in my room.",
-        time: '8:15 AM',
-        sender: 'user',
-      },
-      {
-        id: '2',
-        text: "I'll send someone from IT to assist you. What's your room number?",
-        time: '8:18 AM',
-        sender: 'staff',
-        status: 'read'
-      },
-      {
-        id: '3',
-        text: "Room 302. Thank you!",
-        time: '8:20 AM',
-        sender: 'user',
-      },
-      {
-        id: '4',
-        text: "Our technician will be there in about 15 minutes.",
-        time: '8:22 AM',
-        sender: 'staff',
-        status: 'read'
-      }
-    ]
-  }
-];
-
 const ChatMessages = () => {
-  const [chats, setChats] = useState<Chat[]>(initialChats);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [currentTab, setCurrentTab] = useState('all');
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const handleSelectChat = (chat: Chat) => {
-    // Mark messages as read when opening the chat
-    const updatedChat = {
-      ...chat,
-      unread: 0,
-      messages: chat.messages.map(msg => {
-        if (msg.sender === 'user' && !msg.status) {
-          return { ...msg, status: 'read' as const };
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
+  const fetchChats = async () => {
+    setLoading(true);
+    try {
+      // Fetch all unique users who have sent messages
+      const { data: messagesData, error: messagesError } = await supabase
+        .from('chat_messages')
+        .select('user_id, user_name, room_number')
+        .order('created_at', { ascending: false });
+
+      if (messagesError) throw messagesError;
+
+      // Create a map to deduplicate users
+      const uniqueUsers = new Map();
+      messagesData?.forEach(msg => {
+        if (msg.user_id && !uniqueUsers.has(msg.user_id)) {
+          uniqueUsers.set(msg.user_id, {
+            userId: msg.user_id,
+            userName: msg.user_name || 'Guest',
+            roomNumber: msg.room_number
+          });
         }
-        return msg;
-      })
-    };
-    
-    // Update the chats list with the read status
-    setChats(chats.map(c => c.id === chat.id ? updatedChat : c));
-    setActiveChat(updatedChat);
+      });
+
+      // For each unique user, fetch their conversation
+      const userChats: Chat[] = [];
+      for (const [userId, userInfo] of uniqueUsers.entries()) {
+        const { data: userMessages, error: userMessagesError } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .or(`user_id.eq.${userId},recipient_id.eq.${userId}`)
+          .order('created_at', { ascending: true });
+
+        if (userMessagesError) {
+          console.error('Error fetching user messages:', userMessagesError);
+          continue;
+        }
+
+        // Count unread messages
+        const unreadCount = userMessages?.filter(
+          msg => msg.sender === 'user' && msg.status !== 'read'
+        ).length || 0;
+
+        // Get last message timestamp for "last activity"
+        const lastMessage = userMessages?.[userMessages.length - 1];
+        const lastActivity = lastMessage 
+          ? formatTimeAgo(new Date(lastMessage.created_at))
+          : 'No activity';
+
+        // Format messages for our Chat interface
+        const formattedMessages: Message[] = userMessages?.map(msg => ({
+          id: msg.id,
+          text: msg.text,
+          time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          sender: msg.sender,
+          status: msg.status
+        })) || [];
+
+        userChats.push({
+          id: userId,
+          userId: userId,
+          userName: userInfo.userName,
+          roomNumber: userInfo.roomNumber,
+          lastActivity: lastActivity,
+          messages: formattedMessages,
+          unread: unreadCount
+        });
+      }
+
+      setChats(userChats);
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+      toast({
+        title: "Error loading chats",
+        description: "There was a problem loading the chat data.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSendReply = () => {
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hrs ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
+
+  const handleSelectChat = async (chat: Chat) => {
+    // Mark messages as read when opening the chat
+    const unreadMessages = chat.messages.filter(
+      msg => msg.sender === 'user' && msg.status !== 'read'
+    );
+    
+    if (unreadMessages.length > 0) {
+      try {
+        const messageIds = unreadMessages.map(msg => msg.id);
+        
+        // Update messages status in the database
+        const { error } = await supabase
+          .from('chat_messages')
+          .update({ status: 'read' })
+          .in('id', messageIds);
+          
+        if (error) throw error;
+        
+        // Update the local state
+        const updatedMessages = chat.messages.map(msg => {
+          if (msg.sender === 'user' && !msg.status) {
+            return { ...msg, status: 'read' as const };
+          }
+          return msg;
+        });
+        
+        const updatedChat = {
+          ...chat,
+          unread: 0,
+          messages: updatedMessages
+        };
+        
+        setChats(chats.map(c => c.id === chat.id ? updatedChat : c));
+        setActiveChat(updatedChat);
+      } catch (error) {
+        console.error('Error marking messages as read:', error);
+        toast({
+          title: "Error",
+          description: "Could not mark messages as read.",
+          variant: "destructive"
+        });
+        setActiveChat(chat);
+      }
+    } else {
+      setActiveChat(chat);
+    }
+  };
+
+  const handleSendReply = async () => {
     if (!replyMessage.trim() || !activeChat) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
+    const newMessage = {
       text: replyMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       sender: 'staff',
-      status: 'sent'
+      user_id: activeChat.userId,
+      user_name: activeChat.userName,
+      recipient_id: activeChat.userId,
+      room_number: activeChat.roomNumber,
+      status: 'sent',
+      created_at: new Date().toISOString()
     };
 
-    const updatedChat = {
-      ...activeChat,
-      messages: [...activeChat.messages, newMessage],
-      lastActivity: 'just now'
-    };
+    try {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert(newMessage)
+        .select();
 
-    setChats(chats.map(chat => 
-      chat.id === activeChat.id ? updatedChat : chat
-    ));
-    setActiveChat(updatedChat);
-    setReplyMessage('');
+      if (error) throw error;
 
-    toast({
-      title: "Message sent",
-      description: "Your reply has been sent to " + activeChat.userName,
-    });
+      const sentMessage: Message = {
+        id: data[0].id,
+        text: replyMessage,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: 'staff',
+        status: 'sent'
+      };
+
+      const updatedChat = {
+        ...activeChat,
+        messages: [...activeChat.messages, sentMessage],
+        lastActivity: 'just now'
+      };
+
+      setChats(chats.map(chat => 
+        chat.id === activeChat.id ? updatedChat : chat
+      ));
+      setActiveChat(updatedChat);
+      setReplyMessage('');
+
+      toast({
+        title: "Message sent",
+        description: "Your reply has been sent to " + activeChat.userName,
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error sending message",
+        description: "Your message could not be sent. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleBackToList = () => {
@@ -183,7 +262,12 @@ const ChatMessages = () => {
             </TabsList>
             
             <TabsContent value="all" className="space-y-4">
-              {getFilteredChats().length === 0 ? (
+              {loading ? (
+                <div className="text-center py-10">
+                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+                  <p className="mt-2 text-gray-500">Loading conversations...</p>
+                </div>
+              ) : getFilteredChats().length === 0 ? (
                 <div className="text-center py-10 text-gray-500">
                   No chat messages available
                 </div>
@@ -231,7 +315,12 @@ const ChatMessages = () => {
             </TabsContent>
             
             <TabsContent value="unread" className="space-y-4">
-              {getFilteredChats().length === 0 ? (
+              {loading ? (
+                <div className="text-center py-10">
+                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+                  <p className="mt-2 text-gray-500">Loading conversations...</p>
+                </div>
+              ) : getFilteredChats().length === 0 ? (
                 <div className="text-center py-10 text-gray-500">
                   No unread messages
                 </div>
