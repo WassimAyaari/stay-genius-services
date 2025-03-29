@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useRoom } from '@/hooks/useRoom';
 
 interface Message {
   id: string;
@@ -17,6 +18,12 @@ interface Message {
   time: string;
   sender: 'user' | 'staff';
   status?: 'sent' | 'delivered' | 'read';
+}
+
+interface UserInfo {
+  firstName?: string;
+  lastName?: string;
+  roomNumber?: string;
 }
 
 interface Chat {
@@ -28,6 +35,7 @@ interface Chat {
   messages: Message[];
   unread: number;
   roomNumber?: string;
+  userInfo?: UserInfo;
 }
 
 interface ChatMessage {
@@ -49,10 +57,21 @@ const ChatMessages = () => {
   const [currentTab, setCurrentTab] = useState('all');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchChats();
   }, []);
+
+  useEffect(() => {
+    if (activeChat) {
+      scrollToBottom();
+    }
+  }, [activeChat?.messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const fetchChats = async () => {
     setLoading(true);
@@ -81,6 +100,24 @@ const ChatMessages = () => {
       const userChats: Chat[] = [];
       
       for (const [userId, userInfo] of uniqueUsers.entries()) {
+        // Try to fetch additional user information
+        let userDetails: UserInfo = {};
+        
+        try {
+          // Attempt to get user data from localStorage (if available)
+          const userData = localStorage.getItem(`user_data_${userId}`);
+          if (userData) {
+            const parsedData = JSON.parse(userData);
+            userDetails = {
+              firstName: parsedData.firstName || parsedData.name?.split(' ')[0],
+              lastName: parsedData.lastName || parsedData.name?.split(' ')[1],
+              roomNumber: parsedData.roomNumber || userInfo.roomNumber
+            };
+          }
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+
         const { data: userMessages, error: userMessagesError } = await supabase
           .from('chat_messages')
           .select('*')
@@ -121,7 +158,8 @@ const ChatMessages = () => {
           roomNumber: userInfo.roomNumber,
           lastActivity: lastActivity,
           messages: formattedMessages,
-          unread: unreadCount
+          unread: unreadCount,
+          userInfo: userDetails
         });
       }
 
@@ -303,15 +341,22 @@ const ChatMessages = () => {
                       <div className="flex-1">
                         <div className="flex justify-between items-center mb-1">
                           <div>
-                            <h3 className="font-medium">{chat.userName}</h3>
-                            {chat.roomNumber && (
-                              <p className="text-xs text-muted-foreground">Room: {chat.roomNumber}</p>
-                            )}
+                            <h3 className="font-medium">
+                              {chat.userInfo?.firstName && chat.userInfo?.lastName 
+                                ? `${chat.userInfo.firstName} ${chat.userInfo.lastName}` 
+                                : chat.userName}
+                            </h3>
+                            <div className="flex flex-col gap-0.5">
+                              {chat.roomNumber && (
+                                <p className="text-xs text-primary font-medium">Room: {chat.roomNumber}</p>
+                              )}
+                              <p className="text-xs text-muted-foreground">User ID: {chat.userId}</p>
+                            </div>
                           </div>
                           <span className="text-xs text-muted-foreground">{chat.lastActivity}</span>
                         </div>
                         {chat.messages.length > 0 && (
-                          <p className="text-sm text-muted-foreground truncate">
+                          <p className="text-sm text-muted-foreground truncate mt-1">
                             {chat.messages[chat.messages.length - 1].text}
                           </p>
                         )}
@@ -353,15 +398,22 @@ const ChatMessages = () => {
                       <div className="flex-1">
                         <div className="flex justify-between items-center mb-1">
                           <div>
-                            <h3 className="font-medium">{chat.userName}</h3>
-                            {chat.roomNumber && (
-                              <p className="text-xs text-muted-foreground">Room: {chat.roomNumber}</p>
-                            )}
+                            <h3 className="font-medium">
+                              {chat.userInfo?.firstName && chat.userInfo?.lastName 
+                                ? `${chat.userInfo.firstName} ${chat.userInfo.lastName}` 
+                                : chat.userName}
+                            </h3>
+                            <div className="flex flex-col gap-0.5">
+                              {chat.roomNumber && (
+                                <p className="text-xs text-primary font-medium">Room: {chat.roomNumber}</p>
+                              )}
+                              <p className="text-xs text-muted-foreground">User ID: {chat.userId}</p>
+                            </div>
                           </div>
                           <span className="text-xs text-muted-foreground">{chat.lastActivity}</span>
                         </div>
                         {chat.messages.length > 0 && (
-                          <p className="text-sm text-muted-foreground truncate">
+                          <p className="text-sm text-muted-foreground truncate mt-1">
                             {chat.messages[chat.messages.length - 1].text}
                           </p>
                         )}
@@ -390,12 +442,20 @@ const ChatMessages = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <Avatar className="h-10 w-10">
-              <AvatarFallback>{activeChat.userName.charAt(0)}</AvatarFallback>
+              <AvatarFallback>
+                {activeChat.userInfo?.firstName 
+                  ? activeChat.userInfo.firstName.charAt(0) 
+                  : activeChat.userName.charAt(0)}
+              </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="font-medium">{activeChat.userName}</h2>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <p>User ID: {activeChat.userId}</p>
+              <h2 className="font-medium">
+                {activeChat.userInfo?.firstName && activeChat.userInfo?.lastName 
+                  ? `${activeChat.userInfo.firstName} ${activeChat.userInfo.lastName}` 
+                  : activeChat.userName}
+              </h2>
+              <div className="flex items-center gap-2 text-xs">
+                <p className="text-muted-foreground">User ID: {activeChat.userId}</p>
                 {activeChat.roomNumber && (
                   <p className="font-medium text-primary">Room: {activeChat.roomNumber}</p>
                 )}
@@ -436,6 +496,7 @@ const ChatMessages = () => {
                     </div>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
           </Card>
