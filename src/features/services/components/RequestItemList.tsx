@@ -24,6 +24,11 @@ const RequestItemList = ({
 }: RequestItemListProps) => {
   const { data: items, isLoading } = useRequestItems(category.id);
 
+  // Helper function to check if an item is selected
+  const isItemSelected = (itemName: string) => {
+    return selectedItems.includes(itemName);
+  };
+
   return (
     <div>
       <div className="mb-4 flex items-center">
@@ -57,7 +62,7 @@ const RequestItemList = ({
               <div className="flex items-center">
                 <Checkbox 
                   id={item.id}
-                  checked={selectedItems.includes(item.name)}
+                  checked={isItemSelected(item.name)}
                   onCheckedChange={() => onToggleItem(item.name)}
                   className="mr-3"
                 />
