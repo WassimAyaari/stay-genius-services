@@ -149,6 +149,45 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_id: string | null
+          room_number: string | null
+          sender: string
+          status: string | null
+          text: string
+          updated_at: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_id?: string | null
+          room_number?: string | null
+          sender: string
+          status?: string | null
+          text: string
+          updated_at?: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_id?: string | null
+          room_number?: string | null
+          sender?: string
+          status?: string | null
+          text?: string
+          updated_at?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       companions: {
         Row: {
           created_at: string | null
