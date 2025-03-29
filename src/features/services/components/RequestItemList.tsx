@@ -30,7 +30,7 @@ const RequestItemList = ({
   };
 
   // Debug to check what's happening with selected items
-  console.log("Selected items in RequestItemList:", selectedItems);
+  console.log("Current selectedItems in RequestItemList:", selectedItems);
 
   return (
     <div>
@@ -64,21 +64,21 @@ const RequestItemList = ({
             >
               <div className="flex items-center">
                 <Checkbox 
-                  id={item.id}
+                  id={`item-${item.id}`}
                   checked={isItemSelected(item.id)}
                   onCheckedChange={() => {
-                    console.log(`Toggling item ID: ${item.id}, Name: ${item.name}`);
+                    console.log(`Checkbox toggled for item ID: ${item.id}, Name: ${item.name}`);
                     onToggleItem(item.id);
                   }}
                   className="mr-3"
                 />
                 <label 
-                  htmlFor={item.id}
+                  htmlFor={`item-${item.id}`}
                   className="flex-1 cursor-pointer"
                   onClick={(e) => {
                     // Prevent default to avoid double toggling from the checkbox change
                     e.preventDefault();
-                    console.log(`Clicking label for ID: ${item.id}, Name: ${item.name}`);
+                    console.log(`Label clicked for item ID: ${item.id}, Name: ${item.name}`);
                     onToggleItem(item.id);
                   }}
                 >

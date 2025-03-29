@@ -49,27 +49,27 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
     console.log(`Toggle item called with ID: ${itemId}`);
     
     setSelectedItems(prev => {
-      // Copy the previous array to avoid mutation issues
+      // Check if the item is already selected
       const isAlreadySelected = prev.includes(itemId);
       
       // Create a new array based on the selection state
       if (isAlreadySelected) {
         const result = prev.filter(id => id !== itemId);
-        console.log(`Item was already selected, removing it. New selectedItems: ${result.join(', ')}`);
+        console.log(`Item was already selected, removing it. New selectedItems:`, result);
         return result;
       } else {
         const result = [...prev, itemId];
-        console.log(`Item was not selected, adding it. New selectedItems: ${result.join(', ')}`);
+        console.log(`Item was not selected, adding it. New selectedItems:`, result);
         return result;
       }
     });
   };
 
   const handleSubmitRequests = async () => {
-    // Make sure we log the most up-to-date state
+    // Log the most up-to-date state
     console.log("Selected items during submission:", selectedItems);
     
-    if (!selectedItems.length || !room) {
+    if (selectedItems.length === 0 || !room) {
       toast({
         title: "No items selected",
         description: "Please select at least one request item",
