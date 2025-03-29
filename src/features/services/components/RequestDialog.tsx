@@ -32,18 +32,44 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   // Fetch items for the selected category to have access to their names
   const { data: categoryItems } = useRequestItems(selectedCategory?.id);
 
-  // Reset state when dialog opens/closes
+  // Reset state when dialog opens/closes and load user profile data
   useEffect(() => {
     if (!isOpen) {
       setView('presets');
       setSelectedCategory(null);
       setSelectedItems([]);
     } else {
-      // Load user info from localStorage when dialog opens
-      const savedUserInfo = getUserInfo();
-      setUserInfo(savedUserInfo);
+      // Load user info from localStorage or UserMenu data when dialog opens
+      loadUserProfileData();
     }
-  }, [isOpen]);
+  }, [isOpen, room]);
+
+  // New function to load user profile data
+  const loadUserProfileData = () => {
+    // First try to get user data from localStorage
+    const userDataString = localStorage.getItem('user_data');
+    if (userDataString) {
+      try {
+        const userData = JSON.parse(userDataString);
+        if (userData) {
+          const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+          const roomNumber = userData.room_number || room?.room_number || '';
+          
+          setUserInfo({
+            name: fullName,
+            roomNumber: roomNumber
+          });
+          return;
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+    
+    // If no user data in localStorage, check for values that might have been set in previous sessions
+    const savedUserInfo = getUserInfo();
+    setUserInfo(savedUserInfo);
+  };
 
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
@@ -78,7 +104,11 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   };
 
   const saveUserInfo = (info: { name: string, roomNumber: string }) => {
-    localStorage.setItem('user_data', JSON.stringify(info));
+    localStorage.setItem('user_data', JSON.stringify({
+      first_name: info.name.split(' ')[0],
+      last_name: info.name.split(' ').slice(1).join(' '),
+      room_number: info.roomNumber
+    }));
     setUserInfo(info);
     setIsUserInfoDialogOpen(false);
   };
@@ -89,8 +119,8 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       try {
         const userData = JSON.parse(userInfoStr);
         return {
-          name: userData.name || '',
-          roomNumber: userData.roomNumber || (room?.room_number || '')
+          name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
+          roomNumber: userData.room_number || (room?.room_number || '')
         };
       } catch (error) {
         console.error("Error parsing user info:", error);
