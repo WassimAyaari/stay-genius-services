@@ -30,6 +30,18 @@ interface Chat {
   roomNumber?: string;
 }
 
+interface ChatMessage {
+  id: string;
+  user_id: string;
+  user_name: string;
+  room_number?: string;
+  recipient_id?: string;
+  text: string;
+  sender: 'user' | 'staff';
+  status?: 'sent' | 'delivered' | 'read';
+  created_at: string;
+}
+
 const ChatMessages = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
@@ -80,25 +92,27 @@ const ChatMessages = () => {
           continue;
         }
 
+        if (!userMessages || userMessages.length === 0) continue;
+
         // Count unread messages
-        const unreadCount = userMessages?.filter(
+        const unreadCount = userMessages.filter(
           msg => msg.sender === 'user' && msg.status !== 'read'
         ).length || 0;
 
         // Get last message timestamp for "last activity"
-        const lastMessage = userMessages?.[userMessages.length - 1];
+        const lastMessage = userMessages[userMessages.length - 1];
         const lastActivity = lastMessage 
           ? formatTimeAgo(new Date(lastMessage.created_at))
           : 'No activity';
 
         // Format messages for our Chat interface
-        const formattedMessages: Message[] = userMessages?.map(msg => ({
+        const formattedMessages: Message[] = userMessages.map(msg => ({
           id: msg.id,
           text: msg.text,
           time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           sender: msg.sender as 'user' | 'staff',
           status: msg.status as 'sent' | 'delivered' | 'read' | undefined
-        })) || [];
+        }));
 
         userChats.push({
           id: userId,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
@@ -39,6 +39,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -68,7 +69,29 @@ const Services = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      try {
+        const parsedUserData = JSON.parse(userData);
+        if (parsedUserData.name && parsedUserData.roomNumber) {
+          setUserInfo({
+            name: parsedUserData.name,
+            roomNumber: parsedUserData.roomNumber
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
+
   const handleStartChat = () => {
+    if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
+      setIsUserInfoDialogOpen(true);
+      return;
+    }
+    
     setIsChatOpen(true);
     setMessages([
       {
@@ -90,6 +113,8 @@ const Services = () => {
       return;
     }
 
+    localStorage.setItem('user_data', JSON.stringify(userInfo));
+    
     setIsUserInfoDialogOpen(false);
     setIsChatOpen(true);
     setMessages([
@@ -106,13 +131,16 @@ const Services = () => {
     setIsChatOpen(false);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return;
+
+    const currentTime = new Date();
+    const formattedTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const newMessage: Message = {
       id: Date.now().toString(),
       text: inputMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: formattedTime,
       sender: 'user',
       status: 'sent'
     };
@@ -120,20 +148,76 @@ const Services = () => {
     setMessages([...messages, newMessage]);
     setInputMessage('');
 
-    setTimeout(() => {
-      const staffResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Thank you for your message. Our concierge team will assist you shortly.",
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        sender: 'staff'
-      };
-      setMessages(prevMessages => [...prevMessages, staffResponse]);
-      
+    let userId = localStorage.getItem('user_id');
+    if (!userId) {
+      userId = `user_${Date.now()}`;
+      localStorage.setItem('user_id', userId);
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert([
+          {
+            user_id: userId,
+            user_name: userInfo.name,
+            room_number: userInfo.roomNumber,
+            text: inputMessage,
+            sender: 'user',
+            status: 'sent',
+            created_at: currentTime.toISOString()
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error("Error saving message:", error);
+        toast({
+          title: "Error",
+          description: "Failed to send your message. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setTimeout(async () => {
+        const staffResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "Thank you for your message. Our concierge team will assist you shortly.",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          sender: 'staff'
+        };
+        
+        setMessages(prevMessages => [...prevMessages, staffResponse]);
+        
+        await supabase
+          .from('chat_messages')
+          .insert([
+            {
+              user_id: userId,
+              recipient_id: userId,
+              user_name: "Concierge",
+              room_number: userInfo.roomNumber,
+              text: staffResponse.text,
+              sender: 'staff',
+              status: 'sent',
+              created_at: new Date().toISOString()
+            }
+          ]);
+        
+        toast({
+          title: "New message",
+          description: "You have received a response from our concierge team.",
+        });
+      }, 2000);
+    } catch (error) {
+      console.error("Error in handleSendMessage:", error);
       toast({
-        title: "New message",
-        description: "You have received a response from our concierge team.",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
       });
-    }, 2000);
+    }
   };
 
   const handleMessageSubmit = (e: React.FormEvent) => {
@@ -179,7 +263,7 @@ const Services = () => {
       setIsSubmitting(true);
       
       const getUserInfo = () => {
-        const userInfoStr = localStorage.getItem('userInfo');
+        const userInfoStr = localStorage.getItem('user_data');
         if (userInfoStr) {
           try {
             return JSON.parse(userInfoStr);
@@ -187,10 +271,10 @@ const Services = () => {
             console.error("Error parsing user info:", error);
           }
         }
-        return { name: 'Guest', roomNumber: room.room_number };
+        return { name: userInfo.name, roomNumber: userInfo.roomNumber };
       };
       
-      const userInfo = getUserInfo();
+      const currentUserInfo = getUserInfo();
       
       for (const itemId of selectedItems) {
         await requestService(
@@ -199,8 +283,8 @@ const Services = () => {
           `Request for ${selectedCategory?.name}`,
           itemId,
           undefined,
-          userInfo.name,
-          userInfo.roomNumber || room.room_number
+          currentUserInfo.name,
+          currentUserInfo.roomNumber || room.room_number
         );
       }
       
@@ -392,6 +476,37 @@ const Services = () => {
                 </Button>
               </div>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isUserInfoDialogOpen} onOpenChange={setIsUserInfoDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Please provide your information</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium">Your Name</label>
+              <Input 
+                id="name" 
+                value={userInfo.name} 
+                onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })} 
+                placeholder="Enter your name"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="roomNumber" className="text-sm font-medium">Room Number</label>
+              <Input 
+                id="roomNumber" 
+                value={userInfo.roomNumber} 
+                onChange={(e) => setUserInfo({ ...userInfo, roomNumber: e.target.value })} 
+                placeholder="Enter your room number"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSubmitUserInfo}>Continue</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
