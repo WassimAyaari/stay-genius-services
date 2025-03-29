@@ -9,6 +9,7 @@ import RequestItemList from '@/features/services/components/RequestItemList';
 import { useToast } from '@/hooks/use-toast';
 import { Room } from '@/hooks/useRoom';
 import { requestService } from '@/features/rooms/controllers/roomService';
+import { v4 as uuidv4 } from 'uuid';
 
 interface RequestDialogProps {
   isOpen: boolean;
