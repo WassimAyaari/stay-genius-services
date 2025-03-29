@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -40,6 +41,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Message {
   id: string;
@@ -63,6 +65,7 @@ const Services = () => {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const { data: room } = useRoom(userInfo.roomNumber);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
@@ -85,6 +88,12 @@ const Services = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const handleStartChat = () => {
     if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
@@ -148,9 +157,10 @@ const Services = () => {
     setMessages([...messages, newMessage]);
     setInputMessage('');
 
+    // Generate a proper UUID for user identification instead of using "user_" prefix
     let userId = localStorage.getItem('user_id');
     if (!userId) {
-      userId = `user_${Date.now()}`;
+      userId = uuidv4();
       localStorage.setItem('user_id', userId);
     }
 
