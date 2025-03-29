@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Chat, Message, UserInfo } from '@/components/admin/chat/types';
 import { formatTimeAgo } from '@/utils/dateUtils';
+import { ServiceRequest } from '@/features/rooms/types';
 
 export function useChatFetching() {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -28,7 +29,7 @@ export function useChatFetching() {
       // Then fetch all service requests
       const { data: serviceRequestsData, error: serviceRequestsError } = await supabase
         .from('service_requests')
-        .select('guest_id, guest_name, room_number, type, description, created_at')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (serviceRequestsError) throw serviceRequestsError;
@@ -48,7 +49,7 @@ export function useChatFetching() {
       });
 
       // Process service requests
-      serviceRequestsData?.forEach(req => {
+      serviceRequestsData?.forEach((req: ServiceRequest) => {
         if (req.guest_id && !uniqueUsers.has(req.guest_id)) {
           uniqueUsers.set(req.guest_id, {
             userId: req.guest_id,
@@ -114,7 +115,7 @@ export function useChatFetching() {
             time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             sender: msg.sender as 'user' | 'staff',
             status: msg.status as 'sent' | 'delivered' | 'read' | undefined,
-            type: 'chat'
+            type: 'chat' as 'chat' | 'request'
           })));
         }
         
@@ -126,7 +127,7 @@ export function useChatFetching() {
             time: new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             sender: 'user' as 'user' | 'staff',
             status: 'delivered' as 'sent' | 'delivered' | 'read' | undefined,
-            type: 'request',
+            type: 'request' as 'chat' | 'request',
             requestType: req.type,
             requestStatus: req.status
           })));
