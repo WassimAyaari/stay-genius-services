@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -7,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
@@ -27,34 +30,14 @@ interface Contact {
   avatar?: string;
 }
 
-const contacts: Contact[] = [
+const defaultContacts: Contact[] = [
   {
     id: '1',
     name: 'Guest Relations',
     role: 'Available 24/7',
     icon: <Bell className="h-6 w-6 text-primary" />,
     isOnline: true,
-    lastMessage: "I'll check the availability and get back to you shortly.",
-    messages: [
-      {
-        id: '1',
-        text: "Welcome to Hotel Genius! How may we assist you today?",
-        time: '2:30 PM',
-        sender: 'staff'
-      },
-      {
-        id: '2',
-        text: "I'd like to request a late check-out tomorrow if possible.",
-        time: '2:31 PM',
-        sender: 'user'
-      },
-      {
-        id: '3',
-        text: "I'll check the availability and get back to you shortly.",
-        time: '2:32 PM',
-        sender: 'staff'
-      }
-    ]
+    messages: [],
   },
   {
     id: '2',
@@ -62,36 +45,102 @@ const contacts: Contact[] = [
     role: 'Available 8AM-10PM',
     icon: <Briefcase className="h-6 w-6 text-primary" />,
     isOnline: true,
-    lastMessage: "Yes, please. A table for two at 8 PM would be great.",
-    messages: [
-      {
-        id: '1',
-        text: "Would you like me to make dinner reservations for tonight?",
-        time: '1:00 PM',
-        sender: 'staff'
-      },
-      {
-        id: '2',
-        text: "Yes, please. A table for two at 8 PM would be great.",
-        time: '1:05 PM',
-        sender: 'user'
-      }
-    ]
+    messages: [],
   }
 ];
 
 const Messages = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [inputMessage, setInputMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredContacts, setFilteredContacts] = useState<Contact[]>(contacts);
+  const [filteredContacts, setFilteredContacts] = useState<Contact[]>(defaultContacts);
+  const [contactsData, setContactsData] = useState<Contact[]>(defaultContacts);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [contactsData, setContactsData] = useState<Contact[]>(contacts);
-
   const fromLocation = location.state?.from || '/';
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch messages from Supabase
+  useEffect(() => {
+    const fetchMessages = async () => {
+      setIsLoading(true);
+      try {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) {
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: messagesData, error } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching messages:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to load messages. Please try again.',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Group messages by category/contact
+        const messagesByContact = new Map<string, Message[]>();
+        
+        // Initialize with default contacts
+        const updatedContacts = [...defaultContacts];
+        
+        if (messagesData && messagesData.length > 0) {
+          // Process messages and organize by sender
+          messagesData.forEach(msg => {
+            const contactId = msg.sender === 'user' ? (msg.recipient_id === '1' ? '1' : '2') : (msg.sender === 'staff' ? (msg.user_name?.toLowerCase().includes('guest') ? '1' : '2') : '1');
+            
+            if (!messagesByContact.has(contactId)) {
+              messagesByContact.set(contactId, []);
+            }
+            
+            messagesByContact.get(contactId)?.push({
+              id: msg.id,
+              text: msg.text,
+              time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              sender: msg.sender as 'user' | 'staff',
+              status: msg.status as 'sent' | 'delivered' | 'read'
+            });
+          });
+          
+          // Update contacts with messages
+          updatedContacts.forEach(contact => {
+            const messages = messagesByContact.get(contact.id) || [];
+            contact.messages = messages;
+            if (messages.length > 0) {
+              contact.lastMessage = messages[messages.length - 1].text;
+            }
+          });
+        }
+        
+        setContactsData(updatedContacts);
+        setFilteredContacts(updatedContacts);
+      } catch (err) {
+        console.error('Error in message fetching:', err);
+        toast({
+          title: 'Error',
+          description: 'An unexpected error occurred. Please try again.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, [toast]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -139,7 +188,7 @@ const Messages = () => {
     }
   }, [searchTerm, contactsData]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim() && selectedContact) {
       const newMessage: Message = {
         id: Date.now().toString(),
@@ -149,6 +198,7 @@ const Messages = () => {
         status: 'sent'
       };
 
+      // Update UI first for responsiveness
       const updatedContacts = contactsData.map(contact => {
         if (contact.id === selectedContact.id) {
           return {
@@ -161,20 +211,56 @@ const Messages = () => {
       });
 
       setContactsData(updatedContacts);
-      
-      const updatedContact = updatedContacts.find(contact => contact.id === selectedContact.id);
-      
-      if (updatedContact) {
-        setSelectedContact(updatedContact);
-        setFilteredContacts(
-          filteredContacts.map(contact => contact.id === selectedContact.id ? updatedContact : contact)
-        );
-      }
+      setSelectedContact(updatedContacts.find(c => c.id === selectedContact.id) || null);
+      setFilteredContacts(
+        filteredContacts.map(contact => contact.id === selectedContact.id ? updatedContacts.find(c => c.id === selectedContact.id)! : contact)
+      );
       
       setInputMessage('');
       
-      setTimeout(() => {
-        if (updatedContact) {
+      // Get user info
+      const userDataString = localStorage.getItem('user_data');
+      const userId = localStorage.getItem('user_id');
+      let userName = 'Guest';
+      let roomNumber = '';
+      
+      if (userDataString) {
+        try {
+          const userData = JSON.parse(userDataString);
+          userName = userData.name || 'Guest';
+          roomNumber = userData.roomNumber || '';
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+        }
+      }
+
+      // Save to Supabase
+      try {
+        const { error } = await supabase
+          .from('chat_messages')
+          .insert([{
+            user_id: userId,
+            recipient_id: selectedContact.id,
+            user_name: userName,
+            room_number: roomNumber,
+            text: inputMessage,
+            sender: 'user',
+            status: 'sent',
+            created_at: new Date().toISOString()
+          }]);
+
+        if (error) {
+          console.error("Error saving message:", error);
+          toast({
+            title: "Error",
+            description: "Failed to send your message. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Simulate response after a short delay
+        setTimeout(async () => {
           const responseMessage: Message = {
             id: Date.now().toString(),
             text: "Thank you for your message. We'll get back to you shortly.",
@@ -186,7 +272,7 @@ const Messages = () => {
             if (contact.id === selectedContact.id) {
               return {
                 ...contact,
-                messages: [...contact.messages, responseMessage],
+                messages: [...contact.messages, newMessage, responseMessage],
                 lastMessage: responseMessage.text
               };
             }
@@ -207,8 +293,29 @@ const Messages = () => {
               )
             );
           }
-        }
-      }, 1000);
+          
+          // Save response to Supabase
+          await supabase
+            .from('chat_messages')
+            .insert([{
+              user_id: userId,
+              recipient_id: userId,
+              user_name: selectedContact.name,
+              room_number: roomNumber,
+              text: responseMessage.text,
+              sender: 'staff',
+              status: 'sent',
+              created_at: new Date().toISOString()
+            }]);
+        }, 1000);
+      } catch (error) {
+        console.error("Error in handleSendMessage:", error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -220,7 +327,7 @@ const Messages = () => {
         state: { from: fromLocation } 
       });
     } else {
-      navigate('/', { replace: true });
+      navigate(fromLocation || '/', { replace: true });
     }
   };
 
@@ -263,45 +370,51 @@ const Messages = () => {
 
         <ScrollArea className="flex-1 px-2 py-2">
           <div className="space-y-3">
-            {selectedContact.messages.map(message => (
-              <div 
-                key={message.id} 
-                className={cn(
-                  "flex", 
-                  message.sender === 'user' ? "justify-end" : "justify-start"
-                )}
-              >
+            {selectedContact.messages.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No messages yet. Start a conversation!</p>
+              </div>
+            ) : (
+              selectedContact.messages.map(message => (
                 <div 
+                  key={message.id} 
                   className={cn(
-                    "max-w-[80%] px-4 py-2 rounded-2xl mb-1", 
-                    message.sender === 'user' 
-                      ? "bg-primary text-primary-foreground rounded-tr-none" 
-                      : "bg-muted rounded-tl-none"
+                    "flex", 
+                    message.sender === 'user' ? "justify-end" : "justify-start"
                   )}
                 >
-                  <p className="text-sm">{message.text}</p>
                   <div 
                     className={cn(
-                      "flex items-center justify-end gap-1 mt-1", 
+                      "max-w-[80%] px-4 py-2 rounded-2xl mb-1", 
                       message.sender === 'user' 
-                        ? "text-primary-foreground/80" 
-                        : "text-muted-foreground"
+                        ? "bg-primary text-primary-foreground rounded-tr-none" 
+                        : "bg-muted rounded-tl-none"
                     )}
                   >
-                    <span className="text-[10px]">
-                      {formatTime(message.time)}
-                    </span>
-                    {message.sender === 'user' && message.status && (
-                      <span className="text-[10px] ml-1">
-                        {message.status === 'read' && '✓✓'}
-                        {message.status === 'delivered' && '✓✓'}
-                        {message.status === 'sent' && '✓'}
+                    <p className="text-sm">{message.text}</p>
+                    <div 
+                      className={cn(
+                        "flex items-center justify-end gap-1 mt-1", 
+                        message.sender === 'user' 
+                          ? "text-primary-foreground/80" 
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      <span className="text-[10px]">
+                        {formatTime(message.time)}
                       </span>
-                    )}
+                      {message.sender === 'user' && message.status && (
+                        <span className="text-[10px] ml-1">
+                          {message.status === 'read' && '✓✓'}
+                          {message.status === 'delivered' && '✓✓'}
+                          {message.status === 'sent' && '✓'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
@@ -372,7 +485,11 @@ const Messages = () => {
       
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {filteredContacts.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          ) : filteredContacts.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No contacts found</p>
             </div>
