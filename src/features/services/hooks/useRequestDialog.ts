@@ -4,8 +4,8 @@ import { useToast } from '@/hooks/use-toast';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { requestService } from '@/features/rooms/controllers/roomService';
 import { Room } from '@/hooks/useRoom';
-import { v4 as uuidv4 } from 'uuid';
 import { useRequestItems } from '@/hooks/useRequestCategories';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface UserInfo {
   name: string;
@@ -113,23 +113,53 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     });
   };
 
-  const createUniqueRequestId = () => {
-    const name = userInfo.name.trim();
-    const roomNumber = userInfo.roomNumber.trim();
-    
-    if (!name || !roomNumber) {
-      // If we don't have complete user info, fall back to UUID
-      return uuidv4();
+  // New function to submit requests via chat messages
+  const submitRequestViaChatMessage = async (description: string, type: string) => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      toast({
+        title: "User ID missing",
+        description: "Unable to submit request without user identification.",
+        variant: "destructive"
+      });
+      return false;
     }
-    
-    // Create a deterministic ID from user name and room number
-    const nameInitials = name.split(' ')
-      .map(part => part.charAt(0))
-      .join('')
-      .toUpperCase();
-    
-    // Format: RM{roomNumber}-{nameInitials}-{timestamp}
-    return `RM${roomNumber}-${nameInitials}-${Date.now()}`;
+
+    try {
+      // Insert the request as a chat message
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert([{
+          user_id: userId,
+          recipient_id: null,
+          user_name: userInfo.name,
+          room_number: userInfo.roomNumber,
+          text: description,
+          sender: 'user',
+          status: 'sent',
+          created_at: new Date().toISOString()
+        }]);
+
+      if (error) throw error;
+      
+      // Also insert into service_requests table for tracking purposes
+      if (room?.id) {
+        await requestService(
+          room.id, 
+          type as any, 
+          description, 
+          undefined, 
+          selectedCategory?.id, 
+          userInfo.name, 
+          userInfo.roomNumber
+        );
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error submitting request via chat:", error);
+      return false;
+    }
   };
 
   const handlePresetRequest = async (preset: {category: string, description: string, type: string}) => {
@@ -152,22 +182,26 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     try {
       setIsSubmitting(true);
       
-      await requestService(
-        roomId,
-        preset.type as any,
+      // Submit request via chat message
+      const success = await submitRequestViaChatMessage(
         preset.description,
-        undefined,
-        undefined,
-        userInfo.name,
-        userInfo.roomNumber
+        preset.type
       );
       
-      toast({
-        title: "Request Submitted",
-        description: "Your request has been sent successfully."
-      });
-      
-      onClose();
+      if (success) {
+        toast({
+          title: "Request Submitted",
+          description: "Your request has been sent successfully."
+        });
+        
+        onClose();
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to submit request. Please try again.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -208,6 +242,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     
     try {
       setIsSubmitting(true);
+      let successCount = 0;
       
       // Submit each selected item
       for (const itemId of selectedItems) {
@@ -216,26 +251,34 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
         const categoryName = selectedCategory?.name || 'Custom Request';
         const description = `${categoryName} - ${itemName}`;
         
-        await requestService(
-          roomId, 
-          selectedCategory?.name.toLowerCase() as any || 'custom', 
-          description, 
-          itemId, 
-          selectedCategory?.id, 
-          userInfo.name, 
-          userInfo.roomNumber
+        // Submit via chat message
+        const success = await submitRequestViaChatMessage(
+          description,
+          selectedCategory?.name.toLowerCase() || 'custom'
         );
+        
+        if (success) {
+          successCount++;
+        }
       }
       
-      toast({
-        title: "Requests Submitted",
-        description: `${selectedItems.length} request(s) have been sent successfully.`
-      });
-      
-      // Clear selections and close dialog after successful submission
-      setSelectedItems([]);
-      setSelectedCategory(null);
-      onClose();
+      if (successCount > 0) {
+        toast({
+          title: "Requests Submitted",
+          description: `${successCount} request(s) have been sent successfully.`
+        });
+        
+        // Clear selections and close dialog after successful submission
+        setSelectedItems([]);
+        setSelectedCategory(null);
+        onClose();
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to submit requests. Please try again.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
