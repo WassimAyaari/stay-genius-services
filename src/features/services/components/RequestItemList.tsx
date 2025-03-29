@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader, ChevronLeft, Check } from 'lucide-react';
@@ -75,7 +75,8 @@ const RequestItemList = ({
                 <label 
                   htmlFor={item.id}
                   className="flex-1 cursor-pointer"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent default to avoid double toggling
                     console.log(`Clicking label for: ${item.name}`);
                     onToggleItem(item.name);
                   }}

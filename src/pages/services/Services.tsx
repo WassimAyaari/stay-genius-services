@@ -238,7 +238,18 @@ const Services = () => {
   };
 
   const handleToggleRequestItem = (itemId: string) => {
-    setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
+    console.log(`Toggle item called with: ${itemId}`);
+    console.log(`Current selectedItems: ${selectedItems.join(', ')}`);
+    
+    setSelectedItems(prev => {
+      const isAlreadySelected = prev.includes(itemId);
+      const newItems = isAlreadySelected 
+        ? prev.filter(id => id !== itemId) 
+        : [...prev, itemId];
+        
+      console.log(`After toggle, selectedItems will be: ${newItems.join(', ')}`);
+      return newItems;
+    });
   };
 
   const handleSubmitRequests = async () => {
