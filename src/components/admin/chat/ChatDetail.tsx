@@ -1,160 +1,155 @@
 
 import React, { useRef, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, ArrowLeft, Trash2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { Chat, Message } from '@/components/admin/chat/types';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ArrowLeft, Send, Trash2, Check, X, Clock } from 'lucide-react';
+import { formatTimeAgo } from '@/utils/dateUtils';
+import { Chat, Message } from './types';
 
 interface ChatDetailProps {
   activeChat: Chat;
   replyMessage: string;
-  setReplyMessage: React.Dispatch<React.SetStateAction<string>>;
+  setReplyMessage: (value: string) => void;
   onSendReply: () => void;
   onBackToList: () => void;
   onDeleteClick: (chat: Chat, e: React.MouseEvent) => void;
 }
 
-const ChatDetail = ({
-  activeChat,
-  replyMessage,
-  setReplyMessage,
-  onSendReply,
-  onBackToList,
-  onDeleteClick,
+const ChatDetail = ({ 
+  activeChat, 
+  replyMessage, 
+  setReplyMessage, 
+  onSendReply, 
+  onBackToList, 
+  onDeleteClick 
 }: ChatDetailProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    scrollToBottom();
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+    textareaRef.current?.focus();
   }, [activeChat.messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSendReply();
+    }
+  };
+
+  const getRequestStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="h-3 w-3 text-yellow-500" />;
+      case 'in_progress':
+        return <Clock className="h-3 w-3 text-blue-500" />;
+      case 'completed':
+        return <Check className="h-3 w-3 text-green-500" />;
+      case 'cancelled':
+        return <X className="h-3 w-3 text-red-500" />;
+      default:
+        return <Clock className="h-3 w-3 text-yellow-500" />;
+    }
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
-      <div className="flex items-center gap-4 mb-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onBackToList}
-          className="h-9 w-9"
+          className="gap-1"
         >
           <ArrowLeft className="h-4 w-4" />
+          Back to List
         </Button>
-        <Avatar className="h-10 w-10">
-          <AvatarFallback>
-            {activeChat.userInfo?.firstName 
-              ? activeChat.userInfo.firstName.charAt(0) 
-              : activeChat.userName.charAt(0)}
-          </AvatarFallback>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => onDeleteClick(activeChat, e)}
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="h-4 w-4 mr-1" />
+          Delete Conversation
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-3 mb-6">
+        <Avatar className="h-14 w-14">
+          <AvatarFallback className="text-lg">{activeChat.userName.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="flex-1">
-          <h2 className="font-medium">
+        <div>
+          <h2 className="text-xl font-semibold">
             {activeChat.userInfo?.firstName && activeChat.userInfo?.lastName 
               ? `${activeChat.userInfo.firstName} ${activeChat.userInfo.lastName}` 
               : activeChat.userName}
           </h2>
-          <div className="flex items-center gap-2 text-xs">
-            {activeChat.roomNumber && (
-              <p className="font-medium text-primary">Room: {activeChat.roomNumber}</p>
-            )}
+          <div className="text-sm text-muted-foreground space-y-0.5">
+            {activeChat.roomNumber && <p>Room: {activeChat.roomNumber}</p>}
+            <p>Last activity: {formatTimeAgo(new Date())}</p>
           </div>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={(e) => onDeleteClick(activeChat, e)}
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </Button>
       </div>
-      
-      <Card className="flex-1 mb-4 overflow-hidden">
-        <ScrollArea className="h-full p-4">
+
+      <div className="border rounded-md bg-card p-4 mb-6 h-[400px] overflow-y-auto">
+        {activeChat.messages.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-muted-foreground">
+            No messages yet. Start the conversation!
+          </div>
+        ) : (
           <div className="space-y-4">
-            {activeChat.messages.map((message) => (
-              <MessageBubble 
-                key={message.id} 
-                message={message} 
-                userName={activeChat.userInfo?.firstName || activeChat.userName} 
-              />
-            ))}
+            {activeChat.messages.map((message: Message) => {
+              const isRequest = message.type === 'request';
+              return (
+                <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] p-3 rounded-lg ${
+                    isRequest 
+                      ? 'bg-amber-100 text-amber-800 rounded-tr-none' 
+                      : message.sender === 'user' 
+                        ? 'bg-primary text-primary-foreground rounded-tr-none' 
+                        : 'bg-muted rounded-tl-none'
+                  }`}>
+                    {isRequest && (
+                      <div className="flex items-center gap-2 mb-1 text-xs font-medium">
+                        {getRequestStatusIcon(message.requestStatus || 'pending')}
+                        <span className="capitalize">{message.requestStatus || 'pending'} Request</span>
+                      </div>
+                    )}
+                    <p className="text-sm">{message.text}</p>
+                    <div className="flex justify-end items-center mt-1 text-xs opacity-70">
+                      <span>{message.time}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
-      </Card>
-      
-      <div className="flex items-center gap-2">
-        <Textarea 
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <Textarea
+          ref={textareaRef}
           value={replyMessage}
           onChange={(e) => setReplyMessage(e.target.value)}
-          placeholder={`Type your reply to ${activeChat.userInfo?.firstName || activeChat.userName}...`}
-          className="resize-none min-h-[60px]"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              onSendReply();
-            }
-          }}
+          onKeyDown={handleKeyDown}
+          placeholder="Type your reply..."
+          className="flex-1 resize-none min-h-[100px]"
         />
         <Button 
-          onClick={onSendReply}
+          onClick={onSendReply} 
+          className="h-auto"
           disabled={!replyMessage.trim()}
-          className="self-end h-10"
         >
           <Send className="h-4 w-4 mr-2" />
           Send
         </Button>
-      </div>
-    </div>
-  );
-};
-
-interface MessageBubbleProps {
-  message: Message;
-  userName: string;
-}
-
-const MessageBubble = ({ message, userName }: MessageBubbleProps) => {
-  return (
-    <div 
-      className={cn(
-        "flex", 
-        message.sender === 'staff' ? "justify-end" : "justify-start"
-      )}
-    >
-      <div 
-        className={cn(
-          "max-w-[80%] px-4 py-2 rounded-2xl", 
-          message.sender === 'staff' 
-            ? "bg-primary text-primary-foreground rounded-tr-none" 
-            : "bg-muted rounded-tl-none"
-        )}
-      >
-        {message.sender === 'user' && (
-          <div className="text-xs font-medium mb-1 text-muted-foreground">
-            {userName}
-          </div>
-        )}
-        <p className="text-sm">{message.text}</p>
-        <div className="flex justify-end items-center gap-1 mt-1 text-xs opacity-70">
-          <span>{message.time}</span>
-          {message.sender === 'staff' && message.status && (
-            <span>
-              {message.status === 'read' && '✓✓'}
-              {message.status === 'delivered' && '✓✓'}
-              {message.status === 'sent' && '✓'}
-            </span>
-          )}
-        </div>
       </div>
     </div>
   );

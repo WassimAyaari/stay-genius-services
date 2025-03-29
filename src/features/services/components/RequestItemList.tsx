@@ -57,8 +57,8 @@ const RequestItemList = ({
               <div className="flex items-center">
                 <Checkbox 
                   id={item.id}
-                  checked={selectedItems.includes(item.id)}
-                  onCheckedChange={() => onToggleItem(item.id)}
+                  checked={selectedItems.includes(item.name)}
+                  onCheckedChange={() => onToggleItem(item.name)}
                   className="mr-3"
                 />
                 <label 

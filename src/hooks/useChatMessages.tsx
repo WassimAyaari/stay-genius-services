@@ -23,6 +23,8 @@ export function useChatMessages() {
   const getFilteredChats = (tab: string) => {
     if (tab === 'all') return chats;
     if (tab === 'unread') return chats.filter(chat => chat.unread > 0);
+    if (tab === 'messages') return chats.filter(chat => !chat.type || chat.type === 'chat');
+    if (tab === 'requests') return chats.filter(chat => chat.type === 'request');
     return chats;
   };
 

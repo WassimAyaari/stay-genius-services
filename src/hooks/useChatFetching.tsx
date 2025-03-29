@@ -17,6 +17,7 @@ export function useChatFetching() {
   const fetchChats = async () => {
     setLoading(true);
     try {
+      // First fetch all chat messages
       const { data: messagesData, error: messagesError } = await supabase
         .from('chat_messages')
         .select('user_id, user_name, room_number')
@@ -24,6 +25,15 @@ export function useChatFetching() {
 
       if (messagesError) throw messagesError;
 
+      // Then fetch all service requests
+      const { data: serviceRequestsData, error: serviceRequestsError } = await supabase
+        .from('service_requests')
+        .select('guest_id, guest_name, room_number, type, description, created_at')
+        .order('created_at', { ascending: false });
+
+      if (serviceRequestsError) throw serviceRequestsError;
+
+      // Process chat messages
       const uniqueUsers = new Map();
       
       messagesData?.forEach(msg => {
@@ -31,7 +41,20 @@ export function useChatFetching() {
           uniqueUsers.set(msg.user_id, {
             userId: msg.user_id,
             userName: msg.user_name || 'Guest',
-            roomNumber: msg.room_number
+            roomNumber: msg.room_number,
+            type: 'chat'
+          });
+        }
+      });
+
+      // Process service requests
+      serviceRequestsData?.forEach(req => {
+        if (req.guest_id && !uniqueUsers.has(req.guest_id)) {
+          uniqueUsers.set(req.guest_id, {
+            userId: req.guest_id,
+            userName: req.guest_name || 'Guest',
+            roomNumber: req.room_number,
+            type: 'request'
           });
         }
       });
@@ -57,6 +80,7 @@ export function useChatFetching() {
           console.error('Error parsing user data:', e);
         }
 
+        // Fetch user's chat messages
         const { data: userMessages, error: userMessagesError } = await supabase
           .from('chat_messages')
           .select('*')
@@ -68,37 +92,79 @@ export function useChatFetching() {
           continue;
         }
 
-        if (!userMessages || userMessages.length === 0) continue;
+        // Fetch user's service requests
+        const { data: userRequests, error: userRequestsError } = await supabase
+          .from('service_requests')
+          .select('*')
+          .eq('guest_id', userInfo.userId)
+          .order('created_at', { ascending: true });
 
-        const unreadCount = userMessages.filter(
+        if (userRequestsError) {
+          console.error('Error fetching user requests:', userRequestsError);
+        }
+
+        // Format both messages and requests
+        const formattedMessages: Message[] = [];
+        
+        // Add chat messages
+        if (userMessages && userMessages.length > 0) {
+          formattedMessages.push(...userMessages.map(msg => ({
+            id: msg.id,
+            text: msg.text,
+            time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sender: msg.sender as 'user' | 'staff',
+            status: msg.status as 'sent' | 'delivered' | 'read' | undefined,
+            type: 'chat'
+          })));
+        }
+        
+        // Add service requests as messages
+        if (userRequests && userRequests.length > 0) {
+          formattedMessages.push(...userRequests.map(req => ({
+            id: req.id,
+            text: `Service Request: ${req.type.charAt(0).toUpperCase() + req.type.slice(1)} - ${req.description || 'No details provided'}`,
+            time: new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sender: 'user' as 'user' | 'staff',
+            status: 'delivered' as 'sent' | 'delivered' | 'read' | undefined,
+            type: 'request',
+            requestType: req.type,
+            requestStatus: req.status
+          })));
+        }
+
+        // Sort all messages by time
+        formattedMessages.sort((a, b) => {
+          const dateA = new Date(a.time);
+          const dateB = new Date(b.time);
+          return dateA.getTime() - dateB.getTime();
+        });
+
+        // Calculate unread count from both messages and requests
+        const unreadCount = formattedMessages.filter(
           msg => msg.sender === 'user' && msg.status !== 'read'
         ).length || 0;
 
-        const lastMessage = userMessages[userMessages.length - 1];
-        const lastActivity = lastMessage 
-          ? formatTimeAgo(new Date(lastMessage.created_at))
-          : 'No activity';
+        // Only add users who have messages or requests
+        if (formattedMessages.length > 0) {
+          const lastMessage = formattedMessages[formattedMessages.length - 1];
+          const lastActivity = lastMessage 
+            ? formatTimeAgo(new Date(lastMessage.time))
+            : 'No activity';
 
-        const formattedMessages: Message[] = userMessages.map(msg => ({
-          id: msg.id,
-          text: msg.text,
-          time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          sender: msg.sender as 'user' | 'staff',
-          status: msg.status as 'sent' | 'delivered' | 'read' | undefined
-        }));
+          const displayRoomNumber = userInfo.roomNumber || userDetails.roomNumber || '';
 
-        const displayRoomNumber = userInfo.roomNumber || userDetails.roomNumber || '';
-
-        userChats.push({
-          id: userInfo.userId,
-          userId: userInfo.userId,
-          userName: userInfo.userName,
-          roomNumber: displayRoomNumber,
-          lastActivity: lastActivity,
-          messages: formattedMessages,
-          unread: unreadCount,
-          userInfo: userDetails
-        });
+          userChats.push({
+            id: userInfo.userId,
+            userId: userInfo.userId,
+            userName: userInfo.userName,
+            roomNumber: displayRoomNumber,
+            lastActivity: lastActivity,
+            messages: formattedMessages,
+            unread: unreadCount,
+            userInfo: userDetails,
+            type: userInfo.type as 'chat' | 'request'
+          });
+        }
       }
 
       setChats(userChats);

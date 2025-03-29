@@ -19,6 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+
 interface Message {
   id: string;
   text: string;
@@ -26,10 +27,12 @@ interface Message {
   time: string;
   status?: 'sent' | 'delivered' | 'read';
 }
+
 interface UserInfo {
   name: string;
   roomNumber: string;
 }
+
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -51,6 +54,7 @@ const Services = () => {
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     const userData = localStorage.getItem('user_data');
     if (userData) {
@@ -67,6 +71,7 @@ const Services = () => {
       }
     }
   }, []);
+
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
@@ -74,13 +79,13 @@ const Services = () => {
       });
     }
   }, [messages]);
+
   const handleStartChat = () => {
     if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
       setIsUserInfoDialogOpen(true);
       return;
     }
 
-    // Generate a user ID if not present
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       userId = uuidv4();
@@ -97,6 +102,7 @@ const Services = () => {
       sender: 'staff'
     }]);
   };
+
   const handleSubmitUserInfo = () => {
     if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
       toast({
@@ -108,7 +114,6 @@ const Services = () => {
     }
     localStorage.setItem('user_data', JSON.stringify(userInfo));
 
-    // Generate a user ID if not present
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       userId = uuidv4();
@@ -126,9 +131,11 @@ const Services = () => {
       sender: 'staff'
     }]);
   };
+
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
+
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return;
     const currentTime = new Date();
@@ -146,7 +153,6 @@ const Services = () => {
     setMessages([...messages, newMessage]);
     setInputMessage('');
 
-    // Generate a proper UUID for user identification instead of using "user_" prefix
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       userId = uuidv4();
@@ -209,26 +215,32 @@ const Services = () => {
       });
     }
   };
+
   const handleMessageSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleSendMessage();
   };
+
   const handleOpenRequestDialog = () => {
     setIsRequestDialogOpen(true);
     setSelectedCategory(null);
     setSelectedItems([]);
   };
+
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
     setSelectedItems([]);
   };
+
   const handleGoBackToCategories = () => {
     setSelectedCategory(null);
     setSelectedItems([]);
   };
+
   const handleToggleRequestItem = (itemId: string) => {
     setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
   };
+
   const handleSubmitRequests = async () => {
     if (!selectedItems.length || !room) {
       toast({
@@ -254,10 +266,31 @@ const Services = () => {
           roomNumber: userInfo.roomNumber
         };
       };
-      const currentUserInfo = getUserInfo();
-      for (const itemId of selectedItems) {
-        await requestService(room.id, selectedCategory?.name.toLowerCase() as any || 'custom', `Request for ${selectedCategory?.name}`, itemId, undefined, currentUserInfo.name, currentUserInfo.roomNumber || room.room_number);
+      
+      let userId = localStorage.getItem('user_id');
+      if (!userId) {
+        userId = uuidv4();
+        localStorage.setItem('user_id', userId);
       }
+      
+      const currentUserInfo = getUserInfo();
+      
+      for (const itemId of selectedItems) {
+        const selectedItem = selectedCategory?.name ? 
+          `${selectedCategory.name} - ${itemId}` : 
+          itemId;
+        
+        await requestService(
+          room.id, 
+          selectedCategory?.name.toLowerCase() as any || 'custom', 
+          selectedItem, 
+          itemId, 
+          selectedCategory?.id, 
+          currentUserInfo.name, 
+          currentUserInfo.roomNumber || room.room_number
+        );
+      }
+      
       toast({
         title: "Requests Submitted",
         description: `${selectedItems.length} request(s) have been sent successfully.`
@@ -276,12 +309,15 @@ const Services = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleNavigateToRequests = () => {
     handleOpenRequestDialog();
   };
+
   const handleNavigateToSupport = () => {
     navigate('/messages?contact=1');
   };
+
   const handleWhatsAppService = () => {
     toast({
       title: "WhatsApp Service",
@@ -289,12 +325,15 @@ const Services = () => {
     });
     window.open('https://wa.me/1234567890', '_blank');
   };
+
   const handleNavigateToAdminChat = () => {
     navigate('/admin/chat-messages');
   };
+
   const handleNavigateToRequestManager = () => {
     navigate('/admin/request-manager');
   };
+
   return <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
@@ -474,4 +513,5 @@ const Services = () => {
       </Sheet>
     </Layout>;
 };
+
 export default Services;

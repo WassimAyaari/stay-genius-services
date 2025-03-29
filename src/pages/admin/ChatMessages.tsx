@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import ChatList from '@/components/admin/chat/ChatList';
 import ChatDetail from '@/components/admin/chat/ChatDetail';
@@ -51,39 +50,23 @@ const ChatMessages = () => {
     setActiveChat(null);
   };
 
+  const handleTabChange = (value: string) => {
+    setCurrentTab(value);
+  };
+
   return (
     <div className="container mx-auto p-4 max-w-6xl">
-      <h1 className="text-2xl font-semibold mb-6">Chat Messages</h1>
+      <h1 className="text-2xl font-semibold mb-6">Messages & Requests</h1>
       
       {!activeChat ? (
-        <>
-          <Tabs defaultValue="all" value={currentTab} onValueChange={setCurrentTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All Chats</TabsTrigger>
-              <TabsTrigger value="unread">
-                Unread ({chats.reduce((count, chat) => count + (chat.unread > 0 ? 1 : 0), 0)})
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="all">
-              <ChatList
-                chats={getFilteredChats(currentTab)}
-                loading={loading}
-                onSelectChat={handleSelectChat}
-                onDeleteClick={handleDeleteChat}
-              />
-            </TabsContent>
-            
-            <TabsContent value="unread">
-              <ChatList
-                chats={getFilteredChats(currentTab)}
-                loading={loading}
-                onSelectChat={handleSelectChat}
-                onDeleteClick={handleDeleteChat}
-              />
-            </TabsContent>
-          </Tabs>
-        </>
+        <ChatList
+          chats={getFilteredChats(currentTab)}
+          loading={loading}
+          onSelectChat={handleSelectChat}
+          onDeleteClick={handleDeleteChat}
+          activeTab={currentTab}
+          onTabChange={handleTabChange}
+        />
       ) : (
         <ChatDetail
           activeChat={activeChat}
