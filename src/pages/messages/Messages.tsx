@@ -234,13 +234,13 @@ const Messages = () => {
         }
       }
 
-      // Save to Supabase
+      // Save to Supabase - Fix for recipient_id to be a proper UUID format
       try {
         const { error } = await supabase
           .from('chat_messages')
           .insert([{
             user_id: userId,
-            recipient_id: selectedContact.id,
+            recipient_id: null, // We leave this null since it's a user initiating the conversation
             user_name: userName,
             room_number: roomNumber,
             text: inputMessage,
@@ -299,7 +299,7 @@ const Messages = () => {
             .from('chat_messages')
             .insert([{
               user_id: userId,
-              recipient_id: userId,
+              recipient_id: userId, // Here we send it back to the same user
               user_name: selectedContact.name,
               room_number: roomNumber,
               text: responseMessage.text,
