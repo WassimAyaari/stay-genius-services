@@ -12,6 +12,7 @@ import { Room } from '@/hooks/useRoom';
 import { requestService } from '@/features/rooms/controllers/roomService';
 import { v4 as uuidv4 } from 'uuid';
 import { useRequestItems } from '@/hooks/useRequestCategories';
+import UserInfoDialog from '@/features/services/components/UserInfoDialog';
 
 interface RequestDialogProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState({ name: '', roomNumber: '' });
   const { toast } = useToast();
   
   // Fetch items for the selected category to have access to their names
@@ -35,6 +38,10 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       setView('presets');
       setSelectedCategory(null);
       setSelectedItems([]);
+    } else {
+      // Load user info from localStorage when dialog opens
+      const savedUserInfo = getUserInfo();
+      setUserInfo(savedUserInfo);
     }
   }, [isOpen]);
 
@@ -70,8 +77,59 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
     });
   };
 
+  const saveUserInfo = (info: { name: string, roomNumber: string }) => {
+    localStorage.setItem('user_data', JSON.stringify(info));
+    setUserInfo(info);
+    setIsUserInfoDialogOpen(false);
+  };
+
+  const getUserInfo = () => {
+    const userInfoStr = localStorage.getItem('user_data');
+    if (userInfoStr) {
+      try {
+        const userData = JSON.parse(userInfoStr);
+        return {
+          name: userData.name || '',
+          roomNumber: userData.roomNumber || (room?.room_number || '')
+        };
+      } catch (error) {
+        console.error("Error parsing user info:", error);
+      }
+    }
+    return {
+      name: '',
+      roomNumber: room?.room_number || ''
+    };
+  };
+
+  const createUniqueRequestId = () => {
+    const name = userInfo.name.trim();
+    const roomNumber = userInfo.roomNumber.trim();
+    
+    if (!name || !roomNumber) {
+      // If we don't have complete user info, fall back to UUID
+      return uuidv4();
+    }
+    
+    // Create a deterministic ID from user name and room number
+    const nameInitials = name.split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase();
+    
+    // Format: RM{roomNumber}-{nameInitials}-{timestamp}
+    return `RM${roomNumber}-${nameInitials}-${Date.now()}`;
+  };
+
   const handlePresetRequest = async (preset: {category: string, description: string, type: string}) => {
-    if (!room) {
+    if (!userInfo.name || !userInfo.roomNumber) {
+      setIsUserInfoDialogOpen(true);
+      return;
+    }
+
+    // Ensure we have a valid room ID
+    const roomId = room?.id;
+    if (!roomId) {
       toast({
         title: "Room information missing",
         description: "Unable to submit request without room information.",
@@ -82,16 +140,16 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
 
     try {
       setIsSubmitting(true);
-      const userInfo = getUserInfo();
+      const requestId = createUniqueRequestId();
       
       await requestService(
-        room.id,
+        roomId,
         preset.type as any,
         preset.description,
         undefined,
         undefined,
         userInfo.name,
-        userInfo.roomNumber || room.room_number
+        userInfo.roomNumber
       );
       
       toast({
@@ -106,28 +164,14 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
         description: "Failed to submit request. Please try again.",
         variant: "destructive"
       });
+      console.error("Error submitting request:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getUserInfo = () => {
-    const userInfoStr = localStorage.getItem('user_data');
-    if (userInfoStr) {
-      try {
-        return JSON.parse(userInfoStr);
-      } catch (error) {
-        console.error("Error parsing user info:", error);
-      }
-    }
-    return {
-      name: '',
-      roomNumber: room?.room_number || ''
-    };
-  };
-
   const handleSubmitRequests = async () => {
-    if (selectedItems.length === 0 || !room) {
+    if (selectedItems.length === 0) {
       toast({
         title: "No items selected",
         description: "Please select at least one request item",
@@ -136,9 +180,25 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       return;
     }
     
+    if (!userInfo.name || !userInfo.roomNumber) {
+      setIsUserInfoDialogOpen(true);
+      return;
+    }
+
+    // Ensure we have a valid room ID
+    const roomId = room?.id;
+    if (!roomId) {
+      toast({
+        title: "Room information missing",
+        description: "Unable to submit request without room information.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
-      const userInfo = getUserInfo();
+      const requestId = createUniqueRequestId();
       
       // Submit each selected item
       for (const itemId of selectedItems) {
@@ -148,13 +208,13 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
         const description = `${categoryName} - ${itemName}`;
         
         await requestService(
-          room.id, 
+          roomId, 
           selectedCategory?.name.toLowerCase() as any || 'custom', 
           description, 
           itemId, 
           selectedCategory?.id, 
           userInfo.name, 
-          userInfo.roomNumber || room.room_number
+          userInfo.roomNumber
         );
       }
       
@@ -194,72 +254,82 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{getDialogTitle()}</DialogTitle>
-          <DialogDescription>{getDialogDescription()}</DialogDescription>
-        </DialogHeader>
-        
-        <div className="py-4">
-          {view === 'presets' && (
-            <div>
-              <RequestPresetList onSelectPreset={handlePresetRequest} onBrowseAll={() => setView('categories')} />
-            </div>
-          )}
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{getDialogTitle()}</DialogTitle>
+            <DialogDescription>{getDialogDescription()}</DialogDescription>
+          </DialogHeader>
           
-          {view === 'categories' && (
-            <div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="mb-4"
-                onClick={handleGoBackToPresets}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back to Common Requests
-              </Button>
-              <RequestCategoryList onSelectCategory={handleSelectCategory} />
-            </div>
-          )}
-          
-          {view === 'items' && selectedCategory && (
-            <RequestItemList 
-              category={selectedCategory} 
-              onGoBack={handleGoBackToCategories} 
-              selectedItems={selectedItems} 
-              onToggleItem={handleToggleRequestItem} 
-            />
-          )}
-        </div>
-        
-        <DialogFooter>
-          {view === 'items' && selectedCategory && (
-            <div className="flex w-full justify-between items-center">
-              <div className="text-sm">
-                {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
+          <div className="py-4">
+            {view === 'presets' && (
+              <div>
+                <RequestPresetList onSelectPreset={handlePresetRequest} onBrowseAll={() => setView('categories')} />
               </div>
-              <Button 
-                onClick={handleSubmitRequests} 
-                disabled={selectedItems.length === 0 || isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Submit Requests
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            )}
+            
+            {view === 'categories' && (
+              <div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="mb-4"
+                  onClick={handleGoBackToPresets}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back to Common Requests
+                </Button>
+                <RequestCategoryList onSelectCategory={handleSelectCategory} />
+              </div>
+            )}
+            
+            {view === 'items' && selectedCategory && (
+              <RequestItemList 
+                category={selectedCategory} 
+                onGoBack={handleGoBackToCategories} 
+                selectedItems={selectedItems} 
+                onToggleItem={handleToggleRequestItem} 
+              />
+            )}
+          </div>
+          
+          <DialogFooter>
+            {view === 'items' && selectedCategory && (
+              <div className="flex w-full justify-between items-center">
+                <div className="text-sm">
+                  {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
+                </div>
+                <Button 
+                  onClick={handleSubmitRequests} 
+                  disabled={selectedItems.length === 0 || isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Submit Requests
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <UserInfoDialog
+        isOpen={isUserInfoDialogOpen}
+        onOpenChange={setIsUserInfoDialogOpen}
+        userInfo={userInfo}
+        setUserInfo={setUserInfo}
+        onSubmit={() => saveUserInfo(userInfo)}
+      />
+    </>
   );
 };
 
