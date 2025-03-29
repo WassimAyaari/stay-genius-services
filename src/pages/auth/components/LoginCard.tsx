@@ -11,7 +11,7 @@ const LoginCard: React.FC = () => {
         <div className="flex justify-center">
           <Avatar className="h-16 w-16 border-2 border-primary/10">
             <AvatarFallback className="bg-primary text-white text-xl font-medium">
-              SG
+              WA
             </AvatarFallback>
           </Avatar>
         </div>
