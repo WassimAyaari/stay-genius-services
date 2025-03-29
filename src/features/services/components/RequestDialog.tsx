@@ -27,12 +27,18 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   // Fetch items for the selected category to have access to their names
   const { data: categoryItems } = useRequestItems(selectedCategory?.id);
 
-  // Reset selected items when dialog opens/closes or category changes
+  // Reset state when dialog opens/closes
   useEffect(() => {
-    if (!isOpen || !selectedCategory) {
+    if (!isOpen) {
+      setSelectedCategory(null);
       setSelectedItems([]);
     }
-  }, [isOpen, selectedCategory]);
+  }, [isOpen]);
+
+  // Debug log when selectedItems changes
+  useEffect(() => {
+    console.log("selectedItems updated in RequestDialog:", selectedItems);
+  }, [selectedItems]);
 
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
@@ -47,17 +53,17 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   const handleToggleRequestItem = (itemId: string) => {
     console.log(`Toggle item called with ID: ${itemId}`);
     
-    setSelectedItems(prev => {
+    setSelectedItems(prevItems => {
       // Check if the item is already selected
-      const isAlreadySelected = prev.includes(itemId);
+      const isAlreadySelected = prevItems.includes(itemId);
       
       // Create a new array based on the selection state
       if (isAlreadySelected) {
-        const result = prev.filter(id => id !== itemId);
+        const result = prevItems.filter(id => id !== itemId);
         console.log(`Item was already selected, removing it. New selectedItems:`, result);
         return result;
       } else {
-        const result = [...prev, itemId];
+        const result = [...prevItems, itemId];
         console.log(`Item was not selected, adding it. New selectedItems:`, result);
         return result;
       }

@@ -57,39 +57,38 @@ const RequestItemList = ({
         </div>
       ) : (
         <div className="space-y-2">
-          {items.map((item) => (
-            <Card 
-              key={item.id}
-              className="p-3 hover:bg-accent/50 transition-colors"
-            >
-              <div className="flex items-center">
-                <Checkbox 
-                  id={`item-${item.id}`}
-                  checked={isItemSelected(item.id)}
-                  onCheckedChange={() => {
-                    console.log(`Checkbox toggled for item ID: ${item.id}, Name: ${item.name}`);
-                    onToggleItem(item.id);
-                  }}
-                  className="mr-3"
-                />
-                <label 
-                  htmlFor={`item-${item.id}`}
-                  className="flex-1 cursor-pointer"
-                  onClick={(e) => {
-                    // Prevent default to avoid double toggling from the checkbox change
-                    e.preventDefault();
-                    console.log(`Label clicked for item ID: ${item.id}, Name: ${item.name}`);
-                    onToggleItem(item.id);
-                  }}
-                >
-                  <div className="font-medium">{item.name}</div>
-                  {item.description && (
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                  )}
-                </label>
-              </div>
-            </Card>
-          ))}
+          {items.map((item) => {
+            const checked = isItemSelected(item.id);
+            console.log(`Item ${item.name} (${item.id}): checked=${checked}`);
+            
+            return (
+              <Card 
+                key={item.id}
+                className="p-3 hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex items-center">
+                  <Checkbox 
+                    id={`item-${item.id}`}
+                    checked={checked}
+                    onCheckedChange={() => {
+                      console.log(`Toggling checkbox for ${item.name} (${item.id}), current checked state: ${checked}`);
+                      onToggleItem(item.id);
+                    }}
+                    className="mr-3"
+                  />
+                  <label 
+                    htmlFor={`item-${item.id}`}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div className="font-medium">{item.name}</div>
+                    {item.description && (
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    )}
+                  </label>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
