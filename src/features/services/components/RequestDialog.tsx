@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader, Check } from 'lucide-react';
@@ -23,6 +23,14 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // Reset selected items when dialog opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedCategory(null);
+      setSelectedItems([]);
+    }
+  }, [isOpen]);
+
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
     setSelectedItems([]);
@@ -35,22 +43,29 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
 
   const handleToggleRequestItem = (itemId: string) => {
     console.log(`Toggle item called with: ${itemId}`);
-    console.log(`Current selectedItems: ${selectedItems.join(', ')}`);
     
     setSelectedItems(prev => {
+      // Copy the previous array to avoid mutation issues
       const isAlreadySelected = prev.includes(itemId);
-      const newItems = isAlreadySelected 
-        ? prev.filter(id => id !== itemId) 
-        : [...prev, itemId];
-        
-      console.log(`After toggle, selectedItems will be: ${newItems.join(', ')}`);
-      return newItems;
+      
+      // Create a new array based on the selection state
+      if (isAlreadySelected) {
+        const result = prev.filter(id => id !== itemId);
+        console.log(`Item was already selected, removing it. New selectedItems: ${result.join(', ')}`);
+        return result;
+      } else {
+        const result = [...prev, itemId];
+        console.log(`Item was not selected, adding it. New selectedItems: ${result.join(', ')}`);
+        return result;
+      }
     });
   };
 
   const handleSubmitRequests = async () => {
+    // Make sure we log the most up-to-date state
+    console.log("Selected items during submission:", selectedItems);
+    
     if (!selectedItems.length || !room) {
-      console.log("Selected items during submission:", selectedItems);
       toast({
         title: "No items selected",
         description: "Please select at least one request item",
@@ -58,6 +73,7 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       });
       return;
     }
+    
     try {
       setIsSubmitting(true);
       const getUserInfo = () => {
@@ -135,12 +151,7 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
               onGoBack={handleGoBackToCategories} 
               onSelectItem={() => {}} 
               selectedItems={selectedItems} 
-              onToggleItem={(itemId) => {
-                console.log(`Toggle item called with: ${itemId}`);
-                console.log(`Current selectedItems: ${selectedItems.join(', ')}`);
-                handleToggleRequestItem(itemId);
-                console.log(`After toggle, selectedItems: ${selectedItems.includes(itemId) ? 'contains' : 'does not contain'} ${itemId}`);
-              }} 
+              onToggleItem={handleToggleRequestItem} 
             />
           ) : (
             <RequestCategoryList onSelectCategory={handleSelectCategory} />

@@ -1,8 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader, ChevronLeft, Check } from 'lucide-react';
+import { Loader, ChevronLeft } from 'lucide-react';
 import { useRequestItems } from '@/hooks/useRequestCategories';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -76,7 +76,8 @@ const RequestItemList = ({
                   htmlFor={item.id}
                   className="flex-1 cursor-pointer"
                   onClick={(e) => {
-                    e.preventDefault(); // Prevent default to avoid double toggling
+                    // Prevent default to avoid double toggling from the checkbox change
+                    e.preventDefault();
                     console.log(`Clicking label for: ${item.name}`);
                     onToggleItem(item.name);
                   }}
