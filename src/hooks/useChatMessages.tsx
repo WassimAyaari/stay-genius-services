@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Chat, ChatMessage } from '@/components/admin/chat/types';
+import { Chat, ChatMessage, Message } from '@/components/admin/chat/types';
 
 export function useChatMessages() {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -53,7 +53,7 @@ export function useChatMessages() {
       const userChats: Chat[] = [];
       
       for (const userInfo of filteredUsers) {
-        let userDetails = {};
+        let userDetails: UserInfo = {};
         
         try {
           const userData = localStorage.getItem(`user_data_${userInfo.userId}`);
@@ -91,7 +91,7 @@ export function useChatMessages() {
           ? formatTimeAgo(new Date(lastMessage.created_at))
           : 'No activity';
 
-        const formattedMessages = userMessages.map(msg => ({
+        const formattedMessages: Message[] = userMessages.map(msg => ({
           id: msg.id,
           text: msg.text,
           time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -231,7 +231,7 @@ export function useChatMessages() {
 
       if (error) throw error;
 
-      const sentMessage = {
+      const sentMessage: Message = {
         id: data[0].id,
         text: replyMessage,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -245,9 +245,10 @@ export function useChatMessages() {
         lastActivity: 'just now'
       };
 
-      setChats(chats.map(chat => 
+      setChats(prevChats => prevChats.map(chat => 
         chat.id === activeChat.id ? updatedChat : chat
       ));
+      
       setActiveChat(updatedChat);
 
       return {
