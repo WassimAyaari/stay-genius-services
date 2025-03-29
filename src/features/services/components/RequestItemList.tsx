@@ -64,6 +64,7 @@ const RequestItemList = ({
                 <label 
                   htmlFor={item.id}
                   className="flex-1 cursor-pointer"
+                  onClick={() => onToggleItem(item.name)}
                 >
                   <div className="font-medium">{item.name}</div>
                   {item.description && (
