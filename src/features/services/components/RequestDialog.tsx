@@ -20,6 +20,7 @@ interface RequestDialogProps {
 const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedItemsData, setSelectedItemsData] = useState<Map<string, string>>(new Map());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -28,21 +29,24 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
     if (!isOpen) {
       setSelectedCategory(null);
       setSelectedItems([]);
+      setSelectedItemsData(new Map());
     }
   }, [isOpen]);
 
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
     setSelectedItems([]);
+    setSelectedItemsData(new Map());
   };
 
   const handleGoBackToCategories = () => {
     setSelectedCategory(null);
     setSelectedItems([]);
+    setSelectedItemsData(new Map());
   };
 
   const handleToggleRequestItem = (itemId: string) => {
-    console.log(`Toggle item called with: ${itemId}`);
+    console.log(`Toggle item called with ID: ${itemId}`);
     
     setSelectedItems(prev => {
       // Copy the previous array to avoid mutation issues
@@ -100,15 +104,12 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       const currentUserInfo = getUserInfo();
       
       for (const itemId of selectedItems) {
-        console.log(`Submitting request for item: ${itemId}`);
-        const selectedItem = selectedCategory?.name ? 
-          `${selectedCategory.name} - ${itemId}` : 
-          itemId;
+        console.log(`Submitting request for item with ID: ${itemId}`);
         
         await requestService(
           room.id, 
           selectedCategory?.name.toLowerCase() as any || 'custom', 
-          selectedItem, 
+          selectedCategory?.name || 'Custom Request', 
           itemId, 
           selectedCategory?.id, 
           currentUserInfo.name, 
@@ -123,6 +124,7 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       onOpenChange(false);
       setSelectedCategory(null);
       setSelectedItems([]);
+      setSelectedItemsData(new Map());
     } catch (error) {
       toast({
         title: "Error",

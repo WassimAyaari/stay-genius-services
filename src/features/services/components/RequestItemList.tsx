@@ -25,8 +25,8 @@ const RequestItemList = ({
   const { data: items, isLoading } = useRequestItems(category.id);
 
   // Helper function to check if an item is selected
-  const isItemSelected = (itemName: string) => {
-    return selectedItems.includes(itemName);
+  const isItemSelected = (itemId: string) => {
+    return selectedItems.includes(itemId);
   };
 
   // Debug to check what's happening with selected items
@@ -65,10 +65,10 @@ const RequestItemList = ({
               <div className="flex items-center">
                 <Checkbox 
                   id={item.id}
-                  checked={isItemSelected(item.name)}
+                  checked={isItemSelected(item.id)}
                   onCheckedChange={() => {
-                    console.log(`Toggling item: ${item.name}`);
-                    onToggleItem(item.name);
+                    console.log(`Toggling item ID: ${item.id}, Name: ${item.name}`);
+                    onToggleItem(item.id);
                   }}
                   className="mr-3"
                 />
@@ -78,8 +78,8 @@ const RequestItemList = ({
                   onClick={(e) => {
                     // Prevent default to avoid double toggling from the checkbox change
                     e.preventDefault();
-                    console.log(`Clicking label for: ${item.name}`);
-                    onToggleItem(item.name);
+                    console.log(`Clicking label for ID: ${item.id}, Name: ${item.name}`);
+                    onToggleItem(item.id);
                   }}
                 >
                   <div className="font-medium">{item.name}</div>
