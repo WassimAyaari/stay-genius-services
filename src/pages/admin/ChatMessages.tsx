@@ -1,15 +1,26 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Send, ArrowLeft } from 'lucide-react';
+import { Send, ArrowLeft, Trash2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { useRoom } from '@/hooks/useRoom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Message {
   id: string;
@@ -55,6 +66,8 @@ const ChatMessages = () => {
   const [replyMessage, setReplyMessage] = useState('');
   const [currentTab, setCurrentTab] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [chatToDelete, setChatToDelete] = useState<Chat | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -288,6 +301,49 @@ const ChatMessages = () => {
     setActiveChat(null);
   };
 
+  const handleDeleteClick = (chat: Chat, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the chat from being selected
+    setChatToDelete(chat);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!chatToDelete) return;
+
+    try {
+      // Delete all messages for this user
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .or(`user_id.eq.${chatToDelete.userId},recipient_id.eq.${chatToDelete.userId}`);
+
+      if (error) throw error;
+
+      // If the deleted chat was active, close it
+      if (activeChat && activeChat.id === chatToDelete.id) {
+        setActiveChat(null);
+      }
+
+      // Remove the chat from the state
+      setChats(chats.filter(chat => chat.id !== chatToDelete.id));
+
+      toast({
+        title: "Conversation supprimée",
+        description: `La conversation avec ${chatToDelete.userInfo?.firstName || chatToDelete.userName} a été supprimée.`,
+      });
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la conversation.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setChatToDelete(null);
+    }
+  };
+
   const getFilteredChats = () => {
     if (currentTab === 'all') return chats;
     if (currentTab === 'unread') return chats.filter(chat => chat.unread > 0);
@@ -353,13 +409,22 @@ const ChatMessages = () => {
                             {chat.messages[chat.messages.length - 1].text}
                           </p>
                         )}
-                        {chat.unread > 0 && (
-                          <div className="mt-2">
+                        <div className="flex justify-between items-center mt-2">
+                          {chat.unread > 0 && (
                             <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                               {chat.unread} new {chat.unread === 1 ? 'message' : 'messages'}
                             </span>
-                          </div>
-                        )}
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 p-1 h-auto ml-auto"
+                            onClick={(e) => handleDeleteClick(chat, e)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete conversation</span>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </Card>
@@ -409,10 +474,19 @@ const ChatMessages = () => {
                             {chat.messages[chat.messages.length - 1].text}
                           </p>
                         )}
-                        <div className="mt-2">
+                        <div className="flex justify-between items-center mt-2">
                           <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                             {chat.unread} new {chat.unread === 1 ? 'message' : 'messages'}
                           </span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 p-1 h-auto ml-auto"
+                            onClick={(e) => handleDeleteClick(chat, e)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete conversation</span>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -440,7 +514,7 @@ const ChatMessages = () => {
                   : activeChat.userName.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1">
               <h2 className="font-medium">
                 {activeChat.userInfo?.firstName && activeChat.userInfo?.lastName 
                   ? `${activeChat.userInfo.firstName} ${activeChat.userInfo.lastName}` 
@@ -452,6 +526,15 @@ const ChatMessages = () => {
                 )}
               </div>
             </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={(e) => handleDeleteClick(activeChat, e)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
           </div>
           
           <Card className="flex-1 mb-4 overflow-hidden">
@@ -521,6 +604,24 @@ const ChatMessages = () => {
           </div>
         </div>
       )}
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer la conversation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cette conversation avec {chatToDelete?.userInfo?.firstName || chatToDelete?.userName} ?
+              Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
