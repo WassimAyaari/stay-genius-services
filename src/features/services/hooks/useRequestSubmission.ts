@@ -37,16 +37,14 @@ export function useRequestSubmission() {
     }
 
     try {
-      // Insert the request as a chat message
-      console.log("Submitting chat message for request:", {
-        userId,
-        userName: userInfo.name || 'Guest',
-        roomNumber: userInfo.roomNumber,
-        text: description,
-        type: type
+      console.log("Submitting request:", {
+        description,
+        type,
+        userInfo
       });
       
-      const { error } = await supabase
+      // Insert the request as a chat message
+      const { error: chatError } = await supabase
         .from('chat_messages')
         .insert([{
           user_id: userId,
@@ -59,7 +57,7 @@ export function useRequestSubmission() {
           created_at: new Date().toISOString()
         }]);
 
-      if (error) throw error;
+      if (chatError) throw chatError;
       
       // Try to fetch the room
       try {
@@ -68,50 +66,47 @@ export function useRequestSubmission() {
           .select('id')
           .eq('room_number', userInfo.roomNumber)
           .maybeSingle();
-          
+        
+        let roomId = '';
         if (roomData) {
-          console.log("Room found, submitting service request:", {
-            roomId: roomData.id,
-            type,
-            description,
-            categoryId: selectedCategory?.id,
-            guestName: userInfo.name, 
-            roomNumber: userInfo.roomNumber
-          });
-          
-          // Also insert into service_requests table for tracking purposes
-          await requestService(
-            roomData.id, 
-            type as any, 
-            description, 
-            undefined, 
-            selectedCategory?.id, 
-            userInfo.name, 
-            userInfo.roomNumber
-          );
+          roomId = roomData.id;
+          console.log("Room found for insertion:", roomId);
         } else {
           console.warn("Room not found for number:", userInfo.roomNumber);
-          
-          // Even if room is not found, still create a service request
-          console.log("Creating service request without room_id");
-          await supabase
-            .from('service_requests')
-            .insert({
-              guest_id: userId,
-              guest_name: userInfo.name || 'Guest',
-              room_number: userInfo.roomNumber,
-              type: type,
-              description: description,
-              category_id: selectedCategory?.id,
-              status: 'pending',
-              created_at: new Date().toISOString()
-            });
         }
+        
+        // Create a service request regardless of whether a room was found
+        const requestData = {
+          room_id: roomId || null,
+          guest_id: userId,
+          guest_name: userInfo.name || 'Guest',
+          room_number: userInfo.roomNumber,
+          type: type,
+          description: description,
+          category_id: selectedCategory?.id,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        console.log("Creating service_request:", requestData);
+        
+        const { error: serviceError } = await supabase
+          .from('service_requests')
+          .insert(requestData);
+          
+        if (serviceError) {
+          console.error("Error creating service request directly:", serviceError);
+          throw serviceError;
+        }
+          
+        console.log("Service request created successfully");
+        
+        return true;
       } catch (err) {
-        console.error("Error fetching room by number:", err);
+        console.error("Error in request submission process:", err);
+        throw err;
       }
-      
-      return true;
     } catch (error) {
       console.error("Error submitting request via chat:", error);
       return false;

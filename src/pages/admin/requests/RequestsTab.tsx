@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { 
   Card, 
@@ -7,9 +7,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { RequestStatusBadge } from '@/components/admin/requests/RequestStatusBadge';
-import { RequestStatusActions } from '@/components/admin/requests/RequestStatusActions';
 import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { ServiceRequestWithItem } from '../requests/types';
@@ -19,15 +16,9 @@ export const RequestsTab = () => {
   const { toast } = useToast();
   const { data: requests = [], isLoading, isError, refetch } = useServiceRequests();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [requestsWithDetails, setRequestsWithDetails] = useState<ServiceRequestWithItem[]>([]);
-
-  // Update state only when requests change
-  useEffect(() => {
-    console.log("Requests data changed:", requests);
-    if (requests) {
-      setRequestsWithDetails(requests as ServiceRequestWithItem[]);
-    }
-  }, [requests]);
+  
+  // Utilisons directement les données sans état supplémentaire pour éviter la boucle infinie
+  console.log("RequestsTab rendering with data:", requests);
 
   const handleUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     try {
@@ -84,7 +75,7 @@ export const RequestsTab = () => {
         </div>
 
         <RequestsTable 
-          requests={requestsWithDetails} 
+          requests={requests as ServiceRequestWithItem[]} 
           isLoading={isLoading || isRefreshing} 
           onUpdateStatus={handleUpdateStatus}
         />

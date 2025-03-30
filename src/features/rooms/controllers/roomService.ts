@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export type ServiceType = 'housekeeping' | 'laundry' | 'wifi' | 'bill' | 'preferences' | 'concierge' | 'custom';
@@ -39,10 +40,10 @@ export const updateRequestStatus = async (
     if (requestData && requestData.guest_id) {
       // Since room_number might not be directly available in the service_requests table,
       // we need to handle it more safely
-      let roomNumber = '';
+      let roomNumber = requestData.room_number || '';
       
       // Try to get the room number from the rooms table if we have a room_id
-      if (requestData.room_id) {
+      if (requestData.room_id && !roomNumber) {
         const { data: roomData } = await supabase
           .from('rooms')
           .select('room_number')
@@ -118,7 +119,7 @@ export const requestService = async (
   roomNumber?: string
 ) => {
   try {
-    console.log(`Creating service request: room=${roomId}, type=${type}, desc=${description}`);
+    console.log(`Creating service request: room=${roomId}, type=${type}, desc=${description}, roomNumber=${roomNumber}`);
     
     // Get the current user ID or use a guest ID
     const userId = localStorage.getItem('user_id') || 'guest';
@@ -137,7 +138,7 @@ export const requestService = async (
       updated_at: new Date().toISOString()
     };
     
-    console.log("Service request data:", requestData);
+    console.log("Service request data being submitted:", requestData);
     
     const { data, error } = await supabase
       .from('service_requests')

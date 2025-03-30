@@ -28,6 +28,8 @@ export const useServiceRequests = (roomId?: string) => {
         throw error;
       }
       
+      console.log("Raw service requests data:", data);
+      
       // Transform data to include guest_name and room_number properties
       const transformedData = await Promise.all(data.map(async (request) => {
         let transformedRequest = {
@@ -49,15 +51,19 @@ export const useServiceRequests = (roomId?: string) => {
           if (roomData) {
             transformedRequest.room_number = roomData.room_number;
           }
+        } else if (request.room_number) {
+          // If room_number is already in the request data, use that
+          transformedRequest.room_number = request.room_number;
         }
         
         return transformedRequest;
       }));
       
-      console.info("Service requests fetched:", transformedData);
+      console.info("Transformed service requests:", transformedData);
       return transformedData as ServiceRequest[];
     },
     enabled: true, // Allow fetching even without roomId for admin view
     refetchOnWindowFocus: false, // Prevent excessive refetches
+    staleTime: 1000 * 60, // Consider data fresh for 1 minute
   });
 };
