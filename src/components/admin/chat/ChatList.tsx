@@ -1,13 +1,22 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { 
+  Card, 
+  CardContent
+} from '@/components/ui/card';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
+import { Chat } from './types';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Trash2, MessageCircle, Loader } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Chat } from '@/components/admin/chat/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { formatTimeAgo } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
+import { RequestStatusBadge } from '../requests/RequestStatusBadge';
 
 interface ChatListProps {
   chats: Chat[];
@@ -18,102 +27,114 @@ interface ChatListProps {
   onTabChange: (value: string) => void;
 }
 
-const ChatList = ({ chats, loading, onSelectChat, onDeleteClick, activeTab, onTabChange }: ChatListProps) => {
-  if (loading) {
-    return (
-      <div className="text-center py-10">
-        <Loader className="inline-block h-8 w-8 animate-spin text-primary" />
-        <p className="mt-2 text-gray-500">Loading conversations...</p>
-      </div>
-    );
-  }
-
-  const filteredChats = chats;
-
-  if (filteredChats.length === 0) {
-    return (
-      <div>
-        <Tabs defaultValue={activeTab} onValueChange={onTabChange} className="mb-6">
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="unread">Unread</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <div className="text-center py-10 text-gray-500">
-          No messages available
-        </div>
-      </div>
-    );
-  }
-
+const ChatList: React.FC<ChatListProps> = ({
+  chats,
+  loading,
+  onSelectChat,
+  onDeleteClick,
+  activeTab,
+  onTabChange
+}) => {
   return (
-    <div>
-      <Tabs defaultValue={activeTab} onValueChange={onTabChange} className="mb-6">
-        <TabsList className="w-full grid grid-cols-2">
+    <Card>
+      <Tabs 
+        defaultValue={activeTab} 
+        onValueChange={onTabChange}
+        className="w-full"
+      >
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="unread">Unread</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      <div className="space-y-4">
-        {filteredChats.map(chat => (
-          <Card 
-            key={chat.id} 
-            className={cn(
-              "p-4 cursor-pointer hover:bg-muted/50 transition-colors",
-              chat.unread > 0 ? "border-l-4 border-l-primary" : ""
+          <TabsTrigger value="unread">
+            Unread
+            {chats.filter(chat => chat.unread > 0).length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {chats.filter(chat => chat.unread > 0).length}
+              </Badge>
             )}
-            onClick={() => onSelectChat(chat)}
-          >
-            <div className="flex items-start gap-4">
-              <Avatar>
-                <AvatarFallback>
-                  {chat.userName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex justify-between items-center mb-1">
-                  <div>
-                    <h3 className="font-medium flex items-center gap-2">
-                      {chat.userInfo?.firstName && chat.userInfo?.lastName 
-                        ? `${chat.userInfo.firstName} ${chat.userInfo.lastName}` 
-                        : chat.userName}
-                    </h3>
-                    <div className="flex flex-col gap-0.5">
-                      {chat.roomNumber && (
-                        <p className="text-xs text-primary font-medium">Room: {chat.roomNumber}</p>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{chat.lastActivity}</span>
-                </div>
-                {chat.messages.length > 0 && (
-                  <p className="text-sm text-muted-foreground truncate mt-1">
-                    {chat.messages[chat.messages.length - 1].text}
-                  </p>
-                )}
-                <div className="flex justify-between items-center mt-2">
-                  {chat.unread > 0 && (
-                    <Badge className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                      {chat.unread} new {chat.unread === 1 ? 'message' : 'messages'}
-                    </Badge>
-                  )}
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 p-1 h-auto ml-auto"
-                    onClick={(e) => onDeleteClick(chat, e)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete conversation</span>
-                  </Button>
-                </div>
-              </div>
+          </TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="requests">
+            Requests
+            {chats.filter(chat => chat.type === 'request').length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {chats.filter(chat => chat.type === 'request').length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+        
+        <CardContent className="p-0 pt-4">
+          {loading ? (
+            <div className="flex justify-center p-8">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
             </div>
-          </Card>
-        ))}
-      </div>
-    </div>
+          ) : chats.length === 0 ? (
+            <div className="text-center py-8 px-4">
+              <p className="text-muted-foreground">No messages found</p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {chats.map((chat) => (
+                <div 
+                  key={chat.id} 
+                  className="hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => onSelectChat(chat)}
+                >
+                  <div className="flex items-start p-4 gap-3 relative">
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {chat.userName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium">
+                          {chat.userName}
+                          {chat.unread > 0 && (
+                            <Badge variant="default" className="ml-2">
+                              {chat.unread} new
+                            </Badge>
+                          )}
+                        </h3>
+                        <span className="text-xs text-muted-foreground">
+                          {formatTimeAgo(new Date(chat.lastActivity))}
+                        </span>
+                      </div>
+                      
+                      {chat.roomNumber && (
+                        <p className="text-xs text-muted-foreground">
+                          Room: {chat.roomNumber}
+                        </p>
+                      )}
+                      
+                      {chat.type === 'request' && chat.messages[0]?.requestStatus && (
+                        <div className="mt-1">
+                          <RequestStatusBadge status={chat.messages[0].requestStatus} />
+                        </div>
+                      )}
+                      
+                      <p className="text-sm text-muted-foreground truncate mt-1">
+                        {chat.messages.length > 0 ? chat.messages[0].text : 'No messages'}
+                      </p>
+                    </div>
+                    
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 absolute top-2 right-2 opacity-0 group-hover:opacity-100 hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={(e) => onDeleteClick(chat, e)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Tabs>
+    </Card>
   );
 };
 

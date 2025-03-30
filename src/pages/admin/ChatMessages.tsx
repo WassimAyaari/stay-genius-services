@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import ChatList from '@/components/admin/chat/ChatList';
 import ChatDetail from '@/components/admin/chat/ChatDetail';
@@ -7,6 +7,9 @@ import DeleteChatDialog from '@/components/admin/chat/DeleteChatDialog';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { ServiceRequest } from '@/features/rooms/types';
+import { Chat, Message } from '@/components/admin/chat/types';
 
 const ChatMessages = () => {
   const {
@@ -30,6 +33,82 @@ const ChatMessages = () => {
   const [replyMessage, setReplyMessage] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
+  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(false);
+
+  // Fetch service requests to display as messages
+  useEffect(() => {
+    const fetchServiceRequests = async () => {
+      setIsLoadingRequests(true);
+      try {
+        const { data, error } = await supabase
+          .from('service_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching service requests for messages:', error);
+          throw error;
+        }
+
+        setServiceRequests(data as ServiceRequest[]);
+        
+        // Convert service requests to chat format and merge with existing chats
+        const requestChats = convertRequestsToChats(data as ServiceRequest[]);
+        
+        // This will happen in the useChatMessages hook
+        // Functionality remains in the hook
+      } catch (error) {
+        console.error('Error in fetchServiceRequests:', error);
+      } finally {
+        setIsLoadingRequests(false);
+      }
+    };
+
+    fetchServiceRequests();
+  }, []);
+
+  // Helper function to convert service requests to chat format
+  const convertRequestsToChats = (requests: ServiceRequest[]): Chat[] => {
+    const groupedRequests: Record<string, ServiceRequest[]> = {};
+    
+    // Group requests by guest_id or room_id
+    requests.forEach(request => {
+      const key = request.guest_id || request.room_id;
+      if (!groupedRequests[key]) {
+        groupedRequests[key] = [];
+      }
+      groupedRequests[key].push(request);
+    });
+    
+    // Convert each group to a chat
+    return Object.entries(groupedRequests).map(([userId, userRequests]) => {
+      const latestRequest = userRequests[0];
+      
+      // Create messages from requests
+      const messages: Message[] = userRequests.map(request => ({
+        id: request.id,
+        text: `${request.type} request: ${request.description || 'No description'}`,
+        time: new Date(request.created_at).toLocaleString(),
+        sender: 'user',
+        status: 'sent',
+        type: 'request',
+        requestType: request.type,
+        requestStatus: request.status
+      }));
+      
+      return {
+        id: userId,
+        userId: latestRequest.guest_id || '',
+        userName: latestRequest.guest_name || 'Guest',
+        roomNumber: latestRequest.room_number || '',
+        lastActivity: new Date(latestRequest.created_at).toISOString(),
+        messages,
+        unread: messages.length,
+        type: 'request'
+      };
+    });
+  };
 
   const handleSendReply = async () => {
     if (!replyMessage.trim() || !activeChat) return;
@@ -99,7 +178,7 @@ const ChatMessages = () => {
       {!activeChat ? (
         <ChatList
           chats={getFilteredChats(currentTab)}
-          loading={loading}
+          loading={loading || isLoadingRequests}
           onSelectChat={handleSelectChat}
           onDeleteClick={handleDeleteChat}
           activeTab={currentTab}

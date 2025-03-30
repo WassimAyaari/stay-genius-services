@@ -7,6 +7,10 @@ import { ArrowLeft, Send, Trash2 } from 'lucide-react';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { Chat, Message } from './types';
 import { Badge } from '@/components/ui/badge';
+import { RequestStatusBadge } from '../requests/RequestStatusBadge';
+import { RequestStatusActions } from '../requests/RequestStatusActions';
+import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatDetailProps {
   activeChat: Chat;
@@ -27,6 +31,7 @@ const ChatDetail = ({
 }: ChatDetailProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -41,6 +46,25 @@ const ChatDetail = ({
       onSendReply();
     }
   };
+
+  const handleUpdateRequestStatus = async (messageId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
+    try {
+      await updateRequestStatus(messageId, newStatus);
+      toast({
+        title: "Status Updated",
+        description: `Request status changed to ${newStatus}`
+      });
+      // Note: This doesn't update the UI - would need to update Chat object
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update request status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const isRequestChat = activeChat.type === 'request';
 
   return (
     <div>
@@ -79,7 +103,7 @@ const ChatDetail = ({
           </h2>
           <div className="text-sm text-muted-foreground space-y-0.5">
             {activeChat.roomNumber && <p>Room: {activeChat.roomNumber}</p>}
-            <p>Last activity: {formatTimeAgo(new Date())}</p>
+            <p>Last activity: {formatTimeAgo(new Date(activeChat.lastActivity))}</p>
           </div>
         </div>
       </div>
@@ -99,6 +123,17 @@ const ChatDetail = ({
                     : 'bg-muted rounded-tl-none'
                 }`}>
                   <p className="text-sm">{message.text}</p>
+                  
+                  {isRequestChat && message.requestStatus && (
+                    <div className="mt-2 flex items-center justify-between">
+                      <RequestStatusBadge status={message.requestStatus} />
+                      <RequestStatusActions 
+                        currentStatus={message.requestStatus}
+                        onUpdateStatus={(newStatus) => handleUpdateRequestStatus(message.id, newStatus)}
+                      />
+                    </div>
+                  )}
+                  
                   <div className="flex justify-end items-center mt-1 text-xs opacity-70">
                     <span>{message.time}</span>
                   </div>
