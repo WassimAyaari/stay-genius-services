@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +6,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { syncUserData } from '@/features/users/services/userService';
 import { CompanionType } from '../components/CompanionsList';
+import { CompanionData } from '@/features/users/types/userTypes';
 
 // Schema pour le formulaire d'inscription
 export const registerSchema = z.object({
@@ -21,6 +21,19 @@ export const registerSchema = z.object({
 });
 
 export type RegistrationFormValues = z.infer<typeof registerSchema>;
+
+// Helper function to convert CompanionType to CompanionData
+const mapCompanionsToCompanionData = (companions: CompanionType[]): CompanionData[] => {
+  return companions.map(companion => ({
+    first_name: companion.firstName,
+    last_name: companion.lastName,
+    relation: companion.relation,
+    birthDate: companion.birthDate,
+    // Keep these for backward compatibility
+    firstName: companion.firstName,
+    lastName: companion.lastName
+  }));
+};
 
 export const useRegistrationForm = () => {
   const [loading, setLoading] = useState(false);
@@ -54,7 +67,7 @@ export const useRegistrationForm = () => {
         room_number: values.roomNumber,
         check_in_date: values.checkInDate,
         check_out_date: values.checkOutDate,
-        companions: companions,
+        companions: mapCompanionsToCompanionData(companions),
       };
       
       // Sauvegarder dans le localStorage

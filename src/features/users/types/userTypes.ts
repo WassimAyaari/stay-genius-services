@@ -22,6 +22,7 @@ export interface CompanionData {
   last_name: string;
   relation: string;
   birthDate?: Date;
+  // These are kept for backward compatibility
   firstName?: string;
   lastName?: string;
   created_at?: string;

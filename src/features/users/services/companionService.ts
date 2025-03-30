@@ -5,7 +5,7 @@ import { CompanionData } from '../types/userTypes';
 /**
  * Synchronise les accompagnateurs de l'utilisateur
  */
-export const syncCompanions = async (userId: string, companions: any[]): Promise<boolean> => {
+export const syncCompanions = async (userId: string, companions: CompanionData[]): Promise<boolean> => {
   try {
     // D'abord supprimer tous les accompagnateurs existants
     const { error: deleteError } = await supabase
@@ -21,8 +21,8 @@ export const syncCompanions = async (userId: string, companions: any[]): Promise
     // Préparer les données des accompagnateurs
     const companionsData = companions.map(companion => ({
       user_id: userId,
-      first_name: companion.firstName || companion.first_name,
-      last_name: companion.lastName || companion.last_name,
+      first_name: companion.first_name || companion.firstName,
+      last_name: companion.last_name || companion.lastName,
       relation: companion.relation
     }));
     
