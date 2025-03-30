@@ -63,14 +63,14 @@ export function useChatMessages() {
     return Object.entries(groupedRequests).map(([userId, userRequests]) => {
       const latestRequest = userRequests[0];
       
-      // Create messages from requests
+      // Create messages from requests with the correct sender type
       const messages = userRequests.map(request => ({
         id: request.id,
         text: `${request.type} request: ${request.description || 'No description'}`,
         time: new Date(request.created_at).toLocaleString(),
-        sender: 'user',
-        status: 'sent',
-        type: 'request',
+        sender: 'user' as const,  // Explicitly type as 'user'
+        status: 'sent' as const,  // Explicitly type as 'sent'
+        type: 'request' as const, // Explicitly type as 'request'
         requestType: request.type,
         requestStatus: request.status
       }));
@@ -83,7 +83,7 @@ export function useChatMessages() {
         lastActivity: new Date(latestRequest.created_at).toISOString(),
         messages,
         unread: messages.length,
-        type: 'request'
+        type: 'request' as const  // Explicitly type as 'request'
       };
     });
   };
