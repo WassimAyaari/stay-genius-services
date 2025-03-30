@@ -28,8 +28,9 @@ export const RequestsTab = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [requestsWithDetails, setRequestsWithDetails] = useState<ServiceRequestWithItem[]>([]);
 
+  // Fix: Only update state when requests change, not on every render
   useEffect(() => {
-    if (requests) {
+    if (requests && requests.length > 0) {
       console.info("Requests with items:", requests);
       setRequestsWithDetails(requests as ServiceRequestWithItem[]);
     }
