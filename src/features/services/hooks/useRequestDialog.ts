@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
-import { requestService } from '@/features/rooms/controllers/roomService';
+import { requestService, ServiceType } from '@/features/rooms/controllers/roomService';
 import { Room } from '@/hooks/useRoom';
 import { useRequestItems } from '@/hooks/useRequestCategories';
 import { supabase } from '@/integrations/supabase/client';

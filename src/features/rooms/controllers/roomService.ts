@@ -88,7 +88,7 @@ export const createServiceRequest = async (
   }
 };
 
-// Add the missing requestService function
+// Make sure this function is properly exported
 export const requestService = async (
   roomId: string,
   type: ServiceType, 
