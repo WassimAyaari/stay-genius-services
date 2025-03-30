@@ -22,8 +22,6 @@ export const RequestStatusActions = ({
   onUpdateStatus 
 }: RequestStatusActionsProps) => {
   const { toast } = useToast();
-  // Check if it's a local request (stored in localStorage)
-  const isLocalRequest = requestId.startsWith('local-');
   
   const handleStatusUpdate = (newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     onUpdateStatus(newStatus);

@@ -52,46 +52,30 @@ export const requestService = async (
     }
   }
 
-  // For demonstration purposes, we'll log the request but not actually insert it
-  // as the RLS policy is blocking these insertions
-  console.log('Service request data:', {
-    guest_id,
-    room_id: roomId,
-    type,
-    description,
-    request_item_id,
-    category_id,
-    status: 'pending'
-  });
-
-  // Store the request in local storage as a fallback
   try {
-    const existingRequests = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-    existingRequests.push({
-      guest_id,
-      room_id: roomId,
-      type,
-      description,
-      request_item_id,
-      category_id,
-      status: 'pending',
-      created_at: new Date().toISOString()
-    });
-    localStorage.setItem('pending_requests', JSON.stringify(existingRequests));
+    // Now that RLS is disabled, we can directly insert into the database
+    const { data, error } = await supabase
+      .from('service_requests')
+      .insert({
+        guest_id,
+        room_id: roomId,
+        type,
+        description,
+        request_item_id,
+        category_id,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      })
+      .select();
     
-    // Return mock data for UI consistency
-    return [{
-      id: `local-${Date.now()}`,
-      room_id: roomId,
-      guest_id,
-      type,
-      description,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }];
+    if (error) {
+      console.error('Error saving request to database:', error);
+      throw error;
+    }
+    
+    return data;
   } catch (error) {
-    console.error('Error saving request to local storage:', error);
+    console.error('Error submitting service request:', error);
     throw error;
   }
 };

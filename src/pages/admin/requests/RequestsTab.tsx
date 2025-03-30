@@ -18,28 +18,7 @@ export const RequestsTab = () => {
   const { handleUpdateStatus } = useRequestStatusService();
   
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
-    // Check if it's a local request
-    if (requestId.startsWith('local-')) {
-      try {
-        // Update the request in localStorage
-        const localRequests = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-        const updatedRequests = localRequests.map((req: any) => {
-          if (req.id === requestId || (!req.id && requestId.includes(new Date(req.created_at).getTime().toString()))) {
-            return { ...req, status: newStatus };
-          }
-          return req;
-        });
-        localStorage.setItem('pending_requests', JSON.stringify(updatedRequests));
-        
-        // Refresh the data to show the updated status
-        handleRefresh();
-      } catch (error) {
-        console.error("Error updating local request:", error);
-      }
-    } else {
-      // Handle database requests normally
-      await handleUpdateStatus(requestId, newStatus, handleRefresh);
-    }
+    await handleUpdateStatus(requestId, newStatus, handleRefresh);
   };
 
   return (
