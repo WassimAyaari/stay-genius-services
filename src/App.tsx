@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,6 +32,7 @@ import RestaurantMenuManager from './pages/admin/RestaurantMenuManager';
 import ReservationManager from './pages/admin/ReservationManager';
 import ChatMessages from './pages/admin/ChatMessages';
 import RequestManager from './pages/admin/RequestManager';
+import Profile from './pages/profile/Profile';
 
 const queryClient = new QueryClient();
 
@@ -41,7 +41,6 @@ const AnimatedRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   
   useEffect(() => {
-    // Vérifier l'état d'authentification initial
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
@@ -49,7 +48,6 @@ const AnimatedRoutes = () => {
     
     checkAuth();
     
-    // S'abonner aux changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
     });
@@ -59,7 +57,6 @@ const AnimatedRoutes = () => {
     };
   }, []);
   
-  // Attendre que l'état d'authentification soit vérifié
   if (isAuthenticated === null) {
     return <div className="flex items-center justify-center h-screen">Chargement...</div>;
   }
@@ -82,6 +79,8 @@ const AnimatedRoutes = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/about" element={<About />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Profile />} />
           <Route path="/admin/about" element={<AboutEditor />} />
           <Route path="/admin/restaurants" element={<RestaurantManager />} />
           <Route path="/admin/restaurants/:id/menu" element={<RestaurantMenuManager />} />

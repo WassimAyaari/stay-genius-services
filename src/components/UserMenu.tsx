@@ -69,10 +69,10 @@ const UserMenu = () => {
             <span>My Room</span>
           </DropdownMenuItem>
         </Link>
-        <Link to="/settings">
+        <Link to="/profile">
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+            <span>Profile</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator />
