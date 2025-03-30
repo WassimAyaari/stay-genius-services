@@ -34,7 +34,8 @@ export const useServiceRequests = (roomId?: string) => {
           ...request,
           guest_name: request.profiles ? 
             `${request.profiles.first_name || ''} ${request.profiles.last_name || ''}`.trim() : 
-            'Unknown Guest'
+            'Unknown Guest',
+          room_number: undefined // Initialize room_number property explicitly
         };
         
         // If room_id exists, try to get the room_number
