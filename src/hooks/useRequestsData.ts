@@ -23,12 +23,16 @@ export function useRequestsData() {
           ...req,
           id: req.id || `local-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           guest_name: localStorage.getItem('user_data') 
-            ? JSON.parse(localStorage.getItem('user_data') || '{}').first_name || 'Guest'
+            ? JSON.parse(localStorage.getItem('user_data') || '{}').name || 'Guest'
             : 'Guest',
           room_number: localStorage.getItem('user_data')
-            ? JSON.parse(localStorage.getItem('user_data') || '{}').room_number || 'Unknown'
-            : 'Unknown'
+            ? JSON.parse(localStorage.getItem('user_data') || '{}').roomNumber || 'Unknown'
+            : 'Unknown',
+          request_items: req.request_item_id ? { name: req.description || 'Request item' } : null
         }));
+        
+        console.log('Transformed local requests:', transformedLocalRequests);
+        console.log('DB requests:', dbRequests);
         
         // Combine DB requests with local requests
         setRequests([...dbRequests, ...transformedLocalRequests]);
@@ -44,6 +48,11 @@ export function useRequestsData() {
     setIsRefreshing(true);
     try {
       await refetch();
+      
+      // Force re-read of localStorage
+      const localRequestsStr = localStorage.getItem('pending_requests') || '[]';
+      const localRequests = JSON.parse(localRequestsStr);
+      
       toast({
         title: "Data Refreshed",
         description: "Request data has been refreshed."

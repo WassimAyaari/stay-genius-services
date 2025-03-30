@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface RequestStatusActionsProps {
   currentStatus: string;
@@ -21,41 +21,12 @@ export const RequestStatusActions = ({
   requestId,
   onUpdateStatus 
 }: RequestStatusActionsProps) => {
+  const { toast } = useToast();
   // Check if it's a local request (stored in localStorage)
   const isLocalRequest = requestId.startsWith('local-');
   
   const handleStatusUpdate = (newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
-    if (isLocalRequest) {
-      try {
-        // Update the request in localStorage
-        const localRequests = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-        const updatedRequests = localRequests.map((req: any) => {
-          if (req.id === requestId || (!req.id && requestId.includes(new Date(req.created_at).getTime().toString()))) {
-            return { ...req, status: newStatus };
-          }
-          return req;
-        });
-        localStorage.setItem('pending_requests', JSON.stringify(updatedRequests));
-        
-        // Call the onUpdateStatus callback to update UI
-        onUpdateStatus(newStatus);
-        
-        toast({
-          title: "Status Updated",
-          description: `Local request status changed to ${newStatus}`
-        });
-      } catch (error) {
-        console.error("Error updating local request:", error);
-        toast({
-          title: "Error",
-          description: "Failed to update local request status",
-          variant: "destructive"
-        });
-      }
-    } else {
-      // Handle database requests normally
-      onUpdateStatus(newStatus);
-    }
+    onUpdateStatus(newStatus);
   };
   
   return (
