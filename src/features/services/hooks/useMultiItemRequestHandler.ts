@@ -6,30 +6,33 @@ import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Ensures user profile exists in the database by using a chat message as a fallback
+ * Creates a user profile in the database if it doesn't exist
  */
-const ensureUserProfileExists = async (userId: string, userInfo: UserInfo) => {
+const createUserProfile = async (userId: string, userInfo: UserInfo) => {
   try {
-    // Check if profile exists
-    const { data: existingProfile, error: profileError } = await supabase
+    // Extract first and last name from full name
+    const nameParts = userInfo.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    // Insert the profile
+    const { error } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+      .insert([{
+        id: userId,
+        first_name: firstName,
+        last_name: lastName
+      }]);
     
-    if (profileError) throw profileError;
-    
-    if (!existingProfile) {
-      console.log("Profile doesn't exist, but we'll continue with the request anyway");
-      // We'll skip profile creation since it's failing with RLS policies
-      // Instead we'll just proceed with the request
+    if (error) {
+      console.error("Error inserting profile:", error);
+      return false;
     }
     
     return true;
   } catch (error) {
-    console.error("Error checking if user profile exists:", error);
-    // Even if there's an error, we'll still try to proceed with the request
-    return true;
+    console.error("Error in createUserProfile:", error);
+    return false;
   }
 };
 
@@ -67,38 +70,21 @@ export function useMultiItemRequestHandler() {
     }
 
     try {
-      // Check if user profile exists, but don't fail if it doesn't
-      await ensureUserProfileExists(userId, userInfo);
-      
-      // First check if room number exists and get the room_id
-      const { data: roomData, error: roomError } = await supabase
-        .from('rooms')
-        .select('id')
-        .eq('room_number', userInfo.roomNumber)
-        .maybeSingle();
-      
-      let roomId = null;
-      
-      if (roomError) {
-        console.error("Error fetching room:", roomError);
-        throw roomError;
+      // Step 1: Try to create user profile if it doesn't exist (but don't block if it fails)
+      try {
+        await createUserProfile(userId, userInfo);
+      } catch (profileError) {
+        console.warn("Failed to create profile, but continuing with request", profileError);
+        // Continue despite profile creation failure
       }
       
-      if (roomData) {
-        roomId = roomData.id;
-      } else {
-        console.log(`Room ${userInfo.roomNumber} not found. Creating requests without room_id.`);
-      }
-
-      // Create a request for each selected item
+      // Step 2: Create a chat message that summarizes all requests
       const selectedItemData = categoryItems.filter(item => selectedItems.includes(item.id));
-      
-      // First, create a chat message that summarizes all requests
       const itemNames = selectedItemData.map(item => item.name).join(', ');
       const categoryName = selectedCategory?.name || 'items';
       const chatMessage = `Requesting ${categoryName}: ${itemNames}`;
       
-      await supabase
+      const { error: chatError } = await supabase
         .from('chat_messages')
         .insert([{
           user_id: userId,
@@ -111,33 +97,75 @@ export function useMultiItemRequestHandler() {
           created_at: new Date().toISOString()
         }]);
       
-      // Then create individual service requests for each item
-      const requests = selectedItemData.map(item => ({
-        guest_id: userId,
-        room_id: roomId, // This will be null if room doesn't exist
-        type: 'custom', // Using 'custom' as the generic type
-        description: item.name,
-        category_id: selectedCategory?.id,
-        request_item_id: item.id,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      }));
-      
-      const { error: batchError } = await supabase
-        .from('service_requests')
-        .insert(requests);
-      
-      if (batchError) {
-        console.error("Error submitting batch requests:", batchError);
-        throw batchError;
+      if (chatError) {
+        console.error("Error creating chat message:", chatError);
+        throw chatError;
       }
       
-      toast({
-        title: "Requests Submitted",
-        description: `${requests.length} requests have been sent successfully.`
-      });
+      // Step 3: Check if room exists and get room_id
+      const { data: roomData } = await supabase
+        .from('rooms')
+        .select('id')
+        .eq('room_number', userInfo.roomNumber)
+        .maybeSingle();
       
-      onClose();
+      // Step 4: Try to create service requests for each item
+      let successful = 0;
+      let failed = 0;
+      
+      for (const item of selectedItemData) {
+        try {
+          const requestData = {
+            guest_id: userId,
+            type: 'custom',
+            description: item.name,
+            category_id: selectedCategory?.id,
+            request_item_id: item.id,
+            status: 'pending',
+            created_at: new Date().toISOString()
+          };
+          
+          // Add room_id only if the room exists
+          if (roomData?.id) {
+            Object.assign(requestData, { room_id: roomData.id });
+          }
+          
+          const { error } = await supabase
+            .from('service_requests')
+            .insert([requestData]);
+            
+          if (error) {
+            console.error(`Error submitting request for item ${item.name}:`, error);
+            failed++;
+          } else {
+            successful++;
+          }
+        } catch (itemError) {
+          console.error(`Error processing item ${item.name}:`, itemError);
+          failed++;
+        }
+      }
+      
+      // Show appropriate toast based on results
+      if (successful > 0 && failed === 0) {
+        toast({
+          title: "Requests Submitted",
+          description: `${successful} requests have been sent successfully.`
+        });
+        onClose();
+      } else if (successful > 0 && failed > 0) {
+        toast({
+          title: "Partial Success",
+          description: `${successful} requests sent, but ${failed} failed. Your message was delivered.`
+        });
+        onClose();
+      } else {
+        toast({
+          title: "Requests Failed",
+          description: "Failed to submit requests, but your message was delivered.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error("Error submitting multiple requests:", error);
       toast({

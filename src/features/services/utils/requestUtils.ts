@@ -5,30 +5,33 @@ import { RequestCategory } from '@/features/rooms/types';
 import { toast } from '@/hooks/use-toast';
 
 /**
- * Ensures user profile exists in the database by using a chat message as a fallback
+ * Creates a user profile in the database if it doesn't exist
  */
-const ensureUserProfileExists = async (userId: string, userInfo: UserInfo) => {
+const createUserProfile = async (userId: string, userInfo: UserInfo) => {
   try {
-    // Check if profile exists
-    const { data: existingProfile, error: profileError } = await supabase
+    // Extract first and last name from full name
+    const nameParts = userInfo.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    // Insert the profile
+    const { error } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+      .insert([{
+        id: userId,
+        first_name: firstName,
+        last_name: lastName
+      }]);
     
-    if (profileError) throw profileError;
-    
-    if (!existingProfile) {
-      console.log("Profile doesn't exist, but we'll continue with the request anyway");
-      // We'll skip profile creation since it's failing with RLS policies
-      // Instead we'll just proceed with the request
+    if (error) {
+      console.error("Error inserting profile:", error);
+      return false;
     }
     
     return true;
   } catch (error) {
-    console.error("Error checking if user profile exists:", error);
-    // Even if there's an error, we'll still try to proceed with the request
-    return true;
+    console.error("Error in createUserProfile:", error);
+    return false;
   }
 };
 
@@ -62,17 +65,7 @@ export const submitRequestViaChatMessage = async (
   }
 
   try {
-    // Check if user profile exists, but don't fail if it doesn't
-    await ensureUserProfileExists(userId, userInfo);
-    
-    console.log("Submitting request:", {
-      description,
-      type,
-      userInfo,
-      categoryId: selectedCategory?.id
-    });
-    
-    // Insert the request as a chat message
+    // Step 1: Create a chat message (this doesn't require a profile)
     const { error: chatError } = await supabase
       .from('chat_messages')
       .insert([{
@@ -86,58 +79,72 @@ export const submitRequestViaChatMessage = async (
         created_at: new Date().toISOString()
       }]);
 
-    if (chatError) throw chatError;
+    if (chatError) {
+      console.error("Error creating chat message:", chatError);
+      throw chatError;
+    }
     
-    // Check if room exists
-    const { data: roomData, error: roomError } = await supabase
+    // Step 2: Try to create user profile if it doesn't exist
+    try {
+      await createUserProfile(userId, userInfo);
+    } catch (profileError) {
+      console.warn("Failed to create profile, but continuing with request", profileError);
+      // Continue despite profile creation failure
+    }
+    
+    // Step 3: Check if room exists and get room_id
+    const { data: roomData } = await supabase
       .from('rooms')
       .select('id')
       .eq('room_number', userInfo.roomNumber)
       .maybeSingle();
     
-    if (roomError) {
-      console.error("Error fetching room:", roomError);
-      throw roomError;
-    }
-    
-    // If room doesn't exist or we can't create it due to RLS, create a service request without room_id
-    if (!roomData) {
-      console.log(`Room ${userInfo.roomNumber} not found. Creating service request without room_id.`);
+    // Step 4: Create service request with minimal required data
+    try {
+      const requestData = {
+        guest_id: userId,
+        type: type,
+        description: description,
+        category_id: selectedCategory?.id || null,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      // Add room_id only if the room exists
+      if (roomData?.id) {
+        Object.assign(requestData, { room_id: roomData.id });
+      }
       
-      // Create service request without room_id
+      // Insert service request (will only work if profile exists)
       const { error: serviceError } = await supabase
         .from('service_requests')
-        .insert([{
-          guest_id: userId,
-          type: type,
-          description: description,
-          category_id: selectedCategory?.id || null,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }]);
+        .insert([requestData]);
       
       if (serviceError) {
         console.error("Error submitting service request:", serviceError);
-        throw serviceError;
+        
+        // If we failed because the profile doesn't exist, show a special error
+        if (serviceError.code === '23503' && serviceError.details?.includes('guest_id')) {
+          toast({
+            title: "Profile Error",
+            description: "Your user profile is not set up correctly. Please contact reception.",
+            variant: "destructive"
+          });
+        } else {
+          // For other errors, show generic message
+          toast({
+            title: "Error",
+            description: "Failed to submit service request. The chat message was sent.",
+            variant: "destructive"
+          });
+        }
+        
+        // Return partial success since the chat message was sent
+        return true;
       }
-    } else {
-      // Insert the service request with the existing room_id
-      const { error: serviceError } = await supabase
-        .from('service_requests')
-        .insert([{
-          guest_id: userId,
-          room_id: roomData.id,
-          type: type,
-          description: description,
-          category_id: selectedCategory?.id || null,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }]);
-      
-      if (serviceError) {
-        console.error("Error submitting service request:", serviceError);
-        throw serviceError;
-      }
+    } catch (requestError) {
+      console.error("Error creating service request:", requestError);
+      // Continue despite service request failure since chat message was sent
     }
     
     toast({
@@ -145,7 +152,6 @@ export const submitRequestViaChatMessage = async (
       description: "Your request has been sent successfully.",
     });
     
-    console.log("Service request submitted successfully");
     return true;
   } catch (error) {
     console.error("Error submitting request via chat:", error);
