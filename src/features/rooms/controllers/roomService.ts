@@ -39,7 +39,7 @@ export const updateRequestStatus = async (
     // Use the initially fetched data to access all the needed properties
     if (requestData && requestData.guest_id) {
       // We'll use the room_id from the request data if available
-      const roomNumber = requestData.room_number || '';
+      const roomNumber = requestData.room_id || ''; // Use room_id instead of room_number since it's definitely in the type
       
       const statusMessage = `Your ${requestData.type} request has been updated to: ${newStatus}`;
       
@@ -47,7 +47,7 @@ export const updateRequestStatus = async (
         user_id: requestData.guest_id,
         recipient_id: requestData.guest_id,
         user_name: 'System',
-        room_number: roomNumber,
+        room_number: roomNumber, // Passing roomNumber (derived from room_id) to the chat_messages table
         text: statusMessage,
         sender: 'staff',
         status: 'sent',
