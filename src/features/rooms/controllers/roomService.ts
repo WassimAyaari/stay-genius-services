@@ -14,7 +14,7 @@ export const updateRequestStatus = async (
       .from('service_requests')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
       .eq('id', requestId)
-      .select();
+      .select('*, guest_name, room_number');
 
     if (error) {
       console.error("Error updating request status:", error);
@@ -30,7 +30,7 @@ export const updateRequestStatus = async (
       
       // Only add a chat message if the request has a guest_id
       if (request.guest_id) {
-        // Fix: Check if room_number exists before accessing it
+        // Access room_number safely (might be undefined or null in some cases)
         const roomNumber = request.room_number || '';
         
         const statusMessage = `Your ${request.type} request has been updated to: ${newStatus}`;
