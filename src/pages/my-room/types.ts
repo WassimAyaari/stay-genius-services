@@ -1,5 +1,5 @@
 
-import { ServiceType } from '@/features/rooms/controllers/roomService';
+import { ServiceType } from '@/features/rooms/types';
 
 export interface Service {
   icon: React.ReactNode;

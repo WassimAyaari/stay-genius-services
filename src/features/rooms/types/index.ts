@@ -39,3 +39,6 @@ export interface RequestItem {
   created_at: string;
   updated_at: string;
 }
+
+// Adding ServiceType type to fix imports
+export type ServiceType = 'housekeeping' | 'laundry' | 'wifi' | 'bill' | 'preferences' | 'concierge' | 'custom';

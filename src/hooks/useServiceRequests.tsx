@@ -31,7 +31,7 @@ export const useServiceRequests = (roomId?: string) => {
       console.log("Raw service requests data:", data);
       
       // Transform data to include guest_name and room_number properties
-      const transformedData = await Promise.all(data.map(async (request) => {
+      const transformedData = await Promise.all(data.map(async (request: any) => {
         // Initialize transformed request with explicit room_number property
         let transformedRequest = {
           ...request,

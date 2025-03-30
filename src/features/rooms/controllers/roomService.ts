@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { ServiceType } from '../types';
 
 // Function to create a new service request
 export const createServiceRequest = async (requestData: {
@@ -19,6 +20,59 @@ export const createServiceRequest = async (requestData: {
     })
     .select()
     .single();
+
+  if (error) {
+    console.error('Error creating service request:', error);
+    throw error;
+  }
+
+  return data;
+};
+
+// Adding the missing requestService function
+export const requestService = async (
+  roomId: string,
+  type: ServiceType,
+  description: string,
+  request_item_id?: string,
+  category_id?: string,
+  guest_name?: string,
+  room_number?: string
+) => {
+  // Get guest_id from local storage or use a default
+  const userDataStr = localStorage.getItem('user_data');
+  let guest_id = '00000000-0000-0000-0000-000000000000'; // Default guest ID
+
+  if (userDataStr) {
+    try {
+      const userData = JSON.parse(userDataStr);
+      if (userData.id) {
+        guest_id = userData.id;
+      }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+    }
+  }
+
+  // Prepare request data
+  const requestData = {
+    guest_id,
+    room_id: roomId,
+    type,
+    description,
+    request_item_id,
+    category_id,
+    room_number,
+    status: 'pending'
+  };
+
+  console.log('Creating service request with data:', requestData);
+
+  // Create the service request
+  const { data, error } = await supabase
+    .from('service_requests')
+    .insert(requestData)
+    .select();
 
   if (error) {
     console.error('Error creating service request:', error);
