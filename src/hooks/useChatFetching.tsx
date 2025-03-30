@@ -34,9 +34,10 @@ export function useChatFetching() {
 
       if (serviceRequestsError) throw serviceRequestsError;
 
-      // Process chat messages
+      // Process chat messages and service requests
       const uniqueUsers = new Map();
       
+      // Process regular chat messages
       messagesData?.forEach(msg => {
         if (msg.user_id && !uniqueUsers.has(msg.user_id)) {
           uniqueUsers.set(msg.user_id, {
@@ -49,8 +50,8 @@ export function useChatFetching() {
       });
 
       // Process service requests - ensure proper type casting
-      if (serviceRequestsData) {
-        serviceRequestsData.forEach((req: any) => {
+      if (serviceRequestsData && Array.isArray(serviceRequestsData)) {
+        serviceRequestsData.forEach((req: ServiceRequest) => {
           if (req.guest_id && !uniqueUsers.has(req.guest_id)) {
             uniqueUsers.set(req.guest_id, {
               userId: req.guest_id,
@@ -117,19 +118,19 @@ export function useChatFetching() {
             time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             sender: msg.sender as 'user' | 'staff',
             status: msg.status as 'sent' | 'delivered' | 'read' | undefined,
-            type: 'chat' as 'chat' | 'request'
+            type: 'chat' as const
           })));
         }
         
-        // Add service requests as messages - ensure proper type handling
+        // Add service requests as messages
         if (userRequests && userRequests.length > 0) {
           formattedMessages.push(...userRequests.map(req => ({
             id: req.id,
-            text: `Service Request: ${req.type.charAt(0).toUpperCase() + req.type.slice(1)} - ${req.description || 'No details provided'}`,
+            text: `Service Request: ${req.type.replace('_', ' ').charAt(0).toUpperCase() + req.type.replace('_', ' ').slice(1)} - ${req.description || 'No details provided'}`,
             time: new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            sender: 'user' as 'user' | 'staff',
-            status: 'delivered' as 'sent' | 'delivered' | 'read' | undefined,
-            type: 'request' as 'chat' | 'request',
+            sender: 'user' as const,
+            status: 'delivered' as const,
+            type: 'request' as const,
             requestType: req.type,
             requestStatus: req.status
           })));

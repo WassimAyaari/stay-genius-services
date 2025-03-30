@@ -12,7 +12,8 @@ import {
   ChevronDown,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  MessageSquare
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -54,12 +55,14 @@ import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface ServiceRequestWithItem extends ServiceRequest {
   request_items?: RequestItem | null;
 }
 
 const RequestManager = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
@@ -247,6 +250,18 @@ const RequestManager = () => {
     }
   };
   
+  const handleViewInChat = (guestId: string) => {
+    if (guestId) {
+      navigate('/admin/messages');
+    } else {
+      toast({
+        title: "Cannot view in chat",
+        description: "This request has no associated guest ID",
+        variant: "destructive"
+      });
+    }
+  };
+  
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -276,6 +291,12 @@ const RequestManager = () => {
         <TabsContent value="requests">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-medium">Request Status Management</h2>
+            <Link to="/admin/messages?tab=requests">
+              <Button variant="outline" size="sm" className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                View in Messages
+              </Button>
+            </Link>
           </div>
           
           {isLoadingRequests ? (
@@ -318,43 +339,55 @@ const RequestManager = () => {
                             {getStatusBadge(request.status)}
                           </TableCell>
                           <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  Update Status <ChevronDown className="ml-1 h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuItem 
-                                  onClick={() => handleUpdateRequestStatus(request.id, 'pending')}
-                                  disabled={request.status === 'pending'}
-                                >
-                                  <Clock className="mr-2 h-4 w-4" />
-                                  Mark as Pending
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
-                                  disabled={request.status === 'in_progress'}
-                                >
-                                  <Loader className="mr-2 h-4 w-4" />
-                                  Mark as In Progress
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleUpdateRequestStatus(request.id, 'completed')}
-                                  disabled={request.status === 'completed'}
-                                >
-                                  <Check className="mr-2 h-4 w-4" />
-                                  Mark as Completed
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
-                                  disabled={request.status === 'cancelled'}
-                                >
-                                  <X className="mr-2 h-4 w-4" />
-                                  Mark as Cancelled
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div className="flex gap-2">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    Update Status <ChevronDown className="ml-1 h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleUpdateRequestStatus(request.id, 'pending')}
+                                    disabled={request.status === 'pending'}
+                                  >
+                                    <Clock className="mr-2 h-4 w-4" />
+                                    Mark as Pending
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
+                                    disabled={request.status === 'in_progress'}
+                                  >
+                                    <Loader className="mr-2 h-4 w-4" />
+                                    Mark as In Progress
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleUpdateRequestStatus(request.id, 'completed')}
+                                    disabled={request.status === 'completed'}
+                                  >
+                                    <Check className="mr-2 h-4 w-4" />
+                                    Mark as Completed
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
+                                    disabled={request.status === 'cancelled'}
+                                  >
+                                    <X className="mr-2 h-4 w-4" />
+                                    Mark as Cancelled
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleViewInChat(request.guest_id)}
+                                disabled={!request.guest_id}
+                                title={request.guest_id ? "View in chat messages" : "No guest ID available"}
+                              >
+                                <MessageSquare className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))

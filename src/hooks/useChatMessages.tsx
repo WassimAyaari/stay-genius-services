@@ -1,12 +1,23 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Chat } from '@/components/admin/chat/types';
 import { useChatFetching } from './useChatFetching';
 import { useChatOperations } from './useChatOperations';
+import { useLocation } from 'react-router-dom';
 
 export function useChatMessages() {
-  const [currentTab, setCurrentTab] = useState('all');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const tabFromUrl = queryParams.get('tab');
+  
+  const [currentTab, setCurrentTab] = useState(tabFromUrl || 'all');
   const { chats, loading, setChats, fetchChats } = useChatFetching();
+  
+  useEffect(() => {
+    if (tabFromUrl) {
+      setCurrentTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
   
   const {
     activeChat,
@@ -41,6 +52,8 @@ export function useChatMessages() {
     confirmDelete,
     sendReply,
     getFilteredChats,
-    fetchChats
+    fetchChats,
+    currentTab,
+    setCurrentTab
   };
 }

@@ -5,6 +5,8 @@ import ChatList from '@/components/admin/chat/ChatList';
 import ChatDetail from '@/components/admin/chat/ChatDetail';
 import DeleteChatDialog from '@/components/admin/chat/DeleteChatDialog';
 import { useChatMessages } from '@/hooks/useChatMessages';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 const ChatMessages = () => {
   const {
@@ -19,11 +21,13 @@ const ChatMessages = () => {
     handleDeleteChat,
     confirmDelete,
     sendReply,
-    getFilteredChats
+    getFilteredChats,
+    fetchChats
   } = useChatMessages();
   
   const [currentTab, setCurrentTab] = useState('all');
   const [replyMessage, setReplyMessage] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
   const handleSendReply = async () => {
@@ -54,9 +58,42 @@ const ChatMessages = () => {
     setCurrentTab(value);
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchChats();
+      toast({
+        title: "Data refreshed",
+        description: "The messages and requests have been refreshed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error refreshing data",
+        description: "There was a problem refreshing the data.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 max-w-6xl">
-      <h1 className="text-2xl font-semibold mb-6">Messages & Requests</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Messages & Requests</h1>
+        {!activeChat && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        )}
+      </div>
       
       {!activeChat ? (
         <ChatList
