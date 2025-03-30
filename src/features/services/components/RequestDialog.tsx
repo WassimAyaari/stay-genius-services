@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { useRequestDialog } from '@/features/services/hooks/useRequestDialog';
@@ -37,7 +38,12 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        if (!open) {
+          handleDialogClose();
+        }
+        onOpenChange(open);
+      }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
