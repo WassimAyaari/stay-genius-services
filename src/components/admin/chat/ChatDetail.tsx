@@ -129,6 +129,7 @@ const ChatDetail = ({
                       <RequestStatusBadge status={message.requestStatus} />
                       <RequestStatusActions 
                         currentStatus={message.requestStatus}
+                        requestId={message.id}
                         onUpdateStatus={(newStatus) => handleUpdateRequestStatus(message.id, newStatus)}
                       />
                     </div>
