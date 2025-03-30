@@ -22,6 +22,7 @@ export const useServiceRequests = (roomId?: string) => {
         throw error;
       }
       
+      console.info("Service requests fetched:", data);
       return data as ServiceRequest[];
     },
     enabled: true, // Allow fetching even without roomId for admin view

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -78,6 +77,13 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
       userId = uuidv4();
       localStorage.setItem('user_id', userId);
     }
+    
+    const userData = {
+      name: userInfo.name,
+      roomNumber: userInfo.roomNumber
+    };
+    localStorage.setItem('user_data', JSON.stringify(userData));
+    
     try {
       const {
         data,
@@ -91,6 +97,31 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         status: 'sent',
         created_at: currentTime.toISOString()
       }]).select();
+      
+      if (inputMessage.toLowerCase().includes('request') || 
+          inputMessage.toLowerCase().includes('service') ||
+          inputMessage.toLowerCase().includes('clean') ||
+          inputMessage.toLowerCase().includes('laundry') ||
+          inputMessage.toLowerCase().includes('help') ||
+          inputMessage.toLowerCase().includes('need')) {
+        
+        let requestType = 'general';
+        if (inputMessage.toLowerCase().includes('clean')) requestType = 'cleaning';
+        else if (inputMessage.toLowerCase().includes('laundry')) requestType = 'laundry';
+        else if (inputMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
+        else if (inputMessage.toLowerCase().includes('food') || inputMessage.toLowerCase().includes('meal')) requestType = 'food';
+        
+        await supabase.from('service_requests').insert([{
+          guest_id: userId,
+          guest_name: userInfo.name,
+          room_number: userInfo.roomNumber,
+          type: requestType,
+          description: inputMessage,
+          status: 'pending',
+          created_at: currentTime.toISOString()
+        }]);
+      }
+      
       if (error) {
         console.error("Error saving message:", error);
         toast({
@@ -100,6 +131,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         });
         return;
       }
+      
       setTimeout(async () => {
         const staffResponse: Message = {
           id: (Date.now() + 1).toString(),

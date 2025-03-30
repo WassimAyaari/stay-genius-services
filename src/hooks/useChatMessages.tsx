@@ -36,6 +36,7 @@ export function useChatMessages() {
           return;
         }
 
+        console.log('Service requests fetched for chat:', data);
         const requestChats = convertRequestsToChats(data as ServiceRequest[]);
         setServiceRequestChats(requestChats);
       } catch (error) {
@@ -52,6 +53,8 @@ export function useChatMessages() {
     
     // Group requests by guest_id
     requests.forEach(request => {
+      if (!request.guest_id) return; // Skip requests without guest_id
+      
       const key = request.guest_id || '';
       if (!groupedRequests[key]) {
         groupedRequests[key] = [];
