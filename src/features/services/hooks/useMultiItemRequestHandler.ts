@@ -202,7 +202,7 @@ export function useMultiItemRequestHandler() {
         toast({
           title: "Message Sent",
           description: "Your message was delivered, but we couldn't register your requests. Our staff will assist you.",
-          variant: "warning"
+          variant: "destructive" // Changed from "warning" to "destructive"
         });
         onClose();
       }

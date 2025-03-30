@@ -164,7 +164,7 @@ export const submitRequestViaChatMessage = async (
         toast({
           title: "Partial Success",
           description: "Your message was sent, but we couldn't register your full request. Our staff will still assist you.",
-          variant: "warning"
+          variant: "destructive" // Changed from "warning" to "destructive"
         });
         
         // Return partial success since the chat message was sent
@@ -176,14 +176,14 @@ export const submitRequestViaChatMessage = async (
       toast({
         title: "Message Sent",
         description: "Your message was sent, but we encountered an issue with your request. Our staff will assist you.",
-        variant: "warning"
+        variant: "destructive" // Changed from "warning" to "destructive"
       });
       return true;
     }
     
     toast({
       title: "Request Submitted",
-      description: "Your request has been sent successfully.",
+      description: "Your request has been sent successfully."
     });
     
     return true;
