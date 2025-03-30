@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { ServiceType } from '@/features/rooms/controllers/roomService';
+import { ServiceType } from '@/features/rooms/types';
 
 interface ServiceCardProps {
   icon: React.ReactNode;

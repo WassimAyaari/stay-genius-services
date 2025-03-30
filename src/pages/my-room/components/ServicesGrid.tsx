@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Room } from '@/hooks/useRoom';
-import { requestService, ServiceType } from '@/features/rooms/controllers/roomService';
+import { requestService } from '@/features/rooms/controllers/roomService';
+import { ServiceType } from '@/features/rooms/types';
 import { useToast } from '@/components/ui/use-toast';
 import { ShowerHead, Shirt, PhoneCall, Wifi, FileText, Settings } from 'lucide-react';
 import ServiceCard from './ServiceCard';
