@@ -29,15 +29,13 @@ export const createServiceRequest = async (requestData: {
   return data;
 };
 
-// Adding the missing requestService function
+// Adding the requestService function for compatibility
 export const requestService = async (
   roomId: string,
   type: ServiceType,
   description: string,
   request_item_id?: string,
-  category_id?: string,
-  guest_name?: string,
-  room_number?: string
+  category_id?: string
 ) => {
   // Get guest_id from local storage or use a default
   const userDataStr = localStorage.getItem('user_data');
@@ -54,7 +52,7 @@ export const requestService = async (
     }
   }
 
-  // Prepare request data
+  // Prepare request data - without guest_name and room_number fields
   const requestData = {
     guest_id,
     room_id: roomId,
@@ -62,7 +60,6 @@ export const requestService = async (
     description,
     request_item_id,
     category_id,
-    room_number,
     status: 'pending'
   };
 
@@ -99,7 +96,6 @@ export const updateRequestStatus = async (
     throw error;
   }
 
-  // Fix TypeScript error by ensuring return type
   return data;
 };
 

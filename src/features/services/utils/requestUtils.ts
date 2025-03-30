@@ -72,12 +72,11 @@ export const submitRequestViaChatMessage = async (
         console.warn("Room not found for number:", userInfo.roomNumber);
       }
       
-      // Create a service request regardless of whether a room was found
+      // Create a service request - without the guest_name and room_number fields
+      // that aren't in the database schema
       const requestData = {
         room_id: roomId || null,
         guest_id: userId,
-        guest_name: userInfo.name || 'Guest',
-        room_number: userInfo.roomNumber,
         type: type,
         description: description,
         category_id: selectedCategory?.id,

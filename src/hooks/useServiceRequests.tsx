@@ -30,19 +30,11 @@ export const useServiceRequests = (roomId?: string) => {
       
       console.log("Raw service requests data:", data);
       
-      // Transform data to include guest_name and room_number properties
+      // Transform data to add guest_name and room_number properties
       const transformedData = await Promise.all(data.map(async (request: any) => {
-        // Initialize transformed request with explicit room_number property
-        let transformedRequest = {
-          ...request,
-          guest_name: request.profiles ? 
-            `${request.profiles.first_name || ''} ${request.profiles.last_name || ''}`.trim() : 
-            'Unknown Guest',
-          room_number: request.room_number || undefined // Use existing room_number if available
-        };
-        
-        // If no room_number exists and room_id exists, try to get the room_number
-        if (!transformedRequest.room_number && request.room_id) {
+        // Get the room number if needed
+        let room_number;
+        if (request.room_id) {
           const { data: roomData } = await supabase
             .from('rooms')
             .select('room_number')
@@ -50,11 +42,21 @@ export const useServiceRequests = (roomId?: string) => {
             .maybeSingle();
             
           if (roomData) {
-            transformedRequest.room_number = roomData.room_number;
+            room_number = roomData.room_number;
           }
         }
         
-        return transformedRequest;
+        // Create guest name from profiles if available
+        const guest_name = request.profiles ? 
+          `${request.profiles.first_name || ''} ${request.profiles.last_name || ''}`.trim() : 
+          'Unknown Guest';
+        
+        // Return transformed request with guest_name and room_number
+        return {
+          ...request,
+          guest_name,
+          room_number
+        };
       }));
       
       console.info("Transformed service requests:", transformedData);

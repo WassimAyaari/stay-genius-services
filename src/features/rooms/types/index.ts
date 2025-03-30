@@ -10,8 +10,8 @@ export interface ServiceRequest {
   updated_at: string;
   request_item_id?: string;
   category_id?: string;
-  guest_name?: string;
-  room_number?: string;
+  guest_name?: string; // Added for UI display
+  room_number?: string; // Added for UI display
   profiles?: {
     first_name: string | null;
     last_name: string | null;
