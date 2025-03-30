@@ -1,17 +1,15 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Loader2, CheckCircle2, Timer, XCircle, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, Timer, XCircle, Clock, ShowerHead, Shirt, PhoneCall, Wifi, FileText, Settings, Search } from 'lucide-react';
 import { ServiceRequest } from '@/features/rooms/types';
-import { Service } from '../types';
 
 interface RequestHistoryProps {
   isLoading: boolean;
   requests: ServiceRequest[];
-  services: Service[];
 }
 
-const RequestHistory = ({ isLoading, requests, services }: RequestHistoryProps) => {
+const RequestHistory = ({ isLoading, requests }: RequestHistoryProps) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
@@ -22,6 +20,25 @@ const RequestHistory = ({ isLoading, requests, services }: RequestHistoryProps) 
         return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return <Clock className="h-5 w-5 text-blue-500" />;
+    }
+  };
+
+  const getServiceIcon = (type: string) => {
+    switch (type) {
+      case 'housekeeping':
+        return <ShowerHead className="h-6 w-6" />;
+      case 'laundry':
+        return <Shirt className="h-6 w-6" />;
+      case 'wifi':
+        return <Wifi className="h-6 w-6" />;
+      case 'bill':
+        return <FileText className="h-6 w-6" />;
+      case 'preferences':
+        return <Settings className="h-6 w-6" />;
+      case 'concierge':
+        return <PhoneCall className="h-6 w-6" />;
+      default:
+        return <Search className="h-6 w-6" />;
     }
   };
 
@@ -41,7 +58,7 @@ const RequestHistory = ({ isLoading, requests, services }: RequestHistoryProps) 
                 className="flex items-center gap-4 p-4 bg-gray-50/80 rounded-xl hover:bg-gray-100/80 transition-colors"
               >
                 <div className="p-2 bg-white rounded-lg">
-                  {services.find(s => s.type === request.type)?.icon}
+                  {getServiceIcon(request.type)}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
