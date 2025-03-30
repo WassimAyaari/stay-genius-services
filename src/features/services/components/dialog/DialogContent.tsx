@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogContent as BaseDialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import RequestPresetView from '@/features/services/components/dialog/RequestPresetView';
 import RequestCategoriesView from '@/features/services/components/dialog/RequestCategoriesView';
 import RequestItemsView from '@/features/services/components/dialog/RequestItemsView';
 import { RequestCategory } from '@/features/rooms/types';
 
-interface DialogContentProps {
+interface RequestDialogContentProps {
   view: 'presets' | 'categories' | 'items';
   selectedCategory: RequestCategory | null;
   selectedItems: string[];
@@ -22,7 +22,7 @@ interface DialogContentProps {
   onDialogClose: () => void;
 }
 
-const DialogContent = ({
+const RequestDialogContent = ({
   view,
   selectedCategory,
   selectedItems,
@@ -36,9 +36,9 @@ const DialogContent = ({
   onPresetRequest,
   onSubmitRequests,
   onDialogClose
-}: DialogContentProps) => {
+}: RequestDialogContentProps) => {
   return (
-    <DialogContent className="sm:max-w-lg">
+    <BaseDialogContent className="sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>{dialogTitle}</DialogTitle>
         <DialogDescription>{dialogDescription}</DialogDescription>
@@ -70,8 +70,8 @@ const DialogContent = ({
           />
         )}
       </div>
-    </DialogContent>
+    </BaseDialogContent>
   );
 };
 
-export default DialogContent;
+export default RequestDialogContent;

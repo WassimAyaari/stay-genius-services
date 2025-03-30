@@ -3,7 +3,7 @@ import React from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { useRequestDialog } from '@/features/services/hooks/useRequestDialog';
 import { Room } from '@/hooks/useRoom';
-import DialogContent from '@/features/services/components/dialog/DialogContent';
+import RequestDialogContent from '@/features/services/components/dialog/DialogContent';
 import UserInfoDialogWrapper from '@/features/services/components/dialog/UserInfoDialogWrapper';
 
 interface RequestDialogProps {
@@ -42,7 +42,7 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
         }
         onOpenChange(open);
       }}>
-        <DialogContent
+        <RequestDialogContent
           view={view}
           selectedCategory={selectedCategory}
           selectedItems={selectedItems}
