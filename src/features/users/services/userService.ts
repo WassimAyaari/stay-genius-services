@@ -40,7 +40,7 @@ export const syncUserData = async (userData: UserData): Promise<boolean> => {
       id: userId,
       first_name: userData.first_name,
       last_name: userData.last_name,
-      email: userData.email,
+      // Note: email is not stored in profiles table based on Supabase schema
       phone: null
     };
     
@@ -127,9 +127,10 @@ export const getUserData = async (userId: string): Promise<UserData | null> => {
     if (!data) return null;
     
     // Construire l'objet UserData à partir des données du profil
+    // Note: email is not part of profiles table, so we can't get it from there
     const userData: UserData = {
       id: data.id,
-      email: data.email || '',
+      email: '', // The profiles table doesn't have an email field, so we use an empty string
       first_name: data.first_name || '',
       last_name: data.last_name || '',
       room_number: '' // Nous devrons récupérer cette information ailleurs
