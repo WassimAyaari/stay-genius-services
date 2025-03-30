@@ -1201,6 +1201,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_guest_by_id: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          birth_date: string | null
+          check_in_date: string | null
+          check_out_date: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string
+          guest_type: string | null
+          id: string
+          last_name: string
+          nationality: string | null
+          room_number: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+      }
       get_user_hotels: {
         Args: {
           user_id: string
@@ -1217,6 +1238,20 @@ export type Database = {
           required_role: string
         }
         Returns: boolean
+      }
+      insert_guest_from_registration: {
+        Args: {
+          user_id: string
+          first_name: string
+          last_name: string
+          email: string
+          room_number: string
+          nationality?: string
+          birth_date?: string
+          check_in_date?: string
+          check_out_date?: string
+        }
+        Returns: string
       }
       is_admin: {
         Args: {

@@ -1,69 +1,22 @@
 
-import { supabase } from '@/integrations/supabase/client';
+// Ce fichier n'est plus nécessaire car nous utilisons uniquement la table guests.
+// Il est maintenu pour des raisons de compatibilité, mais toutes les fonctions
+// renverront des résultats vides ou des succès factices.
+
 import { ProfileData } from '../types/userTypes';
 
 /**
- * Synchronise les données de profil avec Supabase
+ * Cette fonction est maintenue pour la compatibilité mais ne fait plus rien
  */
 export const syncProfileData = async (userId: string, profileData: Partial<ProfileData>): Promise<boolean> => {
-  try {
-    // Vérifier si le profil existe déjà
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    
-    console.log('Existing profile:', existingProfile);
-    console.log('Profile data to save:', profileData);
-    
-    if (existingProfile) {
-      // Mettre à jour le profil existant
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update(profileData)
-        .eq('id', userId);
-      
-      if (updateError) {
-        console.error('Error updating profile:', updateError);
-        throw updateError;
-      }
-    } else {
-      // Créer un nouveau profil
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert([{ id: userId, ...profileData }]);
-      
-      if (insertError) {
-        console.error('Error inserting profile:', insertError);
-        throw insertError;
-      }
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error synchronizing profile data with Supabase:', error);
-    return false;
-  }
+  console.log('syncProfileData est déprécié, utiliser syncGuestData à la place');
+  return true;
 };
 
 /**
- * Récupère les données de profil depuis Supabase
+ * Cette fonction est maintenue pour la compatibilité mais renverra null
  */
 export const getProfileData = async (userId: string): Promise<ProfileData | null> => {
-  try {
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    
-    if (profileError) throw profileError;
-    if (!profileData) return null;
-    
-    return profileData;
-  } catch (error) {
-    console.error('Error fetching profile data from Supabase:', error);
-    return null;
-  }
+  console.log('getProfileData est déprécié, utiliser getGuestData à la place');
+  return null;
 };
