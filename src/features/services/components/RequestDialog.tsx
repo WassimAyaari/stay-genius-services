@@ -1,12 +1,10 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog } from '@/components/ui/dialog';
 import { useRequestDialog } from '@/features/services/hooks/useRequestDialog';
 import { Room } from '@/hooks/useRoom';
-import UserInfoDialog from '@/features/services/components/UserInfoDialog';
-import RequestPresetView from '@/features/services/components/dialog/RequestPresetView';
-import RequestCategoriesView from '@/features/services/components/dialog/RequestCategoriesView';
-import RequestItemsView from '@/features/services/components/dialog/RequestItemsView';
+import DialogContent from '@/features/services/components/dialog/DialogContent';
+import UserInfoDialogWrapper from '@/features/services/components/dialog/UserInfoDialogWrapper';
 
 interface RequestDialogProps {
   isOpen: boolean;
@@ -44,46 +42,24 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
         }
         onOpenChange(open);
       }}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{dialogTitle}</DialogTitle>
-            <DialogDescription>{dialogDescription}</DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            {view === 'presets' && (
-              <RequestPresetView 
-                onSelectPreset={handlePresetRequest}
-                onBrowseAllCategories={() => handleGoBackToCategories()}
-              />
-            )}
-            
-            {view === 'categories' && (
-              <RequestCategoriesView 
-                onSelectCategory={handleSelectCategory}
-                onGoBackToPresets={handleGoBackToPresets}
-              />
-            )}
-            
-            {view === 'items' && selectedCategory && (
-              <RequestItemsView
-                category={selectedCategory}
-                selectedItems={selectedItems}
-                onToggleItem={handleToggleRequestItem}
-                onGoBackToCategories={handleGoBackToCategories}
-                onSubmitRequests={handleSubmitRequests}
-                isSubmitting={isSubmitting}
-              />
-            )}
-          </div>
-          
-          <DialogFooter>
-            {/* Footer content moved to the respective view components */}
-          </DialogFooter>
-        </DialogContent>
+        <DialogContent
+          view={view}
+          selectedCategory={selectedCategory}
+          selectedItems={selectedItems}
+          isSubmitting={isSubmitting}
+          dialogTitle={dialogTitle}
+          dialogDescription={dialogDescription}
+          onSelectCategory={handleSelectCategory}
+          onGoBackToCategories={handleGoBackToCategories}
+          onGoBackToPresets={handleGoBackToPresets}
+          onToggleRequestItem={handleToggleRequestItem}
+          onPresetRequest={handlePresetRequest}
+          onSubmitRequests={handleSubmitRequests}
+          onDialogClose={handleDialogClose}
+        />
       </Dialog>
 
-      <UserInfoDialog
+      <UserInfoDialogWrapper
         isOpen={isUserInfoDialogOpen}
         onOpenChange={setIsUserInfoDialogOpen}
         userInfo={userInfo}
