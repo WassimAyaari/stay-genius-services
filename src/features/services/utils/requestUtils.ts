@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { UserInfo } from '../hooks/useUserInfo';
 import { RequestCategory } from '@/features/rooms/types';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 /**
  * Submits a service request via chat message
