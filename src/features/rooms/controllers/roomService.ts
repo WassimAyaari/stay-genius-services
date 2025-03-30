@@ -38,12 +38,15 @@ export const updateRequestStatus = async (
     
     // Use the initially fetched data to access all the needed properties
     if (requestData && requestData.guest_id) {
-      // Since room_number might not be directly available in the service_requests table,
-      // we need to handle it more safely
-      let roomNumber = requestData.room_number || '';
+      // Get room_number either from the request data directly or try to fetch it
+      let roomNumber = '';
       
-      // Try to get the room number from the rooms table if we have a room_id
-      if (requestData.room_id && !roomNumber) {
+      // Try to get room_number from request data if it exists
+      if ('room_number' in requestData && requestData.room_number) {
+        roomNumber = requestData.room_number;
+      }
+      // If no room_number but room_id exists, try to get it from the rooms table
+      else if (requestData.room_id) {
         const { data: roomData } = await supabase
           .from('rooms')
           .select('room_number')
