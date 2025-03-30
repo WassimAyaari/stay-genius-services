@@ -1,13 +1,16 @@
 
 import React, { useEffect, useState } from 'react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Key, Bell, Users, Pencil, X } from "lucide-react";
+import { Key, Bell, Users, Pencil, X, Calendar, Mail, Flag, Building } from "lucide-react";
 import { CompanionData, UserData } from '@/features/users/types/userTypes';
 import { getCompanions } from '@/features/users/services/companionService';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Layout from '@/components/Layout';
+import { Badge } from '@/components/ui/badge';
 
 const Profile = () => {
   const { toast } = useToast();
@@ -74,6 +77,38 @@ const Profile = () => {
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
   };
 
+  // Format date
+  const formatDate = (dateString?: string | Date) => {
+    if (!dateString) return 'Non défini';
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd MMMM yyyy', { locale: fr });
+    } catch (error) {
+      return 'Date invalide';
+    }
+  };
+
+  // Calculate stay duration
+  const calculateStayDuration = () => {
+    if (!userData?.check_in_date || !userData?.check_out_date) return null;
+    
+    try {
+      const checkIn = new Date(userData.check_in_date);
+      const checkOut = new Date(userData.check_out_date);
+      
+      // Calculate the difference in days
+      const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      return diffDays;
+    } catch (error) {
+      console.error('Error calculating stay duration:', error);
+      return null;
+    }
+  };
+
+  const stayDuration = calculateStayDuration();
+
   return (
     <Layout>
       <div className="container max-w-4xl py-8">
@@ -98,22 +133,95 @@ const Profile = () => {
           </div>
         </Card>
 
+        {/* Informations personnelles */}
+        <Card className="mb-6">
+          <CardContent className="p-0">
+            <div className="p-4 border-b">
+              <div className="flex items-center gap-2 text-primary mb-1">
+                <Users className="h-5 w-5" />
+                <h2 className="text-lg font-semibold">Informations personnelles</h2>
+              </div>
+            </div>
+            <div className="divide-y">
+              {userData?.email && (
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-gray-500" />
+                    <div>
+                      <p className="font-medium">Email</p>
+                      <p className="text-sm text-muted-foreground">{userData.email}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {userData?.birth_date && (
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5 text-gray-500" />
+                    <div>
+                      <p className="font-medium">Date de naissance</p>
+                      <p className="text-sm text-muted-foreground">{formatDate(userData.birth_date)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {userData?.nationality && (
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <Flag className="h-5 w-5 text-gray-500" />
+                    <div>
+                      <p className="font-medium">Nationalité</p>
+                      <p className="text-sm text-muted-foreground">{userData.nationality}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Informations sur le séjour actuel */}
         <Card className="mb-6">
           <CardContent className="p-0">
             <div className="p-4 border-b">
               <div className="flex items-center gap-2 text-primary mb-1">
-                <h2 className="text-lg font-semibold">Current Stay</h2>
+                <Building className="h-5 w-5" />
+                <h2 className="text-lg font-semibold">Séjour actuel</h2>
               </div>
             </div>
-            <div className="p-4 flex justify-between items-center">
-              <div>
-                <p className="font-medium">Room {userData?.room_number || '406'}</p>
+            <div className="divide-y">
+              <div className="p-4 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Key className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Chambre</p>
+                    <p className="text-sm text-muted-foreground">{userData?.room_number || '406'}</p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Key className="h-4 w-4" />
+                  Clé mobile
+                </Button>
               </div>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Key className="h-4 w-4" />
-                Mobile Key
-              </Button>
+              
+              <div className="p-4 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Dates de séjour</p>
+                    <p className="text-sm text-muted-foreground">
+                      Du {formatDate(userData?.check_in_date)} au {formatDate(userData?.check_out_date)}
+                    </p>
+                  </div>
+                </div>
+                {stayDuration && (
+                  <Badge variant="outline" className="ml-2">
+                    {stayDuration} {stayDuration > 1 ? 'nuits' : 'nuit'}
+                  </Badge>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -124,7 +232,7 @@ const Profile = () => {
             <div className="p-4 border-b">
               <div className="flex items-center gap-2 text-primary mb-1">
                 <Users className="h-5 w-5" />
-                <h2 className="text-lg font-semibold">Family Members</h2>
+                <h2 className="text-lg font-semibold">Accompagnateurs</h2>
               </div>
             </div>
             {companions.length > 0 ? (
@@ -140,12 +248,12 @@ const Profile = () => {
               </div>
             ) : (
               <div className="p-4 text-center text-muted-foreground">
-                No family members added
+                Aucun accompagnateur ajouté
               </div>
             )}
             <div className="p-4 border-t">
               <Button variant="outline" className="w-full">
-                Add Family Member
+                Ajouter un accompagnateur
               </Button>
             </div>
           </CardContent>
@@ -157,7 +265,7 @@ const Profile = () => {
             <div className="p-4 border-b">
               <div className="flex items-center gap-2 text-primary mb-1">
                 <Bell className="h-5 w-5" />
-                <h2 className="text-lg font-semibold">Recent Notifications</h2>
+                <h2 className="text-lg font-semibold">Notifications récentes</h2>
               </div>
             </div>
             {notifications.length > 0 ? (
@@ -181,7 +289,7 @@ const Profile = () => {
               </div>
             ) : (
               <div className="p-4 text-center text-muted-foreground">
-                No notifications
+                Aucune notification
               </div>
             )}
           </CardContent>
@@ -200,7 +308,7 @@ const Profile = () => {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 mb-2 text-primary">
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
               </svg>
-              <p className="font-medium">Favorites</p>
+              <p className="font-medium">Favoris</p>
             </CardContent>
           </Card>
         </div>
