@@ -10,45 +10,52 @@ export const updateRequestStatus = async (
   try {
     console.log(`Updating request ${requestId} to status: ${newStatus}`);
     
-    const { data, error } = await supabase
+    // First, get the current request to have all the data we need
+    const { data: requestData, error: requestError } = await supabase
+      .from('service_requests')
+      .select('*')
+      .eq('id', requestId)
+      .single();
+
+    if (requestError) {
+      console.error("Error fetching request data:", requestError);
+      throw requestError;
+    }
+
+    // Then update the status
+    const { data: updateData, error: updateError } = await supabase
       .from('service_requests')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
       .eq('id', requestId)
-      .select('*, guest_name, room_number');
+      .select('*');
 
-    if (error) {
-      console.error("Error updating request status:", error);
-      throw error;
+    if (updateError) {
+      console.error("Error updating request status:", updateError);
+      throw updateError;
     }
 
-    console.log("Status updated successfully:", data);
+    console.log("Status updated successfully:", updateData);
     
-    // When we update the status, we want to add a system message to the chat
-    // so the user can see the status change
-    if (data && data.length > 0) {
-      const request = data[0];
+    // Use the initially fetched data to access all the needed properties
+    if (requestData && requestData.guest_id) {
+      // We'll use the room_id from the request data if available
+      const roomNumber = requestData.room_number || '';
       
-      // Only add a chat message if the request has a guest_id
-      if (request.guest_id) {
-        // Access room_number safely (might be undefined or null in some cases)
-        const roomNumber = request.room_number || '';
-        
-        const statusMessage = `Your ${request.type} request has been updated to: ${newStatus}`;
-        
-        await supabase.from('chat_messages').insert({
-          user_id: request.guest_id,
-          recipient_id: request.guest_id,
-          user_name: 'System',
-          room_number: roomNumber,
-          text: statusMessage,
-          sender: 'staff',
-          status: 'sent',
-          created_at: new Date().toISOString()
-        });
-      }
+      const statusMessage = `Your ${requestData.type} request has been updated to: ${newStatus}`;
+      
+      await supabase.from('chat_messages').insert({
+        user_id: requestData.guest_id,
+        recipient_id: requestData.guest_id,
+        user_name: 'System',
+        room_number: roomNumber,
+        text: statusMessage,
+        sender: 'staff',
+        status: 'sent',
+        created_at: new Date().toISOString()
+      });
     }
     
-    return data;
+    return updateData;
   } catch (error) {
     console.error("Error in updateRequestStatus:", error);
     throw error;
