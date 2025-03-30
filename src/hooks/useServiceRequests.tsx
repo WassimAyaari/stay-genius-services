@@ -7,9 +7,11 @@ export const useServiceRequests = (roomId?: string) => {
   return useQuery({
     queryKey: ['service-requests', roomId],
     queryFn: async () => {
+      console.log("Fetching service requests for roomId:", roomId);
+      
       let query = supabase
         .from('service_requests')
-        .select(`*, request_items(*)`);
+        .select(`*, request_items(*), guest_name, room_number`);
       
       if (roomId) {
         query = query.eq('room_id', roomId);
@@ -26,5 +28,6 @@ export const useServiceRequests = (roomId?: string) => {
       return data as ServiceRequest[];
     },
     enabled: true, // Allow fetching even without roomId for admin view
+    refetchOnWindowFocus: false, // Prevent excessive refetches
   });
 };

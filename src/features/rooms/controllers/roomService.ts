@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export type ServiceType = 'housekeeping' | 'laundry' | 'wifi' | 'bill' | 'preferences' | 'concierge' | 'custom';
@@ -39,7 +38,7 @@ export const updateRequestStatus = async (
     // Use the initially fetched data to access all the needed properties
     if (requestData && requestData.guest_id) {
       // We'll use the room_id from the request data if available
-      const roomNumber = requestData.room_id || ''; // Use room_id instead of room_number since it's definitely in the type
+      const roomNumber = requestData.room_number || requestData.room_id || ''; 
       
       const statusMessage = `Your ${requestData.type} request has been updated to: ${newStatus}`;
       
@@ -47,7 +46,7 @@ export const updateRequestStatus = async (
         user_id: requestData.guest_id,
         recipient_id: requestData.guest_id,
         user_name: 'System',
-        room_number: roomNumber, // Passing roomNumber (derived from room_id) to the chat_messages table
+        room_number: roomNumber,
         text: statusMessage,
         sender: 'staff',
         status: 'sent',
@@ -95,7 +94,6 @@ export const createServiceRequest = async (
   }
 };
 
-// Make sure this function is properly exported
 export const requestService = async (
   roomId: string,
   type: ServiceType, 
@@ -106,26 +104,30 @@ export const requestService = async (
   roomNumber?: string
 ) => {
   try {
-    console.log(`Creating service request for room ${roomId}: ${type}`);
+    console.log(`Creating service request: room=${roomId}, type=${type}, desc=${description}`);
     
     // Get the current user ID or use a guest ID
     const userId = localStorage.getItem('user_id') || 'guest';
     
+    const requestData = {
+      room_id: roomId,
+      guest_id: userId,
+      guest_name: guestName || 'Guest',
+      room_number: roomNumber,
+      type: type,
+      description: description,
+      request_item_id: requestItemId,
+      category_id: categoryId,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log("Service request data:", requestData);
+    
     const { data, error } = await supabase
       .from('service_requests')
-      .insert({
-        room_id: roomId,
-        guest_id: userId,
-        guest_name: guestName || 'Guest',
-        room_number: roomNumber,
-        type: type,
-        description: description,
-        request_item_id: requestItemId,
-        category_id: categoryId,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .insert(requestData)
       .select();
 
     if (error) {

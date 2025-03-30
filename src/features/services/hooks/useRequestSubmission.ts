@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,6 +38,14 @@ export function useRequestSubmission() {
 
     try {
       // Insert the request as a chat message
+      console.log("Submitting chat message for request:", {
+        userId,
+        userName: userInfo.name || 'Guest',
+        roomNumber: userInfo.roomNumber,
+        text: description,
+        type: type
+      });
+      
       const { error } = await supabase
         .from('chat_messages')
         .insert([{
@@ -63,6 +70,15 @@ export function useRequestSubmission() {
           .maybeSingle();
           
         if (roomData) {
+          console.log("Room found, submitting service request:", {
+            roomId: roomData.id,
+            type,
+            description,
+            categoryId: selectedCategory?.id,
+            guestName: userInfo.name, 
+            roomNumber: userInfo.roomNumber
+          });
+          
           // Also insert into service_requests table for tracking purposes
           await requestService(
             roomData.id, 
@@ -73,6 +89,23 @@ export function useRequestSubmission() {
             userInfo.name, 
             userInfo.roomNumber
           );
+        } else {
+          console.warn("Room not found for number:", userInfo.roomNumber);
+          
+          // Even if room is not found, still create a service request
+          console.log("Creating service request without room_id");
+          await supabase
+            .from('service_requests')
+            .insert({
+              guest_id: userId,
+              guest_name: userInfo.name || 'Guest',
+              room_number: userInfo.roomNumber,
+              type: type,
+              description: description,
+              category_id: selectedCategory?.id,
+              status: 'pending',
+              created_at: new Date().toISOString()
+            });
         }
       } catch (err) {
         console.error("Error fetching room by number:", err);

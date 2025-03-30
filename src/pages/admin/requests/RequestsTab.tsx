@@ -5,14 +5,6 @@ import {
   Card, 
   CardContent,
 } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -21,6 +13,7 @@ import { RequestStatusActions } from '@/components/admin/requests/RequestStatusA
 import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { ServiceRequestWithItem } from '../requests/types';
+import { RequestsTable } from '@/components/admin/requests/RequestsTable';
 
 export const RequestsTab = () => {
   const { toast } = useToast();
@@ -28,14 +21,11 @@ export const RequestsTab = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [requestsWithDetails, setRequestsWithDetails] = useState<ServiceRequestWithItem[]>([]);
 
-  // Fix: Only update state when requests change, not on every render
+  // Update state only when requests change
   useEffect(() => {
-    if (requests && requests.length > 0) {
-      console.info("Requests with items:", requests);
+    console.log("Requests data changed:", requests);
+    if (requests) {
       setRequestsWithDetails(requests as ServiceRequestWithItem[]);
-    } else if (requests) {
-      // Even if there are no requests, update the state to empty array
-      setRequestsWithDetails([]);
     }
   }, [requests]);
 
@@ -93,63 +83,11 @@ export const RequestsTab = () => {
           </Button>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center p-8">
-            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-          </div>
-        ) : isError ? (
-          <div className="text-center py-8 text-red-500">
-            Error loading requests. Please try again.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Room</TableHead>
-                  <TableHead>Guest</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {requestsWithDetails.length > 0 ? (
-                  requestsWithDetails.map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell>{request.room_number || request.room_id || 'N/A'}</TableCell>
-                      <TableCell>{request.guest_name || 'Anonymous'}</TableCell>
-                      <TableCell>{request.type}</TableCell>
-                      <TableCell className="max-w-xs truncate">{request.description || 'No description'}</TableCell>
-                      <TableCell>
-                        {request.created_at 
-                          ? formatDistanceToNow(new Date(request.created_at), { addSuffix: true }) 
-                          : 'Unknown'}
-                      </TableCell>
-                      <TableCell>
-                        <RequestStatusBadge status={request.status} />
-                      </TableCell>
-                      <TableCell>
-                        <RequestStatusActions 
-                          currentStatus={request.status} 
-                          onUpdateStatus={(newStatus) => handleUpdateStatus(request.id, newStatus)} 
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      No requests found
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+        <RequestsTable 
+          requests={requestsWithDetails} 
+          isLoading={isLoading || isRefreshing} 
+          onUpdateStatus={handleUpdateStatus}
+        />
       </CardContent>
     </Card>
   );

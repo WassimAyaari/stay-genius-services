@@ -33,6 +33,8 @@ export const RequestsTable = ({
     );
   }
 
+  const hasData = requests && requests.length > 0;
+  
   return (
     <ScrollArea className="h-[500px]">
       <Table>
@@ -48,10 +50,10 @@ export const RequestsTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {requests && requests.length > 0 ? (
+          {hasData ? (
             requests.map((request) => (
               <TableRow key={request.id}>
-                <TableCell>{request.room_number || request.room_id}</TableCell>
+                <TableCell>{request.room_number || request.room_id || 'N/A'}</TableCell>
                 <TableCell>{request.guest_name || 'Unknown'}</TableCell>
                 <TableCell className="capitalize">{request.type.replace('_', ' ')}</TableCell>
                 <TableCell>
