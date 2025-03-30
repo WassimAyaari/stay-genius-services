@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader, RefreshCw } from 'lucide-react';
@@ -22,27 +22,37 @@ export const RequestsTab = () => {
   } = useQuery({
     queryKey: ['service-requests'],
     queryFn: async () => {
+      console.log('Fetching service requests...');
       const { data, error } = await supabase
         .from('service_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching service requests:', error);
+        throw error;
+      }
+      
+      console.log('Service requests fetched:', data);
       
       const serviceRequests = data as ServiceRequest[];
       const requestsWithItems: ServiceRequestWithItem[] = [];
       
       for (const request of serviceRequests) {
         if (request.request_item_id) {
-          const { data: itemData } = await supabase
+          const { data: itemData, error: itemError } = await supabase
             .from('request_items')
             .select('*')
             .eq('id', request.request_item_id)
             .single();
             
+          if (itemError) {
+            console.error(`Error fetching item for request ${request.id}:`, itemError);
+          }
+          
           requestsWithItems.push({
             ...request,
-            request_items: itemData as unknown as RequestItem
+            request_items: itemData || null
           });
         } else {
           requestsWithItems.push({
@@ -52,6 +62,7 @@ export const RequestsTab = () => {
         }
       }
       
+      console.log('Requests with items:', requestsWithItems);
       return requestsWithItems;
     },
   });
@@ -118,7 +129,3 @@ export const RequestsTab = () => {
     </>
   );
 };
-
-// Don't forget to import useState
-import { useState } from 'react';
-import { RequestItem } from '@/features/rooms/types';
