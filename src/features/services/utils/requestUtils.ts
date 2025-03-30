@@ -8,11 +8,30 @@ import { toast } from '@/hooks/use-toast';
  * Creates a user profile in the database if it doesn't exist
  */
 const createUserProfile = async (userId: string, userInfo: UserInfo) => {
+  console.log('Creating user profile:', userId, userInfo);
   try {
+    // Check if profile already exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+      
+    if (existingProfile) {
+      console.log('Profile already exists, skipping creation');
+      return true;
+    }
+    
     // Extract first and last name from full name
     const nameParts = userInfo.name.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
+    
+    console.log('Creating new profile with:', {
+      id: userId,
+      first_name: firstName,
+      last_name: lastName
+    });
     
     // Insert the profile
     const { error } = await supabase
@@ -44,6 +63,8 @@ export const submitRequestViaChatMessage = async (
   userInfo: UserInfo,
   selectedCategory?: RequestCategory | null
 ) => {
+  console.log('Submitting request via chat message:', { description, type, userInfo, selectedCategory });
+  
   const userId = localStorage.getItem('user_id');
   if (!userId) {
     toast({
@@ -66,6 +87,7 @@ export const submitRequestViaChatMessage = async (
 
   try {
     // Step 1: Create a chat message (this doesn't require a profile)
+    console.log('Creating chat message');
     const { error: chatError } = await supabase
       .from('chat_messages')
       .insert([{
@@ -84,38 +106,53 @@ export const submitRequestViaChatMessage = async (
       throw chatError;
     }
     
-    // Step 2: Try to create user profile if it doesn't exist
-    try {
-      await createUserProfile(userId, userInfo);
-    } catch (profileError) {
-      console.warn("Failed to create profile, but continuing with request", profileError);
-      // Continue despite profile creation failure
+    // Step 2: Always try to create user profile if it doesn't exist
+    console.log('Attempting to create/update user profile');
+    const profileCreated = await createUserProfile(userId, userInfo);
+    console.log('Profile creation result:', profileCreated);
+    
+    if (!profileCreated) {
+      console.warn("Could not create or verify user profile");
+      toast({
+        title: "Request Sent",
+        description: "Your message was sent, but we couldn't register your request. Please contact reception.",
+      });
+      return true; // Return true because the message was sent
     }
     
     // Step 3: Check if room exists and get room_id
+    console.log('Checking if room exists:', userInfo.roomNumber);
     const { data: roomData } = await supabase
       .from('rooms')
       .select('id')
       .eq('room_number', userInfo.roomNumber)
       .maybeSingle();
     
+    console.log('Room data:', roomData);
+    
     // Step 4: Create service request with minimal required data
     try {
-      const requestData = {
+      const requestData: any = {
         guest_id: userId,
         type: type,
         description: description,
-        category_id: selectedCategory?.id || null,
         status: 'pending',
         created_at: new Date().toISOString()
       };
 
+      // Add category if available
+      if (selectedCategory?.id) {
+        requestData.category_id = selectedCategory.id;
+      }
+
       // Add room_id only if the room exists
       if (roomData?.id) {
-        Object.assign(requestData, { room_id: roomData.id });
+        requestData.room_id = roomData.id;
       }
       
-      // Insert service request (will only work if profile exists)
+      console.log('Creating service request with data:', requestData);
+      
+      // Insert service request
       const { error: serviceError } = await supabase
         .from('service_requests')
         .insert([requestData]);
@@ -123,21 +160,12 @@ export const submitRequestViaChatMessage = async (
       if (serviceError) {
         console.error("Error submitting service request:", serviceError);
         
-        // If we failed because the profile doesn't exist, show a special error
-        if (serviceError.code === '23503' && serviceError.details?.includes('guest_id')) {
-          toast({
-            title: "Profile Error",
-            description: "Your user profile is not set up correctly. Please contact reception.",
-            variant: "destructive"
-          });
-        } else {
-          // For other errors, show generic message
-          toast({
-            title: "Error",
-            description: "Failed to submit service request. The chat message was sent.",
-            variant: "destructive"
-          });
-        }
+        // Show appropriate error message but don't fail the overall process
+        toast({
+          title: "Partial Success",
+          description: "Your message was sent, but we couldn't register your full request. Our staff will still assist you.",
+          variant: "warning"
+        });
         
         // Return partial success since the chat message was sent
         return true;
@@ -145,6 +173,12 @@ export const submitRequestViaChatMessage = async (
     } catch (requestError) {
       console.error("Error creating service request:", requestError);
       // Continue despite service request failure since chat message was sent
+      toast({
+        title: "Message Sent",
+        description: "Your message was sent, but we encountered an issue with your request. Our staff will assist you.",
+        variant: "warning"
+      });
+      return true;
     }
     
     toast({

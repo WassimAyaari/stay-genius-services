@@ -9,11 +9,30 @@ import { supabase } from '@/integrations/supabase/client';
  * Creates a user profile in the database if it doesn't exist
  */
 const createUserProfile = async (userId: string, userInfo: UserInfo) => {
+  console.log('Creating user profile in useMultiItemRequestHandler:', userId, userInfo);
   try {
+    // Check if profile already exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+      
+    if (existingProfile) {
+      console.log('Profile already exists, skipping creation');
+      return true;
+    }
+    
     // Extract first and last name from full name
     const nameParts = userInfo.name.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
+    
+    console.log('Creating new profile with:', {
+      id: userId,
+      first_name: firstName,
+      last_name: lastName
+    });
     
     // Insert the profile
     const { error } = await supabase
@@ -70,19 +89,13 @@ export function useMultiItemRequestHandler() {
     }
 
     try {
-      // Step 1: Try to create user profile if it doesn't exist (but don't block if it fails)
-      try {
-        await createUserProfile(userId, userInfo);
-      } catch (profileError) {
-        console.warn("Failed to create profile, but continuing with request", profileError);
-        // Continue despite profile creation failure
-      }
-      
-      // Step 2: Create a chat message that summarizes all requests
+      // Step 1: Create a chat message that summarizes all requests (doesn't require a profile)
       const selectedItemData = categoryItems.filter(item => selectedItems.includes(item.id));
       const itemNames = selectedItemData.map(item => item.name).join(', ');
       const categoryName = selectedCategory?.name || 'items';
       const chatMessage = `Requesting ${categoryName}: ${itemNames}`;
+      
+      console.log('Creating chat message for multiple items:', chatMessage);
       
       const { error: chatError } = await supabase
         .from('chat_messages')
@@ -102,6 +115,22 @@ export function useMultiItemRequestHandler() {
         throw chatError;
       }
       
+      // Step 2: Try to create user profile if it doesn't exist
+      console.log('Attempting to create/update user profile');
+      const profileCreated = await createUserProfile(userId, userInfo);
+      console.log('Profile creation result:', profileCreated);
+      
+      if (!profileCreated) {
+        console.warn("Could not create or verify user profile");
+        toast({
+          title: "Request Sent",
+          description: "Your message was sent, but we couldn't register your individual requests. Please contact reception.",
+        });
+        onClose();
+        setIsSubmitting(false);
+        return;
+      }
+      
       // Step 3: Check if room exists and get room_id
       const { data: roomData } = await supabase
         .from('rooms')
@@ -115,20 +144,30 @@ export function useMultiItemRequestHandler() {
       
       for (const item of selectedItemData) {
         try {
-          const requestData = {
+          const requestData: any = {
             guest_id: userId,
             type: 'custom',
             description: item.name,
-            category_id: selectedCategory?.id,
-            request_item_id: item.id,
             status: 'pending',
             created_at: new Date().toISOString()
           };
           
+          // Add category if available
+          if (selectedCategory?.id) {
+            requestData.category_id = selectedCategory.id;
+          }
+          
+          // Add request item ID
+          if (item.id) {
+            requestData.request_item_id = item.id;
+          }
+          
           // Add room_id only if the room exists
           if (roomData?.id) {
-            Object.assign(requestData, { room_id: roomData.id });
+            requestData.room_id = roomData.id;
           }
+          
+          console.log('Creating service request for item:', item.name, requestData);
           
           const { error } = await supabase
             .from('service_requests')
@@ -161,10 +200,11 @@ export function useMultiItemRequestHandler() {
         onClose();
       } else {
         toast({
-          title: "Requests Failed",
-          description: "Failed to submit requests, but your message was delivered.",
-          variant: "destructive"
+          title: "Message Sent",
+          description: "Your message was delivered, but we couldn't register your requests. Our staff will assist you.",
+          variant: "warning"
         });
+        onClose();
       }
     } catch (error) {
       console.error("Error submitting multiple requests:", error);

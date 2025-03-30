@@ -21,6 +21,8 @@ export interface UserData {
  */
 export const syncUserData = async (userData: UserData): Promise<boolean> => {
   try {
+    console.log('Syncing user data:', userData);
+    
     // Récupérer l'ID utilisateur du localStorage ou en générer un nouveau
     let userId = localStorage.getItem('user_id');
     if (!userId) {
@@ -40,9 +42,11 @@ export const syncUserData = async (userData: UserData): Promise<boolean> => {
       id: userId,
       first_name: userData.first_name,
       last_name: userData.last_name,
-      // Note: email is not stored in profiles table based on Supabase schema
       phone: null
     };
+    
+    console.log('Existing profile:', existingProfile);
+    console.log('Profile data to save:', profileData);
     
     if (existingProfile) {
       // Mettre à jour le profil existant
@@ -51,14 +55,20 @@ export const syncUserData = async (userData: UserData): Promise<boolean> => {
         .update(profileData)
         .eq('id', userId);
       
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating profile:', updateError);
+        throw updateError;
+      }
     } else {
       // Créer un nouveau profil
       const { error: insertError } = await supabase
         .from('profiles')
         .insert([profileData]);
       
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error inserting profile:', insertError);
+        throw insertError;
+      }
     }
     
     // Vérifier si la chambre existe et la créer si nécessaire
