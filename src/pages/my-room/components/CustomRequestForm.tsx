@@ -29,9 +29,7 @@ const CustomRequestForm = ({ room, onRequestSuccess }: CustomRequestFormProps) =
         'custom', 
         customRequest, 
         undefined, 
-        undefined, 
-        userInfo.name, 
-        userInfo.roomNumber
+        undefined
       );
       
       setCustomRequest('');

@@ -68,9 +68,7 @@ const ServicesGrid = ({ room, onRequestSuccess }: ServicesGridProps) => {
         type, 
         `Request for ${type}`, 
         undefined, 
-        undefined, 
-        userInfo.name, 
-        userInfo.roomNumber
+        undefined
       );
       
       toast({
