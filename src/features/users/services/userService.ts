@@ -137,16 +137,16 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       .eq('user_id', userId)
       .maybeSingle();
     
-    // Préparer les données à insérer ou mettre à jour
+    // Préparer les données à insérer ou mettre à jour - Convert Date objects to ISO strings
     const guestData = {
       user_id: userId,
       first_name: userData.first_name,
       last_name: userData.last_name,
       email: userData.email,
       room_number: userData.room_number,
-      check_in_date: userData.check_in_date,
-      check_out_date: userData.check_out_date,
-      birth_date: userData.birth_date,
+      check_in_date: userData.check_in_date ? userData.check_in_date.toISOString() : null,
+      check_out_date: userData.check_out_date ? userData.check_out_date.toISOString() : null,
+      birth_date: userData.birth_date ? userData.birth_date.toISOString() : null,
       nationality: userData.nationality,
       guest_type: 'Premium Guest' // Tous les invités seront considérés comme Premium Guest
     };
@@ -211,10 +211,11 @@ export const getUserData = async (userId: string): Promise<UserData | null> => {
         first_name: guestData.first_name || '',
         last_name: guestData.last_name || '',
         room_number: guestData.room_number || '',
-        birth_date: guestData.birth_date,
+        // Convert string dates back to Date objects if they exist
+        birth_date: guestData.birth_date ? new Date(guestData.birth_date) : undefined,
         nationality: guestData.nationality,
-        check_in_date: guestData.check_in_date,
-        check_out_date: guestData.check_out_date
+        check_in_date: guestData.check_in_date ? new Date(guestData.check_in_date) : undefined,
+        check_out_date: guestData.check_out_date ? new Date(guestData.check_out_date) : undefined
       };
       
       return userData;

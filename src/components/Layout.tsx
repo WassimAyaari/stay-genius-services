@@ -44,7 +44,7 @@ const Layout = ({
               </Link>
               
               <div className="flex items-center gap-3 w-[100px] justify-end">
-                <UserMenu roomNumber="401" />
+                <UserMenu />
                 <Link 
                   to="/messages" 
                   state={{ from: location.pathname }}
