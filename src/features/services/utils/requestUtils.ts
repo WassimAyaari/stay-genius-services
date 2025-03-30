@@ -37,7 +37,8 @@ export const submitRequestViaChatMessage = async (
     console.log("Submitting request:", {
       description,
       type,
-      userInfo
+      userInfo,
+      categoryId: selectedCategory?.id
     });
     
     // Insert the request as a chat message
@@ -56,16 +57,26 @@ export const submitRequestViaChatMessage = async (
 
     if (chatError) throw chatError;
     
-    // Fetch room ID first based on room number
-    let roomId = null;
-    const { data: roomData } = await supabase
+    // First check if room number exists and get the room_id
+    const { data: roomData, error: roomError } = await supabase
       .from('rooms')
       .select('id')
       .eq('room_number', userInfo.roomNumber)
       .maybeSingle();
     
-    if (roomData) {
-      roomId = roomData.id;
+    if (roomError) {
+      console.error("Error fetching room:", roomError);
+      throw roomError;
+    }
+    
+    if (!roomData) {
+      console.error("Room not found:", userInfo.roomNumber);
+      toast({
+        title: "Room not found",
+        description: `Room ${userInfo.roomNumber} does not exist in our system.`,
+        variant: "destructive"
+      });
+      return false;
     }
     
     // Insert the service request in the database with the correct room_id format
@@ -73,25 +84,33 @@ export const submitRequestViaChatMessage = async (
       .from('service_requests')
       .insert([{
         guest_id: userId,
-        room_id: roomId, // Use the fetched room ID or null if not found
+        room_id: roomData.id,
         type: type,
         description: description,
-        category_id: selectedCategory?.id,
+        category_id: selectedCategory?.id || null,
         status: 'pending',
         created_at: new Date().toISOString()
       }]);
     
     if (serviceError) {
       console.error("Error submitting service request:", serviceError);
-      // We still return true if the chat message was created successfully
-      console.log("Chat message created successfully, but service request failed.");
-      return true;
+      toast({
+        title: "Error submitting request",
+        description: "There was a problem submitting your request. Please try again.",
+        variant: "destructive"
+      });
+      return false;
     }
     
-    // Return success
+    console.log("Service request submitted successfully");
     return true;
   } catch (error) {
     console.error("Error submitting request via chat:", error);
+    toast({
+      title: "Error",
+      description: "Failed to submit request. Please try again.",
+      variant: "destructive"
+    });
     return false;
   }
 };

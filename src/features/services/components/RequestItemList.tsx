@@ -20,12 +20,19 @@ const RequestItemList = ({
   selectedItems,
   onToggleItem
 }: RequestItemListProps) => {
-  const { data: items, isLoading } = useRequestItems(category.id);
+  const { data: items, isLoading, error } = useRequestItems(category.id);
+
+  // Filter only active items
+  const activeItems = items?.filter(item => item.is_active) || [];
 
   // Helper function to check if an item is selected
   const isItemSelected = (itemId: string) => {
     return selectedItems.includes(itemId);
   };
+
+  if (error) {
+    console.error("Error loading request items:", error);
+  }
 
   return (
     <div>
@@ -46,13 +53,13 @@ const RequestItemList = ({
         <div className="flex justify-center py-8">
           <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : !items || items.length === 0 ? (
+      ) : !activeItems || activeItems.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">No items available in this category</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {items.map((item) => {
+          {activeItems.map((item) => {
             const checked = isItemSelected(item.id);
             
             return (
