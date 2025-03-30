@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/popover";
 import CompanionsList from './CompanionsList';
 import { CompanionType } from './CompanionsList';
+import { syncUserData } from '@/features/users/services/userService';
 
 // Schema pour le formulaire d'inscription
 const registerSchema = z.object({
@@ -63,8 +64,8 @@ const RegistrationForm = () => {
     setLoading(true);
     
     try {
-      // Simulation d'enregistrement sans authentification réelle
-      localStorage.setItem('user_data', JSON.stringify({
+      // Préparer les données utilisateur
+      const userData = {
         email: values.email,
         first_name: values.firstName,
         last_name: values.lastName,
@@ -74,7 +75,21 @@ const RegistrationForm = () => {
         check_in_date: values.checkInDate,
         check_out_date: values.checkOutDate,
         companions: companions,
-      }));
+      };
+      
+      // Sauvegarder dans le localStorage
+      localStorage.setItem('user_data', JSON.stringify(userData));
+      
+      // Synchroniser avec Supabase
+      const syncSuccess = await syncUserData(userData);
+      
+      if (!syncSuccess) {
+        toast({
+          variant: "destructive",
+          title: "Synchronisation échouée",
+          description: "Les données ont été enregistrées localement mais la synchronisation avec le serveur a échoué.",
+        });
+      }
       
       toast({
         title: "Inscription réussie",

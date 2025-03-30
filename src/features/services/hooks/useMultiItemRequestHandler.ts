@@ -46,6 +46,8 @@ export function useMultiItemRequestHandler() {
         .eq('room_number', userInfo.roomNumber)
         .maybeSingle();
       
+      let roomId;
+      
       if (roomError) {
         console.error("Error fetching room:", roomError);
         throw roomError;
@@ -53,13 +55,47 @@ export function useMultiItemRequestHandler() {
       
       if (!roomData) {
         console.error("Room not found:", userInfo.roomNumber);
-        toast({
-          title: "Room not found",
-          description: `Room ${userInfo.roomNumber} does not exist in our system.`,
-          variant: "destructive"
-        });
-        setIsSubmitting(false);
-        return;
+        
+        // Si la chambre n'existe pas, tentons de la créer
+        const { data: newRoom, error: createRoomError } = await supabase
+          .from('rooms')
+          .insert([{
+            room_number: userInfo.roomNumber,
+            type: 'standard',
+            floor: parseInt(userInfo.roomNumber.substring(0, 1)) || 1,
+            status: 'occupied',
+            price: 100,
+            capacity: 2,
+            amenities: ['wifi', 'tv', 'minibar'],
+            images: []
+          }])
+          .select()
+          .maybeSingle();
+        
+        if (createRoomError) {
+          console.error("Error creating room:", createRoomError);
+          toast({
+            title: "Error creating room",
+            description: `Failed to create room ${userInfo.roomNumber} in our system.`,
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        
+        if (!newRoom) {
+          toast({
+            title: "Room creation failed",
+            description: `Could not create room ${userInfo.roomNumber}.`,
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        
+        roomId = newRoom.id;
+      } else {
+        roomId = roomData.id;
       }
 
       // Create a request for each selected item
@@ -86,7 +122,7 @@ export function useMultiItemRequestHandler() {
       // Then create individual service requests for each item
       const requests = selectedItemData.map(item => ({
         guest_id: userId,
-        room_id: roomData.id,
+        room_id: roomId,
         type: 'custom', // Using 'custom' as the generic type
         description: item.name,
         category_id: selectedCategory?.id,

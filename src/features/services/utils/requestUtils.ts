@@ -71,35 +71,77 @@ export const submitRequestViaChatMessage = async (
     
     if (!roomData) {
       console.error("Room not found:", userInfo.roomNumber);
-      toast({
-        title: "Room not found",
-        description: `Room ${userInfo.roomNumber} does not exist in our system.`,
-        variant: "destructive"
-      });
-      return false;
-    }
-    
-    // Insert the service request in the database with the correct room_id format
-    const { error: serviceError } = await supabase
-      .from('service_requests')
-      .insert([{
-        guest_id: userId,
-        room_id: roomData.id,
-        type: type,
-        description: description,
-        category_id: selectedCategory?.id || null,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      }]);
-    
-    if (serviceError) {
-      console.error("Error submitting service request:", serviceError);
-      toast({
-        title: "Error submitting request",
-        description: "There was a problem submitting your request. Please try again.",
-        variant: "destructive"
-      });
-      return false;
+      
+      // Si la chambre n'existe pas, tentons de la créer
+      const { data: newRoom, error: createRoomError } = await supabase
+        .from('rooms')
+        .insert([{
+          room_number: userInfo.roomNumber,
+          type: 'standard',
+          floor: parseInt(userInfo.roomNumber.substring(0, 1)) || 1,
+          status: 'occupied',
+          price: 100,
+          capacity: 2,
+          amenities: ['wifi', 'tv', 'minibar'],
+          images: []
+        }])
+        .select()
+        .maybeSingle();
+      
+      if (createRoomError) {
+        console.error("Error creating room:", createRoomError);
+        toast({
+          title: "Error creating room",
+          description: `Failed to create room ${userInfo.roomNumber} in our system.`,
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (!newRoom) {
+        toast({
+          title: "Room creation failed",
+          description: `Could not create room ${userInfo.roomNumber}.`,
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      // Insert the service request with the newly created room_id
+      const { error: serviceError } = await supabase
+        .from('service_requests')
+        .insert([{
+          guest_id: userId,
+          room_id: newRoom.id,
+          type: type,
+          description: description,
+          category_id: selectedCategory?.id || null,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        }]);
+      
+      if (serviceError) {
+        console.error("Error submitting service request:", serviceError);
+        throw serviceError;
+      }
+    } else {
+      // Insert the service request with the existing room_id
+      const { error: serviceError } = await supabase
+        .from('service_requests')
+        .insert([{
+          guest_id: userId,
+          room_id: roomData.id,
+          type: type,
+          description: description,
+          category_id: selectedCategory?.id || null,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        }]);
+      
+      if (serviceError) {
+        console.error("Error submitting service request:", serviceError);
+        throw serviceError;
+      }
     }
     
     console.log("Service request submitted successfully");
