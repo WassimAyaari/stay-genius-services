@@ -57,7 +57,7 @@ export const submitRequestViaChatMessage = async (
 
     if (chatError) throw chatError;
     
-    // First check if room number exists and get the room_id
+    // Check if room exists
     const { data: roomData, error: roomError } = await supabase
       .from('rooms')
       .select('id')
@@ -69,50 +69,15 @@ export const submitRequestViaChatMessage = async (
       throw roomError;
     }
     
+    // If room doesn't exist or we can't create it due to RLS, create a service request without room_id
     if (!roomData) {
-      console.error("Room not found:", userInfo.roomNumber);
+      console.log(`Room ${userInfo.roomNumber} not found. Creating service request without room_id.`);
       
-      // Si la chambre n'existe pas, tentons de la créer
-      const { data: newRoom, error: createRoomError } = await supabase
-        .from('rooms')
-        .insert([{
-          room_number: userInfo.roomNumber,
-          type: 'standard',
-          floor: parseInt(userInfo.roomNumber.substring(0, 1)) || 1,
-          status: 'occupied',
-          price: 100,
-          capacity: 2,
-          amenities: ['wifi', 'tv', 'minibar'],
-          images: []
-        }])
-        .select()
-        .maybeSingle();
-      
-      if (createRoomError) {
-        console.error("Error creating room:", createRoomError);
-        toast({
-          title: "Error creating room",
-          description: `Failed to create room ${userInfo.roomNumber} in our system.`,
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      if (!newRoom) {
-        toast({
-          title: "Room creation failed",
-          description: `Could not create room ${userInfo.roomNumber}.`,
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      // Insert the service request with the newly created room_id
+      // Create service request without room_id
       const { error: serviceError } = await supabase
         .from('service_requests')
         .insert([{
           guest_id: userId,
-          room_id: newRoom.id,
           type: type,
           description: description,
           category_id: selectedCategory?.id || null,
@@ -143,6 +108,11 @@ export const submitRequestViaChatMessage = async (
         throw serviceError;
       }
     }
+    
+    toast({
+      title: "Request Submitted",
+      description: "Your request has been sent successfully.",
+    });
     
     console.log("Service request submitted successfully");
     return true;

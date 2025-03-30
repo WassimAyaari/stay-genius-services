@@ -46,56 +46,17 @@ export function useMultiItemRequestHandler() {
         .eq('room_number', userInfo.roomNumber)
         .maybeSingle();
       
-      let roomId;
+      let roomId = null;
       
       if (roomError) {
         console.error("Error fetching room:", roomError);
         throw roomError;
       }
       
-      if (!roomData) {
-        console.error("Room not found:", userInfo.roomNumber);
-        
-        // Si la chambre n'existe pas, tentons de la créer
-        const { data: newRoom, error: createRoomError } = await supabase
-          .from('rooms')
-          .insert([{
-            room_number: userInfo.roomNumber,
-            type: 'standard',
-            floor: parseInt(userInfo.roomNumber.substring(0, 1)) || 1,
-            status: 'occupied',
-            price: 100,
-            capacity: 2,
-            amenities: ['wifi', 'tv', 'minibar'],
-            images: []
-          }])
-          .select()
-          .maybeSingle();
-        
-        if (createRoomError) {
-          console.error("Error creating room:", createRoomError);
-          toast({
-            title: "Error creating room",
-            description: `Failed to create room ${userInfo.roomNumber} in our system.`,
-            variant: "destructive"
-          });
-          setIsSubmitting(false);
-          return;
-        }
-        
-        if (!newRoom) {
-          toast({
-            title: "Room creation failed",
-            description: `Could not create room ${userInfo.roomNumber}.`,
-            variant: "destructive"
-          });
-          setIsSubmitting(false);
-          return;
-        }
-        
-        roomId = newRoom.id;
-      } else {
+      if (roomData) {
         roomId = roomData.id;
+      } else {
+        console.log(`Room ${userInfo.roomNumber} not found. Creating requests without room_id.`);
       }
 
       // Create a request for each selected item
@@ -122,7 +83,7 @@ export function useMultiItemRequestHandler() {
       // Then create individual service requests for each item
       const requests = selectedItemData.map(item => ({
         guest_id: userId,
-        room_id: roomId,
+        room_id: roomId, // This will be null if room doesn't exist
         type: 'custom', // Using 'custom' as the generic type
         description: item.name,
         category_id: selectedCategory?.id,
