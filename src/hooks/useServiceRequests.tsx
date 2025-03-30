@@ -9,7 +9,7 @@ export const useServiceRequests = (roomId?: string) => {
     queryFn: async () => {
       let query = supabase
         .from('service_requests')
-        .select('*');
+        .select(`*, request_items(*)`);
       
       if (roomId) {
         query = query.eq('room_id', roomId);

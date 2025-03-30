@@ -33,6 +33,9 @@ export const RequestsTab = () => {
     if (requests && requests.length > 0) {
       console.info("Requests with items:", requests);
       setRequestsWithDetails(requests as ServiceRequestWithItem[]);
+    } else if (requests) {
+      // Even if there are no requests, update the state to empty array
+      setRequestsWithDetails([]);
     }
   }, [requests]);
 
@@ -116,7 +119,7 @@ export const RequestsTab = () => {
                 {requestsWithDetails.length > 0 ? (
                   requestsWithDetails.map((request) => (
                     <TableRow key={request.id}>
-                      <TableCell>{request.room_number || 'N/A'}</TableCell>
+                      <TableCell>{request.room_number || request.room_id || 'N/A'}</TableCell>
                       <TableCell>{request.guest_name || 'Anonymous'}</TableCell>
                       <TableCell>{request.type}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.description || 'No description'}</TableCell>
