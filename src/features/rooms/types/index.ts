@@ -12,6 +12,11 @@ export interface ServiceRequest {
   category_id?: string;
   guest_name?: string;
   room_number?: string;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+  };
+  request_items?: RequestItem;
 }
 
 export interface RequestCategory {
