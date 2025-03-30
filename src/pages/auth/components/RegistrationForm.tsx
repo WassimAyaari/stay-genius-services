@@ -64,7 +64,7 @@ const RegistrationForm = () => {
     setLoading(true);
     
     try {
-      // Préparer les données utilisateur
+      // Préparer les données utilisateur pour la table guests
       const userData = {
         email: values.email,
         first_name: values.firstName,
@@ -80,7 +80,7 @@ const RegistrationForm = () => {
       // Sauvegarder dans le localStorage
       localStorage.setItem('user_data', JSON.stringify(userData));
       
-      // Synchroniser avec Supabase
+      // Synchroniser avec Supabase (profiles et guests)
       const syncSuccess = await syncUserData(userData);
       
       if (!syncSuccess) {

@@ -218,6 +218,65 @@ export type Database = {
         }
         Relationships: []
       }
+      guests: {
+        Row: {
+          birth_date: string | null
+          check_in_date: string | null
+          check_out_date: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string
+          guest_type: string | null
+          id: string
+          last_name: string
+          nationality: string | null
+          room_number: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          check_in_date?: string | null
+          check_out_date?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          guest_type?: string | null
+          id?: string
+          last_name: string
+          nationality?: string | null
+          room_number?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          check_in_date?: string | null
+          check_out_date?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          guest_type?: string | null
+          id?: string
+          last_name?: string
+          nationality?: string | null
+          room_number?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hotel_about: {
         Row: {
           action_link: string
