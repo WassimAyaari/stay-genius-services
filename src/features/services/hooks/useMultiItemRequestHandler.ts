@@ -5,6 +5,46 @@ import { UserInfo } from './useUserInfo';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * Ensures user profile exists in the database
+ */
+const ensureUserProfileExists = async (userId: string, userInfo: UserInfo) => {
+  try {
+    // Check if profile exists
+    const { data: existingProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+    
+    if (profileError) throw profileError;
+    
+    // If profile doesn't exist, create it
+    if (!existingProfile) {
+      console.log("Creating profile for user:", userId);
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          first_name: userInfo.name.split(' ')[0] || '',
+          last_name: userInfo.name.split(' ').slice(1).join(' ') || '',
+          phone: null
+        });
+      
+      if (insertError) {
+        console.error("Error creating profile:", insertError);
+        throw insertError;
+      }
+      console.log("Profile created successfully");
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error ensuring user profile exists:", error);
+    return false;
+  }
+};
+
 export function useMultiItemRequestHandler() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -39,6 +79,18 @@ export function useMultiItemRequestHandler() {
     }
 
     try {
+      // First ensure that user profile exists
+      const profileExists = await ensureUserProfileExists(userId, userInfo);
+      if (!profileExists) {
+        toast({
+          title: "Error creating profile",
+          description: "Unable to create user profile. Please try again.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      
       // First check if room number exists and get the room_id
       const { data: roomData, error: roomError } = await supabase
         .from('rooms')

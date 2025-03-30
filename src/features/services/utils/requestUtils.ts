@@ -5,6 +5,46 @@ import { RequestCategory } from '@/features/rooms/types';
 import { toast } from '@/hooks/use-toast';
 
 /**
+ * Ensures user profile exists in the database
+ */
+const ensureUserProfileExists = async (userId: string, userInfo: UserInfo) => {
+  try {
+    // Check if profile exists
+    const { data: existingProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+    
+    if (profileError) throw profileError;
+    
+    // If profile doesn't exist, create it
+    if (!existingProfile) {
+      console.log("Creating profile for user:", userId);
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          first_name: userInfo.name.split(' ')[0] || '',
+          last_name: userInfo.name.split(' ').slice(1).join(' ') || '',
+          phone: null
+        });
+      
+      if (insertError) {
+        console.error("Error creating profile:", insertError);
+        throw insertError;
+      }
+      console.log("Profile created successfully");
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error ensuring user profile exists:", error);
+    return false;
+  }
+};
+
+/**
  * Submits a service request via chat message
  */
 export const submitRequestViaChatMessage = async (
@@ -34,6 +74,17 @@ export const submitRequestViaChatMessage = async (
   }
 
   try {
+    // First ensure that user profile exists
+    const profileExists = await ensureUserProfileExists(userId, userInfo);
+    if (!profileExists) {
+      toast({
+        title: "Error creating profile",
+        description: "Unable to create user profile. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
     console.log("Submitting request:", {
       description,
       type,
