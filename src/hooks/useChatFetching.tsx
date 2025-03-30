@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Chat, Message, UserInfo } from '@/components/admin/chat/types';
 import { formatTimeAgo } from '@/utils/dateUtils';
-import { ServiceRequest } from '@/features/rooms/types';
 
 export function useChatFetching() {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -18,7 +17,7 @@ export function useChatFetching() {
   const fetchChats = async () => {
     setLoading(true);
     try {
-      // First fetch all chat messages
+      // Fetch all chat messages
       const { data: messagesData, error: messagesError } = await supabase
         .from('chat_messages')
         .select('user_id, user_name, room_number')
@@ -26,15 +25,7 @@ export function useChatFetching() {
 
       if (messagesError) throw messagesError;
 
-      // Then fetch all service requests
-      const { data: serviceRequestsData, error: serviceRequestsError } = await supabase
-        .from('service_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (serviceRequestsError) throw serviceRequestsError;
-
-      // Process chat messages and service requests
+      // Process chat messages
       const uniqueUsers = new Map();
       
       // Process regular chat messages
@@ -48,20 +39,6 @@ export function useChatFetching() {
           });
         }
       });
-
-      // Process service requests - ensure proper type casting
-      if (serviceRequestsData && Array.isArray(serviceRequestsData)) {
-        serviceRequestsData.forEach((req: ServiceRequest) => {
-          if (req.guest_id && !uniqueUsers.has(req.guest_id)) {
-            uniqueUsers.set(req.guest_id, {
-              userId: req.guest_id,
-              userName: req.guest_name || 'Guest',
-              roomNumber: req.room_number,
-              type: 'request'
-            });
-          }
-        });
-      }
 
       const filteredUsers = Array.from(uniqueUsers.values()).filter(user => user.userId);
       
@@ -96,18 +73,7 @@ export function useChatFetching() {
           continue;
         }
 
-        // Fetch user's service requests
-        const { data: userRequests, error: userRequestsError } = await supabase
-          .from('service_requests')
-          .select('*')
-          .eq('guest_id', userInfo.userId)
-          .order('created_at', { ascending: true });
-
-        if (userRequestsError) {
-          console.error('Error fetching user requests:', userRequestsError);
-        }
-
-        // Format both messages and requests
+        // Format chat messages
         const formattedMessages: Message[] = [];
         
         // Add chat messages
@@ -121,34 +87,13 @@ export function useChatFetching() {
             type: 'chat' as const
           })));
         }
-        
-        // Add service requests as messages
-        if (userRequests && userRequests.length > 0) {
-          formattedMessages.push(...userRequests.map(req => ({
-            id: req.id,
-            text: `Service Request: ${req.type.replace('_', ' ').charAt(0).toUpperCase() + req.type.replace('_', ' ').slice(1)} - ${req.description || 'No details provided'}`,
-            time: new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            sender: 'user' as const,
-            status: 'delivered' as const,
-            type: 'request' as const,
-            requestType: req.type,
-            requestStatus: req.status
-          })));
-        }
 
-        // Sort all messages by time
-        formattedMessages.sort((a, b) => {
-          const dateA = new Date(a.time);
-          const dateB = new Date(b.time);
-          return dateA.getTime() - dateB.getTime();
-        });
-
-        // Calculate unread count from both messages and requests
+        // Calculate unread count
         const unreadCount = formattedMessages.filter(
           msg => msg.sender === 'user' && msg.status !== 'read'
         ).length || 0;
 
-        // Only add users who have messages or requests
+        // Only add users who have messages
         if (formattedMessages.length > 0) {
           const lastMessage = formattedMessages[formattedMessages.length - 1];
           const lastActivity = lastMessage 
@@ -166,7 +111,7 @@ export function useChatFetching() {
             messages: formattedMessages,
             unread: unreadCount,
             userInfo: userDetails,
-            type: userInfo.type as 'chat' | 'request'
+            type: 'chat' as const
           });
         }
       }

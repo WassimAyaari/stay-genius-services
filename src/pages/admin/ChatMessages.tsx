@@ -22,10 +22,11 @@ const ChatMessages = () => {
     confirmDelete,
     sendReply,
     getFilteredChats,
-    fetchChats
+    fetchChats,
+    currentTab,
+    setCurrentTab
   } = useChatMessages();
   
-  const [currentTab, setCurrentTab] = useState('all');
   const [replyMessage, setReplyMessage] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
@@ -64,7 +65,7 @@ const ChatMessages = () => {
       await fetchChats();
       toast({
         title: "Data refreshed",
-        description: "The messages and requests have been refreshed.",
+        description: "The messages have been refreshed.",
       });
     } catch (error) {
       toast({
@@ -80,7 +81,7 @@ const ChatMessages = () => {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Messages & Requests</h1>
+        <h1 className="text-2xl font-semibold">Messages</h1>
         {!activeChat && (
           <Button 
             variant="outline" 

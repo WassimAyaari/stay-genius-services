@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Trash2, MessageCircle, FileText, Loader } from 'lucide-react';
+import { Trash2, MessageCircle, Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Chat } from '@/components/admin/chat/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,20 +28,20 @@ const ChatList = ({ chats, loading, onSelectChat, onDeleteClick, activeTab, onTa
     );
   }
 
-  const filteredChats = activeTab === 'all' 
-    ? chats 
-    : activeTab === 'messages' 
-      ? chats.filter(chat => !chat.type || chat.type === 'chat')
-      : chats.filter(chat => chat.type === 'request');
+  const filteredChats = chats;
 
   if (filteredChats.length === 0) {
     return (
-      <div className="text-center py-10 text-gray-500">
-        {activeTab === 'messages' 
-          ? "No chat messages available" 
-          : activeTab === 'requests' 
-            ? "No service requests available" 
-            : "No communications available"}
+      <div>
+        <Tabs defaultValue={activeTab} onValueChange={onTabChange} className="mb-6">
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="unread">Unread</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <div className="text-center py-10 text-gray-500">
+          No messages available
+        </div>
       </div>
     );
   }
@@ -49,10 +49,9 @@ const ChatList = ({ chats, loading, onSelectChat, onDeleteClick, activeTab, onTa
   return (
     <div>
       <Tabs defaultValue={activeTab} onValueChange={onTabChange} className="mb-6">
-        <TabsList className="w-full grid grid-cols-3">
+        <TabsList className="w-full grid grid-cols-2">
           <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="requests">Requests</TabsTrigger>
+          <TabsTrigger value="unread">Unread</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -68,8 +67,8 @@ const ChatList = ({ chats, loading, onSelectChat, onDeleteClick, activeTab, onTa
           >
             <div className="flex items-start gap-4">
               <Avatar>
-                <AvatarFallback className={chat.type === 'request' ? "bg-amber-100 text-amber-800" : ""}>
-                  {chat.type === 'request' ? <FileText className="h-4 w-4" /> : chat.userName.charAt(0)}
+                <AvatarFallback>
+                  {chat.userName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -79,11 +78,6 @@ const ChatList = ({ chats, loading, onSelectChat, onDeleteClick, activeTab, onTa
                       {chat.userInfo?.firstName && chat.userInfo?.lastName 
                         ? `${chat.userInfo.firstName} ${chat.userInfo.lastName}` 
                         : chat.userName}
-                      {chat.type === 'request' && (
-                        <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 text-xs">
-                          Requests
-                        </Badge>
-                      )}
                     </h3>
                     <div className="flex flex-col gap-0.5">
                       {chat.roomNumber && (
@@ -95,14 +89,7 @@ const ChatList = ({ chats, loading, onSelectChat, onDeleteClick, activeTab, onTa
                 </div>
                 {chat.messages.length > 0 && (
                   <p className="text-sm text-muted-foreground truncate mt-1">
-                    {chat.type === 'request' ? (
-                      <span className="flex items-center">
-                        <FileText className="h-3 w-3 mr-1 inline" />
-                        {chat.messages[chat.messages.length - 1].text}
-                      </span>
-                    ) : (
-                      chat.messages[chat.messages.length - 1].text
-                    )}
+                    {chat.messages[chat.messages.length - 1].text}
                   </p>
                 )}
                 <div className="flex justify-between items-center mt-2">
