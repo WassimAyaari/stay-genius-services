@@ -47,6 +47,10 @@ export const requestService = async (
     }
   }
   
+  if (!finalRoomNumber) {
+    throw new Error('Room number is required for service requests');
+  }
+  
   const { data, error } = await supabase
     .from('service_requests')
     .insert({

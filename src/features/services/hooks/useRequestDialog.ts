@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
@@ -77,11 +78,13 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
 
   const saveUserInfo = (info: UserInfo) => {
     // Store user info in local storage with proper fields
-    localStorage.setItem('user_data', JSON.stringify({
+    const userDataToSave = {
       first_name: info.name.split(' ')[0],
       last_name: info.name.split(' ').slice(1).join(' '),
       room_number: info.roomNumber
-    }));
+    };
+    
+    localStorage.setItem('user_data', JSON.stringify(userDataToSave));
     setUserInfo(info);
     setIsUserInfoDialogOpen(false);
   };
@@ -154,10 +157,38 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
 
       if (error) throw error;
       
-      // Also insert into service_requests table for tracking purposes
-      if (room?.id) {
+      // Get room ID if available
+      const roomId = room?.id;
+      
+      // If we don't have room ID but have room number, try to fetch the room
+      if (!roomId && userInfo.roomNumber) {
+        try {
+          const { data: roomData } = await supabase
+            .from('rooms')
+            .select('id')
+            .eq('room_number', userInfo.roomNumber)
+            .maybeSingle();
+            
+          if (roomData) {
+            // Also insert into service_requests table for tracking purposes
+            await requestService(
+              roomData.id, 
+              type as any, 
+              description, 
+              undefined, 
+              selectedCategory?.id, 
+              userInfo.name, 
+              userInfo.roomNumber
+            );
+            return true;
+          }
+        } catch (err) {
+          console.error("Error fetching room by number:", err);
+        }
+      } else if (roomId) {
+        // If we have room ID, use it directly
         await requestService(
-          room.id, 
+          roomId, 
           type as any, 
           description, 
           undefined, 
@@ -165,8 +196,10 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
           userInfo.name, 
           userInfo.roomNumber
         );
+        return true;
       }
       
+      // If we couldn't get room ID but chat message was sent, consider it a success
       return true;
     } catch (error) {
       console.error("Error submitting request via chat:", error);
@@ -177,17 +210,6 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
   const handlePresetRequest = async (preset: {category: string, description: string, type: string}) => {
     if (!userInfo.name || !userInfo.roomNumber) {
       setIsUserInfoDialogOpen(true);
-      return;
-    }
-
-    // Ensure we have a valid room ID
-    const roomId = room?.id;
-    if (!roomId) {
-      toast({
-        title: "Room information missing",
-        description: "Unable to submit request without room information.",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -238,17 +260,6 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     
     if (!userInfo.name || !userInfo.roomNumber) {
       setIsUserInfoDialogOpen(true);
-      return;
-    }
-
-    // Ensure we have a valid room ID
-    const roomId = room?.id;
-    if (!roomId) {
-      toast({
-        title: "Room information missing",
-        description: "Unable to submit request without room information.",
-        variant: "destructive"
-      });
       return;
     }
     

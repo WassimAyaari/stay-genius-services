@@ -22,10 +22,11 @@ const Services = () => {
   const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({
-    name: 'Emma Watson',
-    roomNumber: '401'
+    name: '',
+    roomNumber: ''
   });
   const { toast } = useToast();
+  // Pass room number to useRoom hook to fetch room data
   const { data: room } = useRoom(userInfo.roomNumber);
 
   useEffect(() => {
@@ -33,10 +34,13 @@ const Services = () => {
     if (userData) {
       try {
         const parsedUserData = JSON.parse(userData);
-        if (parsedUserData.name && parsedUserData.roomNumber) {
+        const fullName = `${parsedUserData.first_name || ''} ${parsedUserData.last_name || ''}`.trim();
+        const roomNumber = parsedUserData.room_number || '';
+        
+        if (fullName || roomNumber) {
           setUserInfo({
-            name: parsedUserData.name,
-            roomNumber: parsedUserData.roomNumber
+            name: fullName,
+            roomNumber: roomNumber
           });
         }
       } catch (error) {
@@ -68,7 +72,13 @@ const Services = () => {
       });
       return;
     }
-    localStorage.setItem('user_data', JSON.stringify(userInfo));
+    
+    // Save user data in the expected format
+    localStorage.setItem('user_data', JSON.stringify({
+      first_name: userInfo.name.split(' ')[0],
+      last_name: userInfo.name.split(' ').slice(1).join(' '),
+      room_number: userInfo.roomNumber
+    }));
 
     let userId = localStorage.getItem('user_id');
     if (!userId) {
