@@ -73,6 +73,7 @@ export const RequestsTable = ({
                   <div className="flex gap-2">
                     <RequestStatusActions 
                       currentStatus={request.status}
+                      requestId={request.id}
                       onUpdateStatus={(newStatus) => onUpdateStatus(request.id, newStatus)}
                     />
                   </div>
@@ -90,4 +91,4 @@ export const RequestsTable = ({
       </Table>
     </ScrollArea>
   );
-};
+}
