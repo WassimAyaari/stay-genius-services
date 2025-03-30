@@ -53,12 +53,28 @@ export const requestService = async (
   }
 
   try {
-    // Now that RLS is disabled, we can directly insert into the database
+    // First, check if the roomId is in room number format (e.g., "406")
+    // If so, fetch the actual UUID from the rooms table
+    let actualRoomId = roomId;
+    
+    if (!roomId.includes('-')) {
+      const { data: roomData } = await supabase
+        .from('rooms')
+        .select('id')
+        .eq('room_number', roomId)
+        .maybeSingle();
+      
+      if (roomData) {
+        actualRoomId = roomData.id;
+      }
+    }
+    
+    // Insert the request with the correct room_id
     const { data, error } = await supabase
       .from('service_requests')
       .insert({
         guest_id,
-        room_id: roomId,
+        room_id: actualRoomId,
         type,
         description,
         request_item_id,

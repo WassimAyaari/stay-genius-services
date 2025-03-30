@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { UserInfo } from '../hooks/useUserInfo';
 import { RequestCategory } from '@/features/rooms/types';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 /**
  * Submits a service request via chat message
@@ -56,12 +56,24 @@ export const submitRequestViaChatMessage = async (
 
     if (chatError) throw chatError;
     
-    // Insert the service request in the database
+    // Fetch room ID first based on room number
+    let roomId = null;
+    const { data: roomData } = await supabase
+      .from('rooms')
+      .select('id')
+      .eq('room_number', userInfo.roomNumber)
+      .maybeSingle();
+    
+    if (roomData) {
+      roomId = roomData.id;
+    }
+    
+    // Insert the service request in the database with the correct room_id format
     const { error: serviceError } = await supabase
       .from('service_requests')
       .insert([{
         guest_id: userId,
-        room_id: 'room-' + userInfo.roomNumber, // This is a temporary room_id format
+        room_id: roomId, // Use the fetched room ID or null if not found
         type: type,
         description: description,
         category_id: selectedCategory?.id,
