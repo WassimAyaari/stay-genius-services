@@ -85,18 +85,27 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
     localStorage.setItem('user_data', JSON.stringify(userData));
     
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('chat_messages').insert([{
-        user_id: userId,
-        user_name: userInfo.name,
-        room_number: userInfo.roomNumber,
-        text: inputMessage,
-        sender: 'user',
-        status: 'sent',
-        created_at: currentTime.toISOString()
-      }]).select();
+      const { error: chatError } = await supabase
+        .from('chat_messages')
+        .insert([{
+          user_id: userId,
+          user_name: userInfo.name,
+          room_number: userInfo.roomNumber,
+          text: inputMessage,
+          sender: 'user',
+          status: 'sent',
+          created_at: currentTime.toISOString()
+        }]);
+      
+      if (chatError) {
+        console.error("Error saving message:", chatError);
+        toast({
+          title: "Error",
+          description: "Failed to send your message. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
       
       if (inputMessage.toLowerCase().includes('request') || 
           inputMessage.toLowerCase().includes('service') ||
@@ -120,16 +129,6 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
           status: 'pending',
           created_at: currentTime.toISOString()
         }]);
-      }
-      
-      if (error) {
-        console.error("Error saving message:", error);
-        toast({
-          title: "Error",
-          description: "Failed to send your message. Please try again.",
-          variant: "destructive"
-        });
-        return;
       }
       
       setTimeout(async () => {

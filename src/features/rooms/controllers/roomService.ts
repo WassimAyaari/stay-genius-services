@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceType } from '../types';
 import { toast } from '@/hooks/use-toast';
+import { RoomType, ServiceRequestType } from '@/features/types/supabaseTypes';
 
 // Function to create a new service request
 export const createServiceRequest = async (requestData: {

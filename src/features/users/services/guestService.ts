@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { GuestData, UserData } from '../types/userTypes';
 import { syncCompanions } from './companionService';
@@ -15,16 +14,29 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       .eq('user_id', userId)
       .maybeSingle();
     
-    // Préparer les données à insérer ou mettre à jour - Convert Date objects to ISO strings
+    // Préparer les données à insérer ou mettre à jour - Handle different date formats
     const guestData: GuestData = {
       user_id: userId,
       first_name: userData.first_name,
       last_name: userData.last_name,
       email: userData.email,
       room_number: userData.room_number,
-      check_in_date: userData.check_in_date ? userData.check_in_date.toISOString() : undefined,
-      check_out_date: userData.check_out_date ? userData.check_out_date.toISOString() : undefined,
-      birth_date: userData.birth_date ? userData.birth_date.toISOString() : undefined,
+      // Safely convert date objects to ISO strings or pass strings as is
+      check_in_date: userData.check_in_date ? 
+        (userData.check_in_date instanceof Date ? 
+          userData.check_in_date.toISOString() : 
+          userData.check_in_date) : 
+        undefined,
+      check_out_date: userData.check_out_date ? 
+        (userData.check_out_date instanceof Date ? 
+          userData.check_out_date.toISOString() : 
+          userData.check_out_date) : 
+        undefined,
+      birth_date: userData.birth_date ? 
+        (userData.birth_date instanceof Date ? 
+          userData.birth_date.toISOString() : 
+          userData.birth_date) : 
+        undefined,
       nationality: userData.nationality,
       guest_type: 'Premium Guest' // Tous les invités seront considérés comme Premium Guest
     };
@@ -68,7 +80,7 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
 };
 
 /**
- * Récupère les données d'invité depuis Supabase
+ * Récupère les données utilisateur depuis Supabase
  */
 export const getGuestData = async (userId: string): Promise<UserData | null> => {
   try {
@@ -88,11 +100,11 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
         first_name: guestData.first_name || '',
         last_name: guestData.last_name || '',
         room_number: guestData.room_number || '',
-        // Convert string dates back to Date objects if they exist
-        birth_date: guestData.birth_date ? new Date(guestData.birth_date) : undefined,
+        // Keep the dates as strings to avoid conversion issues
+        birth_date: guestData.birth_date || undefined,
         nationality: guestData.nationality,
-        check_in_date: guestData.check_in_date ? new Date(guestData.check_in_date) : undefined,
-        check_out_date: guestData.check_out_date ? new Date(guestData.check_out_date) : undefined
+        check_in_date: guestData.check_in_date || undefined,
+        check_out_date: guestData.check_out_date || undefined
       };
       
       return userData;

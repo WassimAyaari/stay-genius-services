@@ -1,36 +1,54 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { CompanionData } from '../types/userTypes';
+import { CompanionType } from '@/features/types/supabaseTypes';
 
 /**
- * Synchronise les accompagnateurs de l'utilisateur
+ * Synchronise les données des accompagnateurs avec Supabase
  */
 export const syncCompanions = async (userId: string, companions: CompanionData[]): Promise<boolean> => {
   try {
-    // D'abord supprimer tous les accompagnateurs existants
-    const { error: deleteError } = await supabase
+    // Récupérer les accompagnateurs existants
+    const { data: existingCompanions, error: fetchError } = await supabase
       .from('companions')
-      .delete()
+      .select('*')
       .eq('user_id', userId);
     
-    if (deleteError) {
-      console.error('Error deleting companions:', deleteError);
-      throw deleteError;
+    if (fetchError) {
+      console.error('Error fetching companions:', fetchError);
+      throw fetchError;
     }
     
-    // Préparer les données des accompagnateurs
-    const companionsData = companions.map(companion => ({
-      user_id: userId,
-      first_name: companion.first_name || companion.firstName,
-      last_name: companion.last_name || companion.lastName,
-      relation: companion.relation
-    }));
+    // Supprimer les accompagnateurs existants
+    if (existingCompanions && existingCompanions.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('companions')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (deleteError) {
+        console.error('Error deleting companions:', deleteError);
+        throw deleteError;
+      }
+    }
     
     // Insérer les nouveaux accompagnateurs
-    if (companionsData.length > 0) {
+    const companionsToInsert = companions.map(companion => ({
+      user_id: userId,
+      first_name: companion.first_name || companion.firstName || '',
+      last_name: companion.last_name || companion.lastName || '',
+      relation: companion.relation,
+      birth_date: companion.birthDate ? 
+        (companion.birthDate instanceof Date ? 
+          companion.birthDate.toISOString() : 
+          companion.birthDate) : 
+        null
+    }));
+    
+    if (companionsToInsert.length > 0) {
       const { error: insertError } = await supabase
         .from('companions')
-        .insert(companionsData);
+        .insert(companionsToInsert);
       
       if (insertError) {
         console.error('Error inserting companions:', insertError);
@@ -47,18 +65,29 @@ export const syncCompanions = async (userId: string, companions: CompanionData[]
 };
 
 /**
- * Récupère les accompagnateurs d'un utilisateur depuis Supabase
+ * Récupère les données des accompagnateurs depuis Supabase
  */
 export const getCompanions = async (userId: string): Promise<CompanionData[]> => {
   try {
-    const { data: companions, error } = await supabase
+    const { data } = await supabase
       .from('companions')
       .select('*')
       .eq('user_id', userId);
     
-    if (error) throw error;
+    if (data) {
+      return data.map(companion => ({
+        id: companion.id,
+        user_id: companion.user_id,
+        first_name: companion.first_name,
+        last_name: companion.last_name,
+        relation: companion.relation,
+        birthDate: companion.birth_date,
+        created_at: companion.created_at,
+        updated_at: companion.updated_at
+      }));
+    }
     
-    return companions || [];
+    return [];
   } catch (error) {
     console.error('Error fetching companions from Supabase:', error);
     return [];

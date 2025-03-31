@@ -6,6 +6,7 @@ import { useChatOperations } from './useChatOperations';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
+import { ServiceRequestType } from '@/features/types/supabaseTypes';
 
 export function useChatMessages() {
   const location = useLocation();
@@ -37,8 +38,10 @@ export function useChatMessages() {
         }
 
         console.log('Service requests fetched for chat:', data);
-        const requestChats = convertRequestsToChats(data as ServiceRequest[]);
-        setServiceRequestChats(requestChats);
+        if (data) {
+          const requestChats = convertRequestsToChats(data as ServiceRequestType[]);
+          setServiceRequestChats(requestChats);
+        }
       } catch (error) {
         console.error('Error in fetchServiceRequests:', error);
       }
@@ -48,8 +51,8 @@ export function useChatMessages() {
   }, []);
 
   // Helper function to convert service requests to chat format
-  const convertRequestsToChats = (requests: ServiceRequest[]): Chat[] => {
-    const groupedRequests: Record<string, ServiceRequest[]> = {};
+  const convertRequestsToChats = (requests: ServiceRequestType[]): Chat[] => {
+    const groupedRequests: Record<string, ServiceRequestType[]> = {};
     
     // Group requests by guest_id
     requests.forEach(request => {

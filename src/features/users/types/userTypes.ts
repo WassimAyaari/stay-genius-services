@@ -7,10 +7,10 @@ export interface UserData {
   first_name: string;
   last_name: string;
   room_number: string;
-  birth_date?: Date;
+  birth_date?: Date | string; // Accept both Date and string
   nationality?: string;
-  check_in_date?: Date;
-  check_out_date?: Date;
+  check_in_date?: Date | string; // Accept both Date and string
+  check_out_date?: Date | string; // Accept both Date and string
   profile_image?: string;
   companions?: CompanionData[];
 }
@@ -21,7 +21,7 @@ export interface CompanionData {
   first_name: string;
   last_name: string;
   relation: string;
-  birthDate?: Date;
+  birthDate?: Date | string; // Accept both Date and string
   // These are kept for backward compatibility
   firstName?: string;
   lastName?: string;

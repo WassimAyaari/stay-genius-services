@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { UserInfo } from '../hooks/useUserInfo';
 import { RequestCategory } from '@/features/rooms/types';

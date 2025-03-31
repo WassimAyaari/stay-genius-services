@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '@/features/users/types/userTypes';
 import { useToast } from '@/hooks/use-toast';
@@ -100,7 +99,18 @@ export const loginUser = async (
     }
 
     // Si les données existent dans Supabase, les utiliser, sinon créer un objet vide
-    const userData: UserData = guestData || {
+    // Ensure we're handling the date fields correctly
+    const userData: UserData = guestData ? {
+      email: email,
+      first_name: guestData.first_name || authData.user.user_metadata?.first_name || '',
+      last_name: guestData.last_name || authData.user.user_metadata?.last_name || '',
+      room_number: guestData.room_number || '',
+      // Keep dates as strings to avoid conversion issues
+      birth_date: guestData.birth_date || undefined,
+      check_in_date: guestData.check_in_date || undefined,
+      check_out_date: guestData.check_out_date || undefined,
+      nationality: guestData.nationality
+    } : {
       email: email,
       first_name: authData.user.user_metadata?.first_name || '',
       last_name: authData.user.user_metadata?.last_name || '',
