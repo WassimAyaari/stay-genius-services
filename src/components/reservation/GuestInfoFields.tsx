@@ -3,14 +3,28 @@ import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface GuestInfoFieldsProps {
   form: UseFormReturn<any>;
 }
 
 const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
+  const roomNumber = form.watch('roomNumber');
+  
   return (
     <>
+      {!roomNumber && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Numéro de chambre requis</AlertTitle>
+          <AlertDescription>
+            Veuillez indiquer votre numéro de chambre pour pouvoir effectuer une réservation.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField
           control={form.control}
@@ -73,7 +87,11 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
             <FormItem>
               <FormLabel>Numéro de chambre</FormLabel>
               <FormControl>
-                <Input placeholder="Votre numéro de chambre" {...field} />
+                <Input 
+                  placeholder="Votre numéro de chambre" 
+                  {...field} 
+                  className={!field.value ? "border-red-500 focus:ring-red-500" : ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

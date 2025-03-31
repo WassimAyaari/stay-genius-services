@@ -47,31 +47,48 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
   // Populate form with user data when available
   useEffect(() => {
     if (userData) {
+      console.log("Populating form with user data:", userData);
+      
       // Format full name from user data
       const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
       
+      form.setValue('guestName', fullName || '');
+      form.setValue('guestEmail', userData.email || '');
+      form.setValue('guestPhone', userData.phone || '');
+      form.setValue('roomNumber', userData.room_number || '');
+      
+      console.log("Form values after update:", {
+        name: fullName,
+        email: userData.email,
+        phone: userData.phone,
+        roomNumber: userData.room_number
+      });
+    } else {
+      console.log("No user data available to populate form");
+      
       // Get user details from localStorage if available
-      let phone = '';
-      let roomNumber = '';
       try {
-        const userDataObj = localStorage.getItem('user_data');
-        if (userDataObj) {
-          const parsedData = JSON.parse(userDataObj);
-          phone = parsedData.phone || '';
-          roomNumber = parsedData.room_number || '';
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          const parsedData = JSON.parse(userDataStr);
+          console.log("User data from localStorage:", parsedData);
+          
+          const fullName = `${parsedData.first_name || ''} ${parsedData.last_name || ''}`.trim();
+          
+          form.setValue('guestName', fullName || '');
+          form.setValue('guestEmail', parsedData.email || '');
+          form.setValue('guestPhone', parsedData.phone || '');
+          form.setValue('roomNumber', parsedData.room_number || '');
         }
       } catch (error) {
-        console.error("Error parsing user data:", error);
+        console.error("Error parsing user data from localStorage:", error);
       }
-      
-      form.setValue('guestName', fullName);
-      form.setValue('guestEmail', userData.email || '');
-      form.setValue('guestPhone', phone);
-      form.setValue('roomNumber', roomNumber || userData.room_number || '');
     }
   }, [userData, form]);
 
   const onSubmit = form.handleSubmit((data) => {
+    console.log('Form submission data:', data);
+    
     if (!data.date) {
       form.setError('date', { message: 'Veuillez sélectionner une date' });
       return;
@@ -80,6 +97,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
     // Make sure the room number is included
     if (!data.roomNumber) {
       form.setError('roomNumber', { message: 'Le numéro de chambre est requis' });
+      toast.error('Veuillez indiquer votre numéro de chambre');
       return;
     }
     
@@ -105,7 +123,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
         toast.success('Réservation créée avec succès');
         if (onSuccess) onSuccess();
       },
-      onError: (error) => {
+      onError: (error: any) => {
         console.error('Error creating reservation:', error);
         toast.error(`Erreur lors de la création de la réservation: ${error.message}`);
       }

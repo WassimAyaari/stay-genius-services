@@ -10,11 +10,11 @@ interface SupabaseTableReservation {
   guest_name: string | null;
   guest_email: string | null;
   guest_phone: string | null;
-  room_number: string | null; // Rendre optionnel
+  room_number: string | null;
   date: string;
   time: string;
   guests: number;
-  menu_id: string | null; // Rendre optionnel
+  menu_id: string | null;
   special_requests: string | null;
   status: string;
   created_at: string;
@@ -68,6 +68,11 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || null;
   
+  // Si pas de numéro de chambre fourni, lever une erreur explicite
+  if (!reservation.roomNumber) {
+    throw new Error('Room number is required to create a reservation.');
+  }
+  
   // Si userId est disponible, récupérer les données utilisateur depuis la table guests
   let roomNumber = reservation.roomNumber || '';
   let guestName = reservation.guestName || '';
@@ -92,6 +97,11 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
     } catch (error) {
       console.error('Error fetching guest data for reservation:', error);
     }
+  }
+  
+  // Vérifions à nouveau si nous avons un numéro de chambre
+  if (!roomNumber) {
+    throw new Error('Unable to create reservation. Please make sure you have provided your room number.');
   }
   
   // Create the reservation payload - ensure all required fields are included
