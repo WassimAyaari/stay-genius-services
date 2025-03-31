@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { GuestData, UserData } from '../types/userTypes';
 import { syncCompanions } from './companionService';
@@ -24,18 +25,24 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       // Safely convert date objects to ISO strings or pass strings as is
       check_in_date: userData.check_in_date ? 
         (userData.check_in_date instanceof Date ? 
-          userData.check_in_date.toISOString() : 
-          userData.check_in_date) : 
+          userData.check_in_date.toISOString().split('T')[0] : 
+          typeof userData.check_in_date === 'string' ? 
+            userData.check_in_date : 
+            undefined) : 
         undefined,
       check_out_date: userData.check_out_date ? 
         (userData.check_out_date instanceof Date ? 
-          userData.check_out_date.toISOString() : 
-          userData.check_out_date) : 
+          userData.check_out_date.toISOString().split('T')[0] : 
+          typeof userData.check_out_date === 'string' ? 
+            userData.check_out_date : 
+            undefined) : 
         undefined,
       birth_date: userData.birth_date ? 
         (userData.birth_date instanceof Date ? 
-          userData.birth_date.toISOString() : 
-          userData.birth_date) : 
+          userData.birth_date.toISOString().split('T')[0] : 
+          typeof userData.birth_date === 'string' ? 
+            userData.birth_date : 
+            undefined) : 
         undefined,
       nationality: userData.nationality,
       guest_type: 'Premium Guest' // Tous les invités seront considérés comme Premium Guest

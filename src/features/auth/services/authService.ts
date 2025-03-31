@@ -10,7 +10,7 @@ export const registerUser = async (
   email: string,
   password: string,
   userData: Omit<UserData, 'email'>
-): Promise<{ success: boolean; error?: string }> => {
+): Promise<{ success: boolean; error?: string; userId?: string }> => {
   try {
     console.log('Registering user with email:', email);
     
@@ -34,20 +34,28 @@ export const registerUser = async (
       };
     }
 
+    if (!authData.user) {
+      return { 
+        success: false, 
+        error: 'Erreur de création de compte' 
+      };
+    }
+
     // Stocker aussi les données dans le localStorage pour la compatibilité avec le code existant
     const fullUserData = {
       ...userData,
-      email
+      email,
+      id: authData.user.id
     };
     
     localStorage.setItem('user_data', JSON.stringify(fullUserData));
-    
-    if (authData.user) {
-      localStorage.setItem('user_id', authData.user.id);
-    }
+    localStorage.setItem('user_id', authData.user.id);
 
     console.log('User registered successfully');
-    return { success: true };
+    return { 
+      success: true,
+      userId: authData.user.id
+    };
   } catch (error: any) {
     console.error('Error during registration:', error);
     return { 

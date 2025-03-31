@@ -40,8 +40,10 @@ export const syncCompanions = async (userId: string, companions: CompanionData[]
       relation: companion.relation,
       birth_date: companion.birthDate ? 
         (companion.birthDate instanceof Date ? 
-          companion.birthDate.toISOString() : 
-          companion.birthDate) : 
+          companion.birthDate.toISOString().split('T')[0] : 
+          typeof companion.birthDate === 'string' ? 
+            companion.birthDate : 
+            null) : 
         null
     }));
     

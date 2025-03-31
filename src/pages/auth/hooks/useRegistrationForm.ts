@@ -65,9 +65,8 @@ export const useRegistrationForm = () => {
     setLoading(true);
     
     try {
-      // Préparer les données utilisateur pour la table guests
+      // Préparer les données utilisateur 
       const userData = {
-        email: values.email,
         first_name: values.firstName,
         last_name: values.lastName,
         birth_date: values.birthDate,
@@ -85,15 +84,21 @@ export const useRegistrationForm = () => {
         throw new Error(result.error || "Erreur lors de l'inscription");
       }
       
-      // Synchroniser avec Supabase (profiles et guests)
-      const syncSuccess = await syncUserData(userData);
-      
-      if (!syncSuccess) {
-        toast({
-          variant: "destructive",
-          title: "Synchronisation échouée",
-          description: "Les données ont été enregistrées localement mais la synchronisation avec le serveur a échoué.",
+      // Si userId est défini, synchroniser avec Supabase
+      if (result.userId) {
+        const syncSuccess = await syncUserData({
+          ...userData,
+          email: values.email,
+          id: result.userId
         });
+        
+        if (!syncSuccess) {
+          toast({
+            variant: "destructive",
+            title: "Synchronisation échouée",
+            description: "Les données ont été enregistrées localement mais la synchronisation avec le serveur a échoué.",
+          });
+        }
       }
       
       toast({
