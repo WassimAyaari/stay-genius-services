@@ -95,6 +95,20 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
   try {
     console.log('Sending to Supabase:', reservationData);
     
+    // Let's add a debug output to see the table structure
+    const { data: tableInfo, error: tableError } = await supabase
+      .from('table_reservations')
+      .select('*')
+      .limit(1);
+    
+    if (tableInfo) {
+      console.log('Table structure sample:', tableInfo);
+    }
+    
+    if (tableError) {
+      console.error('Error checking table structure:', tableError);
+    }
+    
     const { data, error } = await supabase
       .from('table_reservations')
       .insert(reservationData)
