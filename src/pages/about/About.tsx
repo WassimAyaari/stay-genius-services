@@ -6,6 +6,7 @@ import WelcomeSection from '@/components/admin/about/WelcomeSection';
 import MissionSection from '@/components/admin/about/MissionSection';
 import DirectorySection from '@/components/admin/about/DirectorySection';
 import FeaturesSection from '@/components/admin/about/FeaturesSection';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const About = () => {
   const { aboutData, isLoadingAbout } = useAboutData();
@@ -14,8 +15,11 @@ const About = () => {
     return (
       <Layout>
         <div className="container mx-auto py-8">
-          <div className="flex justify-center items-center h-64">
-            <p className="text-xl">Loading hotel information...</p>
+          <div className="space-y-8">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-48 w-full" />
           </div>
         </div>
       </Layout>
@@ -38,23 +42,23 @@ const About = () => {
     <Layout>
       <div className="container mx-auto py-8">
         <WelcomeSection 
-          welcomeTitle={aboutData.welcome_title || "Welcome to Our Hotel"} 
-          welcomeDescription={aboutData.welcome_description || "Hotel Genius is a luxury hotel located in the heart of the city."} 
-          welcomeDescriptionExtended={aboutData.welcome_description_extended || ""}
+          welcomeTitle={aboutData.welcome_title} 
+          welcomeDescription={aboutData.welcome_description} 
+          welcomeDescriptionExtended={aboutData.welcome_description_extended}
         />
         
         {aboutData.mission && (
           <MissionSection mission={aboutData.mission} />
         )}
         
-        <FeaturesSection features={aboutData.features || []} />
+        <FeaturesSection features={aboutData.features} />
         
         <DirectorySection 
-          directoryTitle={aboutData.directory_title || "Hotel Directory & Information"}
-          importantNumbers={aboutData.important_numbers || []}
-          facilities={aboutData.facilities || []}
-          hotelPolicies={aboutData.hotel_policies || []}
-          additionalInfo={aboutData.additional_info || []}
+          directoryTitle={aboutData.directory_title}
+          importantNumbers={aboutData.important_numbers}
+          facilities={aboutData.facilities}
+          hotelPolicies={aboutData.hotel_policies}
+          additionalInfo={aboutData.additional_info}
         />
       </div>
     </Layout>
