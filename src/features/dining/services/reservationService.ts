@@ -14,7 +14,6 @@ interface SupabaseTableReservation {
   date: string;
   time: string;
   guests: number;
-  menu_id: string | null;
   special_requests: string | null;
   status: string;
   created_at: string;
@@ -51,7 +50,6 @@ export const fetchReservations = async (restaurantId?: string): Promise<TableRes
     date: item.date,
     time: item.time,
     guests: item.guests,
-    menuId: item.menu_id || undefined,
     specialRequests: item.special_requests || undefined,
     status: item.status as 'pending' | 'confirmed' | 'cancelled',
     createdAt: item.created_at
@@ -79,7 +77,6 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
     date: reservation.date,
     time: reservation.time,
     guests: reservation.guests,
-    menu_id: reservation.menuId || null,
     special_requests: reservation.specialRequests || '',
     status: reservation.status || 'pending'
   };
@@ -111,7 +108,6 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
       date: typedData.date,
       time: typedData.time,
       guests: typedData.guests,
-      menuId: typedData.menu_id || undefined,
       specialRequests: typedData.special_requests || undefined,
       status: typedData.status as 'pending' | 'confirmed' | 'cancelled',
       createdAt: typedData.created_at

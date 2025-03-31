@@ -45,7 +45,6 @@ export interface TableReservation {
   date: string;
   time: string;
   guests: number;
-  menuId?: string;
   specialRequests?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: string;
@@ -62,7 +61,6 @@ export interface CreateTableReservationDTO {
   date: string;
   time: string;
   guests: number;
-  menuId?: string;
   specialRequests?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
 }
