@@ -50,6 +50,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       guestName: '',
       guestEmail: '',
       guestPhone: '',
+      roomNumber: '',
       date: undefined as Date | undefined,
       time: '',
       guests: 2,
@@ -64,21 +65,24 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       // Format full name from user data
       const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
       
-      // Get phone from localStorage if available
+      // Get user details from localStorage if available
       let phone = '';
+      let roomNumber = '';
       try {
         const userDataObj = localStorage.getItem('user_data');
         if (userDataObj) {
           const parsedData = JSON.parse(userDataObj);
           phone = parsedData.phone || '';
+          roomNumber = parsedData.room_number || '';
         }
       } catch (error) {
-        console.error("Error parsing user data for phone:", error);
+        console.error("Error parsing user data:", error);
       }
       
       form.setValue('guestName', fullName);
       form.setValue('guestEmail', userData.email || '');
       form.setValue('guestPhone', phone);
+      form.setValue('roomNumber', roomNumber || userData.room_number || '');
     }
   }, [userData, form]);
 
@@ -93,6 +97,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       guestName: data.guestName,
       guestEmail: data.guestEmail,
       guestPhone: data.guestPhone,
+      roomNumber: data.roomNumber, // Ajout du numéro de chambre
       date: format(data.date, 'yyyy-MM-dd'),
       time: data.time,
       guests: data.guests,
@@ -150,20 +155,37 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
           />
         </div>
         
-        <FormField
-          control={form.control}
-          name="guestPhone"
-          rules={{ required: 'Le téléphone est requis' }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre numéro de téléphone" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="guestPhone"
+            rules={{ required: 'Le téléphone est requis' }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone</FormLabel>
+                <FormControl>
+                  <Input placeholder="Votre numéro de téléphone" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="roomNumber"
+            rules={{ required: 'Le numéro de chambre est requis' }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Numéro de chambre</FormLabel>
+                <FormControl>
+                  <Input placeholder="Votre numéro de chambre" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
