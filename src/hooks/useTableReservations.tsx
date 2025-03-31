@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TableReservation } from '@/features/dining/types';
@@ -14,7 +13,6 @@ export const useTableReservations = (restaurantId?: string) => {
       .order('date', { ascending: true })
       .order('time', { ascending: true });
     
-    // Only apply the restaurant_id filter if a valid UUID is provided
     if (restaurantId && restaurantId !== ':id') {
       query = query.eq('restaurant_id', restaurantId);
     }
@@ -26,7 +24,6 @@ export const useTableReservations = (restaurantId?: string) => {
       throw error;
     }
 
-    // Convert from snake_case to camelCase
     return data.map(item => ({
       id: item.id,
       restaurantId: item.restaurant_id,
@@ -44,24 +41,18 @@ export const useTableReservations = (restaurantId?: string) => {
   };
 
   const createReservation = async (reservation: Omit<TableReservation, 'id' | 'createdAt'>): Promise<TableReservation> => {
-    // Validate restaurantId to ensure it's a valid UUID
     if (!reservation.restaurantId || reservation.restaurantId === ':id') {
       throw new Error('Invalid restaurant ID');
     }
     
-    // Get current user's ID if authenticated
     const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id || null;
     
-    // Get anon key to bypass RLS temporarily
-    // This is a workaround - ideally, proper RLS policies should be set on the server
     const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 
                     import.meta.env.VITE_SUPABASE_ANON_KEY;
     
-    // Create a temporary Supabase client with the anon key for this specific request
     const supabaseTemp = supabase;
     
-    // Convert from camelCase to snake_case
     try {
       const { data, error } = await supabaseTemp
         .from('table_reservations')
@@ -85,7 +76,6 @@ export const useTableReservations = (restaurantId?: string) => {
         throw error;
       }
 
-      // Convert from snake_case to camelCase for the returned data
       return {
         id: data.id,
         restaurantId: data.restaurant_id,
@@ -101,45 +91,45 @@ export const useTableReservations = (restaurantId?: string) => {
         createdAt: data.created_at
       };
     } catch (error) {
-      // If the reservation fails due to RLS policy, try making an anonymous reservation
       console.error('Failed to create reservation, trying alternative approach:', error);
       
-      // Use function if available, or make direct insert with reduced data
       try {
-        const { data, error: fnError } = await supabase
-          .rpc('create_anonymous_reservation', {
-            p_restaurant_id: reservation.restaurantId,
-            p_guest_name: reservation.guestName,
-            p_guest_email: reservation.guestEmail,
-            p_guest_phone: reservation.guestPhone,
-            p_date: reservation.date,
-            p_time: reservation.time,
-            p_guests: reservation.guests,
-            p_special_requests: reservation.specialRequests || '',
-            p_status: reservation.status
-          });
+        const { data, error: directError } = await supabase
+          .from('table_reservations')
+          .insert({
+            restaurant_id: reservation.restaurantId,
+            guest_name: reservation.guestName,
+            guest_email: reservation.guestEmail,
+            guest_phone: reservation.guestPhone,
+            date: reservation.date,
+            time: reservation.time,
+            guests: reservation.guests,
+            special_requests: reservation.specialRequests || '',
+            status: reservation.status
+          })
+          .select()
+          .single();
           
-        if (fnError) {
-          throw fnError;
+        if (directError) {
+          throw directError;
         }
         
-        // Return a constructed response if the function doesn't return the full object
         return {
-          id: data?.id || 'pending',
-          restaurantId: reservation.restaurantId,
-          userId: null,
-          guestName: reservation.guestName,
-          guestEmail: reservation.guestEmail,
-          guestPhone: reservation.guestPhone,
-          date: reservation.date,
-          time: reservation.time,
-          guests: reservation.guests,
-          specialRequests: reservation.specialRequests,
-          status: reservation.status,
-          createdAt: new Date().toISOString()
+          id: data.id,
+          restaurantId: data.restaurant_id,
+          userId: data.user_id,
+          guestName: data.guest_name,
+          guestEmail: data.guest_email,
+          guestPhone: data.guest_phone,
+          date: data.date,
+          time: data.time,
+          guests: data.guests,
+          specialRequests: data.special_requests,
+          status: data.status as 'pending' | 'confirmed' | 'cancelled',
+          createdAt: data.created_at
         };
-      } catch (fnError) {
-        console.error('Both reservation methods failed:', fnError);
+      } catch (directError) {
+        console.error('Both reservation methods failed:', directError);
         throw new Error('Unable to create reservation due to permission restrictions');
       }
     }
@@ -157,11 +147,9 @@ export const useTableReservations = (restaurantId?: string) => {
     }
   };
 
-  // Use React Query for data fetching and caching
   const { data: reservations, isLoading, error } = useQuery({
     queryKey: ['tableReservations', restaurantId],
     queryFn: fetchReservations,
-    // Skip the query if restaurantId is invalid (":id")
     enabled: !restaurantId || restaurantId !== ':id'
   });
 
