@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -120,15 +121,17 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         else if (inputMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
         else if (inputMessage.toLowerCase().includes('food') || inputMessage.toLowerCase().includes('meal')) requestType = 'food';
         
-        await supabase.from('service_requests').insert([{
+        // FIX: Add a room_id that's required by the service_requests table
+        await supabase.from('service_requests').insert({
           guest_id: userId,
           guest_name: userInfo.name,
           room_number: userInfo.roomNumber,
+          room_id: userId, // Use userId as fallback if we don't have a real room_id
           type: requestType,
           description: inputMessage,
           status: 'pending',
           created_at: currentTime.toISOString()
-        }]);
+        });
       }
       
       setTimeout(async () => {

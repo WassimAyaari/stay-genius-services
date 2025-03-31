@@ -9,7 +9,7 @@ interface ItemsTabProps {
 }
 
 export const ItemsTab = ({ onAddItem }: ItemsTabProps) => {
-  const { data: categories, isLoading: isLoadingCategories } = useRequestCategories();
+  const { categories, isLoading: isLoadingCategories } = useRequestCategories();
   
   return (
     <>

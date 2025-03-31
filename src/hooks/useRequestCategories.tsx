@@ -63,7 +63,7 @@ export function useCreateRequestCategory() {
         .insert({
           name: newCategory.name,
           description: newCategory.description,
-          is_active: newCategory.is_active,
+          is_active: newCategory.is_active || true,
           icon: newCategory.icon,
           parent_id: newCategory.parent_id
         })
@@ -118,7 +118,7 @@ export function useCreateRequestItem() {
           name: newItem.name,
           description: newItem.description,
           category_id: newItem.category_id,
-          is_active: newItem.is_active
+          is_active: newItem.is_active || true
         })
         .select()
         .single();

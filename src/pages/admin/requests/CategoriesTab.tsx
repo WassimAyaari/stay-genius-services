@@ -54,7 +54,7 @@ export const CategoriesTab = () => {
     try {
       if (isUpdating && selectedCategory) {
         await updateCategoryMutation.mutateAsync({
-          id: selectedCategory.id,
+          ...selectedCategory,
           name: categoryForm.name,
           description: categoryForm.description,
           icon: categoryForm.icon

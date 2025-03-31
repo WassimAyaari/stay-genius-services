@@ -1,245 +1,145 @@
 
-import React, { useState, useEffect } from 'react';
-import { useHotelConfig } from '@/hooks/useHotelConfig';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, AlertTriangle } from 'lucide-react';
-import Layout from '@/components/Layout';
+import { useAboutData } from '@/hooks/useAboutData';
 import WelcomeSection from '@/components/admin/about/WelcomeSection';
-import DirectorySection from '@/components/admin/about/DirectorySection';
-import FeaturesSection from '@/components/admin/about/FeaturesSection';
 import MissionSection from '@/components/admin/about/MissionSection';
-import { toast } from 'sonner';
+import FeaturesSection from '@/components/admin/about/FeaturesSection';
+import InfoItemSection from '@/components/admin/about/InfoItemSection';
+import DirectorySection from '@/components/admin/about/DirectorySection';
 
 const AboutEditor = () => {
-  const { aboutData, isLoadingAbout, aboutError, updateAboutData, createInitialAboutData } = useHotelConfig();
-  const [formData, setFormData] = useState(null);
+  const { aboutData, isLoadingAbout, aboutError, updateAboutData, createInitialAboutData } = useAboutData();
   const [activeTab, setActiveTab] = useState('welcome');
-  const [isCreating, setIsCreating] = useState(false);
-
-  useEffect(() => {
-    if (aboutData) {
-      // Parse JSON strings if necessary
-      const parsedData = {
-        ...aboutData,
-        important_numbers: Array.isArray(aboutData.important_numbers) 
-          ? aboutData.important_numbers 
-          : JSON.parse(typeof aboutData.important_numbers === 'string' ? aboutData.important_numbers || '[]' : '[]'),
-        hotel_policies: Array.isArray(aboutData.hotel_policies) 
-          ? aboutData.hotel_policies 
-          : JSON.parse(typeof aboutData.hotel_policies === 'string' ? aboutData.hotel_policies || '[]' : '[]'),
-        facilities: Array.isArray(aboutData.facilities) 
-          ? aboutData.facilities 
-          : JSON.parse(typeof aboutData.facilities === 'string' ? aboutData.facilities || '[]' : '[]'),
-        additional_info: Array.isArray(aboutData.additional_info) 
-          ? aboutData.additional_info 
-          : JSON.parse(typeof aboutData.additional_info === 'string' ? aboutData.additional_info || '[]' : '[]'),
-        features: Array.isArray(aboutData.features) 
-          ? aboutData.features 
-          : JSON.parse(typeof aboutData.features === 'string' ? aboutData.features || '[]' : '[]'),
-      };
-      setFormData(parsedData);
-    }
-  }, [aboutData]);
-
-  const handleCreateInitialData = async () => {
-    setIsCreating(true);
-    try {
-      await createInitialAboutData();
-      toast.success("Données initiales créées avec succès!");
-    } catch (error) {
-      console.error("Erreur lors de la création des données initiales:", error);
-      toast.error("Erreur lors de la création des données initiales");
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleTextChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleInfoItemChange = (type, index, field, value) => {
-    setFormData(prev => {
-      const updatedItems = [...prev[type]];
-      updatedItems[index] = {
-        ...updatedItems[index],
-        [field]: value
-      };
-      return {
-        ...prev,
-        [type]: updatedItems
-      };
-    });
-  };
-
-  const handleFeatureChange = (index, field, value) => {
-    setFormData(prev => {
-      const updatedFeatures = [...prev.features];
-      updatedFeatures[index] = {
-        ...updatedFeatures[index],
-        [field]: value
-      };
-      return {
-        ...prev,
-        features: updatedFeatures
-      };
-    });
-  };
-
-  const addInfoItem = (type) => {
-    setFormData(prev => ({
-      ...prev,
-      [type]: [...prev[type], { label: '', value: '' }]
-    }));
-  };
-
-  const removeInfoItem = (type, index) => {
-    setFormData(prev => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== index)
-    }));
-  };
-
-  const addFeature = () => {
-    setFormData(prev => ({
-      ...prev,
-      features: [...prev.features, { title: '', description: '', icon: 'History' }]
-    }));
-  };
-
-  const removeFeature = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData) return;
-
-    updateAboutData(formData);
-  };
-
-  // Loading state
+  
   if (isLoadingAbout) {
-    return (
-      <Layout>
-        <div className="container py-8">
-          <h1 className="text-2xl font-bold mb-4">Chargement de l'éditeur...</h1>
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        </div>
-      </Layout>
-    );
+    return <div className="p-8 text-center">Loading about page content...</div>;
   }
-
-  // Error state or no data
-  if (aboutError || (!isLoadingAbout && !aboutData)) {
-    return (
-      <Layout>
-        <div className="container py-8">
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-            <div className="flex items-start">
-              <AlertTriangle className="h-6 w-6 text-yellow-400 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium text-yellow-800">Aucune donnée trouvée</h3>
-                <p className="text-sm text-yellow-700 mt-1">
-                  Les données de la section "À Propos" n'existent pas encore dans la base de données.
-                </p>
-                <Button 
-                  onClick={handleCreateInitialData} 
-                  className="mt-3"
-                  disabled={isCreating}
-                >
-                  {isCreating ? 'Création en cours...' : 'Créer les données initiales'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
+  
+  if (aboutError) {
+    return <div className="p-8 text-center text-red-500">Error loading content: {aboutError.message}</div>;
   }
-
-  if (!formData) {
+  
+  const handleCreateAboutData = async () => {
+    // Default about data
+    const defaultAboutData = {
+      welcome_title: 'Welcome to Hotel Genius',
+      welcome_description: 'A luxury hotel experience in the heart of the city.',
+      welcome_description_extended: 'Since our establishment, we have been committed to creating a home away from home for our guests.',
+      mission: 'To provide exceptional hospitality experiences by creating memorable moments for our guests.',
+      features: [
+        { icon: 'History', title: 'Our History', description: 'Established with a rich heritage' },
+        { icon: 'Building2', title: 'Our Property', description: 'Luxury rooms and premium facilities' },
+        { icon: 'Users', title: 'Our Team', description: 'Dedicated staff committed to excellence' },
+        { icon: 'Award', title: 'Our Awards', description: 'Recognized for outstanding service' }
+      ],
+      important_numbers: [
+        { label: 'Reception', value: 'Dial 0' },
+        { label: 'Room Service', value: 'Dial 1' },
+        { label: 'Concierge', value: 'Dial 2' }
+      ],
+      facilities: [
+        { label: 'Swimming Pool', value: 'Level 5' },
+        { label: 'Fitness Center', value: 'Level 3' },
+        { label: 'Spa & Wellness', value: 'Level 4' }
+      ],
+      hotel_policies: [
+        { label: 'Check-in', value: '3:00 PM' },
+        { label: 'Check-out', value: '12:00 PM' },
+        { label: 'Breakfast', value: '6:30 AM - 10:30 AM' }
+      ],
+      additional_info: [
+        { label: 'Wi-Fi', value: 'Network "HotelGenius" - Password provided at check-in' },
+        { label: 'Parking', value: 'Valet service available' }
+      ],
+      directory_title: 'Hotel Directory & Information'
+    };
+    
+    try {
+      await createInitialAboutData(defaultAboutData);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating about data:', error);
+    }
+  };
+  
+  if (!aboutData) {
     return (
-      <Layout>
-        <div className="container py-8">
-          <h1 className="text-2xl font-bold mb-4">Préparation des données...</h1>
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  return (
-    <Layout>
-      <div className="container py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Modifier la section À Propos</h1>
-          <Button onClick={handleSubmit} className="flex items-center gap-2">
-            <Save className="h-4 w-4" /> Sauvegarder
-          </Button>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 w-full mb-6">
-            <TabsTrigger value="welcome">Accueil</TabsTrigger>
-            <TabsTrigger value="directory">Répertoire</TabsTrigger>
-            <TabsTrigger value="features">Caractéristiques</TabsTrigger>
-            <TabsTrigger value="mission">Mission</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="welcome" className="space-y-4">
-            <WelcomeSection
-              welcomeTitle={formData.welcome_title}
-              welcomeDescription={formData.welcome_description}
-              welcomeDescriptionExtended={formData.welcome_description_extended}
-              handleTextChange={handleTextChange}
-            />
-          </TabsContent>
-
-          <TabsContent value="directory" className="space-y-4">
-            <DirectorySection
-              directoryTitle={formData.directory_title}
-              importantNumbers={formData.important_numbers}
-              hotelPolicies={formData.hotel_policies}
-              facilities={formData.facilities}
-              additionalInfo={formData.additional_info}
-              handleTextChange={handleTextChange}
-              addInfoItem={addInfoItem}
-              removeInfoItem={removeInfoItem}
-              handleInfoItemChange={handleInfoItemChange}
-            />
-          </TabsContent>
-
-          <TabsContent value="features" className="space-y-4">
-            <FeaturesSection
-              features={formData.features}
-              addFeature={addFeature}
-              removeFeature={removeFeature}
-              handleFeatureChange={handleFeatureChange}
-            />
-          </TabsContent>
-
-          <TabsContent value="mission" className="space-y-4">
-            <MissionSection
-              mission={formData.mission}
-              handleTextChange={handleTextChange}
-            />
-          </TabsContent>
-        </Tabs>
+      <div className="p-8 text-center">
+        <p className="mb-4">No about page content found. Create default content?</p>
+        <button 
+          onClick={handleCreateAboutData}
+          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+        >
+          Create Default Content
+        </button>
       </div>
-    </Layout>
+    );
+  }
+  
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">About Page Editor</h1>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="welcome">Welcome</TabsTrigger>
+          <TabsTrigger value="mission">Mission</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="directory">Directory</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="welcome" className="space-y-6">
+          <WelcomeSection 
+            title={aboutData.welcome_title || ''} 
+            description={aboutData.welcome_description || ''} 
+            extendedDescription={aboutData.welcome_description_extended || ''}
+            isEditing={true}
+            onSave={(data) => updateAboutData({ ...aboutData, ...data })}
+          />
+        </TabsContent>
+        
+        <TabsContent value="mission">
+          <MissionSection 
+            mission={aboutData.mission || ''} 
+            isEditing={true}
+            onSave={(mission) => updateAboutData({ ...aboutData, mission })}
+          />
+        </TabsContent>
+        
+        <TabsContent value="features">
+          <FeaturesSection 
+            features={aboutData.features || []} 
+            isEditing={true}
+            onSave={(features) => updateAboutData({ ...aboutData, features })}
+          />
+        </TabsContent>
+        
+        <TabsContent value="directory">
+          <h2 className="text-xl font-semibold mb-4">Directory Information</h2>
+          <InfoItemSection 
+            title="Directory Title"
+            items={[{ label: 'Title', value: aboutData.directory_title || 'Hotel Directory' }]}
+            isEditing={true}
+            onSave={(items) => updateAboutData({ ...aboutData, directory_title: items[0].value })}
+            singleItem={true}
+          />
+          
+          <DirectorySection 
+            title={aboutData.directory_title || 'Hotel Directory'}
+            importantNumbers={aboutData.important_numbers || []}
+            facilities={aboutData.facilities || []}
+            hotelPolicies={aboutData.hotel_policies || []}
+            additionalInfo={aboutData.additional_info || []}
+            isEditing={true}
+            onSaveImportantNumbers={(items) => updateAboutData({ ...aboutData, important_numbers: items })}
+            onSaveFacilities={(items) => updateAboutData({ ...aboutData, facilities: items })}
+            onSaveHotelPolicies={(items) => updateAboutData({ ...aboutData, hotel_policies: items })}
+            onSaveAdditionalInfo={(items) => updateAboutData({ ...aboutData, additional_info: items })}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

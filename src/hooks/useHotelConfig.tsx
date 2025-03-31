@@ -39,22 +39,39 @@ export function useHotelConfig() {
         .select('id')
         .single();
         
-      const { data, error } = existingConfig
-        ? await supabase
-            .from('hotel_config')
-            .update(newConfig)
-            .eq('id', existingConfig.id)
-            .select()
-            .single()
-        : await supabase
-            .from('hotel_config')
-            .insert([newConfig])
-            .select()
-            .single();
-            
-      if (error) throw error;
+      let result;
       
-      return data as HotelConfig;
+      if (existingConfig) {
+        // Update existing config
+        const { data, error } = await supabase
+          .from('hotel_config')
+          .update(newConfig)
+          .eq('id', existingConfig.id)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        result = data;
+      } else {
+        // Create new config - ensure required fields are present
+        const configToInsert = {
+          name: newConfig.name || 'Hotel Genius',
+          primary_color: newConfig.primary_color || '#1e40af',
+          secondary_color: newConfig.secondary_color || '#4f46e5',
+          ...newConfig
+        };
+        
+        const { data, error } = await supabase
+          .from('hotel_config')
+          .insert(configToInsert)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        result = data;
+      }
+      
+      return result as HotelConfig;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotelConfig'] });

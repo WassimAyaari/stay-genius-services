@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserInfo } from '../hooks/useUserInfo';
 import { RequestCategory } from '@/features/rooms/types';
@@ -129,7 +128,7 @@ export const submitRequestViaChatMessage = async (
     
     // Step 4: Create service request with minimal required data
     try {
-      const requestData = {
+      const requestData: any = {
         guest_id: userId,
         type: type,
         description: description,
