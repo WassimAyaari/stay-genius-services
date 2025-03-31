@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -9,19 +8,18 @@ import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
 interface UserData {
   first_name?: string;
   last_name?: string;
   email?: string;
   room_number?: string;
 }
-
 const UserMenu = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const storedUserData = localStorage.getItem('user_data');
     if (storedUserData) {
@@ -33,26 +31,26 @@ const UserMenu = () => {
       }
     }
   }, []);
-
   const handleLogout = async () => {
     try {
       console.log("=== DÉBUT PROCESSUS DE DÉCONNEXION ===");
-      
+
       // 1. Appeler notre fonction de service pour la déconnexion
       const logoutResult = await logoutUser();
       if (!logoutResult.success) {
         throw new Error(logoutResult.error || "Erreur pendant la déconnexion");
       }
-      
       console.log("Service de déconnexion terminé avec succès");
-      
+
       // 2. Double vérification: Appeler directement l'API Supabase
-      const { error: supabaseError } = await supabase.auth.signOut();
+      const {
+        error: supabaseError
+      } = await supabase.auth.signOut();
       if (supabaseError) {
         console.warn("Avertissement: Erreur secondaire de Supabase:", supabaseError);
         // Continuer malgré l'erreur - on a déjà nettoyé via logoutUser()
       }
-      
+
       // 3. Nettoyage manuel du localStorage pour être certain
       try {
         console.log("Nettoyage manuel du localStorage");
@@ -63,37 +61,36 @@ const UserMenu = () => {
         console.error("Erreur lors du nettoyage du stockage:", storageError);
         // Continuer malgré l'erreur
       }
-      
+
       // 4. Notification à l'utilisateur
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès"
       });
-      
+
       // 5. Forcer une redirection complète (pas seulement via React Router)
       console.log("Redirection vers la page de connexion avec refresh complet");
       setTimeout(() => {
         // Le délai permet à la toast de s'afficher avant le rechargement
         window.location.href = '/auth/login';
       }, 300);
-      
     } catch (error) {
       console.error("=== ERREUR CRITIQUE DE DÉCONNEXION ===", error);
-      
+
       // Notification d'erreur
       toast({
         variant: "destructive",
         title: "Erreur lors de la déconnexion",
         description: "Une erreur inattendue est survenue, tentative de nettoyage forcé..."
       });
-      
+
       // Tentative de nettoyage d'urgence et redirection forcée
       console.log("Démarrage procédure de nettoyage d'urgence");
       try {
         // Tout nettoyer manuellement
         localStorage.clear();
         sessionStorage.clear();
-        
+
         // Dernier recours - redirection forcée avec reload
         console.log("Redirection d'urgence");
         setTimeout(() => {
@@ -118,9 +115,7 @@ const UserMenu = () => {
     if (!userData) return 'Guest';
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
   };
-
-  return (
-    <DropdownMenu>
+  return <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
@@ -129,7 +124,7 @@ const UserMenu = () => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuContent align="end" className="w-56 bg-zinc-100">
         <DropdownMenuLabel className="flex flex-col gap-1">
           <span>{getFullName()}</span>
           <GuestStatusBadge />
@@ -153,8 +148,6 @@ const UserMenu = () => {
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
-  );
+    </DropdownMenu>;
 };
-
 export default UserMenu;
