@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { GuestData, UserData } from '../types/userTypes';
+import { GuestData, UserData, CompanionData } from '../types/userTypes';
 import { syncCompanions } from './companionService';
 
 /**
@@ -24,6 +23,7 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       last_name: userData.last_name,
       email: userData.email,
       room_number: userData.room_number,
+      phone: userData.phone,
       // Safely convert date objects to ISO strings or pass strings as is
       check_in_date: userData.check_in_date ? 
         (userData.check_in_date instanceof Date ? 
@@ -49,7 +49,6 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       nationality: userData.nationality,
       profile_image: userData.profile_image,
       guest_type: 'Premium Guest', // Tous les invités seront considérés comme Premium Guest
-      phone: userData.phone
     };
     
     console.log('Guest data to save:', guestData);
@@ -118,13 +117,13 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
         first_name: guestData.first_name || '',
         last_name: guestData.last_name || '',
         room_number: guestData.room_number || '',
+        phone: guestData.phone,
         // Keep the dates as strings to avoid conversion issues
         birth_date: guestData.birth_date || undefined,
         nationality: guestData.nationality,
         check_in_date: guestData.check_in_date || undefined,
         check_out_date: guestData.check_out_date || undefined,
         profile_image: guestData.profile_image,
-        phone: guestData.phone
       };
       
       // Récupérer et ajouter les accompagnateurs

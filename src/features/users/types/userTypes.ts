@@ -12,6 +12,7 @@ export interface UserData {
   check_in_date?: Date | string; // Accept both Date and string
   check_out_date?: Date | string; // Accept both Date and string
   profile_image?: string;
+  phone?: string; // Added phone property
   companions?: CompanionData[];
 }
 
@@ -59,8 +60,8 @@ export interface GuestData {
   nationality?: string;
   guest_type?: string;
   status?: string;
-  profile_image?: string; // Ajout de cette propriété manquante
-  phone?: string; // Ajout de cette propriété pour être complet
+  profile_image?: string;
+  phone?: string;
 }
 
 export const generateUserId = (): string => {
