@@ -36,57 +36,72 @@ const UserMenu = () => {
 
   const handleLogout = async () => {
     try {
-      console.log("Démarrage du processus de déconnexion");
+      console.log("=== DÉBUT PROCESSUS DE DÉCONNEXION ===");
       
-      // 1. D'abord, déconnexion via Supabase Auth
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Erreur lors de la déconnexion Supabase:", error);
-        throw error;
+      // 1. Appeler notre fonction de service pour la déconnexion
+      const logoutResult = await logoutUser();
+      if (!logoutResult.success) {
+        throw new Error(logoutResult.error || "Erreur pendant la déconnexion");
       }
       
-      console.log("Déconnexion Supabase réussie");
+      console.log("Service de déconnexion terminé avec succès");
       
-      // 2. Nettoyer localStorage manuellement
-      localStorage.removeItem('user_data');
-      localStorage.removeItem('user_id');
-      console.log("Données localStorage supprimées");
+      // 2. Double vérification: Appeler directement l'API Supabase
+      const { error: supabaseError } = await supabase.auth.signOut();
+      if (supabaseError) {
+        console.warn("Avertissement: Erreur secondaire de Supabase:", supabaseError);
+        // Continuer malgré l'erreur - on a déjà nettoyé via logoutUser()
+      }
       
-      // 3. Notification à l'utilisateur
+      // 3. Nettoyage manuel du localStorage pour être certain
+      try {
+        console.log("Nettoyage manuel du localStorage");
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user_id');
+        sessionStorage.clear(); // Aussi nettoyer sessionStorage
+      } catch (storageError) {
+        console.error("Erreur lors du nettoyage du stockage:", storageError);
+        // Continuer malgré l'erreur
+      }
+      
+      // 4. Notification à l'utilisateur
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès"
       });
       
-      // 4. Redirection forcée
-      console.log("Redirection vers la page de connexion");
+      // 5. Forcer une redirection complète (pas seulement via React Router)
+      console.log("Redirection vers la page de connexion avec refresh complet");
+      setTimeout(() => {
+        // Le délai permet à la toast de s'afficher avant le rechargement
+        window.location.href = '/auth/login';
+      }, 300);
       
-      // Utiliser window.location pour forcer un rechargement complet
-      // Cela garantit que tous les états React sont réinitialisés
-      window.location.href = '/auth/login';
     } catch (error) {
-      console.error("Erreur complète de déconnexion:", error);
+      console.error("=== ERREUR CRITIQUE DE DÉCONNEXION ===", error);
       
       // Notification d'erreur
       toast({
         variant: "destructive",
         title: "Erreur lors de la déconnexion",
-        description: "Une erreur inattendue est survenue, tentative de nettoyage..."
+        description: "Une erreur inattendue est survenue, tentative de nettoyage forcé..."
       });
       
-      // Tentative de nettoyage d'urgence
+      // Tentative de nettoyage d'urgence et redirection forcée
+      console.log("Démarrage procédure de nettoyage d'urgence");
       try {
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('user_id');
-        console.log("Nettoyage d'urgence effectué");
+        // Tout nettoyer manuellement
+        localStorage.clear();
+        sessionStorage.clear();
         
-        // Forcer le rechargement même en cas d'erreur
-        window.location.href = '/auth/login';
+        // Dernier recours - redirection forcée avec reload
+        console.log("Redirection d'urgence");
+        setTimeout(() => {
+          window.location.href = '/auth/login?emergency=true';
+        }, 300);
       } catch (e) {
-        console.error("Échec du nettoyage d'urgence:", e);
-        
-        // Dernier recours: redirection simple
+        console.error("Échec critique du nettoyage d'urgence:", e);
+        alert("Problème de déconnexion. Veuillez fermer votre navigateur et réessayer.");
         navigate('/auth/login');
       }
     }

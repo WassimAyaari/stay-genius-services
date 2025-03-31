@@ -142,28 +142,33 @@ export const loginUser = async (
  */
 export const logoutUser = async (): Promise<{ success: boolean; error?: string }> => {
   try {
-    console.log('Starting logout process');
+    console.log('Starting logout process in authService');
     
-    // Déconnexion de Supabase Auth directement
+    // Déconnexion de Supabase Auth
     const { error } = await supabase.auth.signOut();
     
     if (error) {
-      console.error('Erreur lors de la déconnexion Supabase:', error);
+      console.error('Erreur lors de la déconnexion Supabase dans authService:', error);
       return { 
         success: false, 
         error: error.message || 'Erreur lors de la déconnexion' 
       };
     }
     
-    // Nettoyer localStorage
-    console.log('Clearing local storage data');
-    localStorage.removeItem('user_data');
-    localStorage.removeItem('user_id');
+    // Nettoyer localStorage de manière synchrone pour être sûr
+    try {
+      console.log('Clearing local storage data in authService');
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('user_id');
+      sessionStorage.clear(); // Nettoyer aussi le sessionStorage par précaution
+    } catch (e) {
+      console.error('Erreur lors du nettoyage du localStorage dans authService:', e);
+    }
     
-    console.log('User logged out successfully');
+    console.log('User logged out successfully in authService');
     return { success: true };
   } catch (error: any) {
-    console.error('Error during logout:', error);
+    console.error('Error during logout in authService:', error);
     return { 
       success: false, 
       error: error.message || 'Une erreur est survenue lors de la déconnexion' 
@@ -194,14 +199,32 @@ export const getCurrentSession = async () => {
  * Vérifier si l'utilisateur est authentifié
  */
 export const isAuthenticated = async (): Promise<boolean> => {
-  const session = await getCurrentSession();
+  console.log('Vérification de l\'authentification...');
   
-  // Vérifier si l'utilisateur a une session valide
-  if (session && session.user) {
-    return true;
+  try {
+    // 1. Vérifier si l'utilisateur a une session valide dans Supabase
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    if (error) {
+      console.error('Erreur lors de la vérification de la session:', error);
+      return false;
+    }
+    
+    if (session) {
+      console.log('Session Supabase valide trouvée');
+      return true;
+    }
+    
+    // 2. Fallback: vérifier si les données utilisateur sont dans le localStorage
+    const userDataString = localStorage.getItem('user_data');
+    const userIdString = localStorage.getItem('user_id');
+    
+    const isLocalStorageValid = !!userDataString && !!userIdString;
+    
+    console.log('Authentification via localStorage:', isLocalStorageValid);
+    return isLocalStorageValid;
+  } catch (error) {
+    console.error('Erreur lors de la vérification de l\'authentification:', error);
+    return false;
   }
-  
-  // Fallback: vérifier si les données utilisateur sont dans le localStorage
-  const userDataString = localStorage.getItem('user_data');
-  return !!userDataString;
 };
