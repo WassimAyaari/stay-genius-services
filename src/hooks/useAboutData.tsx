@@ -167,16 +167,23 @@ export function useAboutData() {
   // Mutation to create initial about data
   const createInitialAboutMutation = useMutation({
     mutationFn: async (initialData: Partial<HotelAbout>) => {
-      // Convert our typed data to JSON format for Supabase
-      const createPayload = prepareDataForUpdate(initialData);
+      console.log('Creating initial about data:', initialData);
       
-      // Add required fields for the hotel_about table
-      createPayload.title = 'About Our Hotel';
-      createPayload.description = 'Learn more about our hotel, facilities, and services.';
-      createPayload.icon = 'Info';
-      createPayload.action_text = 'Explore';
-      createPayload.action_link = '/about';
-      createPayload.status = 'active';
+      // Prepare the data for the insert
+      const createPayload = {
+        // Required fields for the hotel_about table
+        title: 'About Our Hotel',
+        description: 'Learn more about our hotel, facilities, and services.',
+        icon: 'Info',
+        action_text: 'Explore',
+        action_link: '/about',
+        status: 'active',
+
+        // Add the fields from our initialData
+        ...prepareDataForUpdate(initialData)
+      };
+      
+      console.log('Create payload:', createPayload);
       
       const { data, error } = await supabase
         .from('hotel_about')
@@ -184,7 +191,10 @@ export function useAboutData() {
         .select()
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating hotel about data:', error);
+        throw error;
+      }
       
       return data;
     },
