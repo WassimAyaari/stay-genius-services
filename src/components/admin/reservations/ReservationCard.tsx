@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Users, MessageSquare, CheckCircle, XCircle, Clock3 } from 'lucide-react';
+import { Calendar, Clock, Users, MessageSquare, CheckCircle, XCircle, Clock3, Home } from 'lucide-react';
 import { TableReservation } from '@/features/dining/types';
 
 interface ReservationCardProps {
@@ -83,6 +83,15 @@ const ReservationCard = ({ reservation, onOpenStatusDialog }: ReservationCardPro
           <Users className="h-4 w-4 text-gray-500" />
           <span>{reservation.guests} personnes</span>
         </div>
+        
+        {/* Affichage du numéro de chambre */}
+        {reservation.roomNumber && (
+          <div className="flex items-center gap-2 text-sm">
+            <Home className="h-4 w-4 text-gray-500" />
+            <span>Chambre: {reservation.roomNumber}</span>
+          </div>
+        )}
+        
         {reservation.specialRequests && (
           <div className="flex items-start gap-2 text-sm">
             <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />

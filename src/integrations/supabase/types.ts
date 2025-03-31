@@ -540,6 +540,7 @@ export type Database = {
           guests: number
           id: string
           restaurant_id: string | null
+          room_number: string | null
           special_requests: string | null
           status: string
           time: string
@@ -555,6 +556,7 @@ export type Database = {
           guests: number
           id?: string
           restaurant_id?: string | null
+          room_number?: string | null
           special_requests?: string | null
           status?: string
           time: string
@@ -570,6 +572,7 @@ export type Database = {
           guests?: number
           id?: string
           restaurant_id?: string | null
+          room_number?: string | null
           special_requests?: string | null
           status?: string
           time?: string
