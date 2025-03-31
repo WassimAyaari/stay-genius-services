@@ -50,3 +50,24 @@ export interface TableReservation {
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: string;
 }
+
+// Add the following DTOs for API communication
+export interface CreateTableReservationDTO {
+  restaurantId: string;
+  userId?: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  roomNumber?: string;
+  date: string;
+  time: string;
+  guests: number;
+  menuId?: string;
+  specialRequests?: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+}
+
+export interface UpdateReservationStatusDTO {
+  id: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+}
