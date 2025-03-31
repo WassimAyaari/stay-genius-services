@@ -1,24 +1,29 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, Camera, Pencil } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { compressAndConvertToWebP } from '@/lib/imageUtils';
 
 interface UserData {
   first_name?: string;
   last_name?: string;
   email?: string;
   room_number?: string;
+  profile_image?: string;
 }
 
 const UserMenu = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -119,15 +124,124 @@ const UserMenu = () => {
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
   };
 
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.includes('image')) {
+      toast({
+        variant: "destructive",
+        title: "Type de fichier non supporté",
+        description: "Veuillez sélectionner une image (JPG, PNG, etc.)"
+      });
+      return;
+    }
+
+    try {
+      setUploading(true);
+      
+      // Compresser l'image avant de la stocker
+      const compressedImage = await compressAndConvertToWebP(file);
+      
+      // Mettre à jour les données utilisateur avec l'image
+      if (userData) {
+        const updatedUserData = {
+          ...userData,
+          profile_image: compressedImage
+        };
+        
+        // Sauvegarder dans localStorage
+        localStorage.setItem('user_data', JSON.stringify(updatedUserData));
+        setUserData(updatedUserData);
+        
+        toast({
+          title: "Photo de profil mise à jour",
+          description: "Votre photo de profil a été mise à jour avec succès"
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur lors de l'upload",
+        description: "Impossible de mettre à jour votre photo de profil"
+      });
+    } finally {
+      setUploading(false);
+      // Réinitialiser l'input file
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar>
-            <AvatarImage src="/placeholder.svg" />
-            <AvatarFallback>{getInitials()}</AvatarFallback>
-          </Avatar>
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-muted/30">
+              <Avatar className="border border-muted">
+                {userData?.profile_image ? (
+                  <AvatarImage src={userData.profile_image} alt={getFullName()} />
+                ) : (
+                  <AvatarImage src="/placeholder.svg" />
+                )}
+                <AvatarFallback>{getInitials()}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-60 p-2">
+            <div className="flex flex-col items-center gap-2 p-2">
+              <div className="relative">
+                <Avatar className="h-16 w-16 border-2 border-primary/20">
+                  {userData?.profile_image ? (
+                    <AvatarImage src={userData.profile_image} alt={getFullName()} />
+                  ) : (
+                    <AvatarImage src="/placeholder.svg" />
+                  )}
+                  <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
+                </Avatar>
+                <Button 
+                  size="icon" 
+                  variant="secondary" 
+                  className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full shadow"
+                  onClick={handleImageClick}
+                  disabled={uploading}
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                </Button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold">{getFullName()}</p>
+                <GuestStatusBadge className="mt-1" />
+              </div>
+              <div className="grid w-full grid-cols-2 gap-2 pt-2">
+                <Link to="/profile">
+                  <Button variant="outline" className="w-full" size="sm">
+                    <Pencil className="mr-2 h-3.5 w-3.5" />
+                    Profil
+                  </Button>
+                </Link>
+                <Button variant="outline" className="w-full" size="sm" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-3.5 w-3.5" />
+                  Déconnexion
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="flex flex-col gap-1">
