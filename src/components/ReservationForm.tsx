@@ -12,6 +12,7 @@ import DateTimeFields from '@/components/reservation/DateTimeFields';
 import MenuSelection from '@/components/reservation/MenuSelection';
 import SpecialRequests from '@/components/reservation/SpecialRequests';
 import { ReservationFormProps, ReservationFormValues } from '@/components/reservation/types';
+import { toast } from 'sonner';
 
 const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une table" }: ReservationFormProps) => {
   const { createReservation, isCreating } = useTableReservations(restaurantId);
@@ -76,6 +77,12 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       return;
     }
     
+    // Make sure the room number is included
+    if (!data.roomNumber) {
+      form.setError('roomNumber', { message: 'Le numéro de chambre est requis' });
+      return;
+    }
+    
     const reservation = {
       restaurantId,
       guestName: data.guestName,
@@ -90,10 +97,17 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       status: 'pending' as const
     };
     
+    console.log('Submitting reservation:', reservation);
+    
     createReservation(reservation, {
       onSuccess: () => {
         form.reset();
+        toast.success('Réservation créée avec succès');
         if (onSuccess) onSuccess();
+      },
+      onError: (error) => {
+        console.error('Error creating reservation:', error);
+        toast.error(`Erreur lors de la création de la réservation: ${error.message}`);
       }
     });
   });

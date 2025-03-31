@@ -10,11 +10,11 @@ interface SupabaseTableReservation {
   guest_name: string | null;
   guest_email: string | null;
   guest_phone: string | null;
-  room_number?: string | null;
+  room_number: string | null;
   date: string;
   time: string;
   guests: number;
-  menu_id?: string | null;
+  menu_id: string | null;
   special_requests: string | null;
   status: string;
   created_at: string;
@@ -63,26 +63,32 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
     throw new Error('Invalid restaurant ID');
   }
   
+  // Get the current authenticated user from Supabase
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || null;
+  
+  // Create the reservation payload - ensure all required fields are included
+  const reservationData = {
+    restaurant_id: reservation.restaurantId,
+    user_id: userId,
+    guest_name: reservation.guestName || '',
+    guest_email: reservation.guestEmail || '',
+    guest_phone: reservation.guestPhone || '',
+    room_number: reservation.roomNumber || '',  // Ensure room_number is passed
+    date: reservation.date,
+    time: reservation.time,
+    guests: reservation.guests,
+    menu_id: reservation.menuId || null,  // Ensure menu_id is passed (null if not provided)
+    special_requests: reservation.specialRequests || '',
+    status: reservation.status || 'pending'
+  };
+  
+  console.log('Creating reservation with data:', reservationData);
   
   try {
     const { data, error } = await supabase
       .from('table_reservations')
-      .insert({
-        restaurant_id: reservation.restaurantId,
-        user_id: userId,
-        guest_name: reservation.guestName,
-        guest_email: reservation.guestEmail,
-        guest_phone: reservation.guestPhone,
-        room_number: reservation.roomNumber,
-        date: reservation.date,
-        time: reservation.time,
-        guests: reservation.guests,
-        menu_id: reservation.menuId,
-        special_requests: reservation.specialRequests,
-        status: reservation.status
-      })
+      .insert(reservationData)
       .select()
       .single();
 
@@ -109,52 +115,8 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
       createdAt: typedData.created_at
     };
   } catch (error) {
-    console.error('Failed to create reservation, trying alternative approach:', error);
-    
-    try {
-      const { data, error: directError } = await supabase
-        .from('table_reservations')
-        .insert({
-          restaurant_id: reservation.restaurantId,
-          guest_name: reservation.guestName,
-          guest_email: reservation.guestEmail,
-          guest_phone: reservation.guestPhone,
-          room_number: reservation.roomNumber,
-          date: reservation.date,
-          time: reservation.time,
-          guests: reservation.guests,
-          menu_id: reservation.menuId,
-          special_requests: reservation.specialRequests || '',
-          status: reservation.status
-        })
-        .select()
-        .single();
-        
-      if (directError) {
-        throw directError;
-      }
-      
-      const typedData = data as SupabaseTableReservation;
-      return {
-        id: typedData.id,
-        restaurantId: typedData.restaurant_id,
-        userId: typedData.user_id || undefined,
-        guestName: typedData.guest_name || undefined,
-        guestEmail: typedData.guest_email || undefined,
-        guestPhone: typedData.guest_phone || undefined,
-        roomNumber: typedData.room_number || '',
-        date: typedData.date,
-        time: typedData.time,
-        guests: typedData.guests,
-        menuId: typedData.menu_id || undefined,
-        specialRequests: typedData.special_requests || undefined,
-        status: typedData.status as 'pending' | 'confirmed' | 'cancelled',
-        createdAt: typedData.created_at
-      };
-    } catch (directError) {
-      console.error('Both reservation methods failed:', directError);
-      throw new Error('Unable to create reservation due to permission restrictions');
-    }
+    console.error('Failed to create reservation:', error);
+    throw new Error('Unable to create reservation. Please make sure you are logged in and have provided your room number.');
   }
 };
 
