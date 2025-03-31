@@ -11,6 +11,8 @@ import { getCompanions } from '@/features/users/services/companionService';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
+import ProfileImageUploader from '@/components/profile/ProfileImageUploader';
+import { syncGuestData } from '@/features/users/services/guestService';
 
 const Profile = () => {
   const { toast } = useToast();
@@ -65,18 +67,6 @@ const Profile = () => {
     });
   };
 
-  // Get user initials for avatar fallback
-  const getInitials = () => {
-    if (!userData) return 'G';
-    return `${userData.first_name?.charAt(0) || ''}${userData.last_name?.charAt(0) || ''}`;
-  };
-
-  // Get user full name
-  const getFullName = () => {
-    if (!userData) return 'Guest';
-    return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-  };
-
   // Format date
   const formatDate = (dateString?: string | Date) => {
     if (!dateString) return 'Non défini';
@@ -107,6 +97,29 @@ const Profile = () => {
     }
   };
 
+  const handleProfileImageChange = async (imageData: string | null) => {
+    if (!userData) return;
+    
+    // Mettre à jour les données utilisateur locales
+    const updatedUserData = {
+      ...userData,
+      profile_image: imageData
+    };
+    
+    setUserData(updatedUserData);
+    localStorage.setItem('user_data', JSON.stringify(updatedUserData));
+    
+    // Synchroniser avec Supabase si un ID utilisateur est disponible
+    const userId = localStorage.getItem('user_id');
+    if (userId) {
+      try {
+        await syncGuestData(userId, updatedUserData);
+      } catch (error) {
+        console.error('Error syncing profile image with Supabase:', error);
+      }
+    }
+  };
+
   const stayDuration = calculateStayDuration();
 
   return (
@@ -115,14 +128,20 @@ const Profile = () => {
         {/* Header avec le nom et photo de profil */}
         <Card className="mb-6 overflow-hidden">
           <div className="bg-primary/10 p-6">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16 border-2 border-white">
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
-              </Avatar>
+            <div className="flex flex-col items-center text-center gap-4 sm:flex-row sm:text-left">
+              {userData && (
+                <ProfileImageUploader
+                  initialImage={userData.profile_image}
+                  firstName={userData.first_name}
+                  lastName={userData.last_name}
+                  onImageChange={handleProfileImageChange}
+                />
+              )}
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">{getFullName()}</h1>
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  <h1 className="text-2xl font-bold">
+                    {userData ? `${userData.first_name} ${userData.last_name}` : 'Guest'}
+                  </h1>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -133,6 +152,7 @@ const Profile = () => {
           </div>
         </Card>
 
+        {/* Reste du contenu de la page */}
         {/* Informations personnelles */}
         <Card className="mb-6">
           <CardContent className="p-0">

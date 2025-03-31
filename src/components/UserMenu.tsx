@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,18 +9,20 @@ import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
 interface UserData {
   first_name?: string;
   last_name?: string;
   email?: string;
   room_number?: string;
+  profile_image?: string;
 }
+
 const UserMenu = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   useEffect(() => {
     const storedUserData = localStorage.getItem('user_data');
     if (storedUserData) {
@@ -31,6 +34,26 @@ const UserMenu = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    // Écouter les changements dans le localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user_data' && e.newValue) {
+        try {
+          const parsedData = JSON.parse(e.newValue);
+          setUserData(parsedData);
+        } catch (error) {
+          console.error('Error parsing user data from storage event:', error);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const handleLogout = async () => {
     try {
       console.log("=== DÉBUT PROCESSUS DE DÉCONNEXION ===");
@@ -43,9 +66,7 @@ const UserMenu = () => {
       console.log("Service de déconnexion terminé avec succès");
 
       // 2. Double vérification: Appeler directement l'API Supabase
-      const {
-        error: supabaseError
-      } = await supabase.auth.signOut();
+      const { error: supabaseError } = await supabase.auth.signOut();
       if (supabaseError) {
         console.warn("Avertissement: Erreur secondaire de Supabase:", supabaseError);
         // Continuer malgré l'erreur - on a déjà nettoyé via logoutUser()
@@ -115,11 +136,17 @@ const UserMenu = () => {
     if (!userData) return 'Guest';
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
   };
-  return <DropdownMenu>
+
+  return (
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
-            <AvatarImage src="/placeholder.svg" />
+            {userData?.profile_image ? (
+              <AvatarImage src={userData.profile_image} alt="Photo de profil" />
+            ) : (
+              <AvatarImage src="/placeholder.svg" />
+            )}
             <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
         </Button>
@@ -148,6 +175,8 @@ const UserMenu = () => {
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>;
+    </DropdownMenu>
+  );
 };
+
 export default UserMenu;
