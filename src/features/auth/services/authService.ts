@@ -142,18 +142,21 @@ export const loginUser = async (
  */
 export const logoutUser = async (): Promise<{ success: boolean; error?: string }> => {
   try {
-    // Déconnexion de Supabase Auth
+    console.log('Starting logout process');
+    
+    // Déconnexion de Supabase Auth directement
     const { error } = await supabase.auth.signOut();
     
     if (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+      console.error('Erreur lors de la déconnexion Supabase:', error);
       return { 
         success: false, 
         error: error.message || 'Erreur lors de la déconnexion' 
       };
     }
     
-    // Supprimer les données du localStorage
+    // Nettoyer localStorage
+    console.log('Clearing local storage data');
     localStorage.removeItem('user_data');
     localStorage.removeItem('user_id');
     

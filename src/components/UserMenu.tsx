@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserData {
   first_name?: string;
@@ -35,23 +36,29 @@ const UserMenu = () => {
 
   const handleLogout = async () => {
     try {
-      const result = await logoutUser();
+      // D'abord, on essaie de déconnecter via Supabase
+      const { error } = await supabase.auth.signOut();
       
-      if (result.success) {
-        toast({
-          title: "Déconnexion réussie",
-          description: "Vous avez été déconnecté avec succès"
-        });
-        
-        // Rediriger vers la page de connexion
-        navigate('/auth/login');
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Erreur lors de la déconnexion",
-          description: result.error || "Une erreur est survenue"
-        });
+      if (error) {
+        console.error("Erreur lors de la déconnexion Supabase:", error);
+        throw error;
       }
+      
+      // Ensuite, on utilise notre fonction logoutUser pour la compatibilité
+      await logoutUser();
+      
+      // Nettoyer le localStorage (même si logoutUser le fait déjà, pour être sûr)
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('user_id');
+      
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès"
+      });
+      
+      // Forcer une redirection vers la page de connexion et recharger la page
+      // pour s'assurer que tous les états sont correctement réinitialisés
+      window.location.href = '/auth/login';
     } catch (error) {
       console.error("Erreur de déconnexion:", error);
       toast({
@@ -60,10 +67,10 @@ const UserMenu = () => {
         description: "Une erreur inattendue est survenue"
       });
       
-      // En cas d'erreur, on essaie quand même de rediriger et nettoyer localStorage
+      // En cas d'erreur, on essaie quand même de nettoyer et rediriger
       localStorage.removeItem('user_data');
       localStorage.removeItem('user_id');
-      navigate('/auth/login');
+      window.location.href = '/auth/login';
     }
   };
 
