@@ -66,9 +66,10 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/auth/login" element={
-          isAuthenticated ? <Navigate to="/" /> : <Login />
-        } />
+        {/* Page publique d'authentification */}
+        <Route path="/auth/login" element={<Login />} />
+        
+        {/* Pages protégées nécessitant une authentification */}
         <Route element={<AuthGuard><Layout><Outlet /></Layout></AuthGuard>}>
           <Route path="/" element={<Index />} />
           <Route path="/rooms/:id" element={<RoomDetails />} />
@@ -96,6 +97,9 @@ const AnimatedRoutes = () => {
           <Route path="/events" element={<Events />} />
           <Route path="*" element={<NotFound />} />
         </Route>
+        
+        {/* Redirection par défaut vers la connexion */}
+        <Route path="*" element={<Navigate to="/auth/login" replace />} />
       </Routes>
     </AnimatePresence>
   );

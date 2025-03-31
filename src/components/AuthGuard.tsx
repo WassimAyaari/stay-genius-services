@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { syncUserData } from '@/features/users/services/userService';
 import { isAuthenticated } from '@/features/auth/services/authService';
@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState<boolean>(true);
   const [authorized, setAuthorized] = useState<boolean>(false);
@@ -22,7 +23,8 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
         
         if (!auth) {
           // Rediriger vers la page de connexion si non authentifié
-          navigate('/auth/login');
+          console.log('Utilisateur non authentifié, redirection vers login');
+          navigate('/auth/login', { replace: true });
           return;
         }
         
@@ -51,11 +53,12 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
             setAuthorized(true);
           } catch (error) {
             console.error("Error parsing user data:", error);
-            navigate('/auth/login');
+            navigate('/auth/login', { replace: true });
           }
-        } else if (window.location.pathname !== '/auth/login') {
-          // Si aucune donnée utilisateur et pas sur la page de connexion, rediriger
-          navigate('/auth/login');
+        } else {
+          // Si aucune donnée utilisateur, rediriger vers login
+          console.log('Aucune donnée utilisateur, redirection vers login');
+          navigate('/auth/login', { replace: true });
         }
       } catch (error) {
         console.error("Auth check error:", error);
@@ -64,14 +67,20 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
           title: "Erreur d'authentification",
           description: "Veuillez vous reconnecter",
         });
-        navigate('/auth/login');
+        navigate('/auth/login', { replace: true });
       } finally {
         setLoading(false);
       }
     };
     
+    // Ne pas vérifier l'authentification sur les pages d'authentification
+    if (location.pathname.includes('/auth/')) {
+      setLoading(false);
+      return;
+    }
+    
     checkAuth();
-  }, [navigate, toast]);
+  }, [navigate, toast, location.pathname]);
 
   if (loading) {
     return (
@@ -81,7 +90,8 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return authorized ? <>{children}</> : null;
+  // Si nous sommes sur une page auth, ou si l'utilisateur est autorisé, afficher les enfants
+  return (location.pathname.includes('/auth/') || authorized) ? <>{children}</> : null;
 };
 
 export default AuthGuard;

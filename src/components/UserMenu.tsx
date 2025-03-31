@@ -6,6 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { LogOut, Settings, User } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import GuestStatusBadge from './GuestStatusBadge';
+import { logoutUser } from '@/features/auth/services/authService';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserData {
   first_name?: string;
@@ -17,6 +19,7 @@ interface UserData {
 const UserMenu = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('user_data');
@@ -30,9 +33,38 @@ const UserMenu = () => {
     }
   }, []);
 
-  const handleLogout = () => {
-    // Simple logout for now - just redirect to login page
-    navigate('/auth/login');
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
+      
+      if (result.success) {
+        toast({
+          title: "Déconnexion réussie",
+          description: "Vous avez été déconnecté avec succès"
+        });
+        
+        // Rediriger vers la page de connexion
+        navigate('/auth/login');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur lors de la déconnexion",
+          description: result.error || "Une erreur est survenue"
+        });
+      }
+    } catch (error) {
+      console.error("Erreur de déconnexion:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur lors de la déconnexion",
+        description: "Une erreur inattendue est survenue"
+      });
+      
+      // En cas d'erreur, on essaie quand même de rediriger et nettoyer localStorage
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('user_id');
+      navigate('/auth/login');
+    }
   };
 
   // Get user initials for avatar fallback
