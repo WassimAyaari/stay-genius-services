@@ -20,6 +20,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
       try {
         // Vérifier si l'utilisateur est authentifié via Supabase ou localStorage
         const auth = await isAuthenticated();
+        console.log("Auth state:", auth);
         
         if (!auth) {
           // Rediriger vers la page de connexion si non authentifié
@@ -76,6 +77,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     // Ne pas vérifier l'authentification sur les pages d'authentification
     if (location.pathname.includes('/auth/')) {
       setLoading(false);
+      setAuthorized(false);
       return;
     }
     

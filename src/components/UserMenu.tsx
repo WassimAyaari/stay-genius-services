@@ -36,7 +36,9 @@ const UserMenu = () => {
 
   const handleLogout = async () => {
     try {
-      // D'abord, on essaie de déconnecter via Supabase
+      console.log("Démarrage du processus de déconnexion");
+      
+      // 1. D'abord, déconnexion via Supabase Auth
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -44,33 +46,49 @@ const UserMenu = () => {
         throw error;
       }
       
-      // Ensuite, on utilise notre fonction logoutUser pour la compatibilité
-      await logoutUser();
+      console.log("Déconnexion Supabase réussie");
       
-      // Nettoyer le localStorage (même si logoutUser le fait déjà, pour être sûr)
+      // 2. Nettoyer localStorage manuellement
       localStorage.removeItem('user_data');
       localStorage.removeItem('user_id');
+      console.log("Données localStorage supprimées");
       
+      // 3. Notification à l'utilisateur
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès"
       });
       
-      // Forcer une redirection vers la page de connexion et recharger la page
-      // pour s'assurer que tous les états sont correctement réinitialisés
+      // 4. Redirection forcée
+      console.log("Redirection vers la page de connexion");
+      
+      // Utiliser window.location pour forcer un rechargement complet
+      // Cela garantit que tous les états React sont réinitialisés
       window.location.href = '/auth/login';
     } catch (error) {
-      console.error("Erreur de déconnexion:", error);
+      console.error("Erreur complète de déconnexion:", error);
+      
+      // Notification d'erreur
       toast({
         variant: "destructive",
         title: "Erreur lors de la déconnexion",
-        description: "Une erreur inattendue est survenue"
+        description: "Une erreur inattendue est survenue, tentative de nettoyage..."
       });
       
-      // En cas d'erreur, on essaie quand même de nettoyer et rediriger
-      localStorage.removeItem('user_data');
-      localStorage.removeItem('user_id');
-      window.location.href = '/auth/login';
+      // Tentative de nettoyage d'urgence
+      try {
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user_id');
+        console.log("Nettoyage d'urgence effectué");
+        
+        // Forcer le rechargement même en cas d'erreur
+        window.location.href = '/auth/login';
+      } catch (e) {
+        console.error("Échec du nettoyage d'urgence:", e);
+        
+        // Dernier recours: redirection simple
+        navigate('/auth/login');
+      }
     }
   };
 
