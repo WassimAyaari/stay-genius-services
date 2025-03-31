@@ -47,7 +47,7 @@ const MenuSelection = ({ form, menuCategories, isLoadingMenuItems }: MenuSelecti
             <FormLabel>Menu (optionnel)</FormLabel>
             <Select
               onValueChange={field.onChange}
-              value={field.value || ''}
+              value={field.value || 'none'}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un menu" />
