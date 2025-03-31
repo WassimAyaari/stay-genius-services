@@ -3,7 +3,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
-import { MenuItem } from '@/features/dining/types';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -19,7 +18,7 @@ import { CalendarIcon, Clock } from 'lucide-react';
 interface ReservationFormProps {
   restaurantId: string;
   onSuccess?: () => void;
-  buttonText?: string; // Nouvelle prop pour le texte du bouton
+  buttonText?: string;
 }
 
 const TIME_SLOTS = [
@@ -159,7 +158,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP", { locale: fr })
+                          format(field.value, "d MMMM yyyy", { locale: fr })
                         ) : (
                           <span>Choisir une date</span>
                         )}
@@ -167,13 +166,14 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 z-50" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date()}
                       initialFocus
+                      locale={fr}
                     />
                   </PopoverContent>
                 </Popover>
@@ -238,7 +238,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
           )}
         />
         
-        {/* Nouveau champ pour sélectionner un menu */}
+        {/* Champ pour sélectionner un menu */}
         <FormField
           control={form.control}
           name="menuId"
