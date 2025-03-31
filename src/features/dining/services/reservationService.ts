@@ -84,7 +84,7 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
     guest_name: reservation.guestName,
     guest_email: reservation.guestEmail || '',
     guest_phone: reservation.guestPhone || '',
-    room_number: reservation.roomNumber,
+    room_number: reservation.roomNumber,  // Ensure this field matches the Supabase column name
     date: reservation.date,
     time: reservation.time,
     guests: reservation.guests,
@@ -94,15 +94,17 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
   
   try {
     console.log('Sending to Supabase:', reservationData);
+    console.log('Room number being sent:', reservationData.room_number);
     
-    // Let's add a debug output to see the table structure
+    // Debug output to see the table structure
     const { data: tableInfo, error: tableError } = await supabase
       .from('table_reservations')
       .select('*')
       .limit(1);
     
-    if (tableInfo) {
+    if (tableInfo && tableInfo.length > 0) {
       console.log('Table structure sample:', tableInfo);
+      console.log('Available columns:', Object.keys(tableInfo[0]));
     }
     
     if (tableError) {
@@ -117,6 +119,12 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
 
     if (error) {
       console.error('Supabase error creating reservation:', error);
+      
+      // Additional error handling for column not found error
+      if (error.message && error.message.includes('column "room_number" does not exist')) {
+        throw new Error('La colonne "room_number" n\'existe pas dans la table. Veuillez vérifier la structure de la base de données.');
+      }
+      
       throw new Error(error.message || 'Erreur lors de la création de la réservation');
     }
 
