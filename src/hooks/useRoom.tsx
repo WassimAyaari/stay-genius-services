@@ -8,8 +8,6 @@ export interface Room {
   type: string;
   floor: number;
   status: string;
-  view_type: string | null;
-  description: string | null;
   price: number;
   capacity: number;
   amenities: string[];
@@ -20,6 +18,8 @@ export const useRoom = (roomNumber?: string) => {
   return useQuery({
     queryKey: ['room', roomNumber],
     queryFn: async () => {
+      if (!roomNumber) throw new Error("Room number is required");
+      
       const { data, error } = await supabase
         .from('rooms')
         .select('*')
@@ -27,6 +27,8 @@ export const useRoom = (roomNumber?: string) => {
         .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error(`Room ${roomNumber} not found`);
+      
       return data as Room;
     },
     enabled: !!roomNumber,

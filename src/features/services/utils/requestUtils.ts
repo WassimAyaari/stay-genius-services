@@ -27,15 +27,17 @@ const createUserProfile = async (userId: string, userInfo: UserInfo) => {
       return true;
     }
     
-    // Insert directly into guests table using our new function
+    // Insert directly into guests table
     const { data, error } = await supabase
-      .rpc('insert_guest_from_registration', {
+      .from('guests')
+      .insert([{
         user_id: userId,
         first_name: firstName,
         last_name: lastName,
         email: '',
-        room_number: userInfo.roomNumber
-      });
+        room_number: userInfo.roomNumber,
+        guest_type: 'Premium Guest'
+      }]);
     
     if (error) {
       console.error("Error inserting guest data:", error);
@@ -81,7 +83,7 @@ export const submitRequestViaChatMessage = async (
   }
 
   try {
-    // Step 1: Create a chat message (this doesn't require a profile)
+    // Step 1: Create a chat message
     console.log('Creating chat message');
     const { error: chatError } = await supabase
       .from('chat_messages')
@@ -132,17 +134,14 @@ export const submitRequestViaChatMessage = async (
         type: type,
         description: description,
         status: 'pending',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        room_id: roomData?.id || userId, // Fallback to userId if room not found
+        room_number: userInfo.roomNumber
       };
 
       // Add category if available
       if (selectedCategory?.id) {
         requestData.category_id = selectedCategory.id;
-      }
-
-      // Add room_id only if the room exists
-      if (roomData?.id) {
-        requestData.room_id = roomData.id;
       }
       
       console.log('Creating service request with data:', requestData);
@@ -155,23 +154,20 @@ export const submitRequestViaChatMessage = async (
       if (serviceError) {
         console.error("Error submitting service request:", serviceError);
         
-        // Show appropriate error message but don't fail the overall process
         toast({
           title: "Partial Success",
           description: "Your message was sent, but we couldn't register your full request. Our staff will still assist you.",
-          variant: "destructive" // Changed from "warning" to "destructive"
+          variant: "destructive"
         });
         
-        // Return partial success since the chat message was sent
         return true;
       }
     } catch (requestError) {
       console.error("Error creating service request:", requestError);
-      // Continue despite service request failure since chat message was sent
       toast({
         title: "Message Sent",
         description: "Your message was sent, but we encountered an issue with your request. Our staff will assist you.",
-        variant: "destructive" // Changed from "warning" to "destructive"
+        variant: "destructive"
       });
       return true;
     }

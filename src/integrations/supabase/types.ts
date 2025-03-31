@@ -9,6 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipient_id: string | null
+          room_number: string
+          sender: string
+          status: string
+          text: string
+          updated_at: string | null
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipient_id?: string | null
+          room_number: string
+          sender: string
+          status?: string
+          text: string
+          updated_at?: string | null
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipient_id?: string | null
+          room_number?: string
+          sender?: string
+          status?: string
+          text?: string
+          updated_at?: string | null
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      companions: {
+        Row: {
+          birth_date: string | null
+          created_at: string | null
+          first_name: string
+          id: string
+          last_name: string
+          relation: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          relation: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          relation?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       guests: {
         Row: {
           birth_date: string | null
@@ -143,6 +215,45 @@ export type Database = {
           },
         ]
       }
+      hotel_config: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          enabled_features: string[] | null
+          id: string
+          logo_url: string | null
+          name: string
+          primary_color: string
+          secondary_color: string
+          updated_at: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          enabled_features?: string[] | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          primary_color: string
+          secondary_color: string
+          updated_at?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          enabled_features?: string[] | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          primary_color?: string
+          secondary_color?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       hotels: {
         Row: {
           address: string
@@ -179,6 +290,69 @@ export type Database = {
           name?: string
           subdomain?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      request_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      request_items: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -265,6 +439,93 @@ export type Database = {
           name?: string
           open_hours?: string
           status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          amenities: string[] | null
+          capacity: number
+          created_at: string | null
+          floor: number
+          id: string
+          images: string[] | null
+          price: number
+          room_number: string
+          status: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          capacity: number
+          created_at?: string | null
+          floor: number
+          id?: string
+          images?: string[] | null
+          price: number
+          room_number: string
+          status: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          amenities?: string[] | null
+          capacity?: number
+          created_at?: string | null
+          floor?: number
+          id?: string
+          images?: string[] | null
+          price?: number
+          room_number?: string
+          status?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      service_requests: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          guest_id: string
+          guest_name: string | null
+          id: string
+          request_item_id: string | null
+          room_id: string
+          room_number: string | null
+          status: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          guest_id: string
+          guest_name?: string | null
+          id?: string
+          request_item_id?: string | null
+          room_id: string
+          room_number?: string | null
+          status?: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          guest_id?: string
+          guest_name?: string | null
+          id?: string
+          request_item_id?: string | null
+          room_id?: string
+          room_number?: string | null
+          status?: string
+          type?: string
           updated_at?: string | null
         }
         Relationships: []
