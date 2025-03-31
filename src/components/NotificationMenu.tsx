@@ -8,13 +8,27 @@ import { useTableReservations } from '@/hooks/useTableReservations';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { ServiceRequest } from '@/features/rooms/types';
+import { TableReservation } from '@/features/dining/types';
 
 const NotificationMenu = () => {
   const { data: serviceRequests = [] } = useServiceRequests();
   const { reservations = [] } = useTableReservations();
 
+  // Define a type for combined notifications
+  type NotificationItem = {
+    id: string;
+    type: 'request' | 'reservation';
+    title: string;
+    description: string;
+    icon: string;
+    status: string;
+    time: Date;
+    link: string;
+  };
+
   // Combine and sort notifications by time (newest first)
-  const notifications = [
+  const notifications: NotificationItem[] = [
     ...serviceRequests.map(request => ({
       id: request.id,
       type: 'request',

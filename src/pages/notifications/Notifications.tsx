@@ -9,13 +9,27 @@ import { Card } from '@/components/ui/card';
 import { CheckCircle2, XCircle, Clock, Timer, ShowerHead, Shirt, PhoneCall, Wifi, FileText, Settings, Search, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { ServiceRequest } from '@/features/rooms/types';
+import { TableReservation } from '@/features/dining/types';
 
 const Notifications = () => {
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
   const { reservations = [], isLoading: isLoadingReservations } = useTableReservations();
 
+  // Define a type for the combined notification items
+  type NotificationItem = {
+    id: string;
+    type: 'request' | 'reservation';
+    title: string;
+    description: string;
+    status: string;
+    time: Date;
+    link: string;
+    data: ServiceRequest | TableReservation;
+  };
+
   // Combine and sort notifications by time (newest first)
-  const notifications = [
+  const notifications: NotificationItem[] = [
     ...serviceRequests.map(request => ({
       id: request.id,
       type: 'request',
@@ -54,12 +68,16 @@ const Notifications = () => {
     }
   };
 
-  const getTypeIcon = (type: string, notificationType: string) => {
+  const getTypeIcon = (notificationType: string, serviceType?: string) => {
     if (notificationType === 'reservation') {
       return <Utensils className="h-6 w-6" />;
     }
     
-    switch (type) {
+    if (!serviceType) {
+      return <Search className="h-6 w-6" />;
+    }
+    
+    switch (serviceType) {
       case 'housekeeping':
         return <ShowerHead className="h-6 w-6" />;
       case 'laundry':
@@ -113,8 +131,8 @@ const Notifications = () => {
                   <div className="p-4 flex items-start gap-4">
                     <div className="p-3 bg-gray-100 rounded-full">
                       {notification.type === 'request' 
-                        ? getTypeIcon(notification.data.type, notification.type)
-                        : getTypeIcon('', 'reservation')}
+                        ? getTypeIcon(notification.type, (notification.data as ServiceRequest).type)
+                        : getTypeIcon('reservation')}
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-1">
