@@ -2,6 +2,24 @@
 import { supabase } from '@/integrations/supabase/client';
 import { TableReservation, CreateTableReservationDTO, UpdateReservationStatusDTO } from '@/features/dining/types';
 
+// Define the shape of the data returned from Supabase
+interface SupabaseTableReservation {
+  id: string;
+  restaurant_id: string;
+  user_id: string | null;
+  guest_name: string | null;
+  guest_email: string | null;
+  guest_phone: string | null;
+  room_number?: string | null;
+  date: string;
+  time: string;
+  guests: number;
+  menu_id?: string | null;
+  special_requests: string | null;
+  status: string;
+  created_at: string;
+}
+
 // Fetch reservations for a restaurant
 export const fetchReservations = async (restaurantId?: string): Promise<TableReservation[]> => {
   let query = supabase
@@ -21,19 +39,19 @@ export const fetchReservations = async (restaurantId?: string): Promise<TableRes
     throw error;
   }
 
-  return data.map(item => ({
+  return (data as SupabaseTableReservation[]).map(item => ({
     id: item.id,
     restaurantId: item.restaurant_id,
-    userId: item.user_id,
-    guestName: item.guest_name,
-    guestEmail: item.guest_email,
-    guestPhone: item.guest_phone,
+    userId: item.user_id || undefined,
+    guestName: item.guest_name || undefined,
+    guestEmail: item.guest_email || undefined,
+    guestPhone: item.guest_phone || undefined,
     roomNumber: item.room_number || '',
     date: item.date,
     time: item.time,
     guests: item.guests,
     menuId: item.menu_id || undefined,
-    specialRequests: item.special_requests,
+    specialRequests: item.special_requests || undefined,
     status: item.status as 'pending' | 'confirmed' | 'cancelled',
     createdAt: item.created_at
   }));
@@ -73,21 +91,22 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
       throw error;
     }
 
+    const typedData = data as SupabaseTableReservation;
     return {
-      id: data.id,
-      restaurantId: data.restaurant_id,
-      userId: data.user_id,
-      guestName: data.guest_name,
-      guestEmail: data.guest_email,
-      guestPhone: data.guest_phone,
-      roomNumber: data.room_number || '',
-      date: data.date,
-      time: data.time,
-      guests: data.guests,
-      menuId: data.menu_id || undefined,
-      specialRequests: data.special_requests,
-      status: data.status as 'pending' | 'confirmed' | 'cancelled',
-      createdAt: data.created_at
+      id: typedData.id,
+      restaurantId: typedData.restaurant_id,
+      userId: typedData.user_id || undefined,
+      guestName: typedData.guest_name || undefined,
+      guestEmail: typedData.guest_email || undefined,
+      guestPhone: typedData.guest_phone || undefined,
+      roomNumber: typedData.room_number || '',
+      date: typedData.date,
+      time: typedData.time,
+      guests: typedData.guests,
+      menuId: typedData.menu_id || undefined,
+      specialRequests: typedData.special_requests || undefined,
+      status: typedData.status as 'pending' | 'confirmed' | 'cancelled',
+      createdAt: typedData.created_at
     };
   } catch (error) {
     console.error('Failed to create reservation, trying alternative approach:', error);
@@ -115,21 +134,22 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
         throw directError;
       }
       
+      const typedData = data as SupabaseTableReservation;
       return {
-        id: data.id,
-        restaurantId: data.restaurant_id,
-        userId: data.user_id,
-        guestName: data.guest_name,
-        guestEmail: data.guest_email,
-        guestPhone: data.guest_phone,
-        roomNumber: data.room_number || '',
-        date: data.date,
-        time: data.time,
-        guests: data.guests,
-        menuId: data.menu_id || undefined,
-        specialRequests: data.special_requests,
-        status: data.status as 'pending' | 'confirmed' | 'cancelled',
-        createdAt: data.created_at
+        id: typedData.id,
+        restaurantId: typedData.restaurant_id,
+        userId: typedData.user_id || undefined,
+        guestName: typedData.guest_name || undefined,
+        guestEmail: typedData.guest_email || undefined,
+        guestPhone: typedData.guest_phone || undefined,
+        roomNumber: typedData.room_number || '',
+        date: typedData.date,
+        time: typedData.time,
+        guests: typedData.guests,
+        menuId: typedData.menu_id || undefined,
+        specialRequests: typedData.special_requests || undefined,
+        status: typedData.status as 'pending' | 'confirmed' | 'cancelled',
+        createdAt: typedData.created_at
       };
     } catch (directError) {
       console.error('Both reservation methods failed:', directError);
