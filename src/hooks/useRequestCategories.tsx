@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
-import { RequestCategoryType, RequestItemType } from '@/features/types/supabaseTypes';
 
+// Main hook to fetch categories and provide mutation functions
 export function useRequestCategories() {
   const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { data: categories, isLoading: isCategoriesLoading } = useQuery({
+  
+  // Fetch all categories
+  const categoriesQuery = useQuery({
     queryKey: ['requestCategories'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -26,7 +26,8 @@ export function useRequestCategories() {
     }
   });
 
-  const { data: allItems, isLoading: isItemsLoading } = useQuery({
+  // Fetch all items
+  const itemsQuery = useQuery({
     queryKey: ['requestItems'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,134 +42,124 @@ export function useRequestCategories() {
 
       return data as RequestItem[];
     },
-    enabled: !isCategoriesLoading // Only run after categories are loaded
-  });
-
-  // Create a new category
-  const addCategory = useMutation({
-    mutationFn: async (newCategory: Omit<RequestCategory, 'id' | 'created_at' | 'updated_at'>) => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('request_categories')
-          .insert({
-            name: newCategory.name,
-            description: newCategory.description,
-            is_active: newCategory.is_active,
-            icon: newCategory.icon,
-            parent_id: newCategory.parent_id
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['requestCategories'] });
-    }
-  });
-
-  // Update an existing category
-  const updateCategory = useMutation({
-    mutationFn: async (category: RequestCategory) => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('request_categories')
-          .update({
-            name: category.name,
-            description: category.description,
-            is_active: category.is_active,
-            icon: category.icon,
-            parent_id: category.parent_id,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', category.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['requestCategories'] });
-    }
-  });
-
-  // Create a new item in a category
-  const addItem = useMutation({
-    mutationFn: async (newItem: Omit<RequestItem, 'id' | 'created_at' | 'updated_at'>) => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('request_items')
-          .insert({
-            name: newItem.name,
-            description: newItem.description,
-            category_id: newItem.category_id,
-            is_active: newItem.is_active
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['requestItems'] });
-    }
-  });
-
-  // Update an existing item
-  const updateItem = useMutation({
-    mutationFn: async (item: RequestItem) => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('request_items')
-          .update({
-            name: item.name,
-            description: item.description,
-            category_id: item.category_id,
-            is_active: item.is_active,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', item.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['requestItems'] });
-    }
+    enabled: !categoriesQuery.isLoading // Only run after categories are loaded
   });
 
   return {
-    categories,
-    allItems,
-    isLoading: isLoading || isCategoriesLoading || isItemsLoading,
-    addCategory: addCategory.mutate,
-    updateCategory: updateCategory.mutate,
-    addItem: addItem.mutate,
-    updateItem: updateItem.mutate
+    categories: categoriesQuery.data || [],
+    allItems: itemsQuery.data || [],
+    isLoading: categoriesQuery.isLoading || itemsQuery.isLoading
   };
 }
 
+// Separate hooks for mutations to make them easier to use
+export function useCreateRequestCategory() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (newCategory: Omit<RequestCategory, 'id' | 'created_at' | 'updated_at'>) => {
+      const { data, error } = await supabase
+        .from('request_categories')
+        .insert({
+          name: newCategory.name,
+          description: newCategory.description,
+          is_active: newCategory.is_active,
+          icon: newCategory.icon,
+          parent_id: newCategory.parent_id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requestCategories'] });
+    }
+  });
+}
+
+export function useUpdateRequestCategory() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (category: RequestCategory) => {
+      const { data, error } = await supabase
+        .from('request_categories')
+        .update({
+          name: category.name,
+          description: category.description,
+          is_active: category.is_active,
+          icon: category.icon,
+          parent_id: category.parent_id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', category.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requestCategories'] });
+    }
+  });
+}
+
+export function useCreateRequestItem() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (newItem: Omit<RequestItem, 'id' | 'created_at' | 'updated_at'>) => {
+      const { data, error } = await supabase
+        .from('request_items')
+        .insert({
+          name: newItem.name,
+          description: newItem.description,
+          category_id: newItem.category_id,
+          is_active: newItem.is_active
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requestItems'] });
+    }
+  });
+}
+
+export function useUpdateRequestItem() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (item: RequestItem) => {
+      const { data, error } = await supabase
+        .from('request_items')
+        .update({
+          name: item.name,
+          description: item.description,
+          category_id: item.category_id,
+          is_active: item.is_active,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', item.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requestItems'] });
+    }
+  });
+}
+
+// Hook to fetch items for a specific category
 export function useRequestItems(categoryId?: string) {
   return useQuery({
     queryKey: ['requestItems', categoryId],

@@ -10,7 +10,7 @@ interface RequestCategoryListProps {
 }
 
 const RequestCategoryList = ({ onSelectCategory }: RequestCategoryListProps) => {
-  const { data: categories, isLoading } = useRequestCategories();
+  const { categories, isLoading } = useRequestCategories();
 
   if (isLoading) {
     return (

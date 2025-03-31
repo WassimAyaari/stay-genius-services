@@ -20,7 +20,7 @@ export const CategoriesTab = () => {
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '', icon: '' });
   const [isUpdating, setIsUpdating] = useState(false);
   
-  const { data: categories, isLoading: isLoadingCategories } = useRequestCategories();
+  const { categories, isLoading: isLoadingCategories } = useRequestCategories();
   const createCategoryMutation = useCreateRequestCategory();
   const updateCategoryMutation = useUpdateRequestCategory();
   

@@ -87,7 +87,7 @@ export const submitRequestViaChatMessage = async (
     console.log('Creating chat message');
     const { error: chatError } = await supabase
       .from('chat_messages')
-      .insert([{
+      .insert({
         user_id: userId,
         recipient_id: null,
         user_name: userInfo.name || 'Guest',
@@ -96,7 +96,7 @@ export const submitRequestViaChatMessage = async (
         sender: 'user',
         status: 'sent',
         created_at: new Date().toISOString()
-      }]);
+      });
 
     if (chatError) {
       console.error("Error creating chat message:", chatError);
@@ -129,7 +129,7 @@ export const submitRequestViaChatMessage = async (
     
     // Step 4: Create service request with minimal required data
     try {
-      const requestData: any = {
+      const requestData = {
         guest_id: userId,
         type: type,
         description: description,
@@ -149,7 +149,7 @@ export const submitRequestViaChatMessage = async (
       // Insert service request
       const { error: serviceError } = await supabase
         .from('service_requests')
-        .insert([requestData]);
+        .insert(requestData);
       
       if (serviceError) {
         console.error("Error submitting service request:", serviceError);
