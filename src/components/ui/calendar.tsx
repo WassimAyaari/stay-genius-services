@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, CaptionProps } from "react-day-picker";
+import { DayPicker, type CaptionProps } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -22,7 +22,7 @@ function Calendar({
   ];
 
   // Composant personnalisé pour le caption du calendrier avec sélection rapide
-  function CustomCaption({ displayMonth, goToMonth }: CaptionProps) {
+  function CustomCaption({ displayMonth, onMonthChange }: CaptionProps) {
     const currentYear = displayMonth.getFullYear();
     const currentMonth = displayMonth.getMonth();
     
@@ -39,7 +39,7 @@ function Calendar({
           onValueChange={(value) => {
             const newDate = new Date(displayMonth);
             newDate.setMonth(parseInt(value));
-            goToMonth(newDate);
+            onMonthChange(newDate);
           }}
         >
           <SelectTrigger className="h-7 w-[110px] text-xs font-medium bg-white">
@@ -60,7 +60,7 @@ function Calendar({
           onValueChange={(value) => {
             const newDate = new Date(displayMonth);
             newDate.setFullYear(parseInt(value));
-            goToMonth(newDate);
+            onMonthChange(newDate);
           }}
         >
           <SelectTrigger className="h-7 w-[80px] text-xs font-medium bg-white">
