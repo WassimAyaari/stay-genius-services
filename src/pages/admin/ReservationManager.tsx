@@ -4,12 +4,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, AlertTriangle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowLeft } from 'lucide-react';
 import StatusDialog from '@/components/admin/reservations/StatusDialog';
 import ReservationList from '@/components/admin/reservations/ReservationList';
 import ErrorState from '@/components/admin/reservations/ErrorState';
 import { toast } from 'sonner';
+import { TableReservation } from '@/features/dining/types';
 
 const ReservationManager = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +18,7 @@ const ReservationManager = () => {
   const { reservations, isLoading, error, updateReservationStatus } = useTableReservations(id);
   
   const [restaurant, setRestaurant] = useState<any>(null);
-  const [selectedReservation, setSelectedReservation] = useState<any>(null);
+  const [selectedReservation, setSelectedReservation] = useState<TableReservation | null>(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<'pending' | 'confirmed' | 'cancelled'>('pending');
   const [loadingError, setLoadingError] = useState<string | null>(null);
@@ -47,9 +47,9 @@ const ReservationManager = () => {
     }
   };
 
-  const handleOpenStatusDialog = (reservation: any) => {
+  const handleOpenStatusDialog = (reservation: TableReservation) => {
     setSelectedReservation(reservation);
-    setNewStatus(reservation.status);
+    setNewStatus(reservation.status || 'pending');
     setIsStatusDialogOpen(true);
   };
 
@@ -75,11 +75,10 @@ const ReservationManager = () => {
       </div>
 
       {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Erreur</AlertTitle>
-          <AlertDescription>Impossible de charger les réservations: {error.message}</AlertDescription>
-        </Alert>
+        <ErrorState 
+          errorMessage={`Impossible de charger les réservations: ${error instanceof Error ? error.message : 'Erreur inconnue'}`} 
+          onBackClick={() => navigate('/admin/restaurants')} 
+        />
       )}
 
       <ReservationList 

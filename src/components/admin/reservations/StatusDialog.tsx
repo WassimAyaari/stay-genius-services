@@ -35,6 +35,9 @@ const StatusDialog = ({
   setNewStatus,
   onUpdateStatus
 }: StatusDialogProps) => {
+  // Ensure newStatus always has a valid value
+  const statusValue = newStatus || 'pending';
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -47,8 +50,8 @@ const StatusDialog = ({
         
         <div className="py-4">
           <Select 
-            value={newStatus} 
-            onValueChange={(value: any) => setNewStatus(value)}
+            value={statusValue} 
+            onValueChange={(value: 'pending' | 'confirmed' | 'cancelled') => setNewStatus(value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionnez un statut" />
