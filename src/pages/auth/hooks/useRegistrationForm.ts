@@ -7,6 +7,7 @@ import * as z from "zod";
 import { syncUserData } from '@/features/users/services/userService';
 import { CompanionType } from '../components/CompanionsList';
 import { CompanionData } from '@/features/users/types/userTypes';
+import { registerUser } from '@/features/auth/services/authService';
 
 // Schema pour le formulaire d'inscription
 export const registerSchema = z.object({
@@ -18,6 +19,11 @@ export const registerSchema = z.object({
   roomNumber: z.string().min(1, { message: "Le numéro de chambre est requis" }),
   checkInDate: z.date({ required_error: "La date d'arrivée est requise" }),
   checkOutDate: z.date({ required_error: "La date de départ est requise" }),
+  password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
+  confirmPassword: z.string().min(6, { message: "La confirmation du mot de passe est requise" }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
 });
 
 export type RegistrationFormValues = z.infer<typeof registerSchema>;
@@ -50,6 +56,8 @@ export const useRegistrationForm = () => {
       lastName: "",
       nationality: "",
       roomNumber: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -70,8 +78,12 @@ export const useRegistrationForm = () => {
         companions: mapCompanionsToCompanionData(companions),
       };
       
-      // Sauvegarder dans le localStorage
-      localStorage.setItem('user_data', JSON.stringify(userData));
+      // Enregistrer l'utilisateur avec Supabase Auth
+      const result = await registerUser(values.email, values.password, userData);
+      
+      if (!result.success) {
+        throw new Error(result.error || "Erreur lors de l'inscription");
+      }
       
       // Synchroniser avec Supabase (profiles et guests)
       const syncSuccess = await syncUserData(userData);

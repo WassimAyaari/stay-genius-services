@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Outlet, Navigate }
 import { AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthProvider } from "@/features/auth/hooks/useAuthContext";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from './components/Layout';
 import Index from "./pages/Index";
@@ -102,13 +104,15 @@ const AnimatedRoutes = () => {
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Router>
-          <AnimatedRoutes />
-        </Router>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Router>
+            <AnimatedRoutes />
+          </Router>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

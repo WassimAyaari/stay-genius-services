@@ -1,0 +1,112 @@
+
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
+import { UserData } from '@/features/users/types/userTypes';
+import { getCurrentSession, isAuthenticated } from '../services/authService';
+
+interface AuthContextType {
+  session: Session | null;
+  user: User | null;
+  userData: UserData | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+}
+
+const AuthContext = createContext<AuthContextType>({
+  session: null,
+  user: null,
+  userData: null,
+  loading: true,
+  isAuthenticated: false
+});
+
+export const useAuth = () => useContext(AuthContext);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Fonction pour récupérer les données utilisateur du localStorage
+    const getUserDataFromLocalStorage = () => {
+      const userDataString = localStorage.getItem('user_data');
+      if (userDataString) {
+        try {
+          return JSON.parse(userDataString) as UserData;
+        } catch (error) {
+          console.error('Error parsing user data from localStorage:', error);
+        }
+      }
+      return null;
+    };
+
+    // Initialiser la session et l'utilisateur
+    const initializeAuth = async () => {
+      setLoading(true);
+      
+      // Obtenir la session Supabase
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user || null);
+      
+      // Vérifier l'authentification (Supabase ou localStorage)
+      const authStatus = await isAuthenticated();
+      setIsUserAuthenticated(authStatus);
+      
+      // Récupérer les données utilisateur du localStorage
+      const localUserData = getUserDataFromLocalStorage();
+      if (localUserData) {
+        setUserData(localUserData);
+      }
+      
+      setLoading(false);
+    };
+
+    // Configurer l'écouteur de changement d'état d'authentification
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log('Auth state changed:', event);
+      setSession(newSession);
+      setUser(newSession?.user || null);
+      
+      // Mettre à jour l'état d'authentification
+      const authStatus = await isAuthenticated();
+      setIsUserAuthenticated(authStatus);
+      
+      // Mettre à jour les données utilisateur depuis le localStorage
+      const localUserData = getUserDataFromLocalStorage();
+      if (localUserData) {
+        setUserData(localUserData);
+      }
+    });
+
+    // Initialiser l'auth au chargement du composant
+    initializeAuth();
+
+    // Nettoyer l'écouteur à la déconnexion
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  return (
+    <AuthContext.Provider 
+      value={{ 
+        session, 
+        user, 
+        userData, 
+        loading, 
+        isAuthenticated: isUserAuthenticated 
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};

@@ -9,215 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      activities: {
-        Row: {
-          capacity: number
-          category: string
-          created_at: string | null
-          date: string
-          description: string | null
-          duration: string
-          id: string
-          image: string | null
-          location: string
-          name: string
-          price: number
-          status: string
-          time: string
-          updated_at: string | null
-        }
-        Insert: {
-          capacity: number
-          category: string
-          created_at?: string | null
-          date: string
-          description?: string | null
-          duration: string
-          id?: string
-          image?: string | null
-          location: string
-          name: string
-          price: number
-          status?: string
-          time: string
-          updated_at?: string | null
-        }
-        Update: {
-          capacity?: number
-          category?: string
-          created_at?: string | null
-          date?: string
-          description?: string | null
-          duration?: string
-          id?: string
-          image?: string | null
-          location?: string
-          name?: string
-          price?: number
-          status?: string
-          time?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      activity_bookings: {
-        Row: {
-          activity_id: string
-          created_at: string | null
-          id: string
-          participants: number
-          special_requests: string | null
-          status: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          activity_id: string
-          created_at?: string | null
-          id?: string
-          participants?: number
-          special_requests?: string | null
-          status?: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          activity_id?: string
-          created_at?: string | null
-          id?: string
-          participants?: number
-          special_requests?: string | null
-          status?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_bookings_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bookings: {
-        Row: {
-          check_in: string
-          check_out: string
-          created_at: string | null
-          guest_id: string | null
-          id: string
-          room_id: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          check_in: string
-          check_out: string
-          created_at?: string | null
-          guest_id?: string | null
-          id?: string
-          room_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          check_in?: string
-          check_out?: string
-          created_at?: string | null
-          guest_id?: string | null
-          id?: string
-          room_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bookings_guest_id_fkey"
-            columns: ["guest_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "rooms"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chat_messages: {
-        Row: {
-          created_at: string
-          id: string
-          recipient_id: string | null
-          room_number: string | null
-          sender: string
-          status: string | null
-          text: string
-          updated_at: string
-          user_id: string
-          user_name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          recipient_id?: string | null
-          room_number?: string | null
-          sender: string
-          status?: string | null
-          text: string
-          updated_at?: string
-          user_id: string
-          user_name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          recipient_id?: string | null
-          room_number?: string | null
-          sender?: string
-          status?: string | null
-          text?: string
-          updated_at?: string
-          user_id?: string
-          user_name?: string
-        }
-        Relationships: []
-      }
-      companions: {
-        Row: {
-          created_at: string | null
-          first_name: string
-          id: string
-          last_name: string | null
-          relation: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          first_name: string
-          id?: string
-          last_name?: string | null
-          relation: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          first_name?: string
-          id?: string
-          last_name?: string | null
-          relation?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       guests: {
         Row: {
           birth_date: string | null
@@ -230,6 +21,8 @@ export type Database = {
           id: string
           last_name: string
           nationality: string | null
+          phone: string | null
+          profile_image: string | null
           room_number: string | null
           status: string | null
           updated_at: string | null
@@ -246,6 +39,8 @@ export type Database = {
           id?: string
           last_name: string
           nationality?: string | null
+          phone?: string | null
+          profile_image?: string | null
           room_number?: string | null
           status?: string | null
           updated_at?: string | null
@@ -262,20 +57,14 @@ export type Database = {
           id?: string
           last_name?: string
           nationality?: string | null
+          phone?: string | null
+          profile_image?: string | null
           room_number?: string | null
           status?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "guests_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       hotel_about: {
         Row: {
@@ -354,415 +143,6 @@ export type Database = {
           },
         ]
       }
-      hotel_admins: {
-        Row: {
-          created_at: string
-          hotel_id: string
-          id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          hotel_id: string
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          hotel_id?: string
-          id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_admins_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hotel_assistance: {
-        Row: {
-          action_link: string
-          action_text: string
-          background_image: string
-          created_at: string
-          description: string
-          hotel_id: string | null
-          id: string
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          action_link: string
-          action_text: string
-          background_image: string
-          created_at?: string
-          description: string
-          hotel_id?: string | null
-          id?: string
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          action_link?: string
-          action_text?: string
-          background_image?: string
-          created_at?: string
-          description?: string
-          hotel_id?: string | null
-          id?: string
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_assistance_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hotel_config: {
-        Row: {
-          address: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string | null
-          id: string
-          logo_url: string | null
-          name: string
-          primary_color: string | null
-          secondary_color: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
-          id?: string
-          logo_url?: string | null
-          name?: string
-          primary_color?: string | null
-          secondary_color?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
-          id?: string
-          logo_url?: string | null
-          name?: string
-          primary_color?: string | null
-          secondary_color?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      hotel_events: {
-        Row: {
-          action_link: string
-          action_text: string
-          created_at: string
-          date: string
-          description: string
-          display_order: number
-          hotel_id: string | null
-          id: string
-          image: string
-          location: string
-          status: string
-          time: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          action_link: string
-          action_text: string
-          created_at?: string
-          date: string
-          description: string
-          display_order?: number
-          hotel_id?: string | null
-          id?: string
-          image: string
-          location: string
-          status?: string
-          time: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          action_link?: string
-          action_text?: string
-          created_at?: string
-          date?: string
-          description?: string
-          display_order?: number
-          hotel_id?: string | null
-          id?: string
-          image?: string
-          location?: string
-          status?: string
-          time?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_events_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hotel_experiences: {
-        Row: {
-          action_link: string
-          action_text: string
-          category: string
-          created_at: string
-          description: string
-          display_order: number
-          hotel_id: string | null
-          id: string
-          image: string
-          status: string
-          subtitle: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          action_link: string
-          action_text: string
-          category: string
-          created_at?: string
-          description: string
-          display_order?: number
-          hotel_id?: string | null
-          id?: string
-          image: string
-          status?: string
-          subtitle: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          action_link?: string
-          action_text?: string
-          category?: string
-          created_at?: string
-          description?: string
-          display_order?: number
-          hotel_id?: string | null
-          id?: string
-          image?: string
-          status?: string
-          subtitle?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_experiences_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hotel_hero: {
-        Row: {
-          background_image: string
-          created_at: string
-          hotel_id: string | null
-          id: string
-          search_placeholder: string
-          status: string
-          subtitle: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          background_image: string
-          created_at?: string
-          hotel_id?: string | null
-          id?: string
-          search_placeholder: string
-          status?: string
-          subtitle: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          background_image?: string
-          created_at?: string
-          hotel_id?: string | null
-          id?: string
-          search_placeholder?: string
-          status?: string
-          subtitle?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_hero_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hotel_services: {
-        Row: {
-          action_link: string
-          action_text: string
-          created_at: string
-          description: string
-          display_order: number
-          hotel_id: string | null
-          icon: string
-          id: string
-          status: string
-          title: string
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          action_link: string
-          action_text: string
-          created_at?: string
-          description: string
-          display_order?: number
-          hotel_id?: string | null
-          icon: string
-          id?: string
-          status?: string
-          title: string
-          type?: string
-          updated_at?: string
-        }
-        Update: {
-          action_link?: string
-          action_text?: string
-          created_at?: string
-          description?: string
-          display_order?: number
-          hotel_id?: string | null
-          icon?: string
-          id?: string
-          status?: string
-          title?: string
-          type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_services_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hotel_stories: {
-        Row: {
-          content: string
-          created_at: string
-          display_order: number
-          hotel_id: string | null
-          id: string
-          image: string
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          display_order?: number
-          hotel_id?: string | null
-          id?: string
-          image: string
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          display_order?: number
-          hotel_id?: string | null
-          id?: string
-          image?: string
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_stories_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hotel_user_roles: {
-        Row: {
-          created_at: string
-          hotel_id: string
-          id: string
-          role: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          hotel_id: string
-          id?: string
-          role: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          hotel_id?: string
-          id?: string
-          role?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hotel_user_roles_hotel_id_fkey"
-            columns: ["hotel_id"]
-            isOneToOne: false
-            referencedRelation: "hotels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       hotels: {
         Row: {
           address: string
@@ -801,112 +181,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string | null
-          first_name: string | null
-          id: string
-          last_name: string | null
-          phone: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          first_name?: string | null
-          id: string
-          last_name?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      request_categories: {
-        Row: {
-          created_at: string
-          description: string | null
-          icon: string | null
-          id: string
-          is_active: boolean
-          name: string
-          parent_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          parent_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          parent_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "request_categories_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "request_categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      request_items: {
-        Row: {
-          category_id: string
-          created_at: string
-          description: string | null
-          id: string
-          is_active: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          category_id: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          category_id?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "request_items_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "request_categories"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       restaurant_menus: {
         Row: {
@@ -948,15 +222,7 @@ export type Database = {
           status?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "restaurant_menus_restaurant_id_fkey"
-            columns: ["restaurant_id"]
-            isOneToOne: false
-            referencedRelation: "restaurants"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       restaurants: {
         Row: {
@@ -1000,143 +266,6 @@ export type Database = {
           open_hours?: string
           status?: string
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      rooms: {
-        Row: {
-          amenities: string[] | null
-          capacity: number
-          created_at: string | null
-          description: string | null
-          floor: number
-          id: string
-          images: string[] | null
-          price: number
-          room_number: string
-          status: string | null
-          type: string
-          updated_at: string | null
-          view_type: string | null
-        }
-        Insert: {
-          amenities?: string[] | null
-          capacity?: number
-          created_at?: string | null
-          description?: string | null
-          floor: number
-          id?: string
-          images?: string[] | null
-          price?: number
-          room_number: string
-          status?: string | null
-          type: string
-          updated_at?: string | null
-          view_type?: string | null
-        }
-        Update: {
-          amenities?: string[] | null
-          capacity?: number
-          created_at?: string | null
-          description?: string | null
-          floor?: number
-          id?: string
-          images?: string[] | null
-          price?: number
-          room_number?: string
-          status?: string | null
-          type?: string
-          updated_at?: string | null
-          view_type?: string | null
-        }
-        Relationships: []
-      }
-      service_requests: {
-        Row: {
-          category_id: string | null
-          created_at: string | null
-          description: string | null
-          guest_id: string | null
-          id: string
-          request_item_id: string | null
-          room_id: string | null
-          status: string | null
-          type: string
-          updated_at: string | null
-        }
-        Insert: {
-          category_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          guest_id?: string | null
-          id?: string
-          request_item_id?: string | null
-          room_id?: string | null
-          status?: string | null
-          type: string
-          updated_at?: string | null
-        }
-        Update: {
-          category_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          guest_id?: string | null
-          id?: string
-          request_item_id?: string | null
-          room_id?: string | null
-          status?: string | null
-          type?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_requests_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "request_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_requests_guest_id_fkey"
-            columns: ["guest_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_requests_request_item_id_fkey"
-            columns: ["request_item_id"]
-            isOneToOne: false
-            referencedRelation: "request_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_requests_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "rooms"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      super_admins: {
-        Row: {
-          created_at: string
-          id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -1216,6 +345,8 @@ export type Database = {
           id: string
           last_name: string
           nationality: string | null
+          phone: string | null
+          profile_image: string | null
           room_number: string | null
           status: string | null
           updated_at: string | null
@@ -1239,20 +370,37 @@ export type Database = {
         }
         Returns: boolean
       }
-      insert_guest_from_registration: {
-        Args: {
-          user_id: string
-          first_name: string
-          last_name: string
-          email: string
-          room_number: string
-          nationality?: string
-          birth_date?: string
-          check_in_date?: string
-          check_out_date?: string
-        }
-        Returns: string
-      }
+      insert_guest_from_registration:
+        | {
+            Args: {
+              user_id: string
+              first_name: string
+              last_name: string
+              email: string
+              room_number: string
+              nationality?: string
+              birth_date?: string
+              check_in_date?: string
+              check_out_date?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              user_id: string
+              first_name: string
+              last_name: string
+              email: string
+              room_number: string
+              nationality?: string
+              birth_date?: string
+              check_in_date?: string
+              check_out_date?: string
+              phone?: string
+              profile_image?: string
+            }
+            Returns: string
+          }
       is_admin: {
         Args: {
           user_id: string

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Form } from "@/components/ui/form";
 import CompanionsList from './CompanionsList';
@@ -7,6 +7,7 @@ import { useRegistrationForm } from '../hooks/useRegistrationForm';
 import BasicInfoFields from './form/BasicInfoFields';
 import DateFields from './form/DateFields';
 import AdditionalFields from './form/AdditionalFields';
+import PasswordField from './form/PasswordField';
 
 const RegistrationForm: React.FC = () => {
   const { 
@@ -23,6 +24,7 @@ const RegistrationForm: React.FC = () => {
         <BasicInfoFields form={registerForm} />
         <DateFields form={registerForm} />
         <AdditionalFields form={registerForm} />
+        <PasswordField form={registerForm} />
         
         <CompanionsList
           companions={companions}
