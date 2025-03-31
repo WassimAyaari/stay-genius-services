@@ -38,9 +38,9 @@ const About = () => {
     <Layout>
       <div className="container mx-auto py-8">
         <WelcomeSection 
-          title={aboutData.welcome_title || "Welcome to Our Hotel"} 
-          description={aboutData.welcome_description || "Hotel Genius is a luxury hotel located in the heart of the city."} 
-          extendedDescription={aboutData.welcome_description_extended}
+          welcomeTitle={aboutData.welcome_title || "Welcome to Our Hotel"} 
+          welcomeDescription={aboutData.welcome_description || "Hotel Genius is a luxury hotel located in the heart of the city."} 
+          welcomeDescriptionExtended={aboutData.welcome_description_extended || ""}
         />
         
         {aboutData.mission && (
@@ -50,7 +50,7 @@ const About = () => {
         <FeaturesSection features={aboutData.features || []} />
         
         <DirectorySection 
-          title={aboutData.directory_title || "Hotel Directory & Information"}
+          directoryTitle={aboutData.directory_title || "Hotel Directory & Information"}
           importantNumbers={aboutData.important_numbers || []}
           facilities={aboutData.facilities || []}
           hotelPolicies={aboutData.hotel_policies || []}

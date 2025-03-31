@@ -7,6 +7,7 @@ import MissionSection from '@/components/admin/about/MissionSection';
 import FeaturesSection from '@/components/admin/about/FeaturesSection';
 import InfoItemSection from '@/components/admin/about/InfoItemSection';
 import DirectorySection from '@/components/admin/about/DirectorySection';
+import { InfoItem, FeatureItem } from '@/lib/types';
 
 const AboutEditor = () => {
   const { aboutData, isLoadingAbout, aboutError, updateAboutData, createInitialAboutData } = useAboutData();
@@ -91,9 +92,9 @@ const AboutEditor = () => {
         
         <TabsContent value="welcome" className="space-y-6">
           <WelcomeSection 
-            title={aboutData.welcome_title || ''} 
-            description={aboutData.welcome_description || ''} 
-            extendedDescription={aboutData.welcome_description_extended || ''}
+            welcomeTitle={aboutData.welcome_title || ''}
+            welcomeDescription={aboutData.welcome_description || ''}
+            welcomeDescriptionExtended={aboutData.welcome_description_extended || ''}
             isEditing={true}
             onSave={(data) => updateAboutData({ ...aboutData, ...data })}
           />
@@ -126,7 +127,7 @@ const AboutEditor = () => {
           />
           
           <DirectorySection 
-            title={aboutData.directory_title || 'Hotel Directory'}
+            directoryTitle={aboutData.directory_title || 'Hotel Directory'}
             importantNumbers={aboutData.important_numbers || []}
             facilities={aboutData.facilities || []}
             hotelPolicies={aboutData.hotel_policies || []}
