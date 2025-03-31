@@ -1,64 +1,119 @@
 
 import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
 import { UseFormReturn } from 'react-hook-form';
+import { Utensils } from 'lucide-react';
+
+interface MenuCategory {
+  category: string;
+  items: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    image?: string;
+    isFeatured: boolean;
+    status: string;
+  }[];
+}
 
 interface MenuSelectionProps {
   form: UseFormReturn<any>;
-  menuCategories: Array<{
-    category: string;
-    items: Array<{
-      id: string;
-      name: string;
-      price: number;
-    }>;
-  }>;
+  menuCategories: MenuCategory[];
   isLoadingMenuItems: boolean;
 }
 
 const MenuSelection = ({ form, menuCategories, isLoadingMenuItems }: MenuSelectionProps) => {
+  if (isLoadingMenuItems) {
+    return (
+      <div className="space-y-2">
+        <FormLabel>Menu (optionnel)</FormLabel>
+        <div className="h-10 w-full animate-pulse bg-slate-200 rounded"></div>
+      </div>
+    );
+  }
+
   return (
-    <FormField
-      control={form.control}
-      name="menuId"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Menu (optionnel)</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
-            <FormControl>
+    <div className="space-y-2">
+      <FormField
+        control={form.control}
+        name="menuId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Menu (optionnel)</FormLabel>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value || ''}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un menu" />
               </SelectTrigger>
-            </FormControl>
-            <SelectContent className="max-h-80">
-              <SelectItem value="no-menu">Aucun menu pré-sélectionné</SelectItem>
-              
-              {isLoadingMenuItems ? (
-                <div className="py-2 px-2 text-sm">Chargement des menus...</div>
-              ) : (
-                menuCategories.map(categoryGroup => (
-                  <React.Fragment key={categoryGroup.category}>
-                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                      {categoryGroup.category}
-                    </div>
-                    {categoryGroup.items.map(item => (
+              <SelectContent>
+                <SelectItem value="">Sélectionner un menu</SelectItem>
+                {menuCategories.map((category) => (
+                  <React.Fragment key={category.category}>
+                    {category.items.map((item) => (
                       <SelectItem key={item.id} value={item.id}>
-                        {item.name} - {item.price.toFixed(2)}€
+                        {item.name} - {item.price} €
                       </SelectItem>
                     ))}
                   </React.Fragment>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-          <FormDescription>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {menuCategories.length > 0 && (
+        <div className="mt-4">
+          <p className="text-sm text-muted-foreground mb-2">
             Pré-sélectionnez un plat pour votre réservation (optionnel).
-          </FormDescription>
-          <FormMessage />
-        </FormItem>
+          </p>
+          
+          <ScrollArea className="h-64 rounded-md border">
+            {menuCategories.map((category) => (
+              <div key={category.category} className="p-4">
+                <h3 className="font-medium text-sm mb-2">{category.category}</h3>
+                <div className="grid gap-2">
+                  {category.items.map((item) => (
+                    <Card 
+                      key={item.id}
+                      className={`border cursor-pointer hover:bg-slate-50 transition-colors ${
+                        form.watch('menuId') === item.id ? 'border-primary bg-primary/5' : ''
+                      }`}
+                      onClick={() => form.setValue('menuId', item.id)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                          </div>
+                          <p className="font-medium">{item.price} €</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ))}
+            
+            {menuCategories.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+                <Utensils className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-muted-foreground">Aucun menu disponible pour ce restaurant</p>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
       )}
-    />
+    </div>
   );
 };
 

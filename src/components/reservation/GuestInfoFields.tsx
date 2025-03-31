@@ -73,6 +73,7 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="roomNumber"
+          rules={{ required: "Le numéro de chambre est obligatoire" }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Numéro de chambre</FormLabel>

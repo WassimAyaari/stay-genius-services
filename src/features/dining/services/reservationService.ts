@@ -38,7 +38,6 @@ export const fetchReservations = async (restaurantId?: string): Promise<TableRes
     throw error;
   }
 
-  // Utiliser une assertion de type pour éviter l'erreur
   return (data as unknown as SupabaseTableReservation[]).map(item => ({
     id: item.id,
     restaurantId: item.restaurant_id,
@@ -46,7 +45,7 @@ export const fetchReservations = async (restaurantId?: string): Promise<TableRes
     guestName: item.guest_name || undefined,
     guestEmail: item.guest_email || undefined,
     guestPhone: item.guest_phone || undefined,
-    roomNumber: item.room_number || '',
+    roomNumber: item.room_number || undefined,
     date: item.date,
     time: item.time,
     guests: item.guests,
@@ -58,22 +57,29 @@ export const fetchReservations = async (restaurantId?: string): Promise<TableRes
 
 // Create a new reservation
 export const createReservation = async (reservation: CreateTableReservationDTO): Promise<TableReservation> => {
+  console.log('Creating reservation with data:', reservation);
+  
   if (!reservation.restaurantId || reservation.restaurantId === ':id') {
     throw new Error('Invalid restaurant ID');
   }
   
-  // Get the current authenticated user from Supabase
+  // Verify room number is provided
+  if (!reservation.roomNumber) {
+    throw new Error('Room number is required');
+  }
+  
+  // Get the current authenticated user from Supabase (if available)
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || null;
   
-  // Create the reservation payload - ensure all required fields are included
+  // Create the reservation payload for Supabase format
   const reservationData = {
     restaurant_id: reservation.restaurantId,
     user_id: userId,
     guest_name: reservation.guestName || '',
     guest_email: reservation.guestEmail || '',
     guest_phone: reservation.guestPhone || '',
-    room_number: reservation.roomNumber || '',
+    room_number: reservation.roomNumber,
     date: reservation.date,
     time: reservation.time,
     guests: reservation.guests,
@@ -81,9 +87,9 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
     status: reservation.status || 'pending'
   };
   
-  console.log('Creating reservation with data:', reservationData);
-  
   try {
+    console.log('Sending to Supabase:', reservationData);
+    
     const { data, error } = await supabase
       .from('table_reservations')
       .insert(reservationData)
@@ -91,8 +97,12 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
       .single();
 
     if (error) {
-      console.error('Error creating reservation:', error);
+      console.error('Supabase error creating reservation:', error);
       throw error;
+    }
+
+    if (!data) {
+      throw new Error('No data returned from reservation creation');
     }
 
     // Utiliser une assertion de type pour éviter l'erreur
@@ -104,7 +114,7 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
       guestName: typedData.guest_name || undefined,
       guestEmail: typedData.guest_email || undefined,
       guestPhone: typedData.guest_phone || undefined,
-      roomNumber: typedData.room_number || '',
+      roomNumber: typedData.room_number || undefined,
       date: typedData.date,
       time: typedData.time,
       guests: typedData.guests,

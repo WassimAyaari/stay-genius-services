@@ -94,7 +94,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       return;
     }
     
-    // Make sure the room number is included
+    // Validate the room number is present
     if (!data.roomNumber) {
       form.setError('roomNumber', { message: 'Le numéro de chambre est requis' });
       toast.error('Veuillez indiquer votre numéro de chambre');
