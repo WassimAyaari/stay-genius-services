@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -31,6 +32,7 @@ const GUESTS_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une table" }: ReservationFormProps) => {
   const { createReservation, isCreating } = useTableReservations(restaurantId);
   const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(restaurantId);
+  const { userData } = useAuth();
   
   // Grouper les menus par catégorie pour l'affichage
   const menuCategories = React.useMemo(() => {
@@ -55,6 +57,30 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       specialRequests: ''
     }
   });
+
+  // Populate form with user data when available
+  useEffect(() => {
+    if (userData) {
+      // Format full name from user data
+      const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+      
+      // Get phone from localStorage if available
+      let phone = '';
+      try {
+        const userDataObj = localStorage.getItem('user_data');
+        if (userDataObj) {
+          const parsedData = JSON.parse(userDataObj);
+          phone = parsedData.phone || '';
+        }
+      } catch (error) {
+        console.error("Error parsing user data for phone:", error);
+      }
+      
+      form.setValue('guestName', fullName);
+      form.setValue('guestEmail', userData.email || '');
+      form.setValue('guestPhone', phone);
+    }
+  }, [userData, form]);
 
   const onSubmit = form.handleSubmit((data) => {
     if (!data.date) {

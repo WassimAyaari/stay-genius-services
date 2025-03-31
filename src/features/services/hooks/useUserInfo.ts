@@ -5,6 +5,7 @@ import { Room } from '@/hooks/useRoom';
 export interface UserInfo {
   name: string;
   roomNumber: string;
+  phone?: string;
 }
 
 export function useUserInfo(room: Room | null) {
@@ -27,10 +28,13 @@ export function useUserInfo(room: Room | null) {
           const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
           // Get room number from userData or fall back to room prop
           const roomNumber = userData.room_number || room?.room_number || '';
+          // Get phone number if available
+          const phone = userData.phone || '';
           
           setUserInfo({
             name: fullName,
-            roomNumber: roomNumber
+            roomNumber: roomNumber,
+            phone: phone
           });
           return;
         }
@@ -51,7 +55,8 @@ export function useUserInfo(room: Room | null) {
         const userData = JSON.parse(userInfoStr);
         return {
           name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
-          roomNumber: userData.room_number || (room?.room_number || '')
+          roomNumber: userData.room_number || (room?.room_number || ''),
+          phone: userData.phone || ''
         };
       } catch (error) {
         console.error("Error parsing user info:", error);
@@ -59,7 +64,8 @@ export function useUserInfo(room: Room | null) {
     }
     return {
       name: '',
-      roomNumber: room?.room_number || ''
+      roomNumber: room?.room_number || '',
+      phone: ''
     };
   };
 
@@ -68,7 +74,8 @@ export function useUserInfo(room: Room | null) {
     const userDataToSave = {
       first_name: info.name.split(' ')[0],
       last_name: info.name.split(' ').slice(1).join(' '),
-      room_number: info.roomNumber
+      room_number: info.roomNumber,
+      phone: info.phone || ''
     };
     
     localStorage.setItem('user_data', JSON.stringify(userDataToSave));
