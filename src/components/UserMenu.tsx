@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -9,50 +9,12 @@ import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
-interface UserData {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  room_number?: string;
-  profile_image?: string;
-}
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const UserMenu = () => {
-  const [userData, setUserData] = useState<UserData | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const storedUserData = localStorage.getItem('user_data');
-    if (storedUserData) {
-      try {
-        const parsedData = JSON.parse(storedUserData);
-        setUserData(parsedData);
-      } catch (e) {
-        console.error('Error parsing user data:', e);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // Écouter les changements dans le localStorage
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'user_data' && e.newValue) {
-        try {
-          const parsedData = JSON.parse(e.newValue);
-          setUserData(parsedData);
-        } catch (error) {
-          console.error('Error parsing user data from storage event:', error);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+  const { userData } = useAuth();
 
   const handleLogout = async () => {
     try {

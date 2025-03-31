@@ -16,7 +16,7 @@ import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const Profile = () => {
   const { toast } = useToast();
-  const { userData: authUserData, user } = useAuth();
+  const { userData: authUserData, user, refreshUserData } = useAuth();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [companions, setCompanions] = useState<CompanionData[]>([]);
   const [notifications, setNotifications] = useState([
@@ -35,16 +35,6 @@ const Profile = () => {
   useEffect(() => {
     if (authUserData) {
       setUserData(authUserData);
-    } else {
-      const userDataStr = localStorage.getItem('user_data');
-      if (userDataStr) {
-        try {
-          const parsedData = JSON.parse(userDataStr);
-          setUserData(parsedData);
-        } catch (e) {
-          console.error('Error parsing user data:', e);
-        }
-      }
     }
     
     const userId = user?.id || localStorage.getItem('user_id');
@@ -106,12 +96,12 @@ const Profile = () => {
     };
     
     setUserData(updatedUserData);
-    localStorage.setItem('user_data', JSON.stringify(updatedUserData));
     
     const userId = user?.id || localStorage.getItem('user_id');
     if (userId) {
       try {
         await syncGuestData(userId, updatedUserData);
+        await refreshUserData();
         toast({
           title: "Profil mis à jour",
           description: "Votre photo de profil a été mise à jour avec succès."

@@ -12,6 +12,7 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   isAuthenticated: boolean;
+  refreshUserData: () => Promise<void>; // Nouvelle fonction pour rafraîchir les données
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,7 +20,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   userData: null,
   loading: true,
-  isAuthenticated: false
+  isAuthenticated: false,
+  refreshUserData: async () => {}
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -35,16 +37,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
 
-  // Fonction pour récupérer les données utilisateur
+  // Fonction pour récupérer les données utilisateur depuis Supabase
   const fetchUserData = async (userId: string) => {
     try {
-      // Essayer d'abord de récupérer depuis Supabase
+      console.log('Récupération des données utilisateur depuis Supabase pour:', userId);
+      
+      // Toujours essayer d'abord de récupérer depuis Supabase
       const guestData = await getGuestData(userId);
+      
       if (guestData) {
+        console.log('Données récupérées depuis Supabase:', guestData);
         setUserData(guestData);
-        // Mettre à jour localStorage pour compatibilité
+        
+        // Mettre à jour localStorage en tant que cache local
         localStorage.setItem('user_data', JSON.stringify(guestData));
-        return;
+        return guestData;
       }
       
       // Fallback sur localStorage si pas de données dans Supabase
@@ -53,12 +60,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const localUserData = JSON.parse(userDataString) as UserData;
           setUserData(localUserData);
+          console.log('Données récupérées depuis localStorage:', localUserData);
+          return localUserData;
         } catch (error) {
           console.error('Error parsing user data from localStorage:', error);
         }
       }
+      
+      return null;
     } catch (error) {
       console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
+
+  // Fonction exposée pour rafraîchir les données utilisateur
+  const refreshUserData = async () => {
+    const userId = user?.id || localStorage.getItem('user_id');
+    if (userId) {
+      await fetchUserData(userId);
     }
   };
 
@@ -67,26 +87,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuth = async () => {
       setLoading(true);
       
-      // Obtenir la session Supabase
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      setUser(data.session?.user || null);
-      
-      // Vérifier l'authentification (Supabase ou localStorage)
-      const authStatus = await isAuthenticated();
-      setIsUserAuthenticated(authStatus);
-      
-      // Récupérer les données utilisateur
-      if (data.session?.user?.id) {
-        await fetchUserData(data.session.user.id);
-      } else {
-        const userId = localStorage.getItem('user_id');
-        if (userId) {
-          await fetchUserData(userId);
+      try {
+        // Obtenir la session Supabase
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        setUser(data.session?.user || null);
+        
+        // Vérifier l'authentification (Supabase ou localStorage)
+        const authStatus = await isAuthenticated();
+        setIsUserAuthenticated(authStatus);
+        
+        // Récupérer les données utilisateur
+        if (data.session?.user?.id) {
+          await fetchUserData(data.session.user.id);
+        } else {
+          const userId = localStorage.getItem('user_id');
+          if (userId) {
+            await fetchUserData(userId);
+          }
         }
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     // Configurer l'écouteur de changement d'état d'authentification
@@ -124,7 +148,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user, 
         userData, 
         loading, 
-        isAuthenticated: isUserAuthenticated 
+        isAuthenticated: isUserAuthenticated,
+        refreshUserData
       }}
     >
       {children}

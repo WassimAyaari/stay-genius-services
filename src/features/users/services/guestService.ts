@@ -48,7 +48,8 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
         undefined,
       nationality: userData.nationality,
       profile_image: userData.profile_image,
-      guest_type: 'Premium Guest' // Tous les invités seront considérés comme Premium Guest
+      guest_type: 'Premium Guest', // Tous les invités seront considérés comme Premium Guest
+      phone: userData.phone
     };
     
     console.log('Guest data to save:', guestData);
@@ -94,15 +95,22 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
  */
 export const getGuestData = async (userId: string): Promise<UserData | null> => {
   try {
+    console.log('Fetching guest data from Supabase for user:', userId);
+    
     const { data: guestData, error: guestError } = await supabase
       .from('guests')
       .select('*')
       .eq('user_id', userId)
       .maybeSingle();
     
-    if (guestError) throw guestError;
+    if (guestError) {
+      console.error('Error fetching guest data:', guestError);
+      throw guestError;
+    }
     
     if (guestData) {
+      console.log('Guest data found in Supabase:', guestData);
+      
       // Construire l'objet UserData à partir des données de l'invité
       const userData: UserData = {
         id: userId,
@@ -115,15 +123,55 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
         nationality: guestData.nationality,
         check_in_date: guestData.check_in_date || undefined,
         check_out_date: guestData.check_out_date || undefined,
-        profile_image: guestData.profile_image
+        profile_image: guestData.profile_image,
+        phone: guestData.phone
       };
+      
+      // Récupérer et ajouter les accompagnateurs
+      try {
+        const companions = await getCompanionsForUser(userId);
+        if (companions && companions.length > 0) {
+          userData.companions = companions;
+        }
+      } catch (compError) {
+        console.error('Error fetching companions:', compError);
+      }
       
       return userData;
     }
     
+    console.log('No guest data found in Supabase for user:', userId);
     return null;
   } catch (error) {
     console.error('Error fetching guest data from Supabase:', error);
     return null;
+  }
+};
+
+// Fonction auxiliaire pour récupérer les accompagnateurs
+const getCompanionsForUser = async (userId: string): Promise<CompanionData[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('companions')
+      .select('*')
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      return data.map(comp => ({
+        id: comp.id,
+        user_id: comp.user_id,
+        first_name: comp.first_name,
+        last_name: comp.last_name,
+        relation: comp.relation,
+        birthDate: comp.birth_date
+      }));
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching companions for user:', error);
+    return [];
   }
 };
