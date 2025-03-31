@@ -6,13 +6,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 const NotificationMenu = () => {
   const { data: serviceRequests = [] } = useServiceRequests();
-  const { data: reservations = [] } = useTableReservations();
+  const { reservations = [] } = useTableReservations();
 
   // Combine and sort notifications by time (newest first)
   const notifications = [

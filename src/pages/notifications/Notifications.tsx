@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 
 const Notifications = () => {
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
-  const { data: reservations = [], isLoading: isLoadingReservations } = useTableReservations();
+  const { reservations = [], isLoading: isLoadingReservations } = useTableReservations();
 
   // Combine and sort notifications by time (newest first)
   const notifications = [
