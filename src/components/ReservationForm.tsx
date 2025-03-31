@@ -101,6 +101,9 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       return;
     }
     
+    // Filter out "none" value for menuId
+    const menuId = data.menuId === 'none' ? undefined : data.menuId;
+    
     const reservation = {
       restaurantId,
       guestName: data.guestName,
