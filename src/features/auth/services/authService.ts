@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '@/features/users/types/userTypes';
 import { useToast } from '@/hooks/use-toast';
+import { syncGuestData } from '@/features/users/services/guestService';
 
 /**
  * Inscription d'un utilisateur avec email et mot de passe et synchronisation des données
@@ -50,6 +51,9 @@ export const registerUser = async (
     
     localStorage.setItem('user_data', JSON.stringify(fullUserData));
     localStorage.setItem('user_id', authData.user.id);
+
+    // Synchroniser les données avec la table guests dans Supabase
+    await syncGuestData(authData.user.id, fullUserData);
 
     console.log('User registered successfully');
     return { 
@@ -118,7 +122,8 @@ export const loginUser = async (
       birth_date: guestData.birth_date || undefined,
       check_in_date: guestData.check_in_date || undefined,
       check_out_date: guestData.check_out_date || undefined,
-      nationality: guestData.nationality
+      nationality: guestData.nationality,
+      profile_image: guestData.profile_image
     } : {
       id: authData.user.id,
       email: email,
@@ -130,6 +135,12 @@ export const loginUser = async (
     // Stocker dans le localStorage pour la compatibilité
     localStorage.setItem('user_data', JSON.stringify(userData));
     localStorage.setItem('user_id', authData.user.id);
+
+    // Si nous n'avons pas trouvé des données guest dans Supabase ou si les données sont incomplètes,
+    // synchroniser les données utilisateur avec Supabase
+    if (!guestData || !guestData.room_number) {
+      await syncGuestData(authData.user.id, userData);
+    }
 
     console.log('User logged in successfully');
     return { 

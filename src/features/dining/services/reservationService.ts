@@ -67,18 +67,44 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || null;
   
+  // Si userId est disponible, récupérer les données utilisateur depuis la table guests
+  let roomNumber = reservation.roomNumber || '';
+  let guestName = reservation.guestName || '';
+  let guestEmail = reservation.guestEmail || '';
+  let guestPhone = reservation.guestPhone || '';
+  
+  if (userId) {
+    try {
+      const { data: guestData, error: guestError } = await supabase
+        .from('guests')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (!guestError && guestData) {
+        // Utiliser les données de la table guests si disponibles
+        roomNumber = roomNumber || guestData.room_number || '';
+        guestName = guestName || `${guestData.first_name} ${guestData.last_name}`.trim();
+        guestEmail = guestEmail || guestData.email || '';
+        guestPhone = guestPhone || guestData.phone || '';
+      }
+    } catch (error) {
+      console.error('Error fetching guest data for reservation:', error);
+    }
+  }
+  
   // Create the reservation payload - ensure all required fields are included
   const reservationData = {
     restaurant_id: reservation.restaurantId,
     user_id: userId,
-    guest_name: reservation.guestName || '',
-    guest_email: reservation.guestEmail || '',
-    guest_phone: reservation.guestPhone || '',
-    room_number: reservation.roomNumber || '',  // Ensure room_number is passed
+    guest_name: guestName,
+    guest_email: guestEmail,
+    guest_phone: guestPhone,
+    room_number: roomNumber,
     date: reservation.date,
     time: reservation.time,
     guests: reservation.guests,
-    menu_id: reservation.menuId || null,  // Ensure menu_id is passed (null if not provided)
+    menu_id: reservation.menuId || null,
     special_requests: reservation.specialRequests || '',
     status: reservation.status || 'pending'
   };

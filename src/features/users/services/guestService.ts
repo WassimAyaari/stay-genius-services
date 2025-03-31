@@ -8,6 +8,8 @@ import { syncCompanions } from './companionService';
  */
 export const syncGuestData = async (userId: string, userData: UserData): Promise<boolean> => {
   try {
+    console.log('Syncing guest data for user:', userId);
+    
     // Vérifier si l'invité existe déjà
     const { data: existingGuest } = await supabase
       .from('guests')
@@ -15,7 +17,7 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       .eq('user_id', userId)
       .maybeSingle();
     
-    // Préparer les données à insérer ou mettre à jour - Handle different date formats
+    // Préparer les données à insérer ou mettre à jour 
     const guestData: GuestData = {
       user_id: userId,
       first_name: userData.first_name,
@@ -45,6 +47,7 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
             undefined) : 
         undefined,
       nationality: userData.nationality,
+      profile_image: userData.profile_image,
       guest_type: 'Premium Guest' // Tous les invités seront considérés comme Premium Guest
     };
     
@@ -111,7 +114,8 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
         birth_date: guestData.birth_date || undefined,
         nationality: guestData.nationality,
         check_in_date: guestData.check_in_date || undefined,
-        check_out_date: guestData.check_out_date || undefined
+        check_out_date: guestData.check_out_date || undefined,
+        profile_image: guestData.profile_image
       };
       
       return userData;

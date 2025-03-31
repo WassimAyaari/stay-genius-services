@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -13,9 +12,11 @@ import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
 import ProfileImageUploader from '@/components/profile/ProfileImageUploader';
 import { syncGuestData } from '@/features/users/services/guestService';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const Profile = () => {
   const { toast } = useToast();
+  const { userData: authUserData, user } = useAuth();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [companions, setCompanions] = useState<CompanionData[]>([]);
   const [notifications, setNotifications] = useState([
@@ -32,23 +33,25 @@ const Profile = () => {
   ]);
 
   useEffect(() => {
-    // Récupérer les données utilisateur du localStorage
-    const userDataStr = localStorage.getItem('user_data');
-    if (userDataStr) {
-      try {
-        const parsedData = JSON.parse(userDataStr);
-        setUserData(parsedData);
-
-        // Récupérer les accompagnateurs si un ID utilisateur est disponible
-        const userId = localStorage.getItem('user_id');
-        if (userId) {
-          fetchCompanions(userId);
+    if (authUserData) {
+      setUserData(authUserData);
+    } else {
+      const userDataStr = localStorage.getItem('user_data');
+      if (userDataStr) {
+        try {
+          const parsedData = JSON.parse(userDataStr);
+          setUserData(parsedData);
+        } catch (e) {
+          console.error('Error parsing user data:', e);
         }
-      } catch (e) {
-        console.error('Error parsing user data:', e);
       }
     }
-  }, []);
+    
+    const userId = user?.id || localStorage.getItem('user_id');
+    if (userId) {
+      fetchCompanions(userId);
+    }
+  }, [authUserData, user]);
 
   const fetchCompanions = async (userId: string) => {
     try {
@@ -67,7 +70,6 @@ const Profile = () => {
     });
   };
 
-  // Format date
   const formatDate = (dateString?: string | Date) => {
     if (!dateString) return 'Non défini';
     try {
@@ -78,7 +80,6 @@ const Profile = () => {
     }
   };
 
-  // Calculate stay duration
   const calculateStayDuration = () => {
     if (!userData?.check_in_date || !userData?.check_out_date) return null;
     
@@ -86,7 +87,6 @@ const Profile = () => {
       const checkIn = new Date(userData.check_in_date);
       const checkOut = new Date(userData.check_out_date);
       
-      // Calculate the difference in days
       const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
@@ -100,7 +100,6 @@ const Profile = () => {
   const handleProfileImageChange = async (imageData: string | null) => {
     if (!userData) return;
     
-    // Mettre à jour les données utilisateur locales
     const updatedUserData = {
       ...userData,
       profile_image: imageData
@@ -109,13 +108,21 @@ const Profile = () => {
     setUserData(updatedUserData);
     localStorage.setItem('user_data', JSON.stringify(updatedUserData));
     
-    // Synchroniser avec Supabase si un ID utilisateur est disponible
-    const userId = localStorage.getItem('user_id');
+    const userId = user?.id || localStorage.getItem('user_id');
     if (userId) {
       try {
         await syncGuestData(userId, updatedUserData);
+        toast({
+          title: "Profil mis à jour",
+          description: "Votre photo de profil a été mise à jour avec succès."
+        });
       } catch (error) {
         console.error('Error syncing profile image with Supabase:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de mettre à jour votre photo de profil.",
+          variant: "destructive"
+        });
       }
     }
   };
@@ -125,7 +132,6 @@ const Profile = () => {
   return (
     <Layout>
       <div className="container max-w-4xl py-8">
-        {/* Header avec le nom et photo de profil */}
         <Card className="mb-6 overflow-hidden">
           <div className="bg-primary/10 p-6">
             <div className="flex flex-col items-center text-center gap-4 sm:flex-row sm:text-left">
@@ -152,8 +158,6 @@ const Profile = () => {
           </div>
         </Card>
 
-        {/* Reste du contenu de la page */}
-        {/* Informations personnelles */}
         <Card className="mb-6">
           <CardContent className="p-0">
             <div className="p-4 border-b">
@@ -202,7 +206,6 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Informations sur le séjour actuel */}
         <Card className="mb-6">
           <CardContent className="p-0">
             <div className="p-4 border-b">
@@ -246,7 +249,6 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Membres de la famille */}
         <Card className="mb-6">
           <CardContent className="p-0">
             <div className="p-4 border-b">
@@ -279,7 +281,6 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Notifications récentes */}
         <Card className="mb-6">
           <CardContent className="p-0">
             <div className="p-4 border-b">
@@ -315,7 +316,6 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Boutons de navigation en bas */}
         <div className="grid grid-cols-2 gap-4">
           <Card className="text-center cursor-pointer hover:bg-muted/50 transition-colors">
             <CardContent className="flex flex-col items-center justify-center p-6">

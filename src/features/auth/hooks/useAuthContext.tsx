@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { UserData } from '@/features/users/types/userTypes';
 import { getCurrentSession, isAuthenticated } from '../services/authService';
+import { getGuestData } from '@/features/users/services/guestService';
 
 interface AuthContextType {
   session: Session | null;
@@ -34,20 +35,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
 
-  useEffect(() => {
-    // Fonction pour récupérer les données utilisateur du localStorage
-    const getUserDataFromLocalStorage = () => {
+  // Fonction pour récupérer les données utilisateur
+  const fetchUserData = async (userId: string) => {
+    try {
+      // Essayer d'abord de récupérer depuis Supabase
+      const guestData = await getGuestData(userId);
+      if (guestData) {
+        setUserData(guestData);
+        // Mettre à jour localStorage pour compatibilité
+        localStorage.setItem('user_data', JSON.stringify(guestData));
+        return;
+      }
+      
+      // Fallback sur localStorage si pas de données dans Supabase
       const userDataString = localStorage.getItem('user_data');
       if (userDataString) {
         try {
-          return JSON.parse(userDataString) as UserData;
+          const localUserData = JSON.parse(userDataString) as UserData;
+          setUserData(localUserData);
         } catch (error) {
           console.error('Error parsing user data from localStorage:', error);
         }
       }
-      return null;
-    };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
+  useEffect(() => {
     // Initialiser la session et l'utilisateur
     const initializeAuth = async () => {
       setLoading(true);
@@ -61,10 +76,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const authStatus = await isAuthenticated();
       setIsUserAuthenticated(authStatus);
       
-      // Récupérer les données utilisateur du localStorage
-      const localUserData = getUserDataFromLocalStorage();
-      if (localUserData) {
-        setUserData(localUserData);
+      // Récupérer les données utilisateur
+      if (data.session?.user?.id) {
+        await fetchUserData(data.session.user.id);
+      } else {
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+          await fetchUserData(userId);
+        }
       }
       
       setLoading(false);
@@ -80,10 +99,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const authStatus = await isAuthenticated();
       setIsUserAuthenticated(authStatus);
       
-      // Mettre à jour les données utilisateur depuis le localStorage
-      const localUserData = getUserDataFromLocalStorage();
-      if (localUserData) {
-        setUserData(localUserData);
+      // Mettre à jour les données utilisateur
+      if (newSession?.user?.id) {
+        // Utiliser setTimeout pour éviter les deadlocks avec Supabase
+        setTimeout(() => {
+          fetchUserData(newSession.user!.id);
+        }, 0);
       }
     });
 
