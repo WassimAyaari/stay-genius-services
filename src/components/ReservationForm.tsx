@@ -39,7 +39,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       date: undefined,
       time: '',
       guests: 2,
-      menuId: '',
+      menuId: 'none', // Initialize with 'none' instead of empty string
       specialRequests: ''
     }
   });

@@ -53,7 +53,6 @@ const MenuSelection = ({ form, menuCategories, isLoadingMenuItems }: MenuSelecti
                 <SelectValue placeholder="Sélectionner un menu" />
               </SelectTrigger>
               <SelectContent>
-                {/* Fixed: Using "none" instead of empty string */}
                 <SelectItem value="none">Sélectionner un menu</SelectItem>
                 {menuCategories.map((category) => (
                   <React.Fragment key={category.category}>
