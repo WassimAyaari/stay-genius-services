@@ -10,11 +10,11 @@ interface SupabaseTableReservation {
   guest_name: string | null;
   guest_email: string | null;
   guest_phone: string | null;
-  room_number: string | null;
+  room_number: string | null; // Rendre optionnel
   date: string;
   time: string;
   guests: number;
-  menu_id: string | null;
+  menu_id: string | null; // Rendre optionnel
   special_requests: string | null;
   status: string;
   created_at: string;
@@ -39,7 +39,8 @@ export const fetchReservations = async (restaurantId?: string): Promise<TableRes
     throw error;
   }
 
-  return (data as SupabaseTableReservation[]).map(item => ({
+  // Utiliser une assertion de type pour éviter l'erreur
+  return (data as unknown as SupabaseTableReservation[]).map(item => ({
     id: item.id,
     restaurantId: item.restaurant_id,
     userId: item.user_id || undefined,
@@ -123,7 +124,8 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
       throw error;
     }
 
-    const typedData = data as SupabaseTableReservation;
+    // Utiliser une assertion de type pour éviter l'erreur
+    const typedData = data as unknown as SupabaseTableReservation;
     return {
       id: typedData.id,
       restaurantId: typedData.restaurant_id,

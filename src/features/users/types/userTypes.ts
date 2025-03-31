@@ -59,6 +59,8 @@ export interface GuestData {
   nationality?: string;
   guest_type?: string;
   status?: string;
+  profile_image?: string; // Ajout de cette propriété manquante
+  phone?: string; // Ajout de cette propriété pour être complet
 }
 
 export const generateUserId = (): string => {
