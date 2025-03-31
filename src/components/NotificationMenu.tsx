@@ -31,7 +31,7 @@ const NotificationMenu = () => {
   const notifications: NotificationItem[] = [
     ...serviceRequests.map(request => ({
       id: request.id,
-      type: 'request',
+      type: 'request' as const,
       title: `Demande de service ${getStatusText(request.status)}`,
       description: `Votre demande de type ${request.type} est ${getStatusText(request.status).toLowerCase()}`,
       icon: getRequestIcon(request.type),
@@ -41,7 +41,7 @@ const NotificationMenu = () => {
     })),
     ...reservations.map(reservation => ({
       id: reservation.id,
-      type: 'reservation',
+      type: 'reservation' as const,
       title: `Réservation ${getReservationStatusText(reservation.status)}`,
       description: `Votre réservation pour ${reservation.guests} personnes le ${new Date(reservation.date).toLocaleDateString('fr-FR')} à ${reservation.time}`,
       icon: '🍽️',

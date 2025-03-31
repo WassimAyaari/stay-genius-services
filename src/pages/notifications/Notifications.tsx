@@ -32,7 +32,7 @@ const Notifications = () => {
   const notifications: NotificationItem[] = [
     ...serviceRequests.map(request => ({
       id: request.id,
-      type: 'request',
+      type: 'request' as const,
       title: `Demande de service`,
       description: request.type,
       status: request.status,
@@ -42,7 +42,7 @@ const Notifications = () => {
     })),
     ...reservations.map(reservation => ({
       id: reservation.id,
-      type: 'reservation',
+      type: 'reservation' as const,
       title: `Réservation de table`,
       description: `${reservation.guests} personnes le ${format(new Date(reservation.date), 'dd/MM/yyyy')} à ${reservation.time}`,
       status: reservation.status,
