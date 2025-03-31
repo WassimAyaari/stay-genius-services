@@ -33,7 +33,7 @@ export const useServiceRequests = () => {
     }
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
   });
@@ -54,6 +54,8 @@ export const useServiceRequests = () => {
     data,
     isLoading,
     error,
+    isError,
+    refetch,
     cancelRequest: cancelMutation.mutate,
     isCancelling: cancelMutation.isPending
   };

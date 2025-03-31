@@ -15,4 +15,5 @@ export interface ReservationFormProps {
   restaurantId: string;
   onSuccess?: () => void;
   buttonText?: string;
+  existingReservation?: any; // Added this to support the TableReservation type
 }

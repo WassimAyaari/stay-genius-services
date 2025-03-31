@@ -11,7 +11,7 @@ import CustomRequestForm from './components/CustomRequestForm';
 
 const MyRoom = () => {
   const { data: room, isLoading } = useRoom('401');
-  const { data: serviceRequests = [], isLoading: isLoadingRequests, refetch: refetchRequests } = useServiceRequests(room?.id);
+  const { data: serviceRequests = [], isLoading: isLoadingRequests, refetch: refetchRequests } = useServiceRequests();
 
   if (isLoading) {
     return (
@@ -29,12 +29,12 @@ const MyRoom = () => {
       
       <CustomRequestForm 
         room={room} 
-        onRequestSuccess={refetchRequests} 
+        onRequestSuccess={() => refetchRequests()} 
       />
 
       <ServicesGrid 
         room={room} 
-        onRequestSuccess={refetchRequests} 
+        onRequestSuccess={() => refetchRequests()} 
       />
 
       <RequestHistory 
