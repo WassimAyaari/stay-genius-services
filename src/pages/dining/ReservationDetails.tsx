@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -18,7 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const ReservationDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { reservations, updateReservationStatus, isUpdating } = useTableReservations();
+  const { reservations = [], updateReservationStatus, isUpdating } = useTableReservations();
   const { fetchRestaurantById } = useRestaurants();
   
   const [reservation, setReservation] = useState<TableReservation | null>(null);
@@ -35,7 +34,10 @@ const ReservationDetails = () => {
     }
     
     // Trouver la réservation
-    const foundReservation = reservations.find(r => r.id === id);
+    const foundReservation = reservations && Array.isArray(reservations) 
+      ? reservations.find(r => r.id === id) 
+      : null;
+      
     if (foundReservation) {
       setReservation(foundReservation);
       
@@ -51,8 +53,14 @@ const ReservationDetails = () => {
           setIsLoading(false);
         });
     } else {
-      toast.error("Réservation non trouvée");
-      navigate('/notifications');
+      if (reservations.length > 0) {
+        // If we have reservations but can't find this one
+        toast.error("Réservation non trouvée");
+        navigate('/notifications');
+      } else {
+        // Wait for reservations to load
+        setIsLoading(true);
+      }
     }
   }, [id, reservations, fetchRestaurantById, navigate]);
   
