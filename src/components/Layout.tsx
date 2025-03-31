@@ -43,7 +43,7 @@ const Layout = ({
                 </span>
               </Link>
               
-              <div className="flex items-center gap-3 w-[100px] justify-end">
+              <div className="flex items-center gap-3 w-[120px] justify-end">
                 <UserMenu />
                 <Link 
                   to="/messages" 

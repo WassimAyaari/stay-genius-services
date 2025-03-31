@@ -1,0 +1,148 @@
+
+import React from 'react';
+import { Bell } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useServiceRequests } from '@/hooks/useServiceRequests';
+import { useTableReservations } from '@/hooks/useTableReservations';
+import { Link } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+
+const NotificationMenu = () => {
+  const { data: serviceRequests = [] } = useServiceRequests();
+  const { data: reservations = [] } = useTableReservations();
+
+  // Combine and sort notifications by time (newest first)
+  const notifications = [
+    ...serviceRequests.map(request => ({
+      id: request.id,
+      type: 'request',
+      title: `Demande de service ${getStatusText(request.status)}`,
+      description: `Votre demande de type ${request.type} est ${getStatusText(request.status).toLowerCase()}`,
+      icon: getRequestIcon(request.type),
+      status: request.status,
+      time: new Date(request.created_at),
+      link: '/my-room'
+    })),
+    ...reservations.map(reservation => ({
+      id: reservation.id,
+      type: 'reservation',
+      title: `Réservation ${getReservationStatusText(reservation.status)}`,
+      description: `Votre réservation pour ${reservation.guests} personnes le ${new Date(reservation.date).toLocaleDateString('fr-FR')} à ${reservation.time}`,
+      icon: '🍽️',
+      status: reservation.status,
+      time: new Date(reservation.createdAt),
+      link: '/dining'
+    }))
+  ].sort((a, b) => b.time.getTime() - a.time.getTime());
+
+  const unreadCount = notifications.filter(n => 
+    n.status === 'pending' || n.status === 'in_progress' || n.status === 'confirmed'
+  ).length;
+
+  function getStatusText(status: string) {
+    switch (status) {
+      case 'pending': return 'En attente';
+      case 'in_progress': return 'En cours';
+      case 'completed': return 'Complétée';
+      case 'cancelled': return 'Annulée';
+      default: return 'Inconnu';
+    }
+  }
+
+  function getReservationStatusText(status: string) {
+    switch (status) {
+      case 'confirmed': return 'Confirmée';
+      case 'cancelled': return 'Annulée';
+      case 'pending': return 'En attente';
+      default: return 'Inconnu';
+    }
+  }
+
+  function getRequestIcon(type: string) {
+    switch (type) {
+      case 'housekeeping': return '🧹';
+      case 'laundry': return '👕';
+      case 'wifi': return '📶';
+      case 'room_service': return '🍲';
+      case 'concierge': return '🔑';
+      default: return '📋';
+    }
+  }
+
+  function getStatusColor(status: string) {
+    switch (status) {
+      case 'confirmed':
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-yellow-100 text-yellow-800';
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Bell className="h-5 w-5 text-gray-600" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
+              {unreadCount}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80 bg-zinc-100">
+        <DropdownMenuLabel>Notifications ({notifications.length})</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        
+        <div className="max-h-80 overflow-y-auto">
+          {notifications.length > 0 ? (
+            <DropdownMenuGroup>
+              {notifications.map((notification) => (
+                <Link to={notification.link} key={`${notification.type}-${notification.id}`}>
+                  <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer hover:bg-gray-200/70">
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200">
+                        <span className="text-lg">{notification.icon}</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium">{notification.title}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(notification.status)}`}>
+                          {notification.type === 'request' ? getStatusText(notification.status) : getReservationStatusText(notification.status)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600">{notification.description}</p>
+                      <p className="text-xs text-gray-500">
+                        {formatDistanceToNow(notification.time, { addSuffix: true, locale: fr })}
+                      </p>
+                    </div>
+                  </DropdownMenuItem>
+                </Link>
+              ))}
+            </DropdownMenuGroup>
+          ) : (
+            <div className="py-4 text-center text-sm text-gray-500">
+              Aucune notification
+            </div>
+          )}
+        </div>
+        
+        <DropdownMenuSeparator />
+        <Link to="/notifications">
+          <DropdownMenuItem className="text-center cursor-pointer hover:bg-gray-200/70">
+            <span className="w-full text-center text-primary font-medium">
+              Voir toutes les notifications
+            </span>
+          </DropdownMenuItem>
+        </Link>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export default NotificationMenu;

@@ -1,0 +1,149 @@
+
+import React from 'react';
+import Layout from '@/components/Layout';
+import { useServiceRequests } from '@/hooks/useServiceRequests';
+import { useTableReservations } from '@/hooks/useTableReservations';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Card } from '@/components/ui/card';
+import { CheckCircle2, XCircle, Clock, Timer, ShowerHead, Shirt, PhoneCall, Wifi, FileText, Settings, Search, Utensils } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+
+const Notifications = () => {
+  const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
+  const { data: reservations = [], isLoading: isLoadingReservations } = useTableReservations();
+
+  // Combine and sort notifications by time (newest first)
+  const notifications = [
+    ...serviceRequests.map(request => ({
+      id: request.id,
+      type: 'request',
+      title: `Demande de service`,
+      description: request.type,
+      status: request.status,
+      time: new Date(request.created_at),
+      link: '/my-room',
+      data: request
+    })),
+    ...reservations.map(reservation => ({
+      id: reservation.id,
+      type: 'reservation',
+      title: `Réservation de table`,
+      description: `${reservation.guests} personnes le ${format(new Date(reservation.date), 'dd/MM/yyyy')} à ${reservation.time}`,
+      status: reservation.status,
+      time: new Date(reservation.createdAt),
+      link: '/dining',
+      data: reservation
+    }))
+  ].sort((a, b) => b.time.getTime() - a.time.getTime());
+
+  const isLoading = isLoadingRequests || isLoadingReservations;
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+      case 'confirmed':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'in_progress':
+        return <Timer className="h-5 w-5 text-yellow-500" />;
+      case 'cancelled':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <Clock className="h-5 w-5 text-blue-500" />;
+    }
+  };
+
+  const getTypeIcon = (type: string, notificationType: string) => {
+    if (notificationType === 'reservation') {
+      return <Utensils className="h-6 w-6" />;
+    }
+    
+    switch (type) {
+      case 'housekeeping':
+        return <ShowerHead className="h-6 w-6" />;
+      case 'laundry':
+        return <Shirt className="h-6 w-6" />;
+      case 'wifi':
+        return <Wifi className="h-6 w-6" />;
+      case 'bill':
+        return <FileText className="h-6 w-6" />;
+      case 'preferences':
+        return <Settings className="h-6 w-6" />;
+      case 'concierge':
+        return <PhoneCall className="h-6 w-6" />;
+      default:
+        return <Search className="h-6 w-6" />;
+    }
+  };
+
+  const getStatusText = (status: string, type: string) => {
+    if (type === 'reservation') {
+      switch (status) {
+        case 'confirmed': return 'Confirmée';
+        case 'cancelled': return 'Annulée';
+        case 'pending': return 'En attente';
+        default: return 'Inconnu';
+      }
+    } else {
+      switch (status) {
+        case 'completed': return 'Complétée';
+        case 'in_progress': return 'En cours';
+        case 'cancelled': return 'Annulée';
+        case 'pending': return 'En attente';
+        default: return 'Inconnu';
+      }
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="container py-8">
+        <h1 className="text-2xl font-bold mb-6">Mes Notifications</h1>
+        
+        {isLoading ? (
+          <div className="flex justify-center p-8">
+            <div className="animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent"></div>
+          </div>
+        ) : notifications.length > 0 ? (
+          <div className="space-y-4">
+            {notifications.map((notification) => (
+              <Link to={notification.link} key={`${notification.type}-${notification.id}`}>
+                <Card className="hover:shadow-md transition-shadow">
+                  <div className="p-4 flex items-start gap-4">
+                    <div className="p-3 bg-gray-100 rounded-full">
+                      {notification.type === 'request' 
+                        ? getTypeIcon(notification.data.type, notification.type)
+                        : getTypeIcon('', 'reservation')}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <h3 className="font-medium text-lg">{notification.title}</h3>
+                        <div className="flex items-center gap-1">
+                          {getStatusIcon(notification.status)}
+                          <span className="text-sm font-medium">
+                            {getStatusText(notification.status, notification.type)}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 mb-1">{notification.description}</p>
+                      <p className="text-sm text-gray-500">
+                        {formatDistanceToNow(notification.time, { addSuffix: true, locale: fr })}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-lg text-gray-600">Vous n'avez aucune notification pour le moment.</p>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default Notifications;

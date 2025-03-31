@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,6 +34,7 @@ import ReservationManager from './pages/admin/ReservationManager';
 import ChatMessages from './pages/admin/ChatMessages';
 import RequestManager from './pages/admin/RequestManager';
 import Profile from './pages/profile/Profile';
+import Notifications from './pages/notifications/Notifications';
 
 const queryClient = new QueryClient();
 
@@ -95,6 +95,7 @@ const AnimatedRoutes = () => {
           <Route path="/map" element={<HotelMap />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="*" element={<NotFound />} />
         </Route>
         

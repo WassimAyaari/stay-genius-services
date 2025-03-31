@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { logoutUser } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import NotificationMenu from './NotificationMenu';
 
 const UserMenu = () => {
   const navigate = useNavigate();
@@ -100,44 +100,48 @@ const UserMenu = () => {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar>
-            {userData?.profile_image ? (
-              <AvatarImage src={userData.profile_image} alt="Photo de profil" />
-            ) : (
-              <AvatarImage src="/placeholder.svg" />
-            )}
-            <AvatarFallback>{getInitials()}</AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-zinc-100">
-        <DropdownMenuLabel className="flex flex-col gap-1">
-          <span>{getFullName()}</span>
-          <GuestStatusBadge />
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <Link to="/my-room">
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>My Room</span>
+    <div className="flex items-center gap-2">
+      <NotificationMenu />
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Avatar>
+              {userData?.profile_image ? (
+                <AvatarImage src={userData.profile_image} alt="Photo de profil" />
+              ) : (
+                <AvatarImage src="/placeholder.svg" />
+              )}
+              <AvatarFallback>{getInitials()}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56 bg-zinc-100">
+          <DropdownMenuLabel className="flex flex-col gap-1">
+            <span>{getFullName()}</span>
+            <GuestStatusBadge />
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <Link to="/my-room">
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>My Room</span>
+            </DropdownMenuItem>
+          </Link>
+          <Link to="/profile">
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
           </DropdownMenuItem>
-        </Link>
-        <Link to="/profile">
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
