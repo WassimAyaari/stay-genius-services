@@ -48,13 +48,9 @@ export const useTableReservations = (restaurantId?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id || null;
     
-    const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 
-                    import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    const supabaseTemp = supabase;
-    
+    // Remove reference to process.env which is causing the error
     try {
-      const { data, error } = await supabaseTemp
+      const { data, error } = await supabase
         .from('table_reservations')
         .insert({
           restaurant_id: reservation.restaurantId,
@@ -62,9 +58,11 @@ export const useTableReservations = (restaurantId?: string) => {
           guest_name: reservation.guestName,
           guest_email: reservation.guestEmail,
           guest_phone: reservation.guestPhone,
+          room_number: reservation.roomNumber, // Make sure we include the room number
           date: reservation.date,
           time: reservation.time,
           guests: reservation.guests,
+          menu_id: reservation.menuId, // Add menu_id to the insert
           special_requests: reservation.specialRequests,
           status: reservation.status
         })
@@ -83,9 +81,11 @@ export const useTableReservations = (restaurantId?: string) => {
         guestName: data.guest_name,
         guestEmail: data.guest_email,
         guestPhone: data.guest_phone,
+        roomNumber: data.room_number,
         date: data.date,
         time: data.time,
         guests: data.guests,
+        menuId: data.menu_id,
         specialRequests: data.special_requests,
         status: data.status as 'pending' | 'confirmed' | 'cancelled',
         createdAt: data.created_at
@@ -101,9 +101,11 @@ export const useTableReservations = (restaurantId?: string) => {
             guest_name: reservation.guestName,
             guest_email: reservation.guestEmail,
             guest_phone: reservation.guestPhone,
+            room_number: reservation.roomNumber,
             date: reservation.date,
             time: reservation.time,
             guests: reservation.guests,
+            menu_id: reservation.menuId,
             special_requests: reservation.specialRequests || '',
             status: reservation.status
           })
@@ -121,9 +123,11 @@ export const useTableReservations = (restaurantId?: string) => {
           guestName: data.guest_name,
           guestEmail: data.guest_email,
           guestPhone: data.guest_phone,
+          roomNumber: data.room_number,
           date: data.date,
           time: data.time,
           guests: data.guests,
+          menuId: data.menu_id,
           specialRequests: data.special_requests,
           status: data.status as 'pending' | 'confirmed' | 'cancelled',
           createdAt: data.created_at

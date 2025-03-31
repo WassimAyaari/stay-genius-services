@@ -32,7 +32,7 @@ const MenuSelection = ({ form, menuCategories, isLoadingMenuItems }: MenuSelecti
               </SelectTrigger>
             </FormControl>
             <SelectContent className="max-h-80">
-              <SelectItem key="no-menu" value="no-menu">Aucun menu pré-sélectionné</SelectItem>
+              <SelectItem value="no-menu">Aucun menu pré-sélectionné</SelectItem>
               
               {isLoadingMenuItems ? (
                 <div className="py-2 px-2 text-sm">Chargement des menus...</div>

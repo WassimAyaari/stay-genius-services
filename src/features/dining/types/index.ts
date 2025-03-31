@@ -41,6 +41,7 @@ export interface TableReservation {
   guestName?: string;
   guestEmail?: string;
   guestPhone?: string;
+  roomNumber?: string;
   date: string;
   time: string;
   guests: number;

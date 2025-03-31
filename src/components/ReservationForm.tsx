@@ -85,7 +85,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       date: format(data.date, 'yyyy-MM-dd'),
       time: data.time,
       guests: data.guests,
-      menuId: data.menuId || undefined,
+      menuId: data.menuId && data.menuId !== 'no-menu' ? data.menuId : undefined,
       specialRequests: data.specialRequests,
       status: 'pending' as const
     };
