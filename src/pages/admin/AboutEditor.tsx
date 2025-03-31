@@ -122,7 +122,7 @@ const AboutEditor = () => {
             title="Directory Title"
             items={[{ label: 'Title', value: aboutData.directory_title || 'Hotel Directory' }]}
             isEditing={true}
-            onSave={(items) => updateAboutData({ ...aboutData, directory_title: items[0].value })}
+            onSave={(items) => updateAboutData({ ...aboutData, directory_title: String(items[0].value) })}
             singleItem={true}
           />
           
