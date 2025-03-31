@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,8 +13,10 @@ import Layout from './components/Layout';
 import Index from "./pages/Index";
 import RoomDetails from "./pages/rooms/RoomDetails";
 import MyRoom from "./pages/my-room/MyRoom";
+import ServiceRequestDetails from "./pages/my-room/ServiceRequestDetails";
 import Dining from "./pages/dining/Dining";
 import RestaurantDetail from "./pages/dining/RestaurantDetail";
+import ReservationDetails from "./pages/dining/ReservationDetails";
 import Spa from "./pages/spa/Spa";
 import Activities from "./pages/activities/Activities";
 import Services from "./pages/services/Services";
@@ -74,8 +77,10 @@ const AnimatedRoutes = () => {
           <Route path="/" element={<Index />} />
           <Route path="/rooms/:id" element={<RoomDetails />} />
           <Route path="/my-room" element={<MyRoom />} />
+          <Route path="/requests/:id" element={<ServiceRequestDetails />} />
           <Route path="/dining" element={<Dining />} />
           <Route path="/dining/:id" element={<RestaurantDetail />} />
+          <Route path="/reservations/:id" element={<ReservationDetails />} />
           <Route path="/spa" element={<Spa />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/services" element={<Services />} />

@@ -37,7 +37,7 @@ const Notifications = () => {
       description: request.type,
       status: request.status,
       time: new Date(request.created_at),
-      link: '/my-room',
+      link: `/requests/${request.id}`,
       data: request
     })),
     ...reservations.map(reservation => ({
@@ -47,7 +47,7 @@ const Notifications = () => {
       description: `${reservation.guests} personnes le ${format(new Date(reservation.date), 'dd/MM/yyyy')} à ${reservation.time}`,
       status: reservation.status,
       time: new Date(reservation.createdAt),
-      link: '/dining',
+      link: `/reservations/${reservation.id}`,
       data: reservation
     }))
   ].sort((a, b) => b.time.getTime() - a.time.getTime());
