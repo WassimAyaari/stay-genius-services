@@ -60,12 +60,17 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
   console.log('Creating reservation with data:', reservation);
   
   if (!reservation.restaurantId || reservation.restaurantId === ':id') {
-    throw new Error('Invalid restaurant ID');
+    throw new Error('ID de restaurant invalide');
   }
   
   // Verify room number is provided
   if (!reservation.roomNumber) {
-    throw new Error('Room number is required');
+    throw new Error('Le numéro de chambre est requis');
+  }
+  
+  // Verify guest name is provided
+  if (!reservation.guestName) {
+    throw new Error('Le nom est requis');
   }
   
   // Get the current authenticated user from Supabase (if available)
@@ -76,7 +81,7 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
   const reservationData = {
     restaurant_id: reservation.restaurantId,
     user_id: userId,
-    guest_name: reservation.guestName || '',
+    guest_name: reservation.guestName,
     guest_email: reservation.guestEmail || '',
     guest_phone: reservation.guestPhone || '',
     room_number: reservation.roomNumber,
@@ -98,11 +103,11 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
 
     if (error) {
       console.error('Supabase error creating reservation:', error);
-      throw error;
+      throw new Error(error.message || 'Erreur lors de la création de la réservation');
     }
 
     if (!data) {
-      throw new Error('No data returned from reservation creation');
+      throw new Error('Aucune donnée retournée lors de la création de la réservation');
     }
 
     // Utiliser une assertion de type pour éviter l'erreur
@@ -122,9 +127,9 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
       status: typedData.status as 'pending' | 'confirmed' | 'cancelled',
       createdAt: typedData.created_at
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to create reservation:', error);
-    throw new Error('Erreur lors de la création de la réservation. Veuillez vérifier vos informations et réessayer.');
+    throw new Error(error.message || 'Erreur lors de la création de la réservation. Veuillez vérifier vos informations et réessayer.');
   }
 };
 

@@ -39,7 +39,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       date: undefined,
       time: '',
       guests: 2,
-      menuId: 'none', // Initialize with 'none' instead of empty string
+      menuId: 'none',
       specialRequests: ''
     }
   });
@@ -101,9 +101,13 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       return;
     }
     
-    // Filter out "none" value for menuId
-    const menuId = data.menuId === 'none' ? undefined : data.menuId;
+    if (!data.guestName) {
+      form.setError('guestName', { message: 'Le nom est requis' });
+      toast.error('Veuillez indiquer votre nom');
+      return;
+    }
     
+    // Filter out "none" value for menuId
     const reservation = {
       restaurantId,
       guestName: data.guestName,
@@ -127,7 +131,8 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
       },
       onError: (error: any) => {
         console.error('Error creating reservation:', error);
-        toast.error(`Erreur lors de la création de la réservation: ${error.message}`);
+        const errorMessage = error.message || 'Erreur lors de la création de la réservation';
+        toast.error(`Erreur lors de la création de la réservation: ${errorMessage}`);
       }
     });
   });

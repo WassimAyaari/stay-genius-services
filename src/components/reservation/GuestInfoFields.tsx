@@ -12,6 +12,7 @@ interface GuestInfoFieldsProps {
 
 const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
   const roomNumber = form.watch('roomNumber');
+  const guestName = form.watch('guestName');
   
   return (
     <>
@@ -29,11 +30,16 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="guestName"
+          rules={{ required: "Le nom est obligatoire" }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nom</FormLabel>
               <FormControl>
-                <Input placeholder="Votre nom" {...field} />
+                <Input 
+                  placeholder="Votre nom" 
+                  {...field}
+                  className={!field.value ? "border-red-500 focus:ring-red-500" : ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
