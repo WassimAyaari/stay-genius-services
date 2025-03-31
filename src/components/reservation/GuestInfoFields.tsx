@@ -29,7 +29,6 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="guestName"
-          rules={{ required: 'Le nom est requis' }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nom</FormLabel>
@@ -44,13 +43,6 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="guestEmail"
-          rules={{ 
-            required: 'L\'email est requis',
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Adresse email invalide'
-            }
-          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
@@ -67,7 +59,6 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="guestPhone"
-          rules={{ required: 'Le téléphone est requis' }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Téléphone</FormLabel>
@@ -82,7 +73,6 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="roomNumber"
-          rules={{ required: 'Le numéro de chambre est requis' }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Numéro de chambre</FormLabel>

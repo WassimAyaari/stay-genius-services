@@ -68,50 +68,14 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || null;
   
-  // Si pas de numéro de chambre fourni, lever une erreur explicite
-  if (!reservation.roomNumber) {
-    throw new Error('Room number is required to create a reservation.');
-  }
-  
-  // Si userId est disponible, récupérer les données utilisateur depuis la table guests
-  let roomNumber = reservation.roomNumber || '';
-  let guestName = reservation.guestName || '';
-  let guestEmail = reservation.guestEmail || '';
-  let guestPhone = reservation.guestPhone || '';
-  
-  if (userId) {
-    try {
-      const { data: guestData, error: guestError } = await supabase
-        .from('guests')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-      
-      if (!guestError && guestData) {
-        // Utiliser les données de la table guests si disponibles
-        roomNumber = roomNumber || guestData.room_number || '';
-        guestName = guestName || `${guestData.first_name} ${guestData.last_name}`.trim();
-        guestEmail = guestEmail || guestData.email || '';
-        guestPhone = guestPhone || guestData.phone || '';
-      }
-    } catch (error) {
-      console.error('Error fetching guest data for reservation:', error);
-    }
-  }
-  
-  // Vérifions à nouveau si nous avons un numéro de chambre
-  if (!roomNumber) {
-    throw new Error('Unable to create reservation. Please make sure you have provided your room number.');
-  }
-  
   // Create the reservation payload - ensure all required fields are included
   const reservationData = {
     restaurant_id: reservation.restaurantId,
     user_id: userId,
-    guest_name: guestName,
-    guest_email: guestEmail,
-    guest_phone: guestPhone,
-    room_number: roomNumber,
+    guest_name: reservation.guestName || '',
+    guest_email: reservation.guestEmail || '',
+    guest_phone: reservation.guestPhone || '',
+    room_number: reservation.roomNumber || '',
     date: reservation.date,
     time: reservation.time,
     guests: reservation.guests,
@@ -154,7 +118,7 @@ export const createReservation = async (reservation: CreateTableReservationDTO):
     };
   } catch (error) {
     console.error('Failed to create reservation:', error);
-    throw new Error('Unable to create reservation. Please make sure you are logged in and have provided your room number.');
+    throw new Error('Erreur lors de la création de la réservation. Veuillez vérifier vos informations et réessayer.');
   }
 };
 
