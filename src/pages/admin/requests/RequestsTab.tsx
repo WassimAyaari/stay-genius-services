@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ServiceRequestWithItem } from './types';
 import { RequestsTable } from '@/components/admin/requests/RequestsTable';
@@ -9,6 +9,8 @@ import { RequestsHeader } from '@/components/admin/requests/RequestsHeader';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export const RequestsTab = () => {
   const { 
@@ -22,18 +24,65 @@ export const RequestsTab = () => {
   
   const { handleUpdateStatus } = useRequestStatusService();
   const queryClient = useQueryClient();
+  const [newRequests, setNewRequests] = useState<boolean>(false);
   
-  // Force a refresh when the component mounts
+  // Force a refresh when the component mounts and set up stronger real-time monitoring
   useEffect(() => {
     console.log('RequestsTab mounted, forcing refresh of data');
+    
+    // Immediate refresh when component mounts
     queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-    // Also set up a periodic refresh
+    handleRefresh();
+    
+    // Set up more frequent periodic refresh
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-    }, 15000); // Refresh every 15 seconds
+    }, 5000); // Refresh every 5 seconds
     
-    return () => clearInterval(interval);
-  }, [queryClient]);
+    // Set up real-time subscription with improved handling
+    const channel = supabase
+      .channel('admin-service-requests-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'service_requests',
+      }, (payload) => {
+        console.log('Admin detected service request change:', payload);
+        
+        // Flag that new requests are available
+        setNewRequests(true);
+        
+        // Show notification for changes
+        if (payload.eventType === 'INSERT') {
+          toast.success('New service request received', {
+            description: 'Pull down to refresh or click the refresh button'
+          });
+        } else if (payload.eventType === 'UPDATE') {
+          toast.info('Service request updated', {
+            description: 'A request status has been changed'
+          });
+        }
+        
+        // Force a refresh of the data
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+      })
+      .subscribe((status) => {
+        console.log('Admin real-time subscription status:', status);
+      });
+    
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, handleRefresh]);
+  
+  // Effect to auto-refresh when new requests are detected
+  useEffect(() => {
+    if (newRequests) {
+      handleRefresh();
+      setNewRequests(false);
+    }
+  }, [newRequests, handleRefresh]);
   
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     await handleUpdateStatus(requestId, newStatus, () => {

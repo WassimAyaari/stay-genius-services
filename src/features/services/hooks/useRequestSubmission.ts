@@ -9,20 +9,39 @@ export function useRequestSubmission() {
   const multiItemHandler = useMultiItemRequestHandler();
   const queryClient = useQueryClient();
   
-  // Function to invalidate the cache after each submission
+  // Enhanced function to invalidate the cache after each submission
   const invalidateRequestsCache = () => {
-    console.log('Invalidating serviceRequests cache');
-    // Force an immediate refetch of the serviceRequests query
+    console.log('Aggressively invalidating serviceRequests cache');
+    
+    // Force an immediate refetch of all serviceRequests queries
     queryClient.invalidateQueries({ 
       queryKey: ['serviceRequests'],
-      refetchType: 'active', // Only refetch active queries
+      refetchType: 'all', // Refetch all queries, not just active ones
       exact: false // Include any query that starts with serviceRequests
     });
     
-    // Wait a short time and invalidate again to ensure data is refreshed
+    // Additional invalidation approaches to ensure data freshness
+    // Force explicit refetch with higher priority
+    queryClient.fetchQuery({
+      queryKey: ['serviceRequests'],
+      queryFn: () => null,
+      staleTime: 0
+    });
+    
+    // Multiple invalidations at different times to handle race conditions
     setTimeout(() => {
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+    }, 100);
+    
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+      queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
     }, 500);
+    
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+      queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+    }, 1500);
   };
   
   // Wrap the handlers to invalidate cache after submission
@@ -30,6 +49,7 @@ export function useRequestSubmission() {
     try {
       const result = await presetHandler.handlePresetRequest(...args);
       if (result) {
+        console.log('Preset request submitted successfully, invalidating cache');
         invalidateRequestsCache();
         toast.success('Demande soumise avec succès');
       }
@@ -45,6 +65,7 @@ export function useRequestSubmission() {
     try {
       const result = await multiItemHandler.handleSubmitRequests(...args);
       if (result) {
+        console.log('Multiple requests submitted successfully, invalidating cache');
         invalidateRequestsCache();
         toast.success('Demandes soumises avec succès');
       }

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useUserInfo } from '../hooks/useUserInfo';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface CustomRequestFormProps {
   room: Room | null;
@@ -26,6 +27,7 @@ const CustomRequestForm = ({ room, onRequestSuccess }: CustomRequestFormProps) =
     
     setIsSubmitting(true);
     try {
+      console.log('Submitting custom request:', customRequest);
       const userInfo = getUserInfo();
       
       await requestService(
@@ -42,13 +44,32 @@ const CustomRequestForm = ({ room, onRequestSuccess }: CustomRequestFormProps) =
         description: "Votre requête personnalisée a été soumise.",
       });
       
-      // Invalidate the requests cache to show the new request
+      // Enhanced cache invalidation approach
+      console.log('Invalidating caches after custom request submission');
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       
-      // Force an immediate refresh
+      // Force an immediate refresh with higher priority
+      queryClient.fetchQuery({
+        queryKey: ['serviceRequests'],
+        queryFn: () => null,
+        staleTime: 0
+      });
+      
+      // Multiple invalidations to ensure data refreshes
       setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-      }, 300);
+      }, 200);
+      
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+      }, 1000);
+      
+      // Also notify with Sonner toast for better visibility
+      toast.success('Requête envoyée', {
+        description: 'Votre requête personnalisée a été soumise avec succès.'
+      });
       
       onRequestSuccess();
     } catch (error) {
@@ -57,6 +78,11 @@ const CustomRequestForm = ({ room, onRequestSuccess }: CustomRequestFormProps) =
         title: "Erreur",
         description: "Échec de la soumission de la requête. Veuillez réessayer.",
         variant: "destructive",
+      });
+      
+      // Also show a more visible error with Sonner
+      toast.error('Erreur', {
+        description: 'Échec de la soumission de la requête. Veuillez réessayer.'
       });
     } finally {
       setIsSubmitting(false);

@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ServiceRequest } from '@/features/rooms/types';
+import { toast } from 'sonner';
 
 export function useRequestsData() {
   const { toast } = useToast();
@@ -17,19 +17,20 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for service requests
+  // Set up real-time updates for service requests with improved reliability
   useEffect(() => {
-    console.log('Setting up realtime updates for all service requests');
+    console.log('Setting up enhanced realtime updates for all service requests');
     
     // Enable realtime subscription to all changes in service_requests table
     const channel = supabase
-      .channel('service_requests_changes')
+      .channel('service_requests_enhanced_changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'service_requests',
       }, (payload) => {
-        console.log('Service request change detected:', payload);
+        console.log('Service request change detected with type:', payload.eventType);
+        console.log('Service request payload:', payload);
         
         // Immediately refetch data when any change occurs
         refetch();
@@ -38,7 +39,7 @@ export function useRequestsData() {
         if (payload.eventType === 'INSERT') {
           toast({
             title: "Nouvelle requête",
-            description: `Une nouvelle requête ${payload.new.type} a été reçue.`,
+            description: `Une nouvelle requête a été reçue.`,
             variant: "default"
           });
         }
@@ -57,25 +58,34 @@ export function useRequestsData() {
           
           toast({
             title: "Mise à jour",
-            description: `La requête ${payload.new.type} ${message}.`,
+            description: `La requête ${message}.`,
             variant: "default"
           });
         }
       })
       .subscribe((status) => {
-        console.log('Subscription status:', status);
+        console.log('Enhanced subscription status:', status);
       });
     
+    // Set up periodic refresh as a fallback
+    const interval = setInterval(() => {
+      console.log('Performing scheduled refresh of service requests');
+      refetch();
+    }, 10000); // Refresh every 10 seconds
+    
     return () => {
-      console.log('Cleaning up realtime subscription');
+      console.log('Cleaning up realtime subscription and interval');
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
-  }, [refetch, toast]);
+  }, [refetch]);
   
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
+    console.log('Manual refresh of service requests triggered');
     setIsRefreshing(true);
     try {
-      await refetch();
+      const result = await refetch();
+      console.log('Manual refresh completed with count:', result.data?.length || 0);
       
       toast({
         title: "Données actualisées",
@@ -91,7 +101,7 @@ export function useRequestsData() {
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [refetch]);
 
   return {
     requests,

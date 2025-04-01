@@ -10,7 +10,7 @@ export const useServiceRequests = () => {
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
     console.log('Fetching all service requests...');
     
-    // First, fetch all service requests
+    // Improved query with better error handling and more consistent data fetching
     const { data: requestsData, error: requestsError } = await supabase
       .from('service_requests')
       .select('*')
@@ -21,7 +21,7 @@ export const useServiceRequests = () => {
       throw requestsError;
     }
 
-    console.log('Fetched service requests:', requestsData.length);
+    console.log(`Fetched ${requestsData.length} service requests`);
 
     // For each request that has a request_item_id, fetch the associated request item and category
     const requests = await Promise.all(
@@ -33,24 +33,27 @@ export const useServiceRequests = () => {
               .from('request_items')
               .select('*')
               .eq('id', request.request_item_id)
-              .single();
+              .maybeSingle();
 
-            if (itemError || !itemData) {
+            if (itemError) {
               console.error(`Error fetching item for request ${request.id}:`, itemError);
               return request;
             }
 
             // Then fetch the category separately
             let categoryName = null;
-            if (itemData.category_id) {
-              const { data: categoryData, error: categoryError } = await supabase
+            let categoryData = null;
+            
+            if (itemData?.category_id) {
+              const { data: catData, error: categoryError } = await supabase
                 .from('request_categories')
                 .select('name')
                 .eq('id', itemData.category_id)
-                .maybeSingle(); // Use maybeSingle instead of single to avoid errors if no category is found
+                .maybeSingle();
 
-              if (!categoryError && categoryData) {
-                categoryName = categoryData.name;
+              if (!categoryError && catData) {
+                categoryName = catData.name;
+                categoryData = catData;
               }
             }
 
@@ -58,9 +61,9 @@ export const useServiceRequests = () => {
             return {
               ...request,
               request_items: {
-                ...itemData,
+                ...(itemData || {}),
                 category_name: categoryName,
-                category: categoryName ? { name: categoryName } : null
+                category: categoryName ? { name: categoryName, ...categoryData } : null
               }
             };
           } catch (error) {
@@ -72,6 +75,7 @@ export const useServiceRequests = () => {
       })
     );
 
+    console.log(`Processed ${requests.length} service requests`);
     return requests as ServiceRequest[];
   };
 
@@ -90,8 +94,9 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
-    refetchInterval: 10000, // Refresh more frequently - every 10 seconds
-    staleTime: 5000, // Consider data stale after 5 seconds
+    refetchInterval: 7000, // Refresh more frequently
+    staleTime: 3000, // Consider data stale after 3 seconds
+    retry: 3, // Retry failed requests up to 3 times
   });
 
   const cancelMutation = useMutation({
