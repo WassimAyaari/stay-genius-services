@@ -139,7 +139,8 @@ export const submitRequestViaChatMessage = async (
         description: description,
         status: 'pending',
         created_at: new Date().toISOString(),
-        room_number: userInfo.roomNumber // Include room_number for display purposes
+        room_number: userInfo.roomNumber, // Include room_number for display purposes
+        guest_name: userInfo.name || 'Guest' // Add guest name for display
       };
 
       // Add category if available

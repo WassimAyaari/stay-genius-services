@@ -142,6 +142,9 @@ export function useMultiItemRequestHandler() {
       
       for (const item of selectedItemData) {
         try {
+          // Set request type based on category name if available
+          const requestType = selectedCategory?.name?.toLowerCase() || 'custom';
+          
           // Fix: Define the requestData with the correct interface that includes all fields
           const requestData: {
             guest_id: string;
@@ -151,16 +154,18 @@ export function useMultiItemRequestHandler() {
             status: string;
             created_at: string;
             room_number: string;
+            guest_name: string;
             category_id?: string;
             request_item_id?: string;
           } = {
             guest_id: userId,
             room_id: roomId,
-            type: 'custom',
+            type: requestType,
             description: item.name,
             status: 'pending',
             created_at: new Date().toISOString(),
-            room_number: userInfo.roomNumber
+            room_number: userInfo.roomNumber,
+            guest_name: userInfo.name || 'Guest'
           };
           
           // Add category if available
