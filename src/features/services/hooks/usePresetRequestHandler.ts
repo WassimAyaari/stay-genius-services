@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { UserInfo } from './useUserInfo';
 import { RequestCategory } from '@/features/rooms/types';
-import { submitRequestViaChatMessage } from '../utils/requestUtils';
+import { submitRequestViaChatMessage } from '../utils/requestSubmissionUtils';
 
 export function usePresetRequestHandler() {
   const [isSubmitting, setIsSubmitting] = useState(false);
