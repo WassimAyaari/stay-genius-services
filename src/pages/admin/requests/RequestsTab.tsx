@@ -26,22 +26,24 @@ export const RequestsTab = () => {
   const queryClient = useQueryClient();
   const [newRequests, setNewRequests] = useState<boolean>(false);
   
-  // Force a refresh when the component mounts and set up stronger real-time monitoring
+  // Force a refresh when the component mounts
   useEffect(() => {
     console.log('RequestsTab mounted, forcing refresh of data');
     
-    // Immediate refresh when component mounts
-    queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+    // Force multiple refreshes to ensure data is loaded
     handleRefresh();
     
-    // Set up more frequent periodic refresh
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-    }, 5000); // Refresh every 5 seconds
+    const initialRefreshes = [100, 500, 1500, 3000].map(delay => 
+      setTimeout(() => {
+        console.log(`Performing delayed refresh after ${delay}ms`);
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+      }, delay)
+    );
     
-    // Set up real-time subscription with improved handling
+    // Set up dedicated real-time subscription for admin page
     const channel = supabase
-      .channel('admin-service-requests-changes')
+      .channel('admin-requests-realtime')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -55,22 +57,30 @@ export const RequestsTab = () => {
         // Show notification for changes
         if (payload.eventType === 'INSERT') {
           toast.success('New service request received', {
-            description: 'Pull down to refresh or click the refresh button'
+            description: 'A new request has been added to the system'
           });
         } else if (payload.eventType === 'UPDATE') {
           toast.info('Service request updated', {
-            description: 'A request status has been changed'
+            description: 'A request has been modified'
           });
         }
         
-        // Force a refresh of the data
+        // Force immediate data refresh
         queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       })
       .subscribe((status) => {
         console.log('Admin real-time subscription status:', status);
       });
     
+    // Set up frequent refresh interval as backup
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+      queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+    }, 3000);
+    
     return () => {
+      initialRefreshes.forEach(clearTimeout);
       clearInterval(interval);
       supabase.removeChannel(channel);
     };
@@ -79,6 +89,7 @@ export const RequestsTab = () => {
   // Effect to auto-refresh when new requests are detected
   useEffect(() => {
     if (newRequests) {
+      console.log('New requests detected, refreshing data');
       handleRefresh();
       setNewRequests(false);
     }
@@ -86,8 +97,14 @@ export const RequestsTab = () => {
   
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     await handleUpdateStatus(requestId, newStatus, () => {
+      // Force multiple refreshes to ensure data is updated
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-      handleRefresh();
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+      }, 300);
+      setTimeout(() => {
+        handleRefresh();
+      }, 800);
     });
   };
 

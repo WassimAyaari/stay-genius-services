@@ -9,42 +9,35 @@ export function useRequestSubmission() {
   const multiItemHandler = useMultiItemRequestHandler();
   const queryClient = useQueryClient();
   
-  // Enhanced function to invalidate the cache after each submission
+  // Fonction améliorée pour invalider le cache après chaque soumission
   const invalidateRequestsCache = () => {
-    console.log('Aggressively invalidating serviceRequests cache');
+    console.log('Aggressively invalidating serviceRequests cache with multiple approaches');
     
-    // Force an immediate refetch of all serviceRequests queries
+    // Approche 1: Invalidation directe
     queryClient.invalidateQueries({ 
       queryKey: ['serviceRequests'],
-      refetchType: 'all', // Refetch all queries, not just active ones
-      exact: false // Include any query that starts with serviceRequests
+      refetchType: 'all',
+      exact: false
     });
     
-    // Additional invalidation approaches to ensure data freshness
-    // Force explicit refetch with higher priority
-    queryClient.fetchQuery({
+    // Approche 2: Force refresh immédiat
+    queryClient.refetchQueries({ 
       queryKey: ['serviceRequests'],
-      queryFn: () => null,
-      staleTime: 0
+      type: 'all'
     });
     
-    // Multiple invalidations at different times to handle race conditions
-    setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-    }, 100);
-    
-    setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-      queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-    }, 500);
-    
-    setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-      queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-    }, 1500);
+    // Approche 3: Invalidations multiples à différents moments pour gérer conditions de concurrence
+    const delays = [100, 500, 1000, 2000];
+    delays.forEach(delay => {
+      setTimeout(() => {
+        console.log(`Delayed cache invalidation after ${delay}ms`);
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+      }, delay);
+    });
   };
   
-  // Wrap the handlers to invalidate cache after submission
+  // Envelopper les gestionnaires pour invalider le cache après soumission
   const handlePresetRequest = async (...args: Parameters<typeof presetHandler.handlePresetRequest>) => {
     try {
       const result = await presetHandler.handlePresetRequest(...args);

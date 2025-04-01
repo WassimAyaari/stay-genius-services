@@ -17,20 +17,22 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for service requests with improved reliability
+  // Set up real-time updates for service requests
   useEffect(() => {
     console.log('Setting up enhanced realtime updates for all service requests');
     
-    // Enable realtime subscription to all changes in service_requests table
+    // Force initial fetch
+    refetch();
+    
+    // Enable realtime subscription with improved configuration
     const channel = supabase
-      .channel('service_requests_enhanced_changes')
+      .channel('service_requests_realtime')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'service_requests',
       }, (payload) => {
-        console.log('Service request change detected with type:', payload.eventType);
-        console.log('Service request payload:', payload);
+        console.log('Service request change detected:', payload.eventType, payload);
         
         // Immediately refetch data when any change occurs
         refetch();
@@ -41,6 +43,11 @@ export function useRequestsData() {
             title: "Nouvelle requête",
             description: `Une nouvelle requête a été reçue.`,
             variant: "default"
+          });
+          
+          // Also use sonner toast for better visibility
+          toast.success('Nouvelle requête', {
+            description: 'Une nouvelle requête a été reçue'
           });
         }
         
@@ -65,13 +72,18 @@ export function useRequestsData() {
       })
       .subscribe((status) => {
         console.log('Enhanced subscription status:', status);
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to realtime updates:', status);
+          // Fallback to periodic refresh
+          refetch();
+        }
       });
     
-    // Set up periodic refresh as a fallback
+    // Set up periodic refresh as a backup
     const interval = setInterval(() => {
       console.log('Performing scheduled refresh of service requests');
       refetch();
-    }, 10000); // Refresh every 10 seconds
+    }, 5000); // More frequent refresh (every 5 seconds)
     
     return () => {
       console.log('Cleaning up realtime subscription and interval');
