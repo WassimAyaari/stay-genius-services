@@ -14,17 +14,79 @@ import { TableReservation } from '@/features/dining/types';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Notifications = () => {
   const { user, userData } = useAuth();
-  const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
-  const { reservations = [], isLoading: isLoadingReservations } = useTableReservations();
+  const { data: serviceRequests = [], isLoading: isLoadingRequests, refetch: refetchRequests } = useServiceRequests();
+  const { reservations = [], isLoading: isLoadingReservations, refetch: refetchReservations } = useTableReservations();
+  
+  const userId = user?.id || localStorage.getItem('user_id');
 
   console.log("Notifications page - auth user:", user?.id);
   console.log("Notifications page - userData:", userData);
   console.log("Notifications page - localStorage user_id:", localStorage.getItem('user_id'));
   console.log("Notifications page - service requests:", serviceRequests?.length);
   console.log("Notifications page - reservations:", reservations?.length);
+  console.log("Notifications page - reservations data:", reservations);
+
+  // Effet pour rafraîchir les données en temps réel
+  useEffect(() => {
+    if (!userId) return;
+    
+    // Écouter les mises à jour de réservations
+    const reservationChannel = supabase
+      .channel('notifications_page_reservation_updates')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'table_reservations',
+        filter: `user_id=eq.${userId}`,
+      }, () => {
+        console.log('Notification page - reservation update received');
+        refetchReservations();
+      })
+      .subscribe();
+    
+    // Écouter aussi par email si disponible
+    let emailChannel;
+    if (user?.email) {
+      emailChannel = supabase
+        .channel('notifications_page_email_updates')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'table_reservations',
+          filter: `guest_email=eq.${user.email}`,
+        }, () => {
+          console.log('Notification page - reservation email update received');
+          refetchReservations();
+        })
+        .subscribe();
+    }
+    
+    // Écouter les mises à jour de demandes de service
+    const serviceRequestChannel = supabase
+      .channel('notifications_page_service_updates')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'service_requests',
+        filter: `guest_id=eq.${userId}`,
+      }, () => {
+        console.log('Notification page - service request update received');
+        refetchRequests();
+      })
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(reservationChannel);
+      if (emailChannel) {
+        supabase.removeChannel(emailChannel);
+      }
+      supabase.removeChannel(serviceRequestChannel);
+    };
+  }, [userId, user?.email, refetchReservations, refetchRequests]);
 
   // Define a type for the combined notification items
   type NotificationItem = {

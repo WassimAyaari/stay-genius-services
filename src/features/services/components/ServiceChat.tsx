@@ -97,9 +97,48 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
       })
       .subscribe();
       
+    // Channel for reservation updates by email
+    let emailReservationChannel;
+    const userEmail = localStorage.getItem('user_email');
+    if (userEmail) {
+      emailReservationChannel = supabase
+        .channel('reservation_email_updates_chat')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'table_reservations',
+          filter: `guest_email=eq.${userEmail}`,
+        }, (payload) => {
+          console.log('Reservation updated by email:', payload);
+          
+          if (payload.old.status === payload.new.status) return;
+          
+          // Show a toast notification for the reservation update
+          const statusMap: Record<string, string> = {
+            'pending': 'est en attente',
+            'confirmed': 'a été confirmée',
+            'cancelled': 'a été annulée'
+          };
+          
+          const status = payload.new.status;
+          const message = statusMap[status] || 'a été mise à jour';
+          
+          const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
+          const time = payload.new.time;
+          
+          toast.info(`Mise à jour de réservation`, {
+            description: `Votre réservation de table pour le ${date} à ${time} ${message}.`
+          });
+        })
+        .subscribe();
+    }
+      
     return () => {
       supabase.removeChannel(serviceChannel);
       supabase.removeChannel(reservationChannel);
+      if (emailReservationChannel) {
+        supabase.removeChannel(emailReservationChannel);
+      }
     };
   }, [fetchMessages]);
 

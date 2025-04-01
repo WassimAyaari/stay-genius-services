@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -19,16 +19,71 @@ import { fr } from 'date-fns/locale';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { TableReservation } from '@/features/dining/types';
 import { ServiceRequest } from '@/features/rooms/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const NotificationMenu = () => {
   const { user } = useAuth();
   const userId = user?.id || localStorage.getItem('user_id');
   const { data: serviceRequests = [] } = useServiceRequests();
-  const { reservations = [] } = useTableReservations();
+  const { reservations = [], refetch: refetchReservations } = useTableReservations();
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
 
   console.log("NotificationMenu - auth user ID or localStorage ID:", userId);
   console.log("NotificationMenu - serviceRequests count:", serviceRequests?.length);
   console.log("NotificationMenu - reservations count:", reservations?.length);
+  console.log("NotificationMenu - reservations data:", reservations);
+
+  // Effet pour vérifier les nouvelles notifications en temps réel
+  useEffect(() => {
+    if (!userId) return;
+    
+    // Écouter les mises à jour de réservations
+    const reservationChannel = supabase
+      .channel('notification_reservation_updates')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'table_reservations',
+        filter: `user_id=eq.${userId}`,
+      }, (payload) => {
+        console.log('Notification reservation update received:', payload);
+        setHasNewNotifications(true);
+        refetchReservations();
+      })
+      .subscribe();
+    
+    // Écouter aussi par email si disponible
+    let emailChannel;
+    if (user?.email) {
+      emailChannel = supabase
+        .channel('notification_reservation_email_updates')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'table_reservations',
+          filter: `guest_email=eq.${user.email}`,
+        }, (payload) => {
+          console.log('Notification reservation email update received:', payload);
+          setHasNewNotifications(true);
+          refetchReservations();
+        })
+        .subscribe();
+    }
+    
+    return () => {
+      supabase.removeChannel(reservationChannel);
+      if (emailChannel) {
+        supabase.removeChannel(emailChannel);
+      }
+    };
+  }, [userId, user?.email, refetchReservations]);
+
+  // Réinitialiser l'indicateur de nouvelles notifications lorsque le menu est ouvert
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setHasNewNotifications(false);
+    }
+  };
 
   // Define a type for combined notifications
   type NotificationItem = {
@@ -118,10 +173,10 @@ const NotificationMenu = () => {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Bell className="h-5 w-5 text-gray-600" />
+          <Bell className={`h-5 w-5 ${hasNewNotifications ? 'text-primary' : 'text-gray-600'}`} />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
               {unreadCount}
