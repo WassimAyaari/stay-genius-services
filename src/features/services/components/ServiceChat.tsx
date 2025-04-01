@@ -29,20 +29,110 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
+  
+  // Set up userId at component mount
   useEffect(() => {
-    if (isChatOpen && messages.length === 0) {
-      setMessages([{
-        id: '1',
-        text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
-        time: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        sender: 'staff'
-      }]);
+    let userId = localStorage.getItem('user_id');
+    if (!userId) {
+      userId = uuidv4();
+      localStorage.setItem('user_id', userId);
     }
-  }, [isChatOpen, userInfo.name, messages.length]);
+    
+    // Store user data for future reference
+    const userData = {
+      first_name: userInfo.name.split(' ')[0],
+      last_name: userInfo.name.split(' ').slice(1).join(' '),
+      room_number: userInfo.roomNumber
+    };
+    localStorage.setItem('user_data', JSON.stringify(userData));
+  }, [userInfo]);
+
+  // Fetch messages when chat opens
+  useEffect(() => {
+    if (isChatOpen) {
+      fetchMessages();
+      
+      // If no messages are found, add welcome message
+      if (messages.length === 0) {
+        setMessages([{
+          id: '1',
+          text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
+          time: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          sender: 'staff'
+        }]);
+      }
+    }
+  }, [isChatOpen, userInfo.name]);
+  
+  // Set up realtime subscription for new messages
+  useEffect(() => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    
+    const subscription = supabase
+      .channel('service_chat')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `recipient_id=eq.${userId}`,
+      }, (payload) => {
+        console.log('New message received:', payload);
+        fetchMessages();
+        
+        // Notify user of new message if the sender is staff
+        if (payload.new && payload.new.sender === 'staff') {
+          toast({
+            title: "New message",
+            description: "You have received a response from our concierge team."
+          });
+        }
+      })
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
+
+  // Fetch messages from database
+  const fetchMessages = async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .or(`user_id.eq.${userId},recipient_id.eq.${userId}`)
+        .order('created_at', { ascending: true });
+        
+      if (error) {
+        console.error('Error fetching messages:', error);
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        const formattedMessages = data.map(msg => ({
+          id: msg.id,
+          text: msg.text,
+          sender: msg.sender as 'user' | 'staff',
+          time: new Date(msg.created_at).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          status: msg.status as 'sent' | 'delivered' | 'read' | undefined
+        }));
+        
+        setMessages(formattedMessages);
+      }
+    } catch (error) {
+      console.error('Error in fetchMessages:', error);
+    }
+  };
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -80,8 +170,9 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
     }
     
     const userData = {
-      name: userInfo.name,
-      roomNumber: userInfo.roomNumber
+      first_name: userInfo.name.split(' ')[0],
+      last_name: userInfo.name.split(' ').slice(1).join(' '),
+      room_number: userInfo.roomNumber
     };
     localStorage.setItem('user_data', JSON.stringify(userData));
     
@@ -121,7 +212,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         else if (inputMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
         else if (inputMessage.toLowerCase().includes('food') || inputMessage.toLowerCase().includes('meal')) requestType = 'food';
         
-        // FIX: Add a room_id that's required by the service_requests table
+        // Add a room_id that's required by the service_requests table
         await supabase.from('service_requests').insert({
           guest_id: userId,
           guest_name: userInfo.name,
@@ -134,32 +225,11 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         });
       }
       
-      setTimeout(async () => {
-        const staffResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          text: "Thank you for your message. Our concierge team will assist you shortly.",
-          time: new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          sender: 'staff'
-        };
-        setMessages(prevMessages => [...prevMessages, staffResponse]);
-        await supabase.from('chat_messages').insert([{
-          user_id: userId,
-          recipient_id: userId,
-          user_name: "Concierge",
-          room_number: userInfo.roomNumber,
-          text: staffResponse.text,
-          sender: 'staff',
-          status: 'sent',
-          created_at: new Date().toISOString()
-        }]);
-        toast({
-          title: "New message",
-          description: "You have received a response from our concierge team."
-        });
-      }, 2000);
+      // Check for new messages after sending (in case of automatic replies)
+      setTimeout(() => {
+        fetchMessages();
+      }, 1000);
+      
     } catch (error) {
       console.error("Error in handleSendMessage:", error);
       toast({

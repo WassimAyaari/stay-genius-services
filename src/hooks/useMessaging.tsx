@@ -76,6 +76,32 @@ export function useMessaging() {
     }
   }, [searchTerm, contactsData]);
 
+  // Set up realtime subscription to chat messages
+  useEffect(() => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      return;
+    }
+    
+    // Subscribe to realtime updates for this user's messages
+    const subscription = supabase
+      .channel('chat_updates')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `user_id=eq.${userId}`,
+      }, (payload) => {
+        console.log('New message received:', payload);
+        fetchMessages();
+      })
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   // Fetch messages from Supabase
   const fetchMessages = async () => {
     setIsLoading(true);
@@ -127,6 +153,14 @@ export function useMessaging() {
       
       setContactsData(updatedContacts);
       setFilteredContacts(updatedContacts);
+      
+      // Update the selected contact if it exists
+      if (selectedContact) {
+        const updatedSelectedContact = updatedContacts.find(c => c.id === selectedContact.id);
+        if (updatedSelectedContact) {
+          setSelectedContact(updatedSelectedContact);
+        }
+      }
     } catch (err) {
       console.error('Error in message fetching:', err);
       toast({
@@ -141,7 +175,14 @@ export function useMessaging() {
 
   useEffect(() => {
     fetchMessages();
-  }, [toast]);
+    
+    // Set up a polling interval to fetch messages periodically
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 10000); // Fetch every 10 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -186,8 +227,8 @@ export function useMessaging() {
       if (userDataString) {
         try {
           const userData = JSON.parse(userDataString);
-          userName = userData.name || 'Guest';
-          roomNumber = userData.roomNumber || '';
+          userName = userData.name || userData.first_name || 'Guest';
+          roomNumber = userData.roomNumber || userData.room_number || '';
         } catch (error) {
           console.error('Error parsing user data:', error);
         }
@@ -218,55 +259,8 @@ export function useMessaging() {
           return;
         }
 
-        // Simulate response after a short delay
-        setTimeout(async () => {
-          const responseMessage: Message = {
-            id: Date.now().toString(),
-            text: "Thank you for your message. We'll get back to you shortly.",
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            sender: 'staff'
-          };
-          
-          const updatedContactsWithResponse = contactsData.map(contact => {
-            if (contact.id === selectedContact.id) {
-              return {
-                ...contact,
-                messages: [...contact.messages, newMessage, responseMessage],
-                lastMessage: responseMessage.text
-              };
-            }
-            return contact;
-          });
-          
-          setContactsData(updatedContactsWithResponse);
-          
-          const contactWithResponse = updatedContactsWithResponse.find(
-            contact => contact.id === selectedContact.id
-          );
-          
-          if (contactWithResponse) {
-            setSelectedContact(contactWithResponse);
-            setFilteredContacts(
-              filteredContacts.map(contact => 
-                contact.id === selectedContact.id ? contactWithResponse : contact
-              )
-            );
-          }
-          
-          // Save response to Supabase
-          await supabase
-            .from('chat_messages')
-            .insert([{
-              user_id: userId,
-              recipient_id: userId,
-              user_name: selectedContact.name,
-              room_number: roomNumber,
-              text: responseMessage.text,
-              sender: 'staff',
-              status: 'sent',
-              created_at: new Date().toISOString()
-            }]);
-        }, 1000);
+        // After successful send, fetch updated messages to see if there are any responses
+        fetchMessages();
       } catch (error) {
         console.error("Error in handleSendMessage:", error);
         toast({
