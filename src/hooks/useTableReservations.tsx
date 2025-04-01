@@ -9,20 +9,21 @@ import { createReservation as apiCreateReservation, fetchReservations, updateRes
 export const useTableReservations = (restaurantId?: string) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const userId = user?.id || localStorage.getItem('user_id');
 
   // Fetch user's reservations
   const fetchUserReservations = async (): Promise<TableReservation[]> => {
-    if (!user?.id) {
-      console.log('No authenticated user, returning empty reservations');
+    if (!userId) {
+      console.log('No authenticated user or user_id in localStorage, returning empty reservations');
       return [];
     }
     
-    console.log('Fetching reservations for auth user:', user.id);
+    console.log('Fetching reservations for user ID:', userId);
     
     const { data, error } = await supabase
       .from('table_reservations')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -62,7 +63,7 @@ export const useTableReservations = (restaurantId?: string) => {
 
   // Cancel reservation
   const cancelReservation = async (reservationId: string): Promise<void> => {
-    if (!user?.id) {
+    if (!userId) {
       toast.error("Veuillez vous connecter pour annuler une réservation");
       throw new Error("Utilisateur non authentifié");
     }
@@ -71,7 +72,7 @@ export const useTableReservations = (restaurantId?: string) => {
       .from('table_reservations')
       .update({ status: 'cancelled' })
       .eq('id', reservationId)
-      .eq('user_id', user.id); // Ensure only the user's reservations can be cancelled
+      .eq('user_id', userId); // Ensure only the user's reservations can be cancelled
 
     if (error) {
       console.error('Error cancelling reservation:', error);
@@ -81,9 +82,9 @@ export const useTableReservations = (restaurantId?: string) => {
 
   // Query for fetching reservations (either user's or restaurant's)
   const { data: reservations, isLoading, error, refetch } = useQuery({
-    queryKey: ['tableReservations', user?.id, restaurantId],
+    queryKey: ['tableReservations', userId, restaurantId],
     queryFn: restaurantId ? fetchRestaurantReservations : fetchUserReservations,
-    enabled: true, // Toujours activer cette requête même si l'utilisateur n'est pas connecté
+    enabled: true, // Toujours activer cette requête
     staleTime: 1000 * 60, // 1 minute
     refetchOnWindowFocus: true,
   });
@@ -92,7 +93,7 @@ export const useTableReservations = (restaurantId?: string) => {
   const cancelMutation = useMutation({
     mutationFn: cancelReservation,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tableReservations', user?.id, restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, restaurantId] });
       toast.success('Réservation annulée avec succès');
     },
     onError: (error) => {
@@ -105,7 +106,7 @@ export const useTableReservations = (restaurantId?: string) => {
   const createMutation = useMutation({
     mutationFn: (data: CreateTableReservationDTO) => apiCreateReservation(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tableReservations', user?.id, restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, restaurantId] });
     }
   });
 
@@ -113,7 +114,7 @@ export const useTableReservations = (restaurantId?: string) => {
   const updateStatusMutation = useMutation({
     mutationFn: (data: UpdateReservationStatusDTO) => apiUpdateReservationStatus(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tableReservations', user?.id, restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, restaurantId] });
       toast.success('Statut de la réservation mis à jour');
     },
     onError: (error) => {

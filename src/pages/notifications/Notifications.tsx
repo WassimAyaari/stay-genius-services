@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
@@ -15,21 +16,15 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 const Notifications = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, userData } = useAuth();
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
   const { reservations = [], isLoading: isLoadingReservations } = useTableReservations();
 
   console.log("Notifications page - auth user:", user?.id);
+  console.log("Notifications page - userData:", userData);
+  console.log("Notifications page - localStorage user_id:", localStorage.getItem('user_id'));
   console.log("Notifications page - service requests:", serviceRequests?.length);
   console.log("Notifications page - reservations:", reservations?.length);
-  console.log("Notifications page - authentication loading:", authLoading);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      console.log("Aucun utilisateur authentifié détecté pour les notifications");
-      toast.error("Veuillez vous connecter pour voir vos notifications");
-    }
-  }, [user, authLoading]);
 
   // Define a type for the combined notification items
   type NotificationItem = {
@@ -67,7 +62,8 @@ const Notifications = () => {
     }))
   ].sort((a, b) => b.time.getTime() - a.time.getTime());
 
-  const isLoading = isLoadingRequests || isLoadingReservations || authLoading;
+  const isLoading = isLoadingRequests || isLoadingReservations;
+  const isAuthenticated = Boolean(user || localStorage.getItem('user_id'));
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -138,7 +134,7 @@ const Notifications = () => {
           <div className="flex justify-center p-8">
             <div className="animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent"></div>
           </div>
-        ) : !user ? (
+        ) : !isAuthenticated ? (
           <div className="text-center py-10 space-y-4">
             <p className="text-lg text-gray-600">Veuillez vous connecter pour voir vos notifications.</p>
             <Button asChild variant="default">

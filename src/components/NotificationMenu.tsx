@@ -20,10 +20,11 @@ import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const NotificationMenu = () => {
   const { user } = useAuth();
+  const userId = user?.id || localStorage.getItem('user_id');
   const { data: serviceRequests = [] } = useServiceRequests();
   const { reservations = [] } = useTableReservations();
 
-  console.log("NotificationMenu - auth user ID:", user?.id);
+  console.log("NotificationMenu - auth user ID or localStorage ID:", userId);
   console.log("NotificationMenu - serviceRequests count:", serviceRequests?.length);
   console.log("NotificationMenu - reservations count:", reservations?.length);
 
@@ -66,6 +67,8 @@ const NotificationMenu = () => {
   const unreadCount = notifications.filter(n => 
     n.status === 'pending' || n.status === 'in_progress' || n.status === 'confirmed'
   ).length;
+
+  const isAuthenticated = Boolean(userId);
 
   function getStatusText(status: string) {
     switch (status) {
@@ -124,7 +127,7 @@ const NotificationMenu = () => {
         <DropdownMenuSeparator />
         
         <div className="max-h-80 overflow-y-auto">
-          {!user ? (
+          {!isAuthenticated ? (
             <div className="py-4 text-center text-sm text-gray-500">
               Connectez-vous pour voir vos notifications
             </div>
