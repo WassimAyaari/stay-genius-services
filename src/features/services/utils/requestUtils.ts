@@ -187,3 +187,44 @@ export const submitRequestViaChatMessage = async (
     return false;
   }
 };
+
+// Add a function to transform a service request into a chat message format
+export const serviceRequestToMessage = (request: any): any => {
+  return {
+    id: request.id,
+    text: request.description || 'No description provided',
+    time: new Date(request.created_at).toLocaleString(),
+    sender: 'user',
+    status: 'sent',
+    type: 'request',
+    requestType: request.type,
+    requestStatus: request.status
+  };
+};
+
+// Function to handle push notifications for request updates
+export const notifyRequestStatusChange = (request: any) => {
+  const statusMessages = {
+    pending: 'Your request is pending review',
+    in_progress: 'Your request is now being processed',
+    completed: 'Your request has been completed',
+    cancelled: 'Your request has been cancelled'
+  };
+  
+  if (statusMessages[request.status]) {
+    // Use the browser notification API if permissions granted
+    if (Notification.permission === 'granted') {
+      new Notification('Request Update', {
+        body: statusMessages[request.status],
+        icon: '/favicon.ico'
+      });
+    }
+    
+    // Also show a toast notification
+    import('sonner').then(({ toast }) => {
+      toast.info('Request Status Update', {
+        description: statusMessages[request.status]
+      });
+    });
+  }
+};

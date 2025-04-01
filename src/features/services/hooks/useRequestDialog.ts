@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { Room } from '@/hooks/useRoom';
 import { useRequestItems } from '@/hooks/useRequestCategories';
 import { useUserInfo } from './useUserInfo';
 import { useRequestSubmission } from './useRequestSubmission';
+import { toast } from 'sonner';
 
 export function useRequestDialog(room: Room | null, onClose: () => void) {
   const [view, setView] = useState<'categories' | 'items' | 'presets'>('presets');
@@ -59,22 +59,70 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     });
   };
 
+  // Update the handle preset request to show status information
   const handlePresetRequest = async (preset: {category: string, description: string, type: string}) => {
     if (!userInfo.name || !userInfo.roomNumber) {
       setIsUserInfoDialogOpen(true);
       return;
     }
     
-    await submitPresetRequest(preset, userInfo, selectedCategory, onClose);
+    try {
+      const response = await submitPresetRequest(preset, userInfo, selectedCategory, onClose);
+      
+      // Show a success toast with tracking information
+      toast({
+        title: "Request Submitted",
+        description: `Your ${preset.type} request has been sent. You can track its status in the notifications panel.`,
+      });
+      
+      // Store the request ID for tracking
+      const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
+      if (response && response.id) {
+        requestIds.push(response.id);
+        localStorage.setItem('pending_requests', JSON.stringify(requestIds));
+      }
+    } catch (error) {
+      console.error("Error submitting preset request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your request. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
+  // Update the handle submit requests to show status information
   const handleSubmitRequests = async () => {
     if (!userInfo.name || !userInfo.roomNumber) {
       setIsUserInfoDialogOpen(true);
       return;
     }
     
-    await submitRequests(selectedItems, categoryItems, userInfo, selectedCategory, onClose);
+    try {
+      const response = await submitRequests(selectedItems, categoryItems, userInfo, selectedCategory, onClose);
+      
+      // Show a success toast with tracking information
+      toast({
+        title: "Request Submitted",
+        description: `Your request has been sent. You can track its status in the notifications panel.`,
+      });
+      
+      // Store the request ID for tracking
+      const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
+      if (response && response.length > 0) {
+        response.forEach(item => {
+          if (item.id) requestIds.push(item.id);
+        });
+        localStorage.setItem('pending_requests', JSON.stringify(requestIds));
+      }
+    } catch (error) {
+      console.error("Error submitting requests:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your request. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getDialogTitle = () => {
