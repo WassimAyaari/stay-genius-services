@@ -29,6 +29,15 @@ export const registerUser = async (
 
     if (authError) {
       console.error('Erreur lors de l\'inscription:', authError);
+      
+      // Gestion spécifique de l'erreur "Signups not allowed"
+      if (authError.message?.includes('Signups not allowed') || authError.code === 'signup_disabled') {
+        return { 
+          success: false, 
+          error: 'Les inscriptions sont actuellement désactivées. Veuillez contacter l\'administrateur du système.' 
+        };
+      }
+      
       return { 
         success: false, 
         error: authError.message || 'Erreur lors de l\'inscription' 

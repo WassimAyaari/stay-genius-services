@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +37,6 @@ const mapCompanionsToCompanionData = (companions: CompanionType[]): CompanionDat
     last_name: companion.lastName,
     relation: companion.relation,
     birthDate: companion.birthDate,
-    // Keep these for backward compatibility
     firstName: companion.firstName,
     lastName: companion.lastName
   }));
@@ -97,7 +95,6 @@ export const useRegistrationForm = () => {
           email: values.email,
           room_number: values.roomNumber,
           nationality: values.nationality,
-          // Convert Date objects to ISO date strings for Supabase
           birth_date: values.birthDate.toISOString().split('T')[0],
           check_in_date: values.checkInDate.toISOString().split('T')[0],
           check_out_date: values.checkOutDate.toISOString().split('T')[0]
@@ -143,7 +140,7 @@ export const useRegistrationForm = () => {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erreur",
+        title: "Erreur d'inscription",
         description: error.message,
       });
     } finally {
