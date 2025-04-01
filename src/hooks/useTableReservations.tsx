@@ -122,7 +122,6 @@ export const useTableReservations = (restaurantId?: string) => {
     isLoading,
     error,
     refetch,
-    // Add missing functions
     cancelReservation: cancelMutation.mutate,
     isCancelling: cancelMutation.isPending,
     createReservation: createMutation.mutate,

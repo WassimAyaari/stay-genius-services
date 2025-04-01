@@ -107,11 +107,6 @@ const NotificationMenu = () => {
     }
   }
 
-  // Return null only if user is not logged in
-  if (!user) {
-    return null;
-  }
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
