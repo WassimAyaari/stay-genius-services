@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Table, 
@@ -35,10 +36,17 @@ export const RequestsTable = ({
   const hasData = requests && requests.length > 0;
   
   const getRequestType = (request: ServiceRequestWithItem): string => {
-    if (request.request_items?.category_id) {
-      return request.request_items.category_name || request.type;
+    // First check if we have request_items with category_name or category.name
+    if (request.request_items) {
+      if (request.request_items.category_name) {
+        return request.request_items.category_name;
+      }
+      if (request.request_items.category?.name) {
+        return request.request_items.category.name;
+      }
     }
     
+    // If we don't have category information, use the request type
     return request.type.replace(/_/g, ' ');
   };
   

@@ -16,5 +16,8 @@ export interface ServiceRequestWithItem {
   category_id?: string;
   request_items?: RequestItem & {
     category_name?: string;
+    category?: {
+      name?: string;
+    };
   };
 }

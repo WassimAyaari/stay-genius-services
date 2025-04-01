@@ -8,29 +8,44 @@ export const useServiceRequests = () => {
   const queryClient = useQueryClient();
 
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
-    const { data, error } = await supabase
+    // First, fetch all service requests
+    const { data: requestsData, error: requestsError } = await supabase
       .from('service_requests')
-      .select(`
-        *,
-        request_items(*, category_id, category:request_categories(name))
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching service requests:', error);
-      throw error;
+    if (requestsError) {
+      console.error('Error fetching service requests:', requestsError);
+      throw requestsError;
     }
 
-    // Transform the nested data to match our expected format
-    const transformedData = data.map(request => {
-      if (request.request_items && request.request_items.category) {
-        request.request_items.category_name = request.request_items.category.name;
-        delete request.request_items.category; // Remove the nested object to avoid confusion
-      }
-      return request;
-    });
+    // For each request that has a request_item_id, fetch the associated request item and category
+    const requests = await Promise.all(
+      requestsData.map(async (request) => {
+        if (request.request_item_id) {
+          // Fetch the request item and its category
+          const { data: itemData, error: itemError } = await supabase
+            .from('request_items')
+            .select(`*, category:request_categories(name)`)
+            .eq('id', request.request_item_id)
+            .single();
 
-    return transformedData as ServiceRequest[];
+          if (!itemError && itemData) {
+            // Transform the data to match our expected format
+            return {
+              ...request,
+              request_items: {
+                ...itemData,
+                category_name: itemData.category?.name || null
+              }
+            };
+          }
+        }
+        return request;
+      })
+    );
+
+    return requests as ServiceRequest[];
   };
 
   const cancelServiceRequest = async (requestId: string): Promise<void> => {
