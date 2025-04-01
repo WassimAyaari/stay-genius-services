@@ -124,7 +124,11 @@ const NotificationMenu = () => {
         <DropdownMenuSeparator />
         
         <div className="max-h-80 overflow-y-auto">
-          {notifications.length > 0 ? (
+          {!user ? (
+            <div className="py-4 text-center text-sm text-gray-500">
+              Connectez-vous pour voir vos notifications
+            </div>
+          ) : notifications.length > 0 ? (
             <DropdownMenuGroup>
               {notifications.map((notification) => (
                 <Link to={notification.link} key={`${notification.type}-${notification.id}`}>

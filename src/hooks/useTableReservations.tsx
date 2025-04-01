@@ -62,11 +62,16 @@ export const useTableReservations = (restaurantId?: string) => {
 
   // Cancel reservation
   const cancelReservation = async (reservationId: string): Promise<void> => {
+    if (!user?.id) {
+      toast.error("Veuillez vous connecter pour annuler une réservation");
+      throw new Error("Utilisateur non authentifié");
+    }
+
     const { error } = await supabase
       .from('table_reservations')
       .update({ status: 'cancelled' })
       .eq('id', reservationId)
-      .eq('user_id', user?.id); // Ensure only the user's reservations can be cancelled
+      .eq('user_id', user.id); // Ensure only the user's reservations can be cancelled
 
     if (error) {
       console.error('Error cancelling reservation:', error);
@@ -78,7 +83,7 @@ export const useTableReservations = (restaurantId?: string) => {
   const { data: reservations, isLoading, error, refetch } = useQuery({
     queryKey: ['tableReservations', user?.id, restaurantId],
     queryFn: restaurantId ? fetchRestaurantReservations : fetchUserReservations,
-    enabled: !!user?.id || !!restaurantId, // Only fetch when user is authenticated or restaurantId is provided
+    enabled: true, // Toujours activer cette requête même si l'utilisateur n'est pas connecté
     staleTime: 1000 * 60, // 1 minute
     refetchOnWindowFocus: true,
   });

@@ -33,6 +33,11 @@ export const useServiceRequests = () => {
   };
 
   const cancelServiceRequest = async (requestId: string): Promise<void> => {
+    if (!user?.id) {
+      toast.error("Veuillez vous connecter pour annuler une demande");
+      throw new Error("Utilisateur non authentifié");
+    }
+
     const { error } = await supabase
       .from('service_requests')
       .update({ status: 'cancelled' })
@@ -48,7 +53,7 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests', user?.id],
     queryFn: fetchServiceRequests,
-    enabled: !!user?.id // Only fetch when user is authenticated
+    enabled: true, // Toujours activer cette requête même si l'utilisateur n'est pas connecté
   });
 
   const cancelMutation = useMutation({

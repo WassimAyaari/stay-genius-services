@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
@@ -13,15 +12,24 @@ import { ServiceRequest } from '@/features/rooms/types';
 import { TableReservation } from '@/features/dining/types';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const Notifications = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
   const { reservations = [], isLoading: isLoadingReservations } = useTableReservations();
 
   console.log("Notifications page - auth user:", user?.id);
   console.log("Notifications page - service requests:", serviceRequests?.length);
   console.log("Notifications page - reservations:", reservations?.length);
+  console.log("Notifications page - authentication loading:", authLoading);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      console.log("Aucun utilisateur authentifié détecté pour les notifications");
+      toast.error("Veuillez vous connecter pour voir vos notifications");
+    }
+  }, [user, authLoading]);
 
   // Define a type for the combined notification items
   type NotificationItem = {
@@ -59,7 +67,7 @@ const Notifications = () => {
     }))
   ].sort((a, b) => b.time.getTime() - a.time.getTime());
 
-  const isLoading = isLoadingRequests || isLoadingReservations;
+  const isLoading = isLoadingRequests || isLoadingReservations || authLoading;
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -121,23 +129,6 @@ const Notifications = () => {
     }
   };
 
-  // Si l'utilisateur n'est pas connecté, afficher une page de connexion
-  if (!user) {
-    return (
-      <Layout>
-        <div className="container py-8">
-          <h1 className="text-2xl font-bold mb-6">Mes Notifications</h1>
-          <div className="text-center py-10 space-y-4">
-            <p className="text-lg text-gray-600">Veuillez vous connecter pour voir vos notifications.</p>
-            <Button asChild variant="default">
-              <Link to="/auth/login">Se connecter</Link>
-            </Button>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <div className="container py-8">
@@ -146,6 +137,13 @@ const Notifications = () => {
         {isLoading ? (
           <div className="flex justify-center p-8">
             <div className="animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent"></div>
+          </div>
+        ) : !user ? (
+          <div className="text-center py-10 space-y-4">
+            <p className="text-lg text-gray-600">Veuillez vous connecter pour voir vos notifications.</p>
+            <Button asChild variant="default">
+              <Link to="/auth/login">Se connecter</Link>
+            </Button>
           </div>
         ) : notifications.length > 0 ? (
           <div className="space-y-4">
