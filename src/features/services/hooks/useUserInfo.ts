@@ -34,12 +34,6 @@ export function useUserInfo(room: Room | null) {
           // Get phone number if available
           const phone = userData.phone || '';
           
-          console.log("Retrieved user info from localStorage:", { 
-            name: fullName || 'Guest', 
-            roomNumber, 
-            phone 
-          });
-          
           return {
             name: fullName || 'Guest',
             roomNumber: roomNumber,
@@ -53,11 +47,6 @@ export function useUserInfo(room: Room | null) {
     
     // If no user data in localStorage, use room data if available
     if (room) {
-      console.log("Using room data for user info:", { 
-        name: 'Guest', 
-        roomNumber: room.room_number || '401' 
-      });
-      
       return {
         name: 'Guest',
         roomNumber: room.room_number || '401',
@@ -65,8 +54,6 @@ export function useUserInfo(room: Room | null) {
     }
 
     // Default fallback - ensure we always return something valid
-    console.log("Using default user info:", { name: 'Guest', roomNumber: '401' });
-    
     return { 
       name: 'Guest', 
       roomNumber: '401'
@@ -81,8 +68,6 @@ export function useUserInfo(room: Room | null) {
       room_number: info.roomNumber,
       phone: info.phone || ''
     };
-    
-    console.log("Saving user info to localStorage:", userDataToSave);
     
     localStorage.setItem('user_data', JSON.stringify(userDataToSave));
     setUserInfo(info);
@@ -100,12 +85,10 @@ export function useUserInfo(room: Room | null) {
         phone: currentInfo.phone
       };
       
-      console.log("Ensuring valid user info:", updatedInfo);
       saveUserInfo(updatedInfo);
       return updatedInfo;
     }
     
-    console.log("User info already valid:", currentInfo);
     return currentInfo;
   };
 

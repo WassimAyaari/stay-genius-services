@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useChatMessages } from './chat/useChatMessages';
 import ChatHeader from './chat/ChatHeader';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import { useRealtimeMessages } from '@/hooks/messaging/useRealtimeMessages';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client'; // Add the missing import
 
 interface ServiceChatProps {
   isChatOpen: boolean;
@@ -26,6 +28,46 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
 
   // Setup realtime message updates
   useRealtimeMessages({ fetchMessages });
+  
+  // Listen for service request updates
+  useEffect(() => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    
+    const channel = supabase
+      .channel('service_request_updates')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'service_requests',
+        filter: `guest_id=eq.${userId}`,
+      }, (payload) => {
+        console.log('Service request updated:', payload);
+        
+        // Show a toast notification for the update
+        const statusMap = {
+          'pending': 'is now pending',
+          'in_progress': 'is now in progress',
+          'completed': 'has been completed',
+          'cancelled': 'has been cancelled'
+        };
+        
+        const status = payload.new.status;
+        const message = statusMap[status] || 'has been updated';
+        
+        toast.info(`Request Update`, {
+          description: `Your ${payload.new.type} request ${message}.`
+        });
+        
+        // Refresh messages to show updated request status
+        fetchMessages();
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchMessages]);
 
   const handleCloseChat = () => {
     setIsChatOpen(false);

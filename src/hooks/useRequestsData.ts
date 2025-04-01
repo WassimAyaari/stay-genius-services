@@ -1,154 +1,92 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
+import { ServiceRequest } from '@/features/rooms/types';
 
 export function useRequestsData() {
-  const { toast: uiToast } = useToast();
-  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { 
     data: requests = [], 
     isLoading, 
     isError, 
     error,
-    refetch,
-    createRealRequestExamples
+    refetch 
   } = useServiceRequests();
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Configurer les mises à jour en temps réel pour les demandes de service
+  // Set up real-time updates for service requests
   useEffect(() => {
-    console.log('Setting up enhanced realtime updates for all service requests');
+    // Only setup realtime if we have user data
+    const userData = localStorage.getItem('user_data');
+    if (!userData) return;
     
-    // Forcer les actualisations initiales multiples pour s'assurer que les données sont chargées
-    refetch();
-    
-    // Vérifier et créer des requêtes de test si nécessaire (mode démo)
-    setTimeout(() => {
-      createRealRequestExamples();
-    }, 1000);
-    
-    setTimeout(() => refetch(), 2000);
-    
-    // Abonnement en temps réel principal - optimisé pour la fiabilité
-    const serviceRequestsChannel = supabase
-      .channel('service_requests_all_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'service_requests',
-      }, (payload) => {
-        console.log('Service request change detected:', payload.eventType, payload);
-        
-        // Actualiser les données immédiatement à tout changement
-        refetch();
-        
-        // Afficher une notification pour les nouvelles demandes
-        if (payload.eventType === 'INSERT') {
-          uiToast({
-            title: "Nouvelle requête",
-            description: `Une nouvelle requête a été reçue.`,
-            variant: "default"
-          });
-          
-          // Utiliser également le toast Sonner pour une meilleure visibilité
-          toast('Nouvelle requête', {
-            description: 'Une nouvelle requête a été reçue'
-          });
-          
-          // Forcer l'actualisation
-          queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-          queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-        }
-        
-        // Afficher une notification pour les mises à jour de statut
-        if (payload.eventType === 'UPDATE' && payload.new?.status !== payload.old?.status) {
-          const statusMap = {
-            'pending': 'est en attente',
-            'in_progress': 'est en cours',
-            'completed': 'a été complétée',
-            'cancelled': 'a été annulée'
-          };
-          
-          const status = payload.new.status;
-          const message = statusMap[status] || 'a été mise à jour';
-          
-          uiToast({
-            title: "Mise à jour",
-            description: `La requête ${message}.`,
-            variant: "default"
-          });
-          
-          // Utiliser également le toast Sonner pour une meilleure visibilité
-          toast('Statut mis à jour', {
-            description: `La requête ${message}`
-          });
-          
-          // Forcer l'actualisation
-          queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-          queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-        }
-      })
-      .subscribe((status) => {
-        console.log('Enhanced subscription status:', status);
-        if (status !== 'SUBSCRIBED') {
-          console.error('Failed to subscribe to realtime updates:', status);
-        }
-      });
+    try {
+      const userInfo = JSON.parse(userData);
+      const userId = localStorage.getItem('user_id');
+      if (!userId) return;
       
-    // Écouteur de diffusion pour les notifications de soumission
-    const notificationChannel = supabase
-      .channel('service_requests_notifications')
-      .on('broadcast', { event: 'request_submitted' }, (payload) => {
-        console.log('Request submission notification received:', payload);
-        // Forcer l'actualisation lorsqu'une notification de soumission de demande est reçue
-        refetch();
-        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-      })
-      .subscribe();
-    
-    // Configurer une actualisation fréquente comme sauvegarde supplémentaire
-    const interval = setInterval(() => {
-      console.log('Performing scheduled refresh of service requests');
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-      refetch();
-    }, 15000); // Actualisation toutes les 15 secondes
-    
-    return () => {
-      console.log('Cleaning up realtime subscription and interval');
-      supabase.removeChannel(serviceRequestsChannel);
-      supabase.removeChannel(notificationChannel);
-      clearInterval(interval);
-    };
-  }, [refetch, queryClient, uiToast, createRealRequestExamples]);
+      const channel = supabase
+        .channel('service_requests_updates')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `guest_id=eq.${userId}`,
+        }, (payload) => {
+          console.log('Service request change detected:', payload);
+          refetch();
+          
+          // Show notification for status updates
+          if (payload.eventType === 'UPDATE' && payload.new?.status !== payload.old?.status) {
+            const statusMap = {
+              'pending': 'is now pending',
+              'in_progress': 'is now in progress',
+              'completed': 'has been completed',
+              'cancelled': 'has been cancelled'
+            };
+            
+            const status = payload.new.status;
+            const message = statusMap[status] || 'has been updated';
+            
+            toast({
+              title: "Request Update",
+              description: `Your ${payload.new.type} request ${message}.`
+            });
+          }
+        })
+        .subscribe();
+      
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      console.error("Error setting up realtime updates:", error);
+    }
+  }, [refetch, toast]);
   
-  const handleRefresh = useCallback(async () => {
-    console.log('Manual refresh of service requests triggered');
+  const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      await createRealRequestExamples();
-      const result = await refetch();
-      console.log('Manual refresh completed with count:', result.data?.length || 0);
+      await refetch();
       
-      uiToast({
-        title: "Données actualisées",
-        description: "Les données des requêtes ont été actualisées."
+      toast({
+        title: "Data Refreshed",
+        description: "Request data has been refreshed."
       });
     } catch (error) {
       console.error("Error refreshing data:", error);
-      uiToast({
-        title: "Erreur",
-        description: "Échec de l'actualisation des données.",
+      toast({
+        title: "Error",
+        description: "Failed to refresh request data.",
         variant: "destructive"
       });
     } finally {
       setIsRefreshing(false);
     }
-  }, [refetch, uiToast, createRealRequestExamples]);
+  };
 
   return {
     requests,

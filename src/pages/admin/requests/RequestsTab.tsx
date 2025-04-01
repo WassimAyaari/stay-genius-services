@@ -1,20 +1,15 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ServiceRequestWithItem } from './types';
 import { RequestsTable } from '@/components/admin/requests/RequestsTable';
 import { useRequestsData } from '@/hooks/useRequestsData';
 import { useRequestStatusService } from '@/features/requests/services/requestStatusService';
 import { RequestsHeader } from '@/components/admin/requests/RequestsHeader';
-import { ErrorAlert } from '@/components/admin/requests/ErrorAlert';
-import { EmptyStateAlert } from '@/components/admin/requests/EmptyStateAlert';
-import { useQueryClient } from '@tanstack/react-query';
-import { useRequestDemo } from '@/hooks/useRequestDemo';
-import { useRequestsRealtime } from '@/hooks/useRequestsRealtime';
-import { useInitialDataLoad } from '@/hooks/useInitialDataLoad';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export const RequestsTab = () => {
-  const queryClient = useQueryClient();
   const { 
     requests, 
     isLoading, 
@@ -25,43 +20,9 @@ export const RequestsTab = () => {
   } = useRequestsData();
   
   const { handleUpdateStatus } = useRequestStatusService();
-  const [newRequests, setNewRequests] = useState<boolean>(false);
-  const [dataChecked, setDataChecked] = useState<boolean>(false);
-  const { createRealisticRequest } = useRequestDemo();
-  
-  // Set up initial data loading
-  useInitialDataLoad(handleRefresh);
-  
-  // Set up realtime updates
-  useRequestsRealtime(() => setNewRequests(true));
-  
-  // Mark data as checked after the last refresh
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDataChecked(true);
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Effect for actualiser automatiquement lorsque de nouvelles demandes sont détectées
-  useEffect(() => {
-    if (newRequests) {
-      console.log('New requests detected, refreshing data');
-      handleRefresh();
-      setNewRequests(false);
-    }
-  }, [newRequests, handleRefresh]);
   
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
-    await handleUpdateStatus(requestId, newStatus, () => {
-      // Forcer plusieurs actualisations pour s'assurer que les données sont mises à jour
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-      queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-      setTimeout(() => {
-        handleRefresh();
-      }, 500);
-    });
+    await handleUpdateStatus(requestId, newStatus, handleRefresh);
   };
 
   return (
@@ -72,10 +33,15 @@ export const RequestsTab = () => {
           isRefreshing={isRefreshing}
         />
 
-        {isError && <ErrorAlert error={error} />}
-        
-        {dataChecked && requests.length === 0 && !isLoading && !isRefreshing && (
-          <EmptyStateAlert onCreateRequest={createRealisticRequest} />
+        {isError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Failed to load request data. Please try refreshing.
+              {error && <div className="mt-2 text-xs opacity-80">{String(error)}</div>}
+            </AlertDescription>
+          </Alert>
         )}
 
         <RequestsTable 

@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatTimeAgo } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
+import { RequestStatusBadge } from '../requests/RequestStatusBadge';
 
 interface ChatListProps {
   chats: Chat[];
@@ -41,13 +42,22 @@ const ChatList: React.FC<ChatListProps> = ({
         onValueChange={onTabChange}
         className="w-full"
       >
-        <TabsList className="grid grid-cols-2 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="unread">
             Unread
             {chats.filter(chat => chat.unread > 0).length > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {chats.filter(chat => chat.unread > 0).length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="requests">
+            Requests
+            {chats.filter(chat => chat.type === 'request').length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {chats.filter(chat => chat.type === 'request').length}
               </Badge>
             )}
           </TabsTrigger>
@@ -68,7 +78,7 @@ const ChatList: React.FC<ChatListProps> = ({
                 // Get full guest name if available, with proper fallback
                 const guestName = chat.userInfo && 
                   (chat.userInfo.firstName || chat.userInfo.lastName) ? 
-                  `${chat.userInfo?.firstName || ''} ${chat.userInfo?.lastName || ''}`.trim() : 
+                  `${chat.userInfo.firstName || ''} ${chat.userInfo.lastName || ''}`.trim() : 
                   null;
 
                 return (
@@ -120,6 +130,12 @@ const ChatList: React.FC<ChatListProps> = ({
                             </p>
                           )}
                         </div>
+                        
+                        {chat.type === 'request' && chat.messages[0]?.requestStatus && (
+                          <div className="mt-1">
+                            <RequestStatusBadge status={chat.messages[0].requestStatus} />
+                          </div>
+                        )}
                         
                         <p className="text-sm text-muted-foreground truncate mt-1">
                           {chat.messages.length > 0 ? chat.messages[0].text : 'No messages'}

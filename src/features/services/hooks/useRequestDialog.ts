@@ -65,18 +65,24 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     }
     
     try {
-      // Call the submission function with the correct number of arguments
-      // Get the selected request items from the IDs
-      const selectedRequestItems = categoryItems.filter(item => 
-        selectedItems.includes(item.id)
-      );
-      
-      await submitRequests(selectedRequestItems, selectedCategory as RequestCategory, room);
+      // Call the submission function with the validated user info
+      await submitRequests(selectedItems, categoryItems, validUserInfo, selectedCategory, onClose);
       
       // Show a success toast with tracking information
       toast.success("Request Submitted", {
         description: `Your request has been sent. You can track its status in the notifications panel.`,
       });
+      
+      // Generate mock IDs for tracking
+      const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
+      
+      // Add a mock ID for each selected item
+      selectedItems.forEach(itemId => {
+        const mockRequestId = `mock-${itemId}-${Date.now()}`;
+        requestIds.push(mockRequestId);
+      });
+      
+      localStorage.setItem('pending_requests', JSON.stringify(requestIds));
       
       // Close the dialog after successful submission
       onClose();

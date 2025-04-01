@@ -35,6 +35,7 @@ export function useChatFetching() {
             userId: msg.user_id,
             userName: msg.user_name || 'Guest',
             roomNumber: msg.room_number,
+            type: 'chat'
           });
         }
       });
@@ -82,7 +83,8 @@ export function useChatFetching() {
             text: msg.text,
             time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             sender: msg.sender as 'user' | 'staff',
-            status: msg.status as 'sent' | 'delivered' | 'read' | undefined
+            status: msg.status as 'sent' | 'delivered' | 'read' | undefined,
+            type: 'chat' as const
           })));
         }
 
@@ -108,7 +110,8 @@ export function useChatFetching() {
             lastActivity: lastActivity,
             messages: formattedMessages,
             unread: unreadCount,
-            userInfo: userDetails
+            userInfo: userDetails,
+            type: 'chat' as const
           });
         }
       }

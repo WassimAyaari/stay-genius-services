@@ -5,6 +5,9 @@ export interface Message {
   time: string;
   sender: 'user' | 'staff';
   status?: 'sent' | 'delivered' | 'read';
+  type?: 'chat' | 'request';
+  requestType?: string;
+  requestStatus?: string;
 }
 
 export interface UserInfo {
@@ -24,4 +27,5 @@ export interface Chat {
   messages: Message[];
   unread: number;
   userInfo?: UserInfo;
+  type?: 'chat' | 'request';
 }
