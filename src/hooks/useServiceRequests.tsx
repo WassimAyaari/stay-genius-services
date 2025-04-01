@@ -23,22 +23,45 @@ export const useServiceRequests = () => {
     const requests = await Promise.all(
       requestsData.map(async (request) => {
         if (request.request_item_id) {
-          // Fetch the request item and its category
-          const { data: itemData, error: itemError } = await supabase
-            .from('request_items')
-            .select(`*, category:request_categories(name)`)
-            .eq('id', request.request_item_id)
-            .single();
+          try {
+            // First fetch the request item
+            const { data: itemData, error: itemError } = await supabase
+              .from('request_items')
+              .select('*')
+              .eq('id', request.request_item_id)
+              .single();
 
-          if (!itemError && itemData) {
+            if (itemError || !itemData) {
+              console.error(`Error fetching item for request ${request.id}:`, itemError);
+              return request;
+            }
+
+            // Then fetch the category separately
+            let categoryName = null;
+            if (itemData.category_id) {
+              const { data: categoryData, error: categoryError } = await supabase
+                .from('request_categories')
+                .select('name')
+                .eq('id', itemData.category_id)
+                .single();
+
+              if (!categoryError && categoryData) {
+                categoryName = categoryData.name;
+              }
+            }
+
             // Transform the data to match our expected format
             return {
               ...request,
               request_items: {
                 ...itemData,
-                category_name: itemData.category?.name || null
+                category_name: categoryName,
+                category: categoryName ? { name: categoryName } : null
               }
             };
+          } catch (error) {
+            console.error(`Error processing request ${request.id}:`, error);
+            return request;
           }
         }
         return request;
