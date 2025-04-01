@@ -142,14 +142,25 @@ export function useMultiItemRequestHandler() {
       
       for (const item of selectedItemData) {
         try {
-          const requestData = {
+          // Fix: Define the requestData with the correct interface that includes all fields
+          const requestData: {
+            guest_id: string;
+            room_id: string;
+            type: string;
+            description: string;
+            status: string;
+            created_at: string;
+            room_number: string;
+            category_id?: string;
+            request_item_id?: string;
+          } = {
             guest_id: userId,
-            room_id: roomId, // Always provide a valid room_id
+            room_id: roomId,
             type: 'custom',
             description: item.name,
             status: 'pending',
             created_at: new Date().toISOString(),
-            room_number: userInfo.roomNumber // Include room_number for display purposes
+            room_number: userInfo.roomNumber
           };
           
           // Add category if available
