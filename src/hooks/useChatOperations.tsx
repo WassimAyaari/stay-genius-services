@@ -15,7 +15,12 @@ export function useChatOperations({ chats, setChats }: UseChatOperationsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleSelectChat = async (chat: Chat) => {
+  const handleSelectChat = async (chat: Chat | null) => {
+    if (!chat) {
+      setActiveChat(null);
+      return;
+    }
+    
     const unreadMessages = chat.messages.filter(
       msg => msg.sender === 'user' && msg.status !== 'read'
     );
