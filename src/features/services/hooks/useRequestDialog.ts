@@ -15,7 +15,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
   // Get user info management with enhanced features
   const { 
     userInfo, 
-    getUserInfo,
+    getLocalUserInfo,
     ensureValidUserInfo
   } = useUserInfo(room);
   
