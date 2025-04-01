@@ -7,7 +7,12 @@ import { isAuthenticated } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+interface AuthGuardProps {
+  children: React.ReactNode;
+  adminRequired?: boolean;
+}
+
+const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -67,8 +72,33 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
           return;
         }
         
+        // 4. Vérifier si l'utilisateur a le rôle d'administrateur si requis
+        if (adminRequired) {
+          try {
+            const userData = JSON.parse(userDataString);
+            if (!userData.isAdmin) {
+              console.log('Accès admin requis, redirection vers la page d\'accueil');
+              toast({
+                variant: "destructive",
+                title: "Accès restreint",
+                description: "Vous n'avez pas les droits administrateur nécessaires"
+              });
+              navigate('/', { replace: true });
+              setAuthorized(false);
+              setLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.error("Erreur lors de la vérification des droits admin:", error);
+            navigate('/', { replace: true });
+            setAuthorized(false);
+            setLoading(false);
+            return;
+          }
+        }
+        
         try {
-          // 4. Traiter et synchroniser les données utilisateur
+          // 5. Traiter et synchroniser les données utilisateur
           const userData = JSON.parse(userDataString);
           
           if (!userId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
@@ -145,7 +175,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [navigate, toast, location.pathname]);
+  }, [navigate, toast, location.pathname, adminRequired]);
 
   if (loading) {
     return (
