@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -24,59 +23,101 @@ import { supabase } from '@/integrations/supabase/client';
 const NotificationMenu = () => {
   const { user } = useAuth();
   const userId = user?.id || localStorage.getItem('user_id');
-  const { data: serviceRequests = [] } = useServiceRequests();
+  const userEmail = user?.email || localStorage.getItem('user_email');
+  const { data: serviceRequests = [], refetch: refetchServices } = useServiceRequests();
   const { reservations = [], refetch: refetchReservations } = useTableReservations();
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
 
   console.log("NotificationMenu - auth user ID or localStorage ID:", userId);
+  console.log("NotificationMenu - auth user email or localStorage email:", userEmail);
   console.log("NotificationMenu - serviceRequests count:", serviceRequests?.length);
   console.log("NotificationMenu - reservations count:", reservations?.length);
   console.log("NotificationMenu - reservations data:", reservations);
 
+  // Forcer un rechargement au montage
+  useEffect(() => {
+    refetchServices();
+    refetchReservations();
+    
+    // Store email in localStorage for future reference
+    if (user?.email && !localStorage.getItem('user_email')) {
+      localStorage.setItem('user_email', user.email);
+    }
+  }, [refetchServices, refetchReservations, user?.email]);
+
   // Effet pour vérifier les nouvelles notifications en temps réel
   useEffect(() => {
-    if (!userId) return;
+    if (!userId && !userEmail) {
+      console.log("No user ID or email found, not setting up real-time listeners in NotificationMenu");
+      return;
+    }
     
-    // Écouter les mises à jour de réservations
-    const reservationChannel = supabase
-      .channel('notification_reservation_updates')
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'table_reservations',
-        filter: `user_id=eq.${userId}`,
-      }, (payload) => {
-        console.log('Notification reservation update received:', payload);
-        setHasNewNotifications(true);
-        refetchReservations();
-      })
-      .subscribe();
+    console.log("NotificationMenu - Setting up real-time listeners with user ID:", userId, "and email:", userEmail);
     
-    // Écouter aussi par email si disponible
-    let emailChannel;
-    if (user?.email) {
-      emailChannel = supabase
-        .channel('notification_reservation_email_updates')
+    const channels = [];
+    
+    // Écouter les mises à jour de réservations par ID utilisateur
+    if (userId) {
+      const reservationChannel = supabase
+        .channel('notification_reservation_updates')
         .on('postgres_changes', {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'table_reservations',
-          filter: `guest_email=eq.${user.email}`,
+          filter: `user_id=eq.${userId}`,
+        }, (payload) => {
+          console.log('Notification reservation update received by ID:', payload);
+          setHasNewNotifications(true);
+          refetchReservations();
+        })
+        .subscribe();
+      
+      channels.push(reservationChannel);
+    }
+    
+    // Écouter aussi par email si disponible
+    if (userEmail) {
+      const emailChannel = supabase
+        .channel('notification_reservation_email_updates')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'table_reservations',
+          filter: `guest_email=eq.${userEmail}`,
         }, (payload) => {
           console.log('Notification reservation email update received:', payload);
           setHasNewNotifications(true);
           refetchReservations();
         })
         .subscribe();
+      
+      channels.push(emailChannel);
+    }
+    
+    // Écouter les mises à jour de demandes de service
+    if (userId) {
+      const serviceChannel = supabase
+        .channel('notification_service_updates')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `guest_id=eq.${userId}`,
+        }, (payload) => {
+          console.log('Notification service update received:', payload);
+          setHasNewNotifications(true);
+          refetchServices();
+        })
+        .subscribe();
+      
+      channels.push(serviceChannel);
     }
     
     return () => {
-      supabase.removeChannel(reservationChannel);
-      if (emailChannel) {
-        supabase.removeChannel(emailChannel);
-      }
+      console.log("Cleaning up real-time listeners for notifications");
+      channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [userId, user?.email, refetchReservations]);
+  }, [userId, userEmail, refetchReservations, refetchServices]);
 
   // Réinitialiser l'indicateur de nouvelles notifications lorsque le menu est ouvert
   const handleOpenChange = (open: boolean) => {

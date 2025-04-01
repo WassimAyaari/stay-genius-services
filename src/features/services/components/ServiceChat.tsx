@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useChatMessages } from './chat/useChatMessages';
@@ -44,6 +43,8 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         filter: `guest_id=eq.${userId}`,
       }, (payload) => {
         console.log('Service request updated:', payload);
+        
+        if (payload.old.status === payload.new.status) return;
         
         // Show a toast notification for the service update
         const statusMap: Record<string, string> = {
