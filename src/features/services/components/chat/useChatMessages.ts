@@ -240,5 +240,6 @@ export const useChatMessages = (userInfo: UserInfo) => {
     messagesEndRef,
     handleSendMessage,
     handleMessageSubmit,
+    fetchMessages, // Add the fetchMessages function to the returned object
   };
 };

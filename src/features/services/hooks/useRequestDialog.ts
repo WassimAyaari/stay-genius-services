@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { Room } from '@/hooks/useRoom';
@@ -70,8 +71,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
       const response = await submitPresetRequest(preset, userInfo, selectedCategory, onClose);
       
       // Show a success toast with tracking information
-      toast({
-        title: "Request Submitted",
+      toast.success("Request Submitted", {
         description: `Your ${preset.type} request has been sent. You can track its status in the notifications panel.`,
       });
       
@@ -83,10 +83,8 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
       }
     } catch (error) {
       console.error("Error submitting preset request:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Failed to submit your request. Please try again.",
-        variant: "destructive"
       });
     }
   };
@@ -102,25 +100,22 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
       const response = await submitRequests(selectedItems, categoryItems, userInfo, selectedCategory, onClose);
       
       // Show a success toast with tracking information
-      toast({
-        title: "Request Submitted",
+      toast.success("Request Submitted", {
         description: `Your request has been sent. You can track its status in the notifications panel.`,
       });
       
       // Store the request ID for tracking
       const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
       if (response && response.length > 0) {
-        response.forEach(item => {
+        response.forEach((item: any) => {
           if (item.id) requestIds.push(item.id);
         });
         localStorage.setItem('pending_requests', JSON.stringify(requestIds));
       }
     } catch (error) {
       console.error("Error submitting requests:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Failed to submit your request. Please try again.",
-        variant: "destructive"
       });
     }
   };

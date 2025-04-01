@@ -7,6 +7,7 @@ import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import { useRealtimeMessages } from '@/hooks/messaging/useRealtimeMessages';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client'; // Add the missing import
 
 interface ServiceChatProps {
   isChatOpen: boolean;
