@@ -29,7 +29,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
   } = useRequestSubmission();
   
   // Fetch items for the selected category
-  const { data: categoryItems } = useRequestItems(selectedCategory?.id);
+  const { data: categoryItems = [] } = useRequestItems(selectedCategory?.id);
 
   const handleSelectCategory = (category: RequestCategory) => {
     setSelectedCategory(category);
@@ -77,7 +77,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
       
       // Store the request ID for tracking
       const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-      if (response && response.id) {
+      if (response && typeof response === 'object' && 'id' in response) {
         requestIds.push(response.id);
         localStorage.setItem('pending_requests', JSON.stringify(requestIds));
       }
@@ -106,9 +106,11 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
       
       // Store the request ID for tracking
       const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-      if (response && response.length > 0) {
+      if (response && Array.isArray(response) && response.length > 0) {
         response.forEach((item: any) => {
-          if (item.id) requestIds.push(item.id);
+          if (item && typeof item === 'object' && 'id' in item) {
+            requestIds.push(item.id);
+          }
         });
         localStorage.setItem('pending_requests', JSON.stringify(requestIds));
       }
