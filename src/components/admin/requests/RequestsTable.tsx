@@ -54,7 +54,7 @@ export const RequestsTable = ({
             requests.map((request) => (
               <TableRow key={request.id}>
                 <TableCell>{request.room_number || request.room_id || 'N/A'}</TableCell>
-                <TableCell>{request.guest_name || 'Unknown Guest'}</TableCell>
+                <TableCell>{request.guest_name || 'Unknown'}</TableCell>
                 <TableCell className="capitalize">{request.type.replace('_', ' ')}</TableCell>
                 <TableCell>
                   {request.request_items ? (

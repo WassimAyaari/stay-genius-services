@@ -4,7 +4,51 @@ import { useToast } from '@/hooks/use-toast';
 import { UserInfo } from './useUserInfo';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { supabase } from '@/integrations/supabase/client';
-import { createUserProfile } from '../utils/userProfileUtils';
+
+/**
+ * Creates a user profile in the database if it doesn't exist
+ */
+const createUserProfile = async (userId: string, userInfo: UserInfo) => {
+  console.log('Creating user profile in useMultiItemRequestHandler:', userId, userInfo);
+  try {
+    // Extract first and last name from full name
+    const nameParts = userInfo.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    // Check if guest already exists in the guests table
+    const { data: existingGuest } = await supabase
+      .from('guests')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (existingGuest) {
+      console.log('Guest profile already exists, skipping creation');
+      return true;
+    }
+    
+    // Insert directly into guests table using our new function
+    const { data, error } = await supabase
+      .rpc('insert_guest_from_registration', {
+        user_id: userId,
+        first_name: firstName,
+        last_name: lastName,
+        email: '',
+        room_number: userInfo.roomNumber
+      });
+    
+    if (error) {
+      console.error("Error inserting guest data:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in createUserProfile:", error);
+    return false;
+  }
+};
 
 export function useMultiItemRequestHandler() {
   const [isSubmitting, setIsSubmitting] = useState(false);
