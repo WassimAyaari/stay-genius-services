@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { UserInfo } from './useUserInfo';
@@ -132,18 +133,23 @@ export function useMultiItemRequestHandler() {
         .eq('room_number', userInfo.roomNumber)
         .maybeSingle();
       
+      // Define a valid room_id to use - either from database or use userId as a fallback
+      const roomId = roomData?.id || userId;
+      
       // Step 4: Try to create service requests for each item
       let successful = 0;
       let failed = 0;
       
       for (const item of selectedItemData) {
         try {
-          const requestData: any = {
+          const requestData = {
             guest_id: userId,
+            room_id: roomId, // Always provide a valid room_id
             type: 'custom',
             description: item.name,
             status: 'pending',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            room_number: userInfo.roomNumber // Include room_number for display purposes
           };
           
           // Add category if available
@@ -154,11 +160,6 @@ export function useMultiItemRequestHandler() {
           // Add request item ID
           if (item.id) {
             requestData.request_item_id = item.id;
-          }
-          
-          // Add room_id only if the room exists
-          if (roomData?.id) {
-            requestData.room_id = roomData.id;
           }
           
           console.log('Creating service request for item:', item.name, requestData);

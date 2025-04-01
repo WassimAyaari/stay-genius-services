@@ -200,12 +200,21 @@ export const useChatMessages = (userInfo: UserInfo) => {
         else if (inputMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
         else if (inputMessage.toLowerCase().includes('food') || inputMessage.toLowerCase().includes('meal')) requestType = 'food';
         
-        // Add a room_id that's required by the service_requests table
+        // Get room_id or use userId as fallback
+        const { data: roomData } = await supabase
+          .from('rooms')
+          .select('id')
+          .eq('room_number', userInfo.roomNumber)
+          .maybeSingle();
+          
+        const roomId = roomData?.id || userId;
+        
+        // Add a valid room_id that's required by the service_requests table
         await supabase.from('service_requests').insert({
           guest_id: userId,
           guest_name: userInfo.name,
           room_number: userInfo.roomNumber,
-          room_id: userId, // Use userId as fallback if we don't have a real room_id
+          room_id: roomId,
           type: requestType,
           description: inputMessage,
           status: 'pending',

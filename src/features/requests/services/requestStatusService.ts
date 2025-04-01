@@ -4,6 +4,16 @@ import { useToast } from '@/hooks/use-toast';
 
 type RequestStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 
+const translateStatus = (status: RequestStatus): string => {
+  switch (status) {
+    case 'pending': return 'en attente';
+    case 'in_progress': return 'en cours';
+    case 'completed': return 'terminée';
+    case 'cancelled': return 'annulée';
+    default: return status;
+  }
+};
+
 export function useRequestStatusService() {
   const { toast } = useToast();
   
@@ -14,16 +24,21 @@ export function useRequestStatusService() {
   ) => {
     try {
       await updateRequestStatus(requestId, newStatus);
+      
+      // Get translated status for the toast message
+      const translatedStatus = translateStatus(newStatus);
+      
       toast({
-        title: "Status Updated",
-        description: `Request status changed to ${newStatus}`
+        title: "Statut Mis à Jour",
+        description: `Le statut de la demande est maintenant ${translatedStatus}`
       });
+      
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error updating request status:", error);
       toast({
-        title: "Error",
-        description: "Failed to update request status",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la demande",
         variant: "destructive"
       });
     }

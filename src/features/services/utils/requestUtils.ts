@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { UserInfo } from '../hooks/useUserInfo';
 import { RequestCategory } from '@/features/rooms/types';
@@ -126,16 +127,19 @@ export const submitRequestViaChatMessage = async (
     
     console.log('Room data:', roomData);
     
+    // Define a valid room_id to use - either from database or use userId as a fallback
+    const roomId = roomData?.id || userId;
+    
     // Step 4: Create service request with minimal required data
     try {
       const requestData: any = {
         guest_id: userId,
+        room_id: roomId, // Always provide a valid room_id
         type: type,
         description: description,
         status: 'pending',
         created_at: new Date().toISOString(),
-        room_id: roomData?.id || userId, // Fallback to userId if room not found
-        room_number: userInfo.roomNumber
+        room_number: userInfo.roomNumber // Include room_number for display purposes
       };
 
       // Add category if available
