@@ -17,25 +17,29 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for service requests - écoute tous les changements
+  // Set up real-time updates for service requests
   useEffect(() => {
     console.log('Setting up realtime updates for all service requests');
     
+    // Enable realtime subscription to all changes in service_requests table
     const channel = supabase
-      .channel('service_requests_all_changes')
+      .channel('service_requests_changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'service_requests',
       }, (payload) => {
         console.log('Service request change detected:', payload);
+        
+        // Immediately refetch data when any change occurs
         refetch();
         
         // Show notification for new requests
         if (payload.eventType === 'INSERT') {
           toast({
             title: "Nouvelle requête",
-            description: `Une nouvelle requête ${payload.new.type} a été reçue.`
+            description: `Une nouvelle requête ${payload.new.type} a été reçue.`,
+            variant: "default"
           });
         }
         
@@ -53,43 +57,17 @@ export function useRequestsData() {
           
           toast({
             title: "Mise à jour",
-            description: `La requête ${payload.new.type} ${message}.`
+            description: `La requête ${payload.new.type} ${message}.`,
+            variant: "default"
           });
         }
       })
-      .subscribe();
-    
-    // On garde aussi l'ancienne écoute pour les requêtes spécifiques à l'utilisateur
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      try {
-        const userInfo = JSON.parse(userData);
-        const userId = localStorage.getItem('user_id');
-        if (userId) {
-          const userChannel = supabase
-            .channel('service_requests_user_updates')
-            .on('postgres_changes', {
-              event: '*',
-              schema: 'public',
-              table: 'service_requests',
-              filter: `guest_id=eq.${userId}`,
-            }, (payload) => {
-              console.log('User service request change detected:', payload);
-              refetch();
-            })
-            .subscribe();
-            
-          return () => {
-            supabase.removeChannel(channel);
-            supabase.removeChannel(userChannel);
-          };
-        }
-      } catch (error) {
-        console.error("Error setting up user-specific realtime updates:", error);
-      }
-    }
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
     
     return () => {
+      console.log('Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
   }, [refetch, toast]);

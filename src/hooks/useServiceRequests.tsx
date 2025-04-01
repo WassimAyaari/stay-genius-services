@@ -90,7 +90,8 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
-    refetchInterval: 30000, // Rafraîchir automatiquement toutes les 30 secondes
+    refetchInterval: 10000, // Refresh more frequently - every 10 seconds
+    staleTime: 5000, // Consider data stale after 5 seconds
   });
 
   const cancelMutation = useMutation({

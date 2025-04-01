@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Room } from '@/hooks/useRoom';
 import { requestService } from '@/features/rooms/controllers/roomService';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useUserInfo } from '../hooks/useUserInfo';
@@ -44,6 +44,11 @@ const CustomRequestForm = ({ room, onRequestSuccess }: CustomRequestFormProps) =
       
       // Invalidate the requests cache to show the new request
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+      
+      // Force an immediate refresh
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+      }, 300);
       
       onRequestSuccess();
     } catch (error) {
