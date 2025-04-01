@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
 import { toast } from 'sonner';
+import { ServiceRequestType } from '@/features/types/supabaseTypes';
 
 export const useServiceRequests = () => {
   const queryClient = useQueryClient();
@@ -10,7 +11,7 @@ export const useServiceRequests = () => {
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
     console.log('Fetching all service requests...');
     
-    // Improved: clearer query with better error handling and no caching
+    // Query avec debug supplémentaire et options améliorées
     const { data: requestsData, error: requestsError } = await supabase
       .from('service_requests')
       .select('*')
@@ -21,14 +22,19 @@ export const useServiceRequests = () => {
       throw requestsError;
     }
 
-    console.log(`Fetched ${requestsData.length} service requests`);
+    console.log(`Fetched ${requestsData?.length || 0} service requests:`, requestsData);
 
-    // Process each request to get associated data
+    if (!requestsData || requestsData.length === 0) {
+      console.log('No service requests found in database');
+      return [];
+    }
+
+    // Traitement de chaque demande pour obtenir les données associées
     const requests = await Promise.all(
       requestsData.map(async (request) => {
         if (request.request_item_id) {
           try {
-            // Get the request item
+            // Obtenir l'élément de demande
             const { data: itemData, error: itemError } = await supabase
               .from('request_items')
               .select('*')
@@ -40,7 +46,7 @@ export const useServiceRequests = () => {
               return request;
             }
 
-            // If we have an item, get its category separately
+            // Si nous avons un élément, obtenir sa catégorie séparément
             let categoryName = null;
             if (itemData && itemData.category_id) {
               const { data: categoryData, error: categoryError } = await supabase
@@ -54,7 +60,7 @@ export const useServiceRequests = () => {
               }
             }
 
-            // Transform data to match expected format
+            // Transformer les données pour correspondre au format attendu
             return {
               ...request,
               request_items: itemData ? {
@@ -88,12 +94,44 @@ export const useServiceRequests = () => {
     }
   };
 
+  // Créer une requête de test si aucune n'existe (mode démo uniquement)
+  const createTestRequestIfEmpty = async (): Promise<void> => {
+    const { data: existingRequests } = await supabase
+      .from('service_requests')
+      .select('id')
+      .limit(1);
+    
+    if (!existingRequests || existingRequests.length === 0) {
+      console.log('Creating test service request for demo...');
+      
+      const testRequest: Partial<ServiceRequestType> = {
+        guest_id: 'demo-guest',
+        room_id: 'demo-room',
+        guest_name: 'Jean Dupont',
+        room_number: '101',
+        type: 'housekeeping',
+        description: 'Demande de nettoyage quotidien',
+        status: 'pending'
+      };
+      
+      const { error } = await supabase
+        .from('service_requests')
+        .insert(testRequest);
+        
+      if (error) {
+        console.error('Error creating test request:', error);
+      } else {
+        console.log('Created test service request successfully');
+      }
+    }
+  };
+
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
-    refetchInterval: 3000, // More frequent refresh (every 3 seconds)
-    staleTime: 0, // Always consider data stale
-    gcTime: 0, // Immediate garbage collection
+    refetchInterval: 5000, // Actualisation toutes les 5 secondes
+    staleTime: 0, // Toujours considérer les données comme périmées
+    gcTime: 0, // Collecte immédiate des déchets
     retry: 3,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
@@ -119,6 +157,7 @@ export const useServiceRequests = () => {
     isError,
     refetch,
     cancelRequest: cancelMutation.mutate,
-    isCancelling: cancelMutation.isPending
+    isCancelling: cancelMutation.isPending,
+    createTestRequestIfEmpty
   };
 };

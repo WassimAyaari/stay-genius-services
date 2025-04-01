@@ -14,21 +14,27 @@ export function useRequestsData() {
     isLoading, 
     isError, 
     error,
-    refetch 
+    refetch,
+    createTestRequestIfEmpty
   } = useServiceRequests();
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up enhanced real-time updates for service requests
+  // Configurer les mises à jour en temps réel pour les demandes de service
   useEffect(() => {
     console.log('Setting up enhanced realtime updates for all service requests');
     
-    // Force initial multiple fetches to ensure data is loaded
+    // Forcer les actualisations initiales multiples pour s'assurer que les données sont chargées
     refetch();
-    setTimeout(() => refetch(), 300);
-    setTimeout(() => refetch(), 1000);
     
-    // Primary realtime subscription - optimized for reliability
+    // Vérifier et créer une requête de test si nécessaire (mode démo)
+    setTimeout(() => {
+      createTestRequestIfEmpty();
+    }, 1000);
+    
+    setTimeout(() => refetch(), 2000);
+    
+    // Abonnement en temps réel principal - optimisé pour la fiabilité
     const serviceRequestsChannel = supabase
       .channel('service_requests_all_changes')
       .on('postgres_changes', {
@@ -38,10 +44,10 @@ export function useRequestsData() {
       }, (payload) => {
         console.log('Service request change detected:', payload.eventType, payload);
         
-        // Refresh data immediately on any change
+        // Actualiser les données immédiatement à tout changement
         refetch();
         
-        // Show notification for new requests
+        // Afficher une notification pour les nouvelles demandes
         if (payload.eventType === 'INSERT') {
           uiToast({
             title: "Nouvelle requête",
@@ -49,17 +55,17 @@ export function useRequestsData() {
             variant: "default"
           });
           
-          // Also use Sonner toast for better visibility
+          // Utiliser également le toast Sonner pour une meilleure visibilité
           toast('Nouvelle requête', {
             description: 'Une nouvelle requête a été reçue'
           });
           
-          // Force refresh
+          // Forcer l'actualisation
           queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
           queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
         }
         
-        // Show notification for status updates
+        // Afficher une notification pour les mises à jour de statut
         if (payload.eventType === 'UPDATE' && payload.new?.status !== payload.old?.status) {
           const statusMap = {
             'pending': 'est en attente',
@@ -77,12 +83,12 @@ export function useRequestsData() {
             variant: "default"
           });
           
-          // Also use Sonner toast for better visibility
+          // Utiliser également le toast Sonner pour une meilleure visibilité
           toast('Statut mis à jour', {
             description: `La requête ${message}`
           });
           
-          // Force refresh
+          // Forcer l'actualisation
           queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
           queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
         }
@@ -94,18 +100,18 @@ export function useRequestsData() {
         }
       });
       
-    // Broadcast listener for submission notifications
+    // Écouteur de diffusion pour les notifications de soumission
     const notificationChannel = supabase
       .channel('service_requests_notifications')
       .on('broadcast', { event: 'request_submitted' }, (payload) => {
         console.log('Request submission notification received:', payload);
-        // Force refresh when a request submission notification is received
+        // Forcer l'actualisation lorsqu'une notification de soumission de demande est reçue
         refetch();
         queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       })
       .subscribe();
     
-    // Set up a frequent refresh as an additional backup
+    // Configurer une actualisation fréquente comme sauvegarde supplémentaire
     const interval = setInterval(() => {
       console.log('Performing scheduled refresh of service requests');
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
@@ -118,12 +124,13 @@ export function useRequestsData() {
       supabase.removeChannel(notificationChannel);
       clearInterval(interval);
     };
-  }, [refetch, queryClient, uiToast]);
+  }, [refetch, queryClient, uiToast, createTestRequestIfEmpty]);
   
   const handleRefresh = useCallback(async () => {
     console.log('Manual refresh of service requests triggered');
     setIsRefreshing(true);
     try {
+      await createTestRequestIfEmpty();
       const result = await refetch();
       console.log('Manual refresh completed with count:', result.data?.length || 0);
       
@@ -141,7 +148,7 @@ export function useRequestsData() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [refetch, uiToast]);
+  }, [refetch, uiToast, createTestRequestIfEmpty]);
 
   return {
     requests,

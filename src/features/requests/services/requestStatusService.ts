@@ -17,22 +17,42 @@ export function useRequestStatusService() {
     onSuccess?: () => void
   ) => {
     try {
-      await updateRequestStatus(requestId, newStatus);
+      console.log(`Updating request ${requestId} status to ${newStatus}...`);
       
-      // Use both toast systems for better visibility
+      // Mettre à jour directement via Supabase pour plus de fiabilité
+      const { data, error } = await supabase
+        .from('service_requests')
+        .update({ status: newStatus })
+        .eq('id', requestId)
+        .select();
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log(`Successfully updated request status:`, data);
+      
+      // Appeler également la fonction de service existante pour maintenir la compatibilité
+      try {
+        await updateRequestStatus(requestId, newStatus);
+      } catch (serviceError) {
+        console.warn('Secondary update method failed but primary succeeded:', serviceError);
+      }
+      
+      // Utiliser les deux systèmes de toast pour une meilleure visibilité
       toast({
-        title: "Status Updated",
-        description: `Request status changed to ${newStatus}`
+        title: "Statut mis à jour",
+        description: `Le statut de la requête est maintenant: ${newStatus}`
       });
-      sonnerToast.success("Status Updated", {
-        description: `Request status changed to ${newStatus}`
+      sonnerToast.success("Statut mis à jour", {
+        description: `Le statut de la requête est maintenant: ${newStatus}`
       });
       
-      // Forcefully invalidate and refetch to ensure all data is updated
+      // Invalider et réactualiser de force pour s'assurer que toutes les données sont mises à jour
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       
-      // Broadcast the status change event through Supabase
+      // Diffuser l'événement de changement de statut via Supabase
       try {
         const channel = supabase.channel('status-updates');
         channel.subscribe(status => {
@@ -48,7 +68,7 @@ export function useRequestStatusService() {
               }
             });
             
-            // Remove the channel after sending the notification
+            // Supprimer le canal après avoir envoyé la notification
             setTimeout(() => {
               supabase.removeChannel(channel);
             }, 1000);
@@ -62,12 +82,12 @@ export function useRequestStatusService() {
     } catch (error) {
       console.error("Error updating request status:", error);
       toast({
-        title: "Error",
-        description: "Failed to update request status",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la requête",
         variant: "destructive"
       });
-      sonnerToast.error("Error", {
-        description: "Failed to update request status"
+      sonnerToast.error("Erreur", {
+        description: "Impossible de mettre à jour le statut de la requête"
       });
     }
   };

@@ -7,10 +7,11 @@ import { useRequestsData } from '@/hooks/useRequestsData';
 import { useRequestStatusService } from '@/features/requests/services/requestStatusService';
 import { RequestsHeader } from '@/components/admin/requests/RequestsHeader';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 export const RequestsTab = () => {
   const queryClient = useQueryClient();
@@ -25,25 +26,31 @@ export const RequestsTab = () => {
   
   const { handleUpdateStatus } = useRequestStatusService();
   const [newRequests, setNewRequests] = useState<boolean>(false);
+  const [dataChecked, setDataChecked] = useState<boolean>(false);
   
-  // Force multiple refreshes when the component is mounted
+  // Forcer plusieurs actualisations lorsque le composant est monté
   useEffect(() => {
     console.log('RequestsTab mounted, forcing aggressive refresh of data');
     
-    // Immediate refresh
+    // Actualisation immédiate
     handleRefresh();
     
-    // Schedule multiple refresh cycles to ensure data is loaded
-    const refreshTimes = [100, 500, 1000, 2000, 5000];
+    // Planifier plusieurs cycles d'actualisation pour s'assurer que les données sont chargées
+    const refreshTimes = [500, 1500, 3000, 5000];
     const refreshTimers = refreshTimes.map(delay => 
       setTimeout(() => {
         console.log(`Performing delayed refresh after ${delay}ms`);
         queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+        
+        // Considérer les données comme vérifiées après la dernière actualisation
+        if (delay === refreshTimes[refreshTimes.length - 1]) {
+          setDataChecked(true);
+        }
       }, delay)
     );
     
-    // Set up a dedicated real-time subscription specifically for admin page
+    // Configurer un abonnement en temps réel dédié spécifiquement pour la page d'administration
     const channel = supabase
       .channel('admin-requests-realtime')
       .on('postgres_changes', {
@@ -53,10 +60,10 @@ export const RequestsTab = () => {
       }, (payload) => {
         console.log('Admin detected service request change:', payload);
         
-        // Signal that new requests are available
+        // Signaler que de nouvelles demandes sont disponibles
         setNewRequests(true);
         
-        // Show notification based on event type
+        // Afficher une notification en fonction du type d'événement
         if (payload.eventType === 'INSERT') {
           const data = payload.new;
           const requestType = data.type || 'service';
@@ -66,7 +73,7 @@ export const RequestsTab = () => {
             description: `Nouvelle demande de ${requestType} depuis la chambre ${roomNumber}`
           });
           
-          // Force immediate data refresh
+          // Forcer l'actualisation immédiate des données
           queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
           queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
           handleRefresh();
@@ -75,7 +82,7 @@ export const RequestsTab = () => {
             description: 'Une demande a été modifiée'
           });
           
-          // Force refresh
+          // Forcer l'actualisation
           queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
         }
       })
@@ -86,17 +93,17 @@ export const RequestsTab = () => {
         }
       });
       
-    // Listen for broadcast events for status updates
+    // Écouter les événements de diffusion pour les mises à jour de statut
     const statusChannel = supabase
       .channel('status-updates-listener')
       .on('broadcast', { event: 'status_updated' }, (payload) => {
         console.log('Status update broadcast received:', payload);
         
-        // Force immediate refresh
+        // Forcer l'actualisation immédiate
         queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
         
-        // Show toast notification
+        // Afficher une notification toast
         const statusMap = {
           'pending': 'en attente',
           'in_progress': 'en cours',
@@ -113,7 +120,7 @@ export const RequestsTab = () => {
       })
       .subscribe();
     
-    // Set up a frequent polling interval as a backup
+    // Configurer un intervalle de sondage fréquent comme sauvegarde
     const pollingInterval = setInterval(() => {
       console.log('Performing polling refresh of service requests');
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
@@ -128,7 +135,7 @@ export const RequestsTab = () => {
     };
   }, [queryClient, handleRefresh]);
   
-  // Effect to automatically refresh when new requests are detected
+  // Effet pour actualiser automatiquement lorsque de nouvelles demandes sont détectées
   useEffect(() => {
     if (newRequests) {
       console.log('New requests detected, refreshing data');
@@ -139,13 +146,41 @@ export const RequestsTab = () => {
   
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     await handleUpdateStatus(requestId, newStatus, () => {
-      // Force multiple refreshes to ensure data is updated
+      // Forcer plusieurs actualisations pour s'assurer que les données sont mises à jour
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       setTimeout(() => {
         handleRefresh();
       }, 500);
     });
+  };
+
+  const createDemoRequest = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('service_requests')
+        .insert({
+          guest_id: 'demo-guest',
+          room_id: 'demo-room',
+          guest_name: 'Jean Dupont',
+          room_number: '101',
+          type: 'housekeeping',
+          description: 'Demande de nettoyage quotidien',
+          status: 'pending'
+        })
+        .select();
+        
+      if (error) {
+        console.error('Error creating demo request:', error);
+        toast.error('Erreur lors de la création de la requête de démonstration');
+      } else {
+        console.log('Created demo request:', data);
+        toast.success('Requête de démonstration créée avec succès');
+        handleRefresh();
+      }
+    } catch (e) {
+      console.error('Exception creating demo request:', e);
+    }
   };
 
   return (
@@ -159,10 +194,27 @@ export const RequestsTab = () => {
         {isError && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
+            <AlertTitle>Erreur</AlertTitle>
             <AlertDescription>
-              Failed to load request data. Please try refreshing.
+              Impossible de charger les données des requêtes. Veuillez réessayer.
               {error && <div className="mt-2 text-xs opacity-80">{String(error)}</div>}
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {dataChecked && requests.length === 0 && !isLoading && !isRefreshing && (
+          <Alert className="mb-4">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Aucune requête trouvée</AlertTitle>
+            <AlertDescription className="flex flex-col gap-2">
+              <p>Aucune requête n'est disponible dans la base de données.</p>
+              <Button 
+                variant="outline" 
+                onClick={createDemoRequest}
+                className="w-fit"
+              >
+                Créer une requête de démonstration
+              </Button>
             </AlertDescription>
           </Alert>
         )}
