@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { UserData } from '@/features/users/types/userTypes';
 import { getCurrentSession, isAuthenticated } from '../services/authService';
-import { getGuestData } from '@/features/users/services/guestService';
+import { getGuestData, syncGuestData } from '@/features/users/services/guestService';
 
 interface AuthContextType {
   session: Session | null;
