@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,10 @@ const NotificationMenu = () => {
   const { user, userData } = useAuth();
   const { data: serviceRequests = [] } = useServiceRequests();
   const { reservations = [] } = useTableReservations();
+
+  console.log("NotificationMenu - user:", user?.id);
+  console.log("NotificationMenu - serviceRequests:", serviceRequests.length);
+  console.log("NotificationMenu - reservations:", reservations);
 
   // Define a type for combined notifications
   type NotificationItem = {
@@ -94,9 +99,8 @@ const NotificationMenu = () => {
     }
   }
 
-  // Make sure we only render null if there's no user data at all
-  if (!user && !userData) {
-    console.log("No user data found for NotificationMenu");
+  // Render component if user is logged in
+  if (!user) {
     return null;
   }
 

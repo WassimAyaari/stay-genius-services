@@ -17,6 +17,8 @@ export const useTableReservations = (restaurantId?: string) => {
       return [];
     }
     
+    console.log('Fetching reservations for user:', user.id);
+    
     const { data, error } = await supabase
       .from('table_reservations')
       .select('*')
@@ -27,6 +29,8 @@ export const useTableReservations = (restaurantId?: string) => {
       console.error('Error fetching reservations:', error);
       throw error;
     }
+
+    console.log('Raw reservations data:', data);
 
     // Transform the data to match the TableReservation type
     return (data || []).map(item => ({
@@ -74,7 +78,9 @@ export const useTableReservations = (restaurantId?: string) => {
   const { data: reservations, isLoading, error, refetch } = useQuery({
     queryKey: ['tableReservations', user?.id, restaurantId],
     queryFn: restaurantId ? fetchRestaurantReservations : fetchUserReservations,
-    enabled: !!user?.id || !!restaurantId // Only fetch when user is authenticated or restaurantId is provided
+    enabled: !!user?.id || !!restaurantId, // Only fetch when user is authenticated or restaurantId is provided
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnWindowFocus: true,
   });
 
   // Mutation for cancelling reservations
