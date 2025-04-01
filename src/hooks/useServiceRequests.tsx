@@ -10,7 +10,7 @@ export const useServiceRequests = () => {
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
     console.log('Fetching all service requests...');
     
-    // Improved: clearer query with better error handling
+    // Improved: clearer query with better error handling and no caching
     const { data: requestsData, error: requestsError } = await supabase
       .from('service_requests')
       .select('*')
@@ -91,8 +91,9 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
-    refetchInterval: 3000, // More frequent refresh (every 3 seconds)
-    staleTime: 1000, // Consider data stale after 1 second
+    refetchInterval: 5000, // More frequent refresh (every 5 seconds)
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Immediate garbage collection
     retry: 3,
     refetchOnWindowFocus: true,
     refetchOnMount: true,

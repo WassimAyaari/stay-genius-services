@@ -26,14 +26,16 @@ export const RequestsTab = () => {
   const { handleUpdateStatus } = useRequestStatusService();
   const [newRequests, setNewRequests] = useState<boolean>(false);
   
-  // Force a refresh when the component is mounted
+  // Force multiple refreshes when the component is mounted
   useEffect(() => {
-    console.log('RequestsTab mounted, forcing refresh of data');
+    console.log('RequestsTab mounted, forcing aggressive refresh of data');
     
-    // Force multiple refreshes to ensure data is loaded
+    // Immediate refresh
     handleRefresh();
     
-    const initialRefreshes = [100, 500, 1500, 3000].map(delay => 
+    // Schedule multiple refresh cycles to ensure data is loaded
+    const refreshTimes = [100, 500, 1000, 2000, 5000];
+    const refreshTimers = refreshTimes.map(delay => 
       setTimeout(() => {
         console.log(`Performing delayed refresh after ${delay}ms`);
         queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
@@ -41,9 +43,9 @@ export const RequestsTab = () => {
       }, delay)
     );
     
-    // Set up a dedicated real-time subscription for the admin page
+    // Set up a dedicated real-time subscription specifically for admin page
     const channel = supabase
-      .channel('admin-requests-changes')
+      .channel('admin-requests-realtime')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -54,48 +56,47 @@ export const RequestsTab = () => {
         // Signal that new requests are available
         setNewRequests(true);
         
-        // Show notification for changes
+        // Show notification based on event type
         if (payload.eventType === 'INSERT') {
+          const data = payload.new;
+          const requestType = data.type || 'service';
+          const roomNumber = data.room_number || 'Unknown';
+          
           toast.success('Nouvelle demande reçue', {
-            description: 'Une nouvelle demande a été ajoutée au système'
+            description: `Nouvelle demande de ${requestType} depuis la chambre ${roomNumber}`
           });
+          
+          // Force immediate data refresh
+          queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+          queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+          handleRefresh();
         } else if (payload.eventType === 'UPDATE') {
           toast.info('Demande mise à jour', {
             description: 'Une demande a été modifiée'
           });
+          
+          // Force refresh
+          queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
         }
-        
-        // Force immediate data refresh
-        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       })
       .subscribe((status) => {
         console.log('Admin real-time subscription status:', status);
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to realtime updates, falling back to polling');
+        }
       });
     
-    // Also listen for broadcast events from request submissions
-    const notificationChannel = supabase
-      .channel('admin-request-notifications')
-      .on('broadcast', { event: 'request_submitted' }, (payload) => {
-        console.log('Request submission notification received:', payload);
-        // Force refresh when a request submission notification is received
-        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-        setNewRequests(true);
-      })
-      .subscribe();
-    
-    // Set up a frequent refresh interval as a backup
-    const interval = setInterval(() => {
+    // Set up a frequent polling interval as a backup
+    const pollingInterval = setInterval(() => {
+      console.log('Performing polling refresh of service requests');
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-    }, 2000);
+    }, 3000);
     
     return () => {
-      initialRefreshes.forEach(clearTimeout);
-      clearInterval(interval);
+      refreshTimers.forEach(clearTimeout);
+      clearInterval(pollingInterval);
       supabase.removeChannel(channel);
-      supabase.removeChannel(notificationChannel);
     };
   }, [queryClient, handleRefresh]);
   
@@ -112,12 +113,10 @@ export const RequestsTab = () => {
     await handleUpdateStatus(requestId, newStatus, () => {
       // Force multiple refreshes to ensure data is updated
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-      }, 300);
+      queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       setTimeout(() => {
         handleRefresh();
-      }, 800);
+      }, 500);
     });
   };
 

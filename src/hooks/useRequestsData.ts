@@ -19,16 +19,18 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for service requests
+  // Set up enhanced real-time updates for service requests
   useEffect(() => {
     console.log('Setting up enhanced realtime updates for all service requests');
     
-    // Force initial fetch
+    // Force initial multiple fetches to ensure data is loaded
     refetch();
+    setTimeout(() => refetch(), 300);
+    setTimeout(() => refetch(), 1000);
     
-    // Enable real-time subscription with improved config
-    const channel = supabase
-      .channel('service_requests_changes')
+    // Primary realtime subscription - optimized for reliability
+    const serviceRequestsChannel = supabase
+      .channel('service_requests_all_changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -51,6 +53,10 @@ export function useRequestsData() {
           toast('Nouvelle requête', {
             description: 'Une nouvelle requête a été reçue'
           });
+          
+          // Force refresh
+          queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+          queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
         }
         
         // Show notification for status updates
@@ -76,24 +82,34 @@ export function useRequestsData() {
         console.log('Enhanced subscription status:', status);
         if (status !== 'SUBSCRIBED') {
           console.error('Failed to subscribe to realtime updates:', status);
-          // Fall back to periodic refresh
-          refetch();
         }
       });
+      
+    // Broadcast listener for submission notifications
+    const notificationChannel = supabase
+      .channel('service_requests_notifications')
+      .on('broadcast', { event: 'request_submitted' }, (payload) => {
+        console.log('Request submission notification received:', payload);
+        // Force refresh when a request submission notification is received
+        refetch();
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+      })
+      .subscribe();
     
-    // Set up a periodic refresh as a backup
+    // Set up a frequent refresh as an additional backup
     const interval = setInterval(() => {
       console.log('Performing scheduled refresh of service requests');
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       refetch();
-    }, 3000); // More frequent refresh (every 3 seconds)
+    }, 5000);
     
     return () => {
       console.log('Cleaning up realtime subscription and interval');
-      supabase.removeChannel(channel);
+      supabase.removeChannel(serviceRequestsChannel);
+      supabase.removeChannel(notificationChannel);
       clearInterval(interval);
     };
-  }, [refetch]);
+  }, [refetch, queryClient, uiToast]);
   
   const handleRefresh = useCallback(async () => {
     console.log('Manual refresh of service requests triggered');

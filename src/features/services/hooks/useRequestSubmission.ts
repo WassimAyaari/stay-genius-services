@@ -10,7 +10,7 @@ export function useRequestSubmission() {
   const multiItemHandler = useMultiItemRequestHandler();
   const queryClient = useQueryClient();
   
-  // Improved function to invalidate cache after each submission
+  // Improved function to aggressively invalidate cache after each submission
   const invalidateRequestsCache = () => {
     console.log('Aggressively invalidating serviceRequests cache with multiple approaches');
     
@@ -28,7 +28,7 @@ export function useRequestSubmission() {
     });
     
     // Approach 3: Multiple invalidations at different times to handle race conditions
-    const delays = [100, 500, 1000, 2000];
+    const delays = [100, 500, 1000, 2000, 5000];
     delays.forEach(delay => {
       setTimeout(() => {
         console.log(`Delayed cache invalidation after ${delay}ms`);
@@ -39,15 +39,18 @@ export function useRequestSubmission() {
     
     // Approach 4: Send notification through realtime to trigger listeners
     try {
-      // This is a notification technique to ensure all subscribers know about the new request
-      // It doesn't actually insert new data, just triggers the realtime listeners
+      // This is a broadcast technique to ensure all subscribers know about the new request
       const channel = supabase.channel('request_submission_notification');
       channel.subscribe(status => {
         if (status === 'SUBSCRIBED') {
+          console.log('Broadcasting request_submitted event to all listeners');
           channel.send({
             type: 'broadcast',
             event: 'request_submitted',
-            payload: { timestamp: new Date().toISOString() }
+            payload: { 
+              timestamp: new Date().toISOString(),
+              message: 'New service request submitted'
+            }
           });
           
           // Remove the channel after sending the notification
@@ -68,12 +71,16 @@ export function useRequestSubmission() {
       if (result) {
         console.log('Preset request submitted successfully, invalidating cache');
         invalidateRequestsCache();
-        toast.success('Demande soumise avec succès');
+        toast.success('Demande soumise avec succès', {
+          description: 'Votre demande a été envoyée et sera traitée prochainement'
+        });
       }
       return result;
     } catch (error) {
       console.error('Error in handlePresetRequest:', error);
-      toast.error('Erreur lors de la soumission de la demande');
+      toast.error('Erreur lors de la soumission de la demande', {
+        description: 'Veuillez réessayer plus tard'  
+      });
       return false;
     }
   };
@@ -84,12 +91,16 @@ export function useRequestSubmission() {
       if (result) {
         console.log('Multiple requests submitted successfully, invalidating cache');
         invalidateRequestsCache();
-        toast.success('Demandes soumises avec succès');
+        toast.success('Demandes soumises avec succès', {
+          description: 'Vos demandes ont été envoyées et seront traitées prochainement'
+        });
       }
       return result;
     } catch (error) {
       console.error('Error in handleSubmitRequests:', error);
-      toast.error('Erreur lors de la soumission des demandes');
+      toast.error('Erreur lors de la soumission des demandes', {
+        description: 'Veuillez réessayer plus tard'
+      });
       return false;
     }
   };
