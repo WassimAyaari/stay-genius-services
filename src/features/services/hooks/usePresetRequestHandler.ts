@@ -1,52 +1,77 @@
 
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { UserInfo } from './useUserInfo';
-import { RequestCategory } from '@/features/rooms/types';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Room } from '@/hooks/useRoom';
 import { submitRequestViaChatMessage } from '../utils/requestUtils';
 
 export function usePresetRequestHandler() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
-  const handlePresetRequest = async (
-    preset: {category: string, description: string, type: string},
-    userInfo: UserInfo,
-    selectedCategory: RequestCategory | null,
-    onClose: () => void
-  ) => {
+  const handlePresetRequest = async (requestType: string, description: string, room?: Room | null) => {
+    setIsSubmitting(true);
+
     try {
-      setIsSubmitting(true);
-      
-      // Submit request via chat message
-      const success = await submitRequestViaChatMessage(
-        preset.description,
-        preset.type,
-        userInfo,
-        selectedCategory
-      );
-      
-      if (success) {
-        toast({
-          title: "Request Submitted",
-          description: "Your request has been sent successfully."
-        });
-        
-        onClose();
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to submit request. Please try again.",
-          variant: "destructive"
-        });
+      // Get or create user ID
+      let userId = localStorage.getItem('user_id');
+      if (!userId) {
+        userId = crypto.randomUUID();
+        localStorage.setItem('user_id', userId);
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to submit request. Please try again.",
-        variant: "destructive"
+
+      // Get user info from localStorage
+      const userInfoString = localStorage.getItem('user_data');
+      let userName = 'Guest';
+      let roomNumber = room?.room_number || '';
+      
+      if (userInfoString) {
+        try {
+          const userData = JSON.parse(userInfoString);
+          userName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Guest';
+          roomNumber = userData.room_number || (room?.room_number || '');
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
+
+      // Validate room number
+      if (!roomNumber) {
+        toast.error('Room number is required. Please try again.');
+        setIsSubmitting(false);
+        return false;
+      }
+
+      // Create a service request
+      const { error } = await supabase.from('service_requests').insert({
+        guest_id: userId,
+        guest_name: userName,
+        room_number: roomNumber,
+        room_id: userId, // Use userId as the room_id to satisfy the not-null constraint
+        type: requestType,
+        description,
+        status: 'pending',
+        created_at: new Date().toISOString()
       });
-      console.error("Error submitting request:", error);
+
+      if (error) {
+        console.error('Error creating service request:', error);
+        throw error;
+      }
+
+      // Submit the request via chat message as well
+      await submitRequestViaChatMessage(
+        `${requestType} request: ${description}`, 
+        userId, 
+        userName, 
+        roomNumber
+      );
+
+      toast.success('Your request has been submitted!');
+      return true;
+    } catch (error) {
+      console.error('Error submitting preset request:', error);
+      toast.error('Failed to submit your request. Please try again.');
+      return false;
     } finally {
       setIsSubmitting(false);
     }

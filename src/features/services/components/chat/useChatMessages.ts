@@ -200,12 +200,12 @@ export const useChatMessages = (userInfo: UserInfo) => {
         else if (inputMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
         else if (inputMessage.toLowerCase().includes('food') || inputMessage.toLowerCase().includes('meal')) requestType = 'food';
         
-        // Add a room_id that's required by the service_requests table
+        // Make sure room_id is set to a non-null value using userId as a fallback
         await supabase.from('service_requests').insert({
           guest_id: userId,
           guest_name: userInfo.name,
           room_number: userInfo.roomNumber,
-          room_id: userId, // Use userId as fallback if we don't have a real room_id
+          room_id: userId, // Using userId as the room_id to satisfy the non-null constraint
           type: requestType,
           description: inputMessage,
           status: 'pending',
@@ -240,6 +240,6 @@ export const useChatMessages = (userInfo: UserInfo) => {
     messagesEndRef,
     handleSendMessage,
     handleMessageSubmit,
-    fetchMessages, // Add the fetchMessages function to the returned object
+    fetchMessages,
   };
 };
