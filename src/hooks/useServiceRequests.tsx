@@ -10,7 +10,7 @@ export const useServiceRequests = () => {
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
     console.log('Fetching all service requests...');
     
-    // Amélioré: requête plus claire avec une meilleure gestion des erreurs
+    // Improved: clearer query with better error handling
     const { data: requestsData, error: requestsError } = await supabase
       .from('service_requests')
       .select('*')
@@ -23,12 +23,12 @@ export const useServiceRequests = () => {
 
     console.log(`Fetched ${requestsData.length} service requests`);
 
-    // Traiter chaque requête pour récupérer les données associées
+    // Process each request to get associated data
     const requests = await Promise.all(
       requestsData.map(async (request) => {
         if (request.request_item_id) {
           try {
-            // Récupérer l'élément de requête
+            // Get the request item
             const { data: itemData, error: itemError } = await supabase
               .from('request_items')
               .select('*')
@@ -40,7 +40,7 @@ export const useServiceRequests = () => {
               return request;
             }
 
-            // Si nous avons un élément, récupérer sa catégorie séparément
+            // If we have an item, get its category separately
             let categoryName = null;
             if (itemData && itemData.category_id) {
               const { data: categoryData, error: categoryError } = await supabase
@@ -54,7 +54,7 @@ export const useServiceRequests = () => {
               }
             }
 
-            // Transformer les données pour correspondre au format attendu
+            // Transform data to match expected format
             return {
               ...request,
               request_items: itemData ? {
@@ -91,8 +91,8 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
-    refetchInterval: 5000, // Rafraîchir plus fréquemment (toutes les 5 secondes)
-    staleTime: 2000, // Considérer les données comme périmées après 2 secondes
+    refetchInterval: 3000, // More frequent refresh (every 3 seconds)
+    staleTime: 1000, // Consider data stale after 1 second
     retry: 3,
     refetchOnWindowFocus: true,
     refetchOnMount: true,

@@ -3,30 +3,31 @@ import { usePresetRequestHandler } from './usePresetRequestHandler';
 import { useMultiItemRequestHandler } from './useMultiItemRequestHandler';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useRequestSubmission() {
   const presetHandler = usePresetRequestHandler();
   const multiItemHandler = useMultiItemRequestHandler();
   const queryClient = useQueryClient();
   
-  // Fonction améliorée pour invalider le cache après chaque soumission
+  // Improved function to invalidate cache after each submission
   const invalidateRequestsCache = () => {
     console.log('Aggressively invalidating serviceRequests cache with multiple approaches');
     
-    // Approche 1: Invalidation directe
+    // Approach 1: Direct invalidation
     queryClient.invalidateQueries({ 
       queryKey: ['serviceRequests'],
       refetchType: 'all',
       exact: false
     });
     
-    // Approche 2: Force refresh immédiat
+    // Approach 2: Immediate force refresh
     queryClient.refetchQueries({ 
       queryKey: ['serviceRequests'],
       type: 'all'
     });
     
-    // Approche 3: Invalidations multiples à différents moments pour gérer conditions de concurrence
+    // Approach 3: Multiple invalidations at different times to handle race conditions
     const delays = [100, 500, 1000, 2000];
     delays.forEach(delay => {
       setTimeout(() => {
@@ -35,9 +36,32 @@ export function useRequestSubmission() {
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       }, delay);
     });
+    
+    // Approach 4: Send notification through realtime to trigger listeners
+    try {
+      // This is a notification technique to ensure all subscribers know about the new request
+      // It doesn't actually insert new data, just triggers the realtime listeners
+      const channel = supabase.channel('request_submission_notification');
+      channel.subscribe(status => {
+        if (status === 'SUBSCRIBED') {
+          channel.send({
+            type: 'broadcast',
+            event: 'request_submitted',
+            payload: { timestamp: new Date().toISOString() }
+          });
+          
+          // Remove the channel after sending the notification
+          setTimeout(() => {
+            supabase.removeChannel(channel);
+          }, 1000);
+        }
+      });
+    } catch (error) {
+      console.error('Error broadcasting request submission:', error);
+    }
   };
   
-  // Envelopper les gestionnaires pour invalider le cache après soumission
+  // Wrap handlers to invalidate cache after submission
   const handlePresetRequest = async (...args: Parameters<typeof presetHandler.handlePresetRequest>) => {
     try {
       const result = await presetHandler.handlePresetRequest(...args);

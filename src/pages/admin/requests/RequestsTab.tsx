@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export const RequestsTab = () => {
+  const queryClient = useQueryClient();
   const { 
     requests, 
     isLoading, 
@@ -23,14 +24,13 @@ export const RequestsTab = () => {
   } = useRequestsData();
   
   const { handleUpdateStatus } = useRequestStatusService();
-  const queryClient = useQueryClient();
   const [newRequests, setNewRequests] = useState<boolean>(false);
   
-  // Forcer un rafraîchissement lorsque le composant est monté
+  // Force a refresh when the component is mounted
   useEffect(() => {
     console.log('RequestsTab mounted, forcing refresh of data');
     
-    // Forcer plusieurs rafraîchissements pour s'assurer que les données sont chargées
+    // Force multiple refreshes to ensure data is loaded
     handleRefresh();
     
     const initialRefreshes = [100, 500, 1500, 3000].map(delay => 
@@ -41,9 +41,9 @@ export const RequestsTab = () => {
       }, delay)
     );
     
-    // Mettre en place une souscription en temps réel dédiée pour la page d'administration
+    // Set up a dedicated real-time subscription for the admin page
     const channel = supabase
-      .channel('admin-requests-realtime')
+      .channel('admin-requests-changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -51,10 +51,10 @@ export const RequestsTab = () => {
       }, (payload) => {
         console.log('Admin detected service request change:', payload);
         
-        // Signaler que de nouvelles demandes sont disponibles
+        // Signal that new requests are available
         setNewRequests(true);
         
-        // Afficher une notification pour les changements
+        // Show notification for changes
         if (payload.eventType === 'INSERT') {
           toast.success('Nouvelle demande reçue', {
             description: 'Une nouvelle demande a été ajoutée au système'
@@ -65,7 +65,7 @@ export const RequestsTab = () => {
           });
         }
         
-        // Forcer le rafraîchissement immédiat des données
+        // Force immediate data refresh
         queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       })
@@ -73,20 +73,33 @@ export const RequestsTab = () => {
         console.log('Admin real-time subscription status:', status);
       });
     
-    // Configurer un intervalle de rafraîchissement fréquent comme sauvegarde
+    // Also listen for broadcast events from request submissions
+    const notificationChannel = supabase
+      .channel('admin-request-notifications')
+      .on('broadcast', { event: 'request_submitted' }, (payload) => {
+        console.log('Request submission notification received:', payload);
+        // Force refresh when a request submission notification is received
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+        setNewRequests(true);
+      })
+      .subscribe();
+    
+    // Set up a frequent refresh interval as a backup
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-    }, 3000);
+    }, 2000);
     
     return () => {
       initialRefreshes.forEach(clearTimeout);
       clearInterval(interval);
       supabase.removeChannel(channel);
+      supabase.removeChannel(notificationChannel);
     };
   }, [queryClient, handleRefresh]);
   
-  // Effet pour rafraîchir automatiquement lorsque de nouvelles demandes sont détectées
+  // Effect to automatically refresh when new requests are detected
   useEffect(() => {
     if (newRequests) {
       console.log('New requests detected, refreshing data');
@@ -97,7 +110,7 @@ export const RequestsTab = () => {
   
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     await handleUpdateStatus(requestId, newStatus, () => {
-      // Forcer plusieurs rafraîchissements pour s'assurer que les données sont mises à jour
+      // Force multiple refreshes to ensure data is updated
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });

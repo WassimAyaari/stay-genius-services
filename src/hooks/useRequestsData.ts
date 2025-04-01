@@ -4,9 +4,11 @@ import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function useRequestsData() {
   const { toast: uiToast } = useToast();
+  const queryClient = useQueryClient();
   const { 
     data: requests = [], 
     isLoading, 
@@ -17,16 +19,16 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Configuration des mises à jour en temps réel pour les requêtes de service
+  // Set up real-time updates for service requests
   useEffect(() => {
     console.log('Setting up enhanced realtime updates for all service requests');
     
-    // Forcer la récupération initiale
+    // Force initial fetch
     refetch();
     
-    // Activer la souscription en temps réel avec une configuration améliorée
+    // Enable real-time subscription with improved config
     const channel = supabase
-      .channel('service_requests_realtime')
+      .channel('service_requests_changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -34,10 +36,10 @@ export function useRequestsData() {
       }, (payload) => {
         console.log('Service request change detected:', payload.eventType, payload);
         
-        // Rafraîchir immédiatement les données lors de tout changement
+        // Refresh data immediately on any change
         refetch();
         
-        // Afficher une notification pour les nouvelles demandes
+        // Show notification for new requests
         if (payload.eventType === 'INSERT') {
           uiToast({
             title: "Nouvelle requête",
@@ -45,13 +47,13 @@ export function useRequestsData() {
             variant: "default"
           });
           
-          // Utiliser également toast sonner pour une meilleure visibilité
+          // Also use Sonner toast for better visibility
           toast('Nouvelle requête', {
             description: 'Une nouvelle requête a été reçue'
           });
         }
         
-        // Afficher une notification pour les mises à jour de statut
+        // Show notification for status updates
         if (payload.eventType === 'UPDATE' && payload.new?.status !== payload.old?.status) {
           const statusMap = {
             'pending': 'est en attente',
@@ -74,16 +76,17 @@ export function useRequestsData() {
         console.log('Enhanced subscription status:', status);
         if (status !== 'SUBSCRIBED') {
           console.error('Failed to subscribe to realtime updates:', status);
-          // Repli sur un rafraîchissement périodique
+          // Fall back to periodic refresh
           refetch();
         }
       });
     
-    // Configurer un rafraîchissement périodique comme sauvegarde
+    // Set up a periodic refresh as a backup
     const interval = setInterval(() => {
       console.log('Performing scheduled refresh of service requests');
+      queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       refetch();
-    }, 5000); // Rafraîchissement plus fréquent (toutes les 5 secondes)
+    }, 3000); // More frequent refresh (every 3 seconds)
     
     return () => {
       console.log('Cleaning up realtime subscription and interval');
