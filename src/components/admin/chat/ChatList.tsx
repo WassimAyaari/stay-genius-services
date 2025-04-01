@@ -75,7 +75,7 @@ const ChatList: React.FC<ChatListProps> = ({
           ) : (
             <div className="divide-y">
               {chats.map((chat) => {
-                // Get guest name if available
+                // Get full guest name if available, with proper fallback
                 const guestName = chat.userInfo && 
                   (chat.userInfo.firstName || chat.userInfo.lastName) ? 
                   `${chat.userInfo.firstName || ''} ${chat.userInfo.lastName || ''}`.trim() : 
@@ -90,7 +90,7 @@ const ChatList: React.FC<ChatListProps> = ({
                     <div className="flex items-start p-4 gap-3 relative">
                       <Avatar className="h-10 w-10 flex-shrink-0">
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          {chat.userName.charAt(0)}
+                          {guestName ? guestName.charAt(0) : chat.userName.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       
@@ -116,7 +116,14 @@ const ChatList: React.FC<ChatListProps> = ({
                             </p>
                           )}
                           
-                          {/* Always display username if different from the guest name */}
+                          {/* Display Guest name prominently */}
+                          {guestName && (
+                            <p className="text-xs font-medium text-primary">
+                              Guest: {guestName}
+                            </p>
+                          )}
+                          
+                          {/* Only display username if different from the guest name */}
                           {guestName && chat.userName !== guestName && (
                             <p className="text-xs text-muted-foreground">
                               Username: {chat.userName}
