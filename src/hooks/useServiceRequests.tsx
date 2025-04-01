@@ -43,7 +43,7 @@ export const useServiceRequests = () => {
                 .from('request_categories')
                 .select('name')
                 .eq('id', itemData.category_id)
-                .single();
+                .maybeSingle(); // Use maybeSingle instead of single to avoid errors if no category is found
 
               if (!categoryError && categoryData) {
                 categoryName = categoryData.name;
