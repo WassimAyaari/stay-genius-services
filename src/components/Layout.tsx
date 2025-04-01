@@ -3,6 +3,7 @@ import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
+import NotificationMenu from './NotificationMenu';
 import BottomNav from './BottomNav';
 import { ChevronLeft, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -44,6 +45,7 @@ const Layout = ({
               </Link>
               
               <div className="flex items-center gap-3 w-[120px] justify-end">
+                <NotificationMenu />
                 <UserMenu />
                 <Link 
                   to="/messages" 

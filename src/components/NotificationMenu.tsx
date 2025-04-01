@@ -11,12 +11,12 @@ import { fr } from 'date-fns/locale';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const NotificationMenu = () => {
-  const { user, userData } = useAuth();
+  const { user } = useAuth();
   const { data: serviceRequests = [] } = useServiceRequests();
   const { reservations = [] } = useTableReservations();
 
   console.log("NotificationMenu - user:", user?.id);
-  console.log("NotificationMenu - serviceRequests:", serviceRequests.length);
+  console.log("NotificationMenu - serviceRequests:", serviceRequests);
   console.log("NotificationMenu - reservations:", reservations);
 
   // Define a type for combined notifications
@@ -99,7 +99,7 @@ const NotificationMenu = () => {
     }
   }
 
-  // Render component if user is logged in
+  // Return null only if user is not logged in
   if (!user) {
     return null;
   }
