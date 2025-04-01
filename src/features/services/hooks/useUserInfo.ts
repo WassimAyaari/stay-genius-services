@@ -32,8 +32,8 @@ export function useUserInfo(room: Room | null) {
           const phone = userData.phone || '';
           
           setUserInfo({
-            name: fullName,
-            roomNumber: roomNumber,
+            name: fullName || 'Guest',
+            roomNumber: roomNumber || (room?.room_number || ''),
             phone: phone
           });
           return;
@@ -43,9 +43,13 @@ export function useUserInfo(room: Room | null) {
       }
     }
     
-    // If no user data in localStorage, check for values that might have been set in previous sessions
-    const savedUserInfo = getUserInfo();
-    setUserInfo(savedUserInfo);
+    // If no user data in localStorage, use room data if available
+    if (room) {
+      setUserInfo({
+        name: 'Guest',
+        roomNumber: room.room_number || '',
+      });
+    }
   };
 
   const getUserInfo = () => {
@@ -54,7 +58,7 @@ export function useUserInfo(room: Room | null) {
       try {
         const userData = JSON.parse(userInfoStr);
         return {
-          name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
+          name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Guest',
           roomNumber: userData.room_number || (room?.room_number || ''),
           phone: userData.phone || ''
         };
@@ -63,7 +67,7 @@ export function useUserInfo(room: Room | null) {
       }
     }
     return {
-      name: '',
+      name: 'Guest',
       roomNumber: room?.room_number || '',
       phone: ''
     };

@@ -8,8 +8,8 @@ import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
 import ServiceCard from '@/features/services/components/ServiceCard';
 import ServiceChat from '@/features/services/components/ServiceChat';
-import UserInfoDialog from '@/features/services/components/UserInfoDialog';
 import RequestDialog from '@/features/services/components/RequestDialog';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 interface UserInfo {
   name: string;
@@ -19,13 +19,14 @@ interface UserInfo {
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({
-    name: '',
+    name: 'Guest',
     roomNumber: ''
   });
   const { toast } = useToast();
+  const { userData } = useAuth();
+  
   // Pass room number to useRoom hook to fetch room data
   const { data: room } = useRoom(userInfo.roomNumber);
 
@@ -39,7 +40,7 @@ const Services = () => {
         
         if (fullName || roomNumber) {
           setUserInfo({
-            name: fullName,
+            name: fullName || 'Guest',
             roomNumber: roomNumber
           });
         }
@@ -50,42 +51,12 @@ const Services = () => {
   }, []);
 
   const handleStartChat = () => {
-    if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
-      setIsUserInfoDialogOpen(true);
-      return;
-    }
-
+    // Ensure user ID exists
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       userId = uuidv4();
       localStorage.setItem('user_id', userId);
     }
-    setIsChatOpen(true);
-  };
-
-  const handleSubmitUserInfo = () => {
-    if (!userInfo.name.trim() || !userInfo.roomNumber.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please provide your name and room number.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Save user data in the expected format
-    localStorage.setItem('user_data', JSON.stringify({
-      first_name: userInfo.name.split(' ')[0],
-      last_name: userInfo.name.split(' ').slice(1).join(' '),
-      room_number: userInfo.roomNumber
-    }));
-
-    let userId = localStorage.getItem('user_id');
-    if (!userId) {
-      userId = uuidv4();
-      localStorage.setItem('user_id', userId);
-    }
-    setIsUserInfoDialogOpen(false);
     setIsChatOpen(true);
   };
 
@@ -156,14 +127,6 @@ const Services = () => {
         isChatOpen={isChatOpen}
         setIsChatOpen={setIsChatOpen}
         userInfo={userInfo}
-      />
-
-      <UserInfoDialog
-        isOpen={isUserInfoDialogOpen}
-        onOpenChange={setIsUserInfoDialogOpen}
-        userInfo={userInfo}
-        setUserInfo={setUserInfo}
-        onSubmit={handleSubmitUserInfo}
       />
 
       <RequestDialog
