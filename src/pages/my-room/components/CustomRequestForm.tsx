@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useUserInfo } from '../hooks/useUserInfo';
 import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast as sonnerToast } from 'sonner';
 
 interface CustomRequestFormProps {
   room: Room | null;
@@ -66,8 +66,8 @@ const CustomRequestForm = ({ room, onRequestSuccess }: CustomRequestFormProps) =
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       }, 1000);
       
-      // Also notify with Sonner toast for better visibility
-      toast.success('Requête envoyée', {
+      // Use Sonner toast correctly
+      sonnerToast.success('Requête envoyée', {
         description: 'Votre requête personnalisée a été soumise avec succès.'
       });
       
@@ -80,8 +80,8 @@ const CustomRequestForm = ({ room, onRequestSuccess }: CustomRequestFormProps) =
         variant: "destructive",
       });
       
-      // Also show a more visible error with Sonner
-      toast.error('Erreur', {
+      // Use Sonner toast correctly
+      sonnerToast.error('Erreur', {
         description: 'Échec de la soumission de la requête. Veuillez réessayer.'
       });
     } finally {
