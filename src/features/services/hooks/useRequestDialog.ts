@@ -12,10 +12,11 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
   const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   
-  // Get user info management - don't show dialog automatically
+  // Get user info management with enhanced features
   const { 
     userInfo, 
-    getUserInfo
+    getUserInfo,
+    ensureValidUserInfo
   } = useUserInfo(room);
   
   // Get request submission functionality
@@ -50,13 +51,13 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     });
   };
 
-  // Update the handle submit requests to use the most up-to-date user info
+  // Update the handle submit requests to properly validate user info
   const handleSubmitRequests = async () => {
-    // Get the most recent user info from localStorage
-    const currentUserInfo = getUserInfo();
+    // First ensure we have valid user info and update localStorage if needed
+    const validUserInfo = ensureValidUserInfo();
     
-    // Verify user info is valid and complete
-    if (!currentUserInfo.name || !currentUserInfo.roomNumber) {
+    // Double-check that we actually have the required fields with valid values
+    if (!validUserInfo.name || !validUserInfo.roomNumber) {
       toast.error("Error", {
         description: "Your profile information is incomplete. Please contact reception.",
       });
@@ -64,8 +65,8 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     }
     
     try {
-      // Call the submission function with the current user info
-      await submitRequests(selectedItems, categoryItems, currentUserInfo, selectedCategory, onClose);
+      // Call the submission function with the validated user info
+      await submitRequests(selectedItems, categoryItems, validUserInfo, selectedCategory, onClose);
       
       // Show a success toast with tracking information
       toast.success("Request Submitted", {

@@ -9,7 +9,10 @@ export interface UserInfo {
 }
 
 export function useUserInfo(room: Room | null) {
-  const [userInfo, setUserInfo] = useState<UserInfo>({ name: '', roomNumber: '' });
+  const [userInfo, setUserInfo] = useState<UserInfo>({ 
+    name: '', 
+    roomNumber: room?.room_number || '' 
+  });
 
   // Load user profile data when component mounts
   useEffect(() => {
@@ -27,13 +30,13 @@ export function useUserInfo(room: Room | null) {
           // Format full name from first_name and last_name fields
           const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
           // Get room number from userData or fall back to room prop
-          const roomNumber = userData.room_number || room?.room_number || '';
+          const roomNumber = userData.room_number || room?.room_number || '401';
           // Get phone number if available
           const phone = userData.phone || '';
           
           return {
             name: fullName || 'Guest',
-            roomNumber: roomNumber || (room?.room_number || ''),
+            roomNumber: roomNumber,
             phone: phone
           };
         }
@@ -46,14 +49,14 @@ export function useUserInfo(room: Room | null) {
     if (room) {
       return {
         name: 'Guest',
-        roomNumber: room.room_number || '',
+        roomNumber: room.room_number || '401',
       };
     }
 
-    // Default fallback
+    // Default fallback - ensure we always return something valid
     return { 
       name: 'Guest', 
-      roomNumber: room?.room_number || ''
+      roomNumber: '401'
     };
   };
 
@@ -70,10 +73,30 @@ export function useUserInfo(room: Room | null) {
     setUserInfo(info);
   };
 
+  // Add method to update local user_data with default values if missing
+  const ensureValidUserInfo = () => {
+    const currentInfo = getUserInfo();
+    
+    // If either name or room number is missing, save with defaults
+    if (!currentInfo.name || !currentInfo.roomNumber) {
+      const updatedInfo = {
+        name: currentInfo.name || 'Guest',
+        roomNumber: currentInfo.roomNumber || (room?.room_number || '401'),
+        phone: currentInfo.phone
+      };
+      
+      saveUserInfo(updatedInfo);
+      return updatedInfo;
+    }
+    
+    return currentInfo;
+  };
+
   return {
     userInfo,
     setUserInfo,
     getUserInfo,
-    saveUserInfo
+    saveUserInfo,
+    ensureValidUserInfo
   };
 }

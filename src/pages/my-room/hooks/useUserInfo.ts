@@ -8,7 +8,10 @@ interface UserInfo {
 }
 
 export const useUserInfo = (room: Room | null) => {
-  const [userInfo, setUserInfo] = useState<UserInfo>({ name: 'Guest', roomNumber: '' });
+  const [userInfo, setUserInfo] = useState<UserInfo>({ 
+    name: 'Guest', 
+    roomNumber: room?.room_number || '401' 
+  });
 
   useEffect(() => {
     const storedInfo = getUserInfo();
