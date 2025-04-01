@@ -1,24 +1,14 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Contact, Message } from '@/types/messaging';
-
-const defaultContacts: Contact[] = [
-  {
-    id: '2',
-    name: 'Concierge',
-    role: 'Available 8AM-10PM',
-    icon: null, // Will be set in the component
-    isOnline: true,
-    messages: [],
-  }
-];
+import { Contact } from '@/types/messaging';
+import { defaultContacts } from './messaging/defaultData';
+import { fetchMessages as fetchMessagesUtil, sendMessage, scrollToBottom } from './messaging/messageUtils';
+import { useRealtimeMessages } from './messaging/useRealtimeMessages';
+import { useMessagingNavigation } from './messaging/useMessagingNavigation';
 
 export function useMessaging() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [inputMessage, setInputMessage] = useState('');
@@ -27,37 +17,36 @@ export function useMessaging() {
   const [contactsData, setContactsData] = useState<Contact[]>(defaultContacts);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const fromLocation = location.state?.from || '/';
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Memoize fetchMessages to prevent infinite useEffect loops
+  const fetchMessages = useCallback(() => {
+    const userId = localStorage.getItem('user_id');
+    fetchMessagesUtil(
+      userId, 
+      setIsLoading, 
+      setContactsData, 
+      setFilteredContacts, 
+      setSelectedContact, 
+      selectedContact, 
+      defaultContacts, 
+      toast
+    );
+  }, [selectedContact, toast]);
 
-  // Initialize with contact from URL if present
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const contactId = params.get('contact');
-    
-    if (contactId) {
-      const contact = contactsData.find(c => c.id === contactId);
-      if (contact) {
-        setSelectedContact(contact);
-      }
-    }
-  }, [location, contactsData]);
+  // Connect real-time updates
+  useRealtimeMessages({ fetchMessages });
 
-  // Update URL when selected contact changes
-  useEffect(() => {
-    if (selectedContact) {
-      navigate(`/messages?contact=${selectedContact.id}`, { 
-        replace: true,
-        state: { from: location.state?.from || '/' }
-      });
-    } else {
-      navigate('/messages', { replace: true });
-    }
-  }, [selectedContact, navigate, location.state?.from]);
+  // Handle navigation and URL
+  const { handleGoBack, fromLocation } = useMessagingNavigation({
+    selectedContact,
+    setSelectedContact,
+    contactsData
+  });
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    scrollToBottom();
+    scrollToBottom(messagesEndRef);
     if (selectedContact) {
       inputRef.current?.focus();
     }
@@ -76,103 +65,7 @@ export function useMessaging() {
     }
   }, [searchTerm, contactsData]);
 
-  // Set up realtime subscription to chat messages
-  useEffect(() => {
-    const userId = localStorage.getItem('user_id');
-    if (!userId) {
-      return;
-    }
-    
-    // Subscribe to realtime updates for this user's messages
-    const subscription = supabase
-      .channel('chat_updates')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'chat_messages',
-        filter: `user_id=eq.${userId}`,
-      }, (payload) => {
-        console.log('New message received:', payload);
-        fetchMessages();
-      })
-      .subscribe();
-      
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Fetch messages from Supabase
-  const fetchMessages = async () => {
-    setIsLoading(true);
-    try {
-      const userId = localStorage.getItem('user_id');
-      if (!userId) {
-        setIsLoading(false);
-        return;
-      }
-
-      const { data: messagesData, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .or(`user_id.eq.${userId},recipient_id.eq.${userId}`)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching messages:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load messages. Please try again.',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Initialize with default contacts
-      const updatedContacts = [...defaultContacts];
-      
-      if (messagesData && messagesData.length > 0) {
-        // Extract and format all messages for the Concierge contact (id: '2')
-        const conciergeMessages: Message[] = messagesData.map(msg => ({
-          id: msg.id,
-          text: msg.text,
-          time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          sender: msg.sender as 'user' | 'staff',
-          status: msg.status as 'sent' | 'delivered' | 'read' | undefined
-        }));
-        
-        // Update the Concierge contact with messages
-        updatedContacts[0].messages = conciergeMessages;
-        
-        // Set last message if there are messages
-        if (conciergeMessages.length > 0) {
-          updatedContacts[0].lastMessage = conciergeMessages[conciergeMessages.length - 1].text;
-        }
-      }
-      
-      setContactsData(updatedContacts);
-      setFilteredContacts(updatedContacts);
-      
-      // Update the selected contact if it exists
-      if (selectedContact) {
-        const updatedSelectedContact = updatedContacts.find(c => c.id === selectedContact.id);
-        if (updatedSelectedContact) {
-          setSelectedContact(updatedSelectedContact);
-        }
-      }
-    } catch (err) {
-      console.error('Error in message fetching:', err);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Initial fetch and polling
   useEffect(() => {
     fetchMessages();
     
@@ -182,105 +75,22 @@ export function useMessaging() {
     }, 10000); // Fetch every 10 seconds
     
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchMessages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleSendMessage = async () => {
-    if (inputMessage.trim() && selectedContact) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        text: inputMessage,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        sender: 'user',
-        status: 'sent'
-      };
-
-      // Update UI first for responsiveness
-      const updatedContacts = contactsData.map(contact => {
-        if (contact.id === selectedContact.id) {
-          return {
-            ...contact,
-            messages: [...contact.messages, newMessage],
-            lastMessage: inputMessage
-          };
-        }
-        return contact;
-      });
-
-      setContactsData(updatedContacts);
-      setSelectedContact(updatedContacts.find(c => c.id === selectedContact.id) || null);
-      setFilteredContacts(
-        filteredContacts.map(contact => contact.id === selectedContact.id ? updatedContacts.find(c => c.id === selectedContact.id)! : contact)
-      );
-      
-      setInputMessage('');
-      
-      // Get user info
-      const userDataString = localStorage.getItem('user_data');
-      const userId = localStorage.getItem('user_id');
-      let userName = 'Guest';
-      let roomNumber = '';
-      
-      if (userDataString) {
-        try {
-          const userData = JSON.parse(userDataString);
-          userName = userData.name || userData.first_name || 'Guest';
-          roomNumber = userData.roomNumber || userData.room_number || '';
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-        }
-      }
-
-      // Save to Supabase
-      try {
-        const { error } = await supabase
-          .from('chat_messages')
-          .insert([{
-            user_id: userId,
-            recipient_id: null,
-            user_name: userName,
-            room_number: roomNumber,
-            text: inputMessage,
-            sender: 'user',
-            status: 'sent',
-            created_at: new Date().toISOString()
-          }]);
-
-        if (error) {
-          console.error("Error saving message:", error);
-          toast({
-            title: "Error",
-            description: "Failed to send your message. Please try again.",
-            variant: "destructive"
-          });
-          return;
-        }
-
-        // After successful send, fetch updated messages to see if there are any responses
-        fetchMessages();
-      } catch (error) {
-        console.error("Error in handleSendMessage:", error);
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred. Please try again.",
-          variant: "destructive"
-        });
-      }
-    }
-  };
-
-  const handleGoBack = () => {
+  const handleSendMessage = () => {
     if (selectedContact) {
-      setSelectedContact(null);
-      navigate('/messages', { 
-        replace: true,
-        state: { from: fromLocation } 
-      });
-    } else {
-      navigate(fromLocation || '/', { replace: true });
+      sendMessage(
+        inputMessage,
+        selectedContact,
+        contactsData,
+        setContactsData,
+        setSelectedContact,
+        filteredContacts,
+        setFilteredContacts,
+        setInputMessage,
+        fetchMessages,
+        toast
+      );
     }
   };
 
