@@ -135,7 +135,8 @@ export const submitRequestViaChatMessage = async (
         status: 'pending',
         created_at: new Date().toISOString(),
         room_id: roomData?.id || userId, // Fallback to userId if room not found
-        room_number: userInfo.roomNumber
+        room_number: userInfo.roomNumber,
+        guest_name: userInfo.name || 'Guest'
       };
 
       // Add category if available

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Table, 
@@ -35,6 +34,14 @@ export const RequestsTable = ({
 
   const hasData = requests && requests.length > 0;
   
+  const getRequestType = (request: ServiceRequestWithItem): string => {
+    if (request.request_items?.category_id) {
+      return request.request_items.category_name || request.type;
+    }
+    
+    return request.type.replace(/_/g, ' ');
+  };
+  
   return (
     <ScrollArea className="h-[500px]">
       <Table>
@@ -55,7 +62,7 @@ export const RequestsTable = ({
               <TableRow key={request.id}>
                 <TableCell>{request.room_number || 'N/A'}</TableCell>
                 <TableCell>{request.guest_name || 'Unknown'}</TableCell>
-                <TableCell className="capitalize">{request.type.replace('_', ' ')}</TableCell>
+                <TableCell className="capitalize">{getRequestType(request)}</TableCell>
                 <TableCell>
                   {request.request_items ? (
                     <span>{request.request_items.name}</span>

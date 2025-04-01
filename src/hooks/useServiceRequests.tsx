@@ -10,7 +10,10 @@ export const useServiceRequests = () => {
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
     const { data, error } = await supabase
       .from('service_requests')
-      .select('*')
+      .select(`
+        *,
+        request_items(*, category_id, category:request_categories(name))
+      `)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -18,7 +21,16 @@ export const useServiceRequests = () => {
       throw error;
     }
 
-    return data as ServiceRequest[];
+    // Transform the nested data to match our expected format
+    const transformedData = data.map(request => {
+      if (request.request_items && request.request_items.category) {
+        request.request_items.category_name = request.request_items.category.name;
+        delete request.request_items.category; // Remove the nested object to avoid confusion
+      }
+      return request;
+    });
+
+    return transformedData as ServiceRequest[];
   };
 
   const cancelServiceRequest = async (requestId: string): Promise<void> => {

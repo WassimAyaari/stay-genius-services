@@ -14,5 +14,7 @@ export interface ServiceRequestWithItem {
   updated_at?: string;
   request_item_id?: string;
   category_id?: string;
-  request_items?: RequestItem;
+  request_items?: RequestItem & {
+    category_name?: string;
+  };
 }

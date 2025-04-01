@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { UserInfo } from './useUserInfo';
@@ -140,10 +141,12 @@ export function useMultiItemRequestHandler() {
         try {
           const requestData: any = {
             guest_id: userId,
-            type: 'custom',
+            type: selectedCategory?.name || 'custom',
             description: item.name,
             status: 'pending',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            guest_name: userInfo.name,
+            room_number: userInfo.roomNumber
           };
           
           // Add category if available
