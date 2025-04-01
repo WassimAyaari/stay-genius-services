@@ -34,8 +34,7 @@ const Layout = ({
                     <ChevronLeft className="h-5 w-5 text-secondary" />
                   </Link>
                 )}
-                {/* Only show MainMenu on the home page */}
-                {isHomePage && <MainMenu />}
+                <MainMenu />
               </div>
 
               <Link to="/" className="flex-1 flex justify-center items-center">
