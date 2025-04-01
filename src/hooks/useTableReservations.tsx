@@ -1,43 +1,62 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TableReservation, CreateTableReservationDTO, UpdateReservationStatusDTO } from '@/features/dining/types';
+import { supabase } from '@/integrations/supabase/client';
+import { TableReservation } from '@/features/dining/types';
 import { toast } from 'sonner';
-import {
-  fetchReservations,
-  createReservation,
-  updateReservationStatus
-} from '@/features/dining/services/reservationService';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
-export const useTableReservations = (restaurantId?: string) => {
+export const useTableReservations = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  const { data: reservations, isLoading, error } = useQuery({
-    queryKey: ['tableReservations', restaurantId],
-    queryFn: () => fetchReservations(restaurantId),
-    enabled: !restaurantId || restaurantId !== ':id'
-  });
-
-  const createMutation = useMutation({
-    mutationFn: createReservation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tableReservations', restaurantId] });
-      toast.success('Réservation créée avec succès');
-    },
-    onError: (error) => {
-      console.error('Error creating reservation:', error);
-      toast.error('Erreur lors de la création de la réservation: ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
+  const fetchReservations = async (): Promise<TableReservation[]> => {
+    if (!user?.id) {
+      console.log('No authenticated user, returning empty reservations');
+      return [];
     }
+    
+    const { data, error } = await supabase
+      .from('table_reservations')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching reservations:', error);
+      throw error;
+    }
+
+    return data as TableReservation[];
+  };
+
+  const cancelReservation = async (reservationId: string): Promise<void> => {
+    const { error } = await supabase
+      .from('table_reservations')
+      .update({ status: 'cancelled' })
+      .eq('id', reservationId)
+      .eq('user_id', user?.id); // Ensure only the user's reservations can be cancelled
+
+    if (error) {
+      console.error('Error cancelling reservation:', error);
+      throw error;
+    }
+  };
+
+  const { data: reservations, isLoading, error, refetch } = useQuery({
+    queryKey: ['tableReservations', user?.id],
+    queryFn: fetchReservations,
+    enabled: !!user?.id // Only fetch when user is authenticated
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: updateReservationStatus,
+  const cancelMutation = useMutation({
+    mutationFn: cancelReservation,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tableReservations', restaurantId] });
-      toast.success('Statut de la réservation mis à jour');
+      queryClient.invalidateQueries({ queryKey: ['tableReservations', user?.id] });
+      toast.success('Réservation annulée avec succès');
     },
     onError: (error) => {
-      console.error('Error updating reservation status:', error);
-      toast.error('Erreur lors de la mise à jour du statut');
+      console.error('Error cancelling reservation:', error);
+      toast.error("Erreur lors de l'annulation de la réservation");
     }
   });
 
@@ -45,9 +64,8 @@ export const useTableReservations = (restaurantId?: string) => {
     reservations,
     isLoading,
     error,
-    createReservation: createMutation.mutate,
-    updateReservationStatus: updateStatusMutation.mutate,
-    isCreating: createMutation.isPending,
-    isUpdating: updateStatusMutation.isPending
+    refetch,
+    cancelReservation: cancelMutation.mutate,
+    isCancelling: cancelMutation.isPending
   };
 };

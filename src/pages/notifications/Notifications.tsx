@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
@@ -11,8 +10,10 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ServiceRequest } from '@/features/rooms/types';
 import { TableReservation } from '@/features/dining/types';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const Notifications = () => {
+  const { user } = useAuth();
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
   const { reservations = [], isLoading: isLoadingReservations } = useTableReservations();
 
@@ -113,6 +114,20 @@ const Notifications = () => {
       }
     }
   };
+
+  // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+  if (!user) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <h1 className="text-2xl font-bold mb-6">Mes Notifications</h1>
+          <div className="text-center py-10">
+            <p className="text-lg text-gray-600">Veuillez vous connecter pour voir vos notifications.</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

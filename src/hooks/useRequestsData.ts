@@ -4,9 +4,11 @@ import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 export function useRequestsData() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { 
     data: requests = [], 
     isLoading, 
@@ -17,24 +19,18 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for service requests
+  // Set up real-time updates for service requests for the authenticated user
   useEffect(() => {
-    // Only setup realtime if we have user data
-    const userData = localStorage.getItem('user_data');
-    if (!userData) return;
+    if (!user?.id) return;
     
     try {
-      const userInfo = JSON.parse(userData);
-      const userId = localStorage.getItem('user_id');
-      if (!userId) return;
-      
       const channel = supabase
         .channel('service_requests_updates')
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
           table: 'service_requests',
-          filter: `guest_id=eq.${userId}`,
+          filter: `guest_id=eq.${user.id}`,
         }, (payload) => {
           console.log('Service request change detected:', payload);
           refetch();
@@ -65,7 +61,7 @@ export function useRequestsData() {
     } catch (error) {
       console.error("Error setting up realtime updates:", error);
     }
-  }, [refetch, toast]);
+  }, [refetch, toast, user?.id]);
   
   const handleRefresh = async () => {
     setIsRefreshing(true);

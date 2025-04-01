@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -10,8 +9,10 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ServiceRequest } from '@/features/rooms/types';
 import { TableReservation } from '@/features/dining/types';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const NotificationMenu = () => {
+  const { user } = useAuth();
   const { data: serviceRequests = [] } = useServiceRequests();
   const { reservations = [] } = useTableReservations();
 
@@ -93,6 +94,10 @@ const NotificationMenu = () => {
       case 'in_progress': return 'bg-blue-100 text-blue-800';
       default: return 'bg-yellow-100 text-yellow-800';
     }
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
