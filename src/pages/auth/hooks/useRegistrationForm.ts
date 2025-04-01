@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +9,8 @@ import { syncUserData } from '@/features/users/services/userService';
 import { CompanionType } from '../components/CompanionsList';
 import { CompanionData } from '@/features/users/types/userTypes';
 import { registerUser } from '@/features/auth/services/authService';
+import { supabase } from '@/integrations/supabase/client';
+import { syncGuestData } from '@/features/users/services/guestService';
 
 // Schema pour le formulaire d'inscription
 export const registerSchema = z.object({
@@ -86,6 +89,34 @@ export const useRegistrationForm = () => {
       
       // Si userId est défini, synchroniser avec Supabase
       if (result.userId) {
+        // Créer directement l'entrée dans la table guests
+        const guestData = {
+          user_id: result.userId,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          email: values.email,
+          room_number: values.roomNumber,
+          nationality: values.nationality,
+          birth_date: values.birthDate,
+          check_in_date: values.checkInDate,
+          check_out_date: values.checkOutDate
+        };
+        
+        // Créer l'invité directement dans la table guests
+        const { error } = await supabase
+          .from('guests')
+          .insert([guestData]);
+        
+        if (error) {
+          console.error('Erreur lors de la création de l\'invité:', error);
+          toast({
+            variant: "destructive",
+            title: "Erreur lors de la création du profil invité",
+            description: "Votre compte a été créé mais nous n'avons pas pu enregistrer votre profil d'invité.",
+          });
+        }
+        
+        // Synchroniser également avec la méthode existante pour la compatibilité
         const syncSuccess = await syncUserData({
           ...userData,
           email: values.email,
