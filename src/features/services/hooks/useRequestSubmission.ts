@@ -1,7 +1,6 @@
 
 import { usePresetRequestHandler } from './usePresetRequestHandler';
 import { useMultiItemRequestHandler } from './useMultiItemRequestHandler';
-import { submitRequestViaChatMessage } from '../utils/requestUtils';
 
 export function useRequestSubmission() {
   const presetHandler = usePresetRequestHandler();
@@ -9,7 +8,6 @@ export function useRequestSubmission() {
   
   return {
     isSubmitting: presetHandler.isSubmitting || multiItemHandler.isSubmitting,
-    submitRequestViaChatMessage,
     handlePresetRequest: presetHandler.handlePresetRequest,
     handleSubmitRequests: multiItemHandler.handleSubmitRequests
   };

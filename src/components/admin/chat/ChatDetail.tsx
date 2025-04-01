@@ -5,12 +5,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, Trash2 } from 'lucide-react';
 import { formatTimeAgo } from '@/utils/dateUtils';
-import { Chat, Message } from './types';
+import { Chat } from './types';
 import { Badge } from '@/components/ui/badge';
-import { RequestStatusBadge } from '../requests/RequestStatusBadge';
-import { RequestStatusActions } from '../requests/RequestStatusActions';
-import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
-import { useToast } from '@/hooks/use-toast';
 
 interface ChatDetailProps {
   activeChat: Chat;
@@ -31,7 +27,6 @@ const ChatDetail = ({
 }: ChatDetailProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -47,25 +42,6 @@ const ChatDetail = ({
     }
   };
 
-  const handleUpdateRequestStatus = async (messageId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
-    try {
-      await updateRequestStatus(messageId, newStatus);
-      toast({
-        title: "Status Updated",
-        description: `Request status changed to ${newStatus}`
-      });
-      // Note: This doesn't update the UI - would need to update Chat object
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update request status",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const isRequestChat = activeChat.type === 'request';
-  
   // Get full name from userInfo if available
   const guestFullName = activeChat.userInfo?.firstName || activeChat.userInfo?.lastName 
     ? `${activeChat.userInfo?.firstName || ''} ${activeChat.userInfo?.lastName || ''}`.trim()
@@ -133,7 +109,7 @@ const ChatDetail = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {activeChat.messages.map((message: Message) => (
+            {activeChat.messages.map((message) => (
               <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === 'user' 
@@ -141,18 +117,6 @@ const ChatDetail = ({
                     : 'bg-muted rounded-tl-none'
                 }`}>
                   <p className="text-sm">{message.text}</p>
-                  
-                  {isRequestChat && message.requestStatus && (
-                    <div className="mt-2 flex items-center justify-between">
-                      <RequestStatusBadge status={message.requestStatus} />
-                      <RequestStatusActions 
-                        currentStatus={message.requestStatus}
-                        requestId={message.id}
-                        onUpdateStatus={(newStatus) => handleUpdateRequestStatus(message.id, newStatus)}
-                      />
-                    </div>
-                  )}
-                  
                   <div className="flex justify-end items-center mt-1 text-xs opacity-70">
                     <span>{message.time}</span>
                   </div>

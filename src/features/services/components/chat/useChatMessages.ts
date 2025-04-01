@@ -187,32 +187,6 @@ export const useChatMessages = (userInfo: UserInfo) => {
         return;
       }
       
-      if (inputMessage.toLowerCase().includes('request') || 
-          inputMessage.toLowerCase().includes('service') ||
-          inputMessage.toLowerCase().includes('clean') ||
-          inputMessage.toLowerCase().includes('laundry') ||
-          inputMessage.toLowerCase().includes('help') ||
-          inputMessage.toLowerCase().includes('need')) {
-        
-        let requestType = 'general';
-        if (inputMessage.toLowerCase().includes('clean')) requestType = 'cleaning';
-        else if (inputMessage.toLowerCase().includes('laundry')) requestType = 'laundry';
-        else if (inputMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
-        else if (inputMessage.toLowerCase().includes('food') || inputMessage.toLowerCase().includes('meal')) requestType = 'food';
-        
-        // Make sure room_id is set to a non-null value using userId as a fallback
-        await supabase.from('service_requests').insert({
-          guest_id: userId,
-          guest_name: userInfo.name,
-          room_number: userInfo.roomNumber,
-          room_id: userId, // Using userId as the room_id to satisfy the non-null constraint
-          type: requestType,
-          description: inputMessage,
-          status: 'pending',
-          created_at: currentTime.toISOString()
-        });
-      }
-      
       // Check for new messages after sending (in case of automatic replies)
       setTimeout(() => {
         fetchMessages();

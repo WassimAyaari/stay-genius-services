@@ -8,7 +8,7 @@ export const submitRequestViaChatMessage = async (
   roomNumber: string
 ): Promise<boolean> => {
   try {
-    // Insert the chat message
+    // Insert the chat message only
     const { error: chatError } = await supabase.from('chat_messages').insert({
       user_id: userId,
       user_name: userName,
