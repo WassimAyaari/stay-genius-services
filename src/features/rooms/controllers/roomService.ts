@@ -2,7 +2,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceType } from '../types';
 import { toast } from '@/hooks/use-toast';
-import { RoomType, ServiceRequestType } from '@/features/types/supabaseTypes';
 
 // Function to create a new service request
 export const createServiceRequest = async (requestData: {
@@ -13,6 +12,8 @@ export const createServiceRequest = async (requestData: {
   status?: string;
   request_item_id?: string;
   category_id?: string;
+  guest_name?: string;
+  room_number?: string;
 }) => {
   try {
     const { data, error } = await supabase
@@ -45,15 +46,27 @@ export const requestService = async (
   category_id?: string
 ) => {
   try {
-    // Get guest_id from local storage or use a default
+    // Get guest_id and user information from local storage
     const userDataStr = localStorage.getItem('user_data');
     let guest_id = '00000000-0000-0000-0000-000000000000'; // Default guest ID
+    let guest_name = 'Guest';
+    let room_number = '';
 
     if (userDataStr) {
       try {
         const userData = JSON.parse(userDataStr);
         if (userData.id) {
           guest_id = userData.id;
+        }
+        
+        // Set guest name from user data
+        if (userData.first_name || userData.last_name) {
+          guest_name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+        }
+        
+        // Set room number from user data
+        if (userData.room_number) {
+          room_number = userData.room_number;
         }
       } catch (error) {
         console.error("Error parsing user data:", error);
@@ -89,9 +102,18 @@ export const requestService = async (
       }
     }
     
-    console.log('Submitting service request with room_id:', actualRoomId);
+    // If room_number is not set yet, but we have roomId in format like "406"
+    if (!room_number && !roomId.includes('-')) {
+      room_number = roomId;
+    }
     
-    // Insert the request with the correct room_id
+    console.log('Submitting service request with:', {
+      room_id: actualRoomId,
+      room_number,
+      guest_name
+    });
+    
+    // Insert the request with the correct room_id, room_number, and guest_name
     const { data, error } = await supabase
       .from('service_requests')
       .insert({
@@ -102,7 +124,9 @@ export const requestService = async (
         request_item_id,
         category_id,
         status: 'pending',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        guest_name,
+        room_number
       })
       .select();
     

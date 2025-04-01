@@ -38,8 +38,9 @@ export const useUserInfo = (room: Room | null) => {
     if (userDataStr) {
       try {
         const userData = JSON.parse(userDataStr);
+        const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
         return {
-          name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Guest',
+          name: fullName || 'Guest',
           roomNumber: userData.room_number || (room?.room_number || '401')
         };
       } catch (error) {

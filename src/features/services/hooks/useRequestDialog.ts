@@ -73,17 +73,6 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
         description: `Your request has been sent. You can track its status in the notifications panel.`,
       });
       
-      // Generate mock IDs for tracking
-      const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-      
-      // Add a mock ID for each selected item
-      selectedItems.forEach(itemId => {
-        const mockRequestId = `mock-${itemId}-${Date.now()}`;
-        requestIds.push(mockRequestId);
-      });
-      
-      localStorage.setItem('pending_requests', JSON.stringify(requestIds));
-      
       // Close the dialog after successful submission
       onClose();
     } catch (error) {
