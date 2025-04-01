@@ -17,7 +17,6 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
     selectedCategory,
     selectedItems,
     isSubmitting,
-    userInfo,
     dialogTitle,
     dialogDescription,
     handleSelectCategory,

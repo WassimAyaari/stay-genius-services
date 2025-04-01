@@ -10,14 +10,14 @@ export interface UserInfo {
 
 export function useUserInfo(room: Room | null) {
   const [userInfo, setUserInfo] = useState<UserInfo>({ name: '', roomNumber: '' });
-  const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
 
-  // Load user profile data when dialog opens
+  // Load user profile data when component mounts
   useEffect(() => {
-    loadUserProfileData();
+    const info = getUserInfo();
+    setUserInfo(info);
   }, [room]);
 
-  const loadUserProfileData = () => {
+  const getUserInfo = (): UserInfo => {
     // First try to get user data from localStorage
     const userDataString = localStorage.getItem('user_data');
     if (userDataString) {
@@ -31,12 +31,11 @@ export function useUserInfo(room: Room | null) {
           // Get phone number if available
           const phone = userData.phone || '';
           
-          setUserInfo({
+          return {
             name: fullName || 'Guest',
             roomNumber: roomNumber || (room?.room_number || ''),
             phone: phone
-          });
-          return;
+          };
         }
       } catch (error) {
         console.error("Error parsing user data:", error);
@@ -45,31 +44,16 @@ export function useUserInfo(room: Room | null) {
     
     // If no user data in localStorage, use room data if available
     if (room) {
-      setUserInfo({
+      return {
         name: 'Guest',
         roomNumber: room.room_number || '',
-      });
+      };
     }
-  };
 
-  const getUserInfo = () => {
-    const userInfoStr = localStorage.getItem('user_data');
-    if (userInfoStr) {
-      try {
-        const userData = JSON.parse(userInfoStr);
-        return {
-          name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Guest',
-          roomNumber: userData.room_number || (room?.room_number || ''),
-          phone: userData.phone || ''
-        };
-      } catch (error) {
-        console.error("Error parsing user info:", error);
-      }
-    }
-    return {
-      name: 'Guest',
-      roomNumber: room?.room_number || '',
-      phone: ''
+    // Default fallback
+    return { 
+      name: 'Guest', 
+      roomNumber: room?.room_number || ''
     };
   };
 
@@ -84,14 +68,12 @@ export function useUserInfo(room: Room | null) {
     
     localStorage.setItem('user_data', JSON.stringify(userDataToSave));
     setUserInfo(info);
-    setIsUserInfoDialogOpen(false);
   };
 
   return {
     userInfo,
     setUserInfo,
-    isUserInfoDialogOpen,
-    setIsUserInfoDialogOpen,
+    getUserInfo,
     saveUserInfo
   };
 }

@@ -11,7 +11,7 @@ const RequestCategoriesView = ({
   onSelectCategory
 }: RequestCategoriesViewProps) => {
   return (
-    <div>
+    <div className="space-y-4">
       <RequestCategoryList onSelectCategory={onSelectCategory} />
     </div>
   );

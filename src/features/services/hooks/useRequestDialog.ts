@@ -15,10 +15,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
   // Get user info management - don't show dialog automatically
   const { 
     userInfo, 
-    setUserInfo,
-    isUserInfoDialogOpen, 
-    setIsUserInfoDialogOpen, 
-    saveUserInfo 
+    getUserInfo
   } = useUserInfo(room);
   
   // Get request submission functionality
@@ -53,10 +50,13 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     });
   };
 
-  // Update the handle submit requests to show status information
+  // Update the handle submit requests to use the most up-to-date user info
   const handleSubmitRequests = async () => {
-    // Check if user info is available from localStorage or context
-    if (!userInfo.name || !userInfo.roomNumber) {
+    // Get the most recent user info from localStorage
+    const currentUserInfo = getUserInfo();
+    
+    // Verify user info is valid and complete
+    if (!currentUserInfo.name || !currentUserInfo.roomNumber) {
       toast.error("Error", {
         description: "Your profile information is incomplete. Please contact reception.",
       });
@@ -64,15 +64,15 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     }
     
     try {
-      // Call the submission function, but don't rely on its return value
-      await submitRequests(selectedItems, categoryItems, userInfo, selectedCategory, onClose);
+      // Call the submission function with the current user info
+      await submitRequests(selectedItems, categoryItems, currentUserInfo, selectedCategory, onClose);
       
       // Show a success toast with tracking information
       toast.success("Request Submitted", {
         description: `Your request has been sent. You can track its status in the notifications panel.`,
       });
       
-      // Generate mock IDs for tracking since we're not using the actual response
+      // Generate mock IDs for tracking
       const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
       
       // Add a mock ID for each selected item
@@ -82,6 +82,9 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
       });
       
       localStorage.setItem('pending_requests', JSON.stringify(requestIds));
+      
+      // Close the dialog after successful submission
+      onClose();
     } catch (error) {
       console.error("Error submitting requests:", error);
       toast.error("Error", {
@@ -115,17 +118,13 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     selectedCategory,
     selectedItems,
     isSubmitting,
-    isUserInfoDialogOpen,
     userInfo,
     dialogTitle: getDialogTitle(),
     dialogDescription: getDialogDescription(),
-    setIsUserInfoDialogOpen,
-    setUserInfo,
     handleSelectCategory,
     handleGoBackToCategories,
     handleToggleRequestItem,
     handleSubmitRequests,
-    saveUserInfo,
     handleDialogClose
   };
 }
