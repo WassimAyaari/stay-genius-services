@@ -157,17 +157,20 @@ export const RequestsTab = () => {
 
   const createDemoRequest = async () => {
     try {
+      // Définir explicitement toutes les propriétés requises
+      const demoRequest = {
+        guest_id: 'demo-guest',
+        room_id: 'demo-room',
+        guest_name: 'Jean Dupont',
+        room_number: '101',
+        type: 'housekeeping',
+        description: 'Demande de nettoyage quotidien',
+        status: 'pending'
+      };
+      
       const { data, error } = await supabase
         .from('service_requests')
-        .insert({
-          guest_id: 'demo-guest',
-          room_id: 'demo-room',
-          guest_name: 'Jean Dupont',
-          room_number: '101',
-          type: 'housekeeping',
-          description: 'Demande de nettoyage quotidien',
-          status: 'pending'
-        })
+        .insert(demoRequest)
         .select();
         
       if (error) {

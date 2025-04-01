@@ -104,7 +104,8 @@ export const useServiceRequests = () => {
     if (!existingRequests || existingRequests.length === 0) {
       console.log('Creating test service request for demo...');
       
-      const testRequest: Partial<ServiceRequestType> = {
+      // Définir explicitement les propriétés requises pour éviter l'erreur TypeScript
+      const testRequest = {
         guest_id: 'demo-guest',
         room_id: 'demo-room',
         guest_name: 'Jean Dupont',
