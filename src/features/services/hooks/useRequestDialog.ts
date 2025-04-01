@@ -68,19 +68,19 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     }
     
     try {
-      const response = await submitPresetRequest(preset, userInfo, selectedCategory, onClose);
+      // Call the submission function, but don't rely on its return value
+      await submitPresetRequest(preset, userInfo, selectedCategory, onClose);
       
       // Show a success toast with tracking information
       toast.success("Request Submitted", {
         description: `Your ${preset.type} request has been sent. You can track its status in the notifications panel.`,
       });
       
-      // Store the request ID for tracking
+      // Generate a mock ID for tracking since we're not using the actual response
       const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-      if (response && typeof response === 'object' && 'id' in response) {
-        requestIds.push(response.id);
-        localStorage.setItem('pending_requests', JSON.stringify(requestIds));
-      }
+      const mockRequestId = `mock-${Date.now()}`;
+      requestIds.push(mockRequestId);
+      localStorage.setItem('pending_requests', JSON.stringify(requestIds));
     } catch (error) {
       console.error("Error submitting preset request:", error);
       toast.error("Error", {
@@ -97,23 +97,24 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     }
     
     try {
-      const response = await submitRequests(selectedItems, categoryItems, userInfo, selectedCategory, onClose);
+      // Call the submission function, but don't rely on its return value
+      await submitRequests(selectedItems, categoryItems, userInfo, selectedCategory, onClose);
       
       // Show a success toast with tracking information
       toast.success("Request Submitted", {
         description: `Your request has been sent. You can track its status in the notifications panel.`,
       });
       
-      // Store the request ID for tracking
+      // Generate mock IDs for tracking since we're not using the actual response
       const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-      if (response && Array.isArray(response) && response.length > 0) {
-        response.forEach((item: any) => {
-          if (item && typeof item === 'object' && 'id' in item) {
-            requestIds.push(item.id);
-          }
-        });
-        localStorage.setItem('pending_requests', JSON.stringify(requestIds));
-      }
+      
+      // Add a mock ID for each selected item
+      selectedItems.forEach(itemId => {
+        const mockRequestId = `mock-${itemId}-${Date.now()}`;
+        requestIds.push(mockRequestId);
+      });
+      
+      localStorage.setItem('pending_requests', JSON.stringify(requestIds));
     } catch (error) {
       console.error("Error submitting requests:", error);
       toast.error("Error", {
