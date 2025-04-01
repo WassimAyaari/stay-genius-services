@@ -97,7 +97,7 @@ const ChatDetail = ({
       <div className="flex items-center gap-3 mb-6">
         <Avatar className="h-14 w-14">
           <AvatarFallback>
-            {activeChat.userName.charAt(0)}
+            {guestFullName.charAt(0)}
           </AvatarFallback>
         </Avatar>
         <div>
@@ -107,6 +107,11 @@ const ChatDetail = ({
           <div className="text-sm text-muted-foreground space-y-0.5">
             {activeChat.roomNumber && <p>Room: {activeChat.roomNumber}</p>}
             <p>Last activity: {formatTimeAgo(new Date(activeChat.lastActivity))}</p>
+            
+            {/* Only show username if it's different from the guest full name */}
+            {activeChat.userName !== guestFullName && (
+              <p>Username: {activeChat.userName}</p>
+            )}
           </div>
         </div>
       </div>
