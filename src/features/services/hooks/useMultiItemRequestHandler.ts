@@ -56,11 +56,11 @@ export function useMultiItemRequestHandler() {
 
   const handleSubmitRequests = async (
     selectedItems: RequestItem[],
-    category: RequestCategory,
+    category: RequestCategory | null,
     room?: Room | null
   ) => {
-    if (selectedItems.length === 0) {
-      toast.error('Please select at least one item');
+    if (!selectedItems.length || !category) {
+      toast.error('Please select at least one item and a category');
       return false;
     }
 

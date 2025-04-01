@@ -65,8 +65,13 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     }
     
     try {
-      // Call the submission function with the validated user info
-      await submitRequests(selectedItems, categoryItems, validUserInfo, selectedCategory, onClose);
+      // Call the submission function with the correct number of arguments
+      // Get the selected request items from the IDs
+      const selectedRequestItems = categoryItems.filter(item => 
+        selectedItems.includes(item.id)
+      );
+      
+      await submitRequests(selectedRequestItems, selectedCategory as RequestCategory, room);
       
       // Show a success toast with tracking information
       toast.success("Request Submitted", {
