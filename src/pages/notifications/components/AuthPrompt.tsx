@@ -1,0 +1,15 @@
+
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+
+export const AuthPrompt: React.FC = () => {
+  return (
+    <div className="text-center py-10 space-y-4">
+      <p className="text-lg text-gray-600">Veuillez vous connecter pour voir vos notifications.</p>
+      <Button asChild variant="default">
+        <Link to="/auth/login">Se connecter</Link>
+      </Button>
+    </div>
+  );
+};
