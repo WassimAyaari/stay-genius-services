@@ -15,7 +15,7 @@ export function useRequestsData() {
     isError, 
     error,
     refetch,
-    createTestRequestIfEmpty
+    createRealRequestExamples
   } = useServiceRequests();
   
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -27,9 +27,9 @@ export function useRequestsData() {
     // Forcer les actualisations initiales multiples pour s'assurer que les données sont chargées
     refetch();
     
-    // Vérifier et créer une requête de test si nécessaire (mode démo)
+    // Vérifier et créer des requêtes de test si nécessaire (mode démo)
     setTimeout(() => {
-      createTestRequestIfEmpty();
+      createRealRequestExamples();
     }, 1000);
     
     setTimeout(() => refetch(), 2000);
@@ -116,7 +116,7 @@ export function useRequestsData() {
       console.log('Performing scheduled refresh of service requests');
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       refetch();
-    }, 5000);
+    }, 15000); // Actualisation toutes les 15 secondes
     
     return () => {
       console.log('Cleaning up realtime subscription and interval');
@@ -124,13 +124,13 @@ export function useRequestsData() {
       supabase.removeChannel(notificationChannel);
       clearInterval(interval);
     };
-  }, [refetch, queryClient, uiToast, createTestRequestIfEmpty]);
+  }, [refetch, queryClient, uiToast, createRealRequestExamples]);
   
   const handleRefresh = useCallback(async () => {
     console.log('Manual refresh of service requests triggered');
     setIsRefreshing(true);
     try {
-      await createTestRequestIfEmpty();
+      await createRealRequestExamples();
       const result = await refetch();
       console.log('Manual refresh completed with count:', result.data?.length || 0);
       
@@ -148,7 +148,7 @@ export function useRequestsData() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [refetch, uiToast, createTestRequestIfEmpty]);
+  }, [refetch, uiToast, createRealRequestExamples]);
 
   return {
     requests,

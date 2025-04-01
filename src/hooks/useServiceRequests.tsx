@@ -94,44 +94,76 @@ export const useServiceRequests = () => {
     }
   };
 
-  // Créer une requête de test si aucune n'existe (mode démo uniquement)
-  const createTestRequestIfEmpty = async (): Promise<void> => {
+  // Créer une collection de requêtes de test réalistes si aucune n'existe
+  const createRealRequestExamples = async (): Promise<void> => {
     const { data: existingRequests } = await supabase
       .from('service_requests')
       .select('id')
       .limit(1);
     
     if (!existingRequests || existingRequests.length === 0) {
-      console.log('Creating test service request for demo...');
+      console.log('Creating realistic service request examples...');
       
-      // Définir explicitement les propriétés requises pour éviter l'erreur TypeScript
-      const testRequest = {
-        guest_id: 'demo-guest',
-        room_id: 'demo-room',
-        guest_name: 'Jean Dupont',
-        room_number: '101',
-        type: 'housekeeping',
-        description: 'Demande de nettoyage quotidien',
-        status: 'pending'
-      };
+      // Collection de requêtes réalistes
+      const realRequests = [
+        {
+          guest_id: 'guest-001',
+          room_id: 'room-101',
+          guest_name: 'Sophie Martin',
+          room_number: '101',
+          type: 'housekeeping',
+          description: 'Changement de serviettes et nettoyage de la salle de bain',
+          status: 'pending'
+        },
+        {
+          guest_id: 'guest-002',
+          room_id: 'room-203',
+          guest_name: 'Thomas Bernard',
+          room_number: '203',
+          type: 'maintenance',
+          description: 'Problème avec la climatisation',
+          status: 'in_progress'
+        },
+        {
+          guest_id: 'guest-003',
+          room_id: 'room-305',
+          guest_name: 'Émilie Dubois',
+          room_number: '305',
+          type: 'room_service',
+          description: 'Commande petit-déjeuner pour 7h30',
+          status: 'pending'
+        },
+        {
+          guest_id: 'guest-004',
+          room_id: 'room-118',
+          guest_name: 'Pierre Lefèvre',
+          room_number: '118',
+          type: 'amenities',
+          description: 'Demande d\'oreillers supplémentaires',
+          status: 'completed'
+        }
+      ];
       
-      const { error } = await supabase
-        .from('service_requests')
-        .insert(testRequest);
-        
-      if (error) {
-        console.error('Error creating test request:', error);
-      } else {
-        console.log('Created test service request successfully');
+      // Insérer les requêtes une par une pour un meilleur débogage
+      for (const request of realRequests) {
+        const { error } = await supabase
+          .from('service_requests')
+          .insert(request);
+          
+        if (error) {
+          console.error('Error creating realistic request:', error);
+        }
       }
+      
+      console.log('Created realistic service requests successfully');
     }
   };
 
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
-    refetchInterval: 5000, // Actualisation toutes les 5 secondes
-    staleTime: 0, // Toujours considérer les données comme périmées
+    refetchInterval: 10000, // Actualisation toutes les 10 secondes
+    staleTime: 5000, // Considérer les données comme périmées après 5 secondes
     gcTime: 0, // Collecte immédiate des déchets
     retry: 3,
     refetchOnWindowFocus: true,
@@ -159,6 +191,6 @@ export const useServiceRequests = () => {
     refetch,
     cancelRequest: cancelMutation.mutate,
     isCancelling: cancelMutation.isPending,
-    createTestRequestIfEmpty
+    createRealRequestExamples
   };
 };

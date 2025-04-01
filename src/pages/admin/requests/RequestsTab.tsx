@@ -125,7 +125,7 @@ export const RequestsTab = () => {
       console.log('Performing polling refresh of service requests');
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
-    }, 3000);
+    }, 5000);
     
     return () => {
       refreshTimers.forEach(clearTimeout);
@@ -155,34 +155,57 @@ export const RequestsTab = () => {
     });
   };
 
-  const createDemoRequest = async () => {
+  const createRealisticRequests = async () => {
     try {
-      // Définir explicitement toutes les propriétés requises
-      const demoRequest = {
-        guest_id: 'demo-guest',
-        room_id: 'demo-room',
-        guest_name: 'Jean Dupont',
-        room_number: '101',
-        type: 'housekeeping',
-        description: 'Demande de nettoyage quotidien',
-        status: 'pending'
-      };
+      // Définir différents types de requêtes réalistes
+      const requestTypes = [
+        {
+          guest_id: 'guest-101',
+          room_id: 'room-101',
+          guest_name: 'Jean Dupont',
+          room_number: '101',
+          type: 'housekeeping',
+          description: 'Demande de nettoyage quotidien',
+          status: 'pending'
+        },
+        {
+          guest_id: 'guest-102',
+          room_id: 'room-102',
+          guest_name: 'Marie Laforêt',
+          room_number: '102',
+          type: 'maintenance',
+          description: 'Fuite d\'eau dans la salle de bain',
+          status: 'in_progress'
+        },
+        {
+          guest_id: 'guest-103',
+          room_id: 'room-103',
+          guest_name: 'Paul Martin',
+          room_number: '103',
+          type: 'concierge',
+          description: 'Réservation de taxi pour 18h00',
+          status: 'pending'
+        }
+      ];
+      
+      // Choisir aléatoirement une requête
+      const randomRequest = requestTypes[Math.floor(Math.random() * requestTypes.length)];
       
       const { data, error } = await supabase
         .from('service_requests')
-        .insert(demoRequest)
+        .insert(randomRequest)
         .select();
         
       if (error) {
-        console.error('Error creating demo request:', error);
+        console.error('Error creating realistic request:', error);
         toast.error('Erreur lors de la création de la requête de démonstration');
       } else {
-        console.log('Created demo request:', data);
+        console.log('Created realistic request:', data);
         toast.success('Requête de démonstration créée avec succès');
         handleRefresh();
       }
     } catch (e) {
-      console.error('Exception creating demo request:', e);
+      console.error('Exception creating realistic request:', e);
     }
   };
 
@@ -213,10 +236,10 @@ export const RequestsTab = () => {
               <p>Aucune requête n'est disponible dans la base de données.</p>
               <Button 
                 variant="outline" 
-                onClick={createDemoRequest}
+                onClick={createRealisticRequests}
                 className="w-fit"
               >
-                Créer une requête de démonstration
+                Créer une requête réaliste
               </Button>
             </AlertDescription>
           </Alert>

@@ -39,13 +39,23 @@ export function useRequestStatusService() {
         console.warn('Secondary update method failed but primary succeeded:', serviceError);
       }
       
+      // Traduire les statuts en français pour les notifications
+      const statusTranslations = {
+        'pending': 'en attente',
+        'in_progress': 'en cours de traitement',
+        'completed': 'complétée',
+        'cancelled': 'annulée'
+      };
+      
+      const statusText = statusTranslations[newStatus] || newStatus;
+      
       // Utiliser les deux systèmes de toast pour une meilleure visibilité
       toast({
         title: "Statut mis à jour",
-        description: `Le statut de la requête est maintenant: ${newStatus}`
+        description: `Le statut de la requête est maintenant: ${statusText}`
       });
       sonnerToast.success("Statut mis à jour", {
-        description: `Le statut de la requête est maintenant: ${newStatus}`
+        description: `Le statut de la requête est maintenant: ${statusText}`
       });
       
       // Invalider et réactualiser de force pour s'assurer que toutes les données sont mises à jour
