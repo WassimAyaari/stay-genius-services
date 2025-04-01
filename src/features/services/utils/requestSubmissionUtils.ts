@@ -84,11 +84,9 @@ export const submitRequestViaChatMessage = async (
     // Define a valid room_id to use - either from database or use userId as a fallback
     const roomId = roomData?.id || userId;
     
+    // Ensure we have the full name for the guest
     // Extract first and last name from full name for storing in the request
-    const nameParts = userInfo.name.split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-    const fullName = `${firstName} ${lastName}`.trim();
+    const fullName = userInfo.name.trim();
     
     // Step 4: Create service request with minimal required data
     try {
