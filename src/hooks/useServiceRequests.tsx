@@ -15,6 +15,8 @@ export const useServiceRequests = () => {
       return [];
     }
 
+    console.log('Fetching service requests for auth user:', user.id);
+    
     const { data, error } = await supabase
       .from('service_requests')
       .select('*')
@@ -26,6 +28,7 @@ export const useServiceRequests = () => {
       throw error;
     }
 
+    console.log('Service requests data retrieved:', data?.length || 0);
     return data as ServiceRequest[];
   };
 

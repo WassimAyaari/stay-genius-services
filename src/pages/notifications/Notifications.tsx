@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/Layout';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
@@ -11,11 +12,16 @@ import { format } from 'date-fns';
 import { ServiceRequest } from '@/features/rooms/types';
 import { TableReservation } from '@/features/dining/types';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { Button } from '@/components/ui/button';
 
 const Notifications = () => {
   const { user } = useAuth();
   const { data: serviceRequests = [], isLoading: isLoadingRequests } = useServiceRequests();
   const { reservations = [], isLoading: isLoadingReservations } = useTableReservations();
+
+  console.log("Notifications page - auth user:", user?.id);
+  console.log("Notifications page - service requests:", serviceRequests?.length);
+  console.log("Notifications page - reservations:", reservations?.length);
 
   // Define a type for the combined notification items
   type NotificationItem = {
@@ -115,14 +121,17 @@ const Notifications = () => {
     }
   };
 
-  // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+  // Si l'utilisateur n'est pas connecté, afficher une page de connexion
   if (!user) {
     return (
       <Layout>
         <div className="container py-8">
           <h1 className="text-2xl font-bold mb-6">Mes Notifications</h1>
-          <div className="text-center py-10">
+          <div className="text-center py-10 space-y-4">
             <p className="text-lg text-gray-600">Veuillez vous connecter pour voir vos notifications.</p>
+            <Button asChild variant="default">
+              <Link to="/auth/login">Se connecter</Link>
+            </Button>
           </div>
         </div>
       </Layout>

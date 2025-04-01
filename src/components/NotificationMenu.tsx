@@ -15,9 +15,9 @@ const NotificationMenu = () => {
   const { data: serviceRequests = [] } = useServiceRequests();
   const { reservations = [] } = useTableReservations();
 
-  console.log("NotificationMenu - user:", user?.id);
-  console.log("NotificationMenu - serviceRequests:", serviceRequests);
-  console.log("NotificationMenu - reservations:", reservations);
+  console.log("NotificationMenu - auth user ID:", user?.id);
+  console.log("NotificationMenu - serviceRequests count:", serviceRequests?.length);
+  console.log("NotificationMenu - reservations count:", reservations?.length);
 
   // Define a type for combined notifications
   type NotificationItem = {

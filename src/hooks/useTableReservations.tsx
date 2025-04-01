@@ -17,7 +17,7 @@ export const useTableReservations = (restaurantId?: string) => {
       return [];
     }
     
-    console.log('Fetching reservations for user:', user.id);
+    console.log('Fetching reservations for auth user:', user.id);
     
     const { data, error } = await supabase
       .from('table_reservations')
