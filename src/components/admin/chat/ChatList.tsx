@@ -103,16 +103,18 @@ const ChatList: React.FC<ChatListProps> = ({
                       </div>
                       
                       {chat.roomNumber && (
-                        <p className="text-xs text-muted-foreground">
-                          Room: {chat.roomNumber}
-                        </p>
-                      )}
-                      
-                      {/* Affichage du nom complet de l'invité s'il est disponible */}
-                      {chat.userInfo && (chat.userInfo.firstName || chat.userInfo.lastName) && (
-                        <p className="text-xs text-muted-foreground">
-                          Guest: {[chat.userInfo.firstName, chat.userInfo.lastName].filter(Boolean).join(' ')}
-                        </p>
+                        <div className="flex flex-col">
+                          <p className="text-xs text-muted-foreground">
+                            Room: {chat.roomNumber}
+                          </p>
+                          
+                          {/* Affichage du nom complet de l'invité s'il est disponible */}
+                          {chat.userInfo && (chat.userInfo.firstName || chat.userInfo.lastName) && (
+                            <p className="text-xs text-muted-foreground">
+                              Guest: {[chat.userInfo.firstName, chat.userInfo.lastName].filter(Boolean).join(' ')}
+                            </p>
+                          )}
+                        </div>
                       )}
                       
                       {chat.type === 'request' && chat.messages[0]?.requestStatus && (

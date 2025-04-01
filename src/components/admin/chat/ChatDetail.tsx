@@ -65,6 +65,11 @@ const ChatDetail = ({
   };
 
   const isRequestChat = activeChat.type === 'request';
+  
+  // Get full name from userInfo if available
+  const guestFullName = activeChat.userInfo?.firstName || activeChat.userInfo?.lastName 
+    ? `${activeChat.userInfo?.firstName || ''} ${activeChat.userInfo?.lastName || ''}`.trim()
+    : activeChat.userName;
 
   return (
     <div>
@@ -97,9 +102,7 @@ const ChatDetail = ({
         </Avatar>
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            {activeChat.userInfo?.firstName && activeChat.userInfo?.lastName 
-              ? `${activeChat.userInfo.firstName} ${activeChat.userInfo.lastName}` 
-              : activeChat.userName}
+            {guestFullName}
           </h2>
           <div className="text-sm text-muted-foreground space-y-0.5">
             {activeChat.roomNumber && <p>Room: {activeChat.roomNumber}</p>}
