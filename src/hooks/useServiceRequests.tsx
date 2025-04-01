@@ -8,6 +8,8 @@ export const useServiceRequests = () => {
   const queryClient = useQueryClient();
 
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
+    console.log('Fetching all service requests...');
+    
     // First, fetch all service requests
     const { data: requestsData, error: requestsError } = await supabase
       .from('service_requests')
@@ -18,6 +20,8 @@ export const useServiceRequests = () => {
       console.error('Error fetching service requests:', requestsError);
       throw requestsError;
     }
+
+    console.log('Fetched service requests:', requestsData.length);
 
     // For each request that has a request_item_id, fetch the associated request item and category
     const requests = await Promise.all(
@@ -86,6 +90,7 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
+    refetchInterval: 30000, // Rafraîchir automatiquement toutes les 30 secondes
   });
 
   const cancelMutation = useMutation({
