@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export function useRequestsData() {
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const { 
     data: requests = [], 
     isLoading, 
@@ -39,14 +39,14 @@ export function useRequestsData() {
         
         // Show notification for new requests
         if (payload.eventType === 'INSERT') {
-          toast({
+          uiToast({
             title: "Nouvelle requête",
             description: `Une nouvelle requête a été reçue.`,
             variant: "default"
           });
           
           // Also use sonner toast for better visibility
-          toast.success('Nouvelle requête', {
+          toast('Nouvelle requête', {
             description: 'Une nouvelle requête a été reçue'
           });
         }
@@ -63,7 +63,7 @@ export function useRequestsData() {
           const status = payload.new.status;
           const message = statusMap[status] || 'a été mise à jour';
           
-          toast({
+          uiToast({
             title: "Mise à jour",
             description: `La requête ${message}.`,
             variant: "default"
@@ -99,13 +99,13 @@ export function useRequestsData() {
       const result = await refetch();
       console.log('Manual refresh completed with count:', result.data?.length || 0);
       
-      toast({
+      uiToast({
         title: "Données actualisées",
         description: "Les données des requêtes ont été actualisées."
       });
     } catch (error) {
       console.error("Error refreshing data:", error);
-      toast({
+      uiToast({
         title: "Erreur",
         description: "Échec de l'actualisation des données.",
         variant: "destructive"
@@ -113,7 +113,7 @@ export function useRequestsData() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [refetch]);
+  }, [refetch, uiToast]);
 
   return {
     requests,

@@ -56,12 +56,12 @@ export const RequestsTab = () => {
         
         // Show notification for changes
         if (payload.eventType === 'INSERT') {
-          toast.success('New service request received', {
-            description: 'A new request has been added to the system'
+          toast.success('Nouvelle demande reçue', {
+            description: 'Une nouvelle demande a été ajoutée au système'
           });
         } else if (payload.eventType === 'UPDATE') {
-          toast.info('Service request updated', {
-            description: 'A request has been modified'
+          toast.info('Demande mise à jour', {
+            description: 'Une demande a été modifiée'
           });
         }
         

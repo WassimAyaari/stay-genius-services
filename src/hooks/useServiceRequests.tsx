@@ -28,13 +28,10 @@ export const useServiceRequests = () => {
       requestsData.map(async (request) => {
         if (request.request_item_id) {
           try {
-            // Fetch the request item and its category in a single query
+            // Fetch the request item without joining with category
             const { data: itemData, error: itemError } = await supabase
               .from('request_items')
-              .select(`
-                *,
-                category:request_categories(name)
-              `)
+              .select('*')
               .eq('id', request.request_item_id)
               .maybeSingle();
 
@@ -43,13 +40,27 @@ export const useServiceRequests = () => {
               return request;
             }
 
+            // If we have an item, fetch its category separately
+            let categoryName = null;
+            if (itemData && itemData.category_id) {
+              const { data: categoryData, error: categoryError } = await supabase
+                .from('request_categories')
+                .select('name')
+                .eq('id', itemData.category_id)
+                .maybeSingle();
+                
+              if (!categoryError && categoryData) {
+                categoryName = categoryData.name;
+              }
+            }
+
             // Transform the data to match expected format
             return {
               ...request,
               request_items: itemData ? {
                 ...itemData,
-                category_name: itemData.category?.name || null,
-                category: itemData.category
+                category_name: categoryName,
+                category: categoryName ? { name: categoryName } : null
               } : null
             };
           } catch (error) {
