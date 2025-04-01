@@ -97,9 +97,10 @@ export const useRegistrationForm = () => {
           email: values.email,
           room_number: values.roomNumber,
           nationality: values.nationality,
-          birth_date: values.birthDate,
-          check_in_date: values.checkInDate,
-          check_out_date: values.checkOutDate
+          // Convert Date objects to ISO date strings for Supabase
+          birth_date: values.birthDate.toISOString().split('T')[0],
+          check_in_date: values.checkInDate.toISOString().split('T')[0],
+          check_out_date: values.checkOutDate.toISOString().split('T')[0]
         };
         
         // Créer l'invité directement dans la table guests
