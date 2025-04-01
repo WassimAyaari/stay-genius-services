@@ -36,7 +36,8 @@ const createUserProfile = async (userId: string, userInfo: UserInfo) => {
         last_name: lastName,
         email: '',
         room_number: userInfo.roomNumber,
-        guest_type: 'Premium Guest'
+        guest_type: 'Premium Guest',
+        phone: userInfo.phone || ''
       }]);
     
     if (error) {
@@ -130,6 +131,12 @@ export const submitRequestViaChatMessage = async (
     // Define a valid room_id to use - either from database or use userId as a fallback
     const roomId = roomData?.id || userId;
     
+    // Extract first and last name from full name for storing in the request
+    const nameParts = userInfo.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    const fullName = `${firstName} ${lastName}`.trim();
+    
     // Step 4: Create service request with minimal required data
     try {
       const requestData: any = {
@@ -140,7 +147,7 @@ export const submitRequestViaChatMessage = async (
         status: 'pending',
         created_at: new Date().toISOString(),
         room_number: userInfo.roomNumber, // Include room_number for display purposes
-        guest_name: userInfo.name || 'Guest' // Add guest name for display
+        guest_name: fullName || 'Guest' // Add full name for display
       };
 
       // Add category if available

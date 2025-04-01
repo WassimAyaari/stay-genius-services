@@ -101,9 +101,10 @@ export function useUserInfo(room: Room | null) {
 
   const saveUserInfo = (info: UserInfo) => {
     // Store user info in local storage with proper fields
+    const nameParts = info.name.split(' ');
     const userDataToSave = {
-      first_name: info.name.split(' ')[0],
-      last_name: info.name.split(' ').slice(1).join(' '),
+      first_name: nameParts[0] || '',
+      last_name: nameParts.slice(1).join(' ') || '',
       room_number: info.roomNumber,
       phone: info.phone || ''
     };
