@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Room } from '@/hooks/useRoom';
 import { supabase } from '@/integrations/supabase/client';
@@ -168,8 +167,8 @@ export function useUserInfo(room: Room | null) {
     }
   };
 
-  // Add method to update local user_data with default values if missing
-  const ensureValidUserInfo = async () => {
+  // Ensure that this method returns a Promise
+  const ensureValidUserInfo = async (): Promise<UserInfo> => {
     const currentInfo = getLocalUserInfo();
     
     // If either name or room number is missing, save with defaults

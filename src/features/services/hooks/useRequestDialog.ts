@@ -51,20 +51,21 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     });
   };
 
-  // Update the handle submit requests to properly validate user info
+  // Update the handle submit requests to properly handle the Promise
   const handleSubmitRequests = async () => {
-    // First ensure we have valid user info and update localStorage if needed
-    const validUserInfo = ensureValidUserInfo();
-    
-    // Double-check that we actually have the required fields with valid values
-    if (!validUserInfo.name || !validUserInfo.roomNumber) {
-      toast.error("Error", {
-        description: "Your profile information is incomplete. Please contact reception.",
-      });
-      return;
-    }
-    
     try {
+      // First ensure we have valid user info and update localStorage if needed
+      // Use await to wait for the Promise to resolve
+      const validUserInfo = await ensureValidUserInfo();
+      
+      // Double-check that we actually have the required fields with valid values
+      if (!validUserInfo.name || !validUserInfo.roomNumber) {
+        toast.error("Error", {
+          description: "Your profile information is incomplete. Please contact reception.",
+        });
+        return;
+      }
+      
       // Call the submission function with the validated user info
       await submitRequests(selectedItems, categoryItems, validUserInfo, selectedCategory, onClose);
       
