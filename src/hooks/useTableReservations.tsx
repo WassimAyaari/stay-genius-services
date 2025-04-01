@@ -5,6 +5,7 @@ import { TableReservation, CreateTableReservationDTO, UpdateReservationStatusDTO
 import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { createReservation as apiCreateReservation, fetchReservations, updateReservationStatus as apiUpdateReservationStatus } from '@/features/dining/services/reservationService';
+import { useEffect } from 'react';
 
 export const useTableReservations = (restaurantId?: string) => {
   const queryClient = useQueryClient();
@@ -122,6 +123,55 @@ export const useTableReservations = (restaurantId?: string) => {
       toast.error("Erreur lors de la mise à jour du statut");
     }
   });
+
+  // Subscribe to real-time updates for table reservations
+  useEffect(() => {
+    if (!userId) return;
+    
+    console.log("Setting up real-time listener for reservations for user:", userId);
+    
+    const channel = supabase
+      .channel('reservation_updates')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'table_reservations',
+        filter: `user_id=eq.${userId}`,
+      }, (payload) => {
+        console.log('Reservation update received:', payload);
+        
+        const oldStatus = payload.old.status;
+        const newStatus = payload.new.status;
+        
+        // Only notify if the status has changed
+        if (oldStatus !== newStatus) {
+          // Get the status text in French
+          const getStatusFrench = (status: string) => {
+            switch (status) {
+              case 'confirmed': return 'confirmée';
+              case 'cancelled': return 'annulée';
+              case 'pending': return 'en attente';
+              default: return status;
+            }
+          };
+          
+          // Show a toast notification
+          toast.info(`Mise à jour de réservation`, {
+            description: `Votre réservation est maintenant ${getStatusFrench(newStatus)}.`,
+            duration: 5000,
+          });
+          
+          // Refetch the reservations to update the UI
+          queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, restaurantId] });
+        }
+      })
+      .subscribe();
+      
+    return () => {
+      console.log("Cleaning up real-time listener for reservations");
+      supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient, restaurantId]);
 
   return {
     reservations: reservations || [],

@@ -7,7 +7,7 @@ import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import { useRealtimeMessages } from '@/hooks/messaging/useRealtimeMessages';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client'; // Add the missing import
+import { supabase } from '@/integrations/supabase/client';
 
 interface ServiceChatProps {
   isChatOpen: boolean;
@@ -34,7 +34,8 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
     const userId = localStorage.getItem('user_id');
     if (!userId) return;
     
-    const channel = supabase
+    // Channel for service request updates
+    const serviceChannel = supabase
       .channel('service_request_updates')
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -44,19 +45,19 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
       }, (payload) => {
         console.log('Service request updated:', payload);
         
-        // Show a toast notification for the update
-        const statusMap = {
-          'pending': 'is now pending',
-          'in_progress': 'is now in progress',
-          'completed': 'has been completed',
-          'cancelled': 'has been cancelled'
+        // Show a toast notification for the service update
+        const statusMap: Record<string, string> = {
+          'pending': 'est en attente',
+          'in_progress': 'est en cours de traitement',
+          'completed': 'a été complétée',
+          'cancelled': 'a été annulée'
         };
         
         const status = payload.new.status;
-        const message = statusMap[status] || 'has been updated';
+        const message = statusMap[status] || 'a été mise à jour';
         
-        toast.info(`Request Update`, {
-          description: `Your ${payload.new.type} request ${message}.`
+        toast.info(`Mise à jour de demande`, {
+          description: `Votre demande de type ${payload.new.type} ${message}.`
         });
         
         // Refresh messages to show updated request status
@@ -64,8 +65,41 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
       })
       .subscribe();
       
+    // Channel for reservation updates
+    const reservationChannel = supabase
+      .channel('reservation_updates_chat')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'table_reservations',
+        filter: `user_id=eq.${userId}`,
+      }, (payload) => {
+        console.log('Reservation updated:', payload);
+        
+        if (payload.old.status === payload.new.status) return;
+        
+        // Show a toast notification for the reservation update
+        const statusMap: Record<string, string> = {
+          'pending': 'est en attente',
+          'confirmed': 'a été confirmée',
+          'cancelled': 'a été annulée'
+        };
+        
+        const status = payload.new.status;
+        const message = statusMap[status] || 'a été mise à jour';
+        
+        const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
+        const time = payload.new.time;
+        
+        toast.info(`Mise à jour de réservation`, {
+          description: `Votre réservation de table pour le ${date} à ${time} ${message}.`
+        });
+      })
+      .subscribe();
+      
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(serviceChannel);
+      supabase.removeChannel(reservationChannel);
     };
   }, [fetchMessages]);
 

@@ -17,6 +17,8 @@ import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { TableReservation } from '@/features/dining/types';
+import { ServiceRequest } from '@/features/rooms/types';
 
 const NotificationMenu = () => {
   const { user } = useAuth();
@@ -38,6 +40,11 @@ const NotificationMenu = () => {
     status: string;
     time: Date;
     link: string;
+  };
+
+  // Get restaurant name for reservation (mock since we don't fetch restaurant details here)
+  const getRestaurantName = (reservation: TableReservation) => {
+    return 'Restaurant';
   };
 
   // Combine and sort notifications by time (newest first)
