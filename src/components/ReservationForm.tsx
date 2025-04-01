@@ -14,7 +14,7 @@ import SpecialRequests from '@/components/reservation/SpecialRequests';
 import { ReservationFormProps, ReservationFormValues } from '@/components/reservation/types';
 import { toast } from 'sonner';
 
-const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une table" }: ReservationFormProps) => {
+const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une table", existingReservation }: ReservationFormProps) => {
   const { createReservation, isCreating } = useTableReservations(restaurantId);
   const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(restaurantId);
   const { userData } = useAuth();
@@ -32,21 +32,21 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
   
   const form = useForm<ReservationFormValues>({
     defaultValues: {
-      guestName: '',
-      guestEmail: '',
-      guestPhone: '',
-      roomNumber: '',
-      date: undefined,
-      time: '',
-      guests: 2,
+      guestName: existingReservation?.guestName || '',
+      guestEmail: existingReservation?.guestEmail || '',
+      guestPhone: existingReservation?.guestPhone || '',
+      roomNumber: existingReservation?.roomNumber || '',
+      date: existingReservation?.date ? new Date(existingReservation.date) : undefined,
+      time: existingReservation?.time || '',
+      guests: existingReservation?.guests || 2,
       menuId: 'none',
-      specialRequests: ''
+      specialRequests: existingReservation?.specialRequests || ''
     }
   });
 
   // Populate form with user data when available
   useEffect(() => {
-    if (userData) {
+    if (userData && !existingReservation) {
       console.log("Populating form with user data:", userData);
       
       // Format full name from user data
@@ -66,25 +66,27 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
     } else {
       console.log("No user data available to populate form");
       
-      // Get user details from localStorage if available
-      try {
-        const userDataStr = localStorage.getItem('user_data');
-        if (userDataStr) {
-          const parsedData = JSON.parse(userDataStr);
-          console.log("User data from localStorage:", parsedData);
-          
-          const fullName = `${parsedData.first_name || ''} ${parsedData.last_name || ''}`.trim();
-          
-          form.setValue('guestName', fullName || '');
-          form.setValue('guestEmail', parsedData.email || '');
-          form.setValue('guestPhone', parsedData.phone || '');
-          form.setValue('roomNumber', parsedData.room_number || '');
+      // Get user details from localStorage if available and no existing reservation
+      if (!existingReservation) {
+        try {
+          const userDataStr = localStorage.getItem('user_data');
+          if (userDataStr) {
+            const parsedData = JSON.parse(userDataStr);
+            console.log("User data from localStorage:", parsedData);
+            
+            const fullName = `${parsedData.first_name || ''} ${parsedData.last_name || ''}`.trim();
+            
+            form.setValue('guestName', fullName || '');
+            form.setValue('guestEmail', parsedData.email || '');
+            form.setValue('guestPhone', parsedData.phone || '');
+            form.setValue('roomNumber', parsedData.room_number || '');
+          }
+        } catch (error) {
+          console.error("Error parsing user data from localStorage:", error);
         }
-      } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
       }
     }
-  }, [userData, form]);
+  }, [userData, form, existingReservation]);
 
   const onSubmit = form.handleSubmit((data) => {
     console.log('Form submission data:', data);
