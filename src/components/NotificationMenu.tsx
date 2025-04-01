@@ -7,12 +7,10 @@ import { useTableReservations } from '@/hooks/useTableReservations';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ServiceRequest } from '@/features/rooms/types';
-import { TableReservation } from '@/features/dining/types';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const NotificationMenu = () => {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const { data: serviceRequests = [] } = useServiceRequests();
   const { reservations = [] } = useTableReservations();
 
@@ -96,7 +94,9 @@ const NotificationMenu = () => {
     }
   }
 
-  if (!user) {
+  // Make sure we only render null if there's no user data at all
+  if (!user && !userData) {
+    console.log("No user data found for NotificationMenu");
     return null;
   }
 
