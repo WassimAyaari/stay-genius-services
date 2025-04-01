@@ -91,7 +91,7 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests'],
     queryFn: fetchServiceRequests,
-    refetchInterval: 5000, // More frequent refresh (every 5 seconds)
+    refetchInterval: 3000, // More frequent refresh (every 3 seconds)
     staleTime: 0, // Always consider data stale
     gcTime: 0, // Immediate garbage collection
     retry: 3,

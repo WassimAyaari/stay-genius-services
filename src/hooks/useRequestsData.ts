@@ -76,6 +76,15 @@ export function useRequestsData() {
             description: `La requête ${message}.`,
             variant: "default"
           });
+          
+          // Also use Sonner toast for better visibility
+          toast('Statut mis à jour', {
+            description: `La requête ${message}`
+          });
+          
+          // Force refresh
+          queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+          queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
         }
       })
       .subscribe((status) => {

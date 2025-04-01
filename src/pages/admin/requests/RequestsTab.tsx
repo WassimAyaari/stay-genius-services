@@ -85,6 +85,33 @@ export const RequestsTab = () => {
           console.error('Failed to subscribe to realtime updates, falling back to polling');
         }
       });
+      
+    // Listen for broadcast events for status updates
+    const statusChannel = supabase
+      .channel('status-updates-listener')
+      .on('broadcast', { event: 'status_updated' }, (payload) => {
+        console.log('Status update broadcast received:', payload);
+        
+        // Force immediate refresh
+        queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
+        queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
+        
+        // Show toast notification
+        const statusMap = {
+          'pending': 'en attente',
+          'in_progress': 'en cours',
+          'completed': 'complétée',
+          'cancelled': 'annulée'
+        };
+        
+        const status = payload.payload.newStatus;
+        const statusText = statusMap[status] || status;
+        
+        toast.info('Statut mis à jour', {
+          description: `Demande ${payload.payload.requestId.substring(0, 8)}... maintenant ${statusText}`
+        });
+      })
+      .subscribe();
     
     // Set up a frequent polling interval as a backup
     const pollingInterval = setInterval(() => {
@@ -97,6 +124,7 @@ export const RequestsTab = () => {
       refreshTimers.forEach(clearTimeout);
       clearInterval(pollingInterval);
       supabase.removeChannel(channel);
+      supabase.removeChannel(statusChannel);
     };
   }, [queryClient, handleRefresh]);
   
