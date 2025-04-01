@@ -17,14 +17,14 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for service requests
+  // Configuration des mises à jour en temps réel pour les requêtes de service
   useEffect(() => {
     console.log('Setting up enhanced realtime updates for all service requests');
     
-    // Force initial fetch
+    // Forcer la récupération initiale
     refetch();
     
-    // Enable realtime subscription with improved configuration
+    // Activer la souscription en temps réel avec une configuration améliorée
     const channel = supabase
       .channel('service_requests_realtime')
       .on('postgres_changes', {
@@ -34,10 +34,10 @@ export function useRequestsData() {
       }, (payload) => {
         console.log('Service request change detected:', payload.eventType, payload);
         
-        // Immediately refetch data when any change occurs
+        // Rafraîchir immédiatement les données lors de tout changement
         refetch();
         
-        // Show notification for new requests
+        // Afficher une notification pour les nouvelles demandes
         if (payload.eventType === 'INSERT') {
           uiToast({
             title: "Nouvelle requête",
@@ -45,13 +45,13 @@ export function useRequestsData() {
             variant: "default"
           });
           
-          // Also use sonner toast for better visibility
+          // Utiliser également toast sonner pour une meilleure visibilité
           toast('Nouvelle requête', {
             description: 'Une nouvelle requête a été reçue'
           });
         }
         
-        // Show notification for status updates
+        // Afficher une notification pour les mises à jour de statut
         if (payload.eventType === 'UPDATE' && payload.new?.status !== payload.old?.status) {
           const statusMap = {
             'pending': 'est en attente',
@@ -74,16 +74,16 @@ export function useRequestsData() {
         console.log('Enhanced subscription status:', status);
         if (status !== 'SUBSCRIBED') {
           console.error('Failed to subscribe to realtime updates:', status);
-          // Fallback to periodic refresh
+          // Repli sur un rafraîchissement périodique
           refetch();
         }
       });
     
-    // Set up periodic refresh as a backup
+    // Configurer un rafraîchissement périodique comme sauvegarde
     const interval = setInterval(() => {
       console.log('Performing scheduled refresh of service requests');
       refetch();
-    }, 5000); // More frequent refresh (every 5 seconds)
+    }, 5000); // Rafraîchissement plus fréquent (toutes les 5 secondes)
     
     return () => {
       console.log('Cleaning up realtime subscription and interval');

@@ -26,11 +26,11 @@ export const RequestsTab = () => {
   const queryClient = useQueryClient();
   const [newRequests, setNewRequests] = useState<boolean>(false);
   
-  // Force a refresh when the component mounts
+  // Forcer un rafraîchissement lorsque le composant est monté
   useEffect(() => {
     console.log('RequestsTab mounted, forcing refresh of data');
     
-    // Force multiple refreshes to ensure data is loaded
+    // Forcer plusieurs rafraîchissements pour s'assurer que les données sont chargées
     handleRefresh();
     
     const initialRefreshes = [100, 500, 1500, 3000].map(delay => 
@@ -41,7 +41,7 @@ export const RequestsTab = () => {
       }, delay)
     );
     
-    // Set up dedicated real-time subscription for admin page
+    // Mettre en place une souscription en temps réel dédiée pour la page d'administration
     const channel = supabase
       .channel('admin-requests-realtime')
       .on('postgres_changes', {
@@ -51,10 +51,10 @@ export const RequestsTab = () => {
       }, (payload) => {
         console.log('Admin detected service request change:', payload);
         
-        // Flag that new requests are available
+        // Signaler que de nouvelles demandes sont disponibles
         setNewRequests(true);
         
-        // Show notification for changes
+        // Afficher une notification pour les changements
         if (payload.eventType === 'INSERT') {
           toast.success('Nouvelle demande reçue', {
             description: 'Une nouvelle demande a été ajoutée au système'
@@ -65,7 +65,7 @@ export const RequestsTab = () => {
           });
         }
         
-        // Force immediate data refresh
+        // Forcer le rafraîchissement immédiat des données
         queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
       })
@@ -73,7 +73,7 @@ export const RequestsTab = () => {
         console.log('Admin real-time subscription status:', status);
       });
     
-    // Set up frequent refresh interval as backup
+    // Configurer un intervalle de rafraîchissement fréquent comme sauvegarde
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
@@ -86,7 +86,7 @@ export const RequestsTab = () => {
     };
   }, [queryClient, handleRefresh]);
   
-  // Effect to auto-refresh when new requests are detected
+  // Effet pour rafraîchir automatiquement lorsque de nouvelles demandes sont détectées
   useEffect(() => {
     if (newRequests) {
       console.log('New requests detected, refreshing data');
@@ -97,7 +97,7 @@ export const RequestsTab = () => {
   
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     await handleUpdateStatus(requestId, newStatus, () => {
-      // Force multiple refreshes to ensure data is updated
+      // Forcer plusieurs rafraîchissements pour s'assurer que les données sont mises à jour
       queryClient.invalidateQueries({ queryKey: ['serviceRequests'] });
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['serviceRequests'] });
