@@ -108,6 +108,13 @@ const ChatList: React.FC<ChatListProps> = ({
                         </p>
                       )}
                       
+                      {/* Affichage du nom complet de l'invité s'il est disponible */}
+                      {chat.userInfo && (chat.userInfo.firstName || chat.userInfo.lastName) && (
+                        <p className="text-xs text-muted-foreground">
+                          Guest: {[chat.userInfo.firstName, chat.userInfo.lastName].filter(Boolean).join(' ')}
+                        </p>
+                      )}
+                      
                       {chat.type === 'request' && chat.messages[0]?.requestStatus && (
                         <div className="mt-1">
                           <RequestStatusBadge status={chat.messages[0].requestStatus} />
