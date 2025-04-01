@@ -2,7 +2,15 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuGroup, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { Link } from 'react-router-dom';
