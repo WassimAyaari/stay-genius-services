@@ -31,6 +31,7 @@ const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
     const checkAuth = async () => {
       setLoading(true);
       console.log("Vérification de l'authentification pour la route:", location.pathname);
+      console.log("adminRequired:", adminRequired);
       
       try {
         // 1. Vérifier si l'utilisateur est authentifié via Supabase
@@ -72,8 +73,17 @@ const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
           return;
         }
         
-        // 4. Vérifier si l'utilisateur a le rôle d'administrateur si requis
+        // 4. TEMPORAIREMENT DÉSACTIVÉ: Vérification des droits administrateur
+        // La vérification des droits admin est désactivée pour le moment
         if (adminRequired) {
+          // Désactivation temporaire de la vérification des droits admin
+          console.log('Accès admin requis, mais la vérification est temporairement désactivée');
+          // On considère que tous les utilisateurs ont les droits admin pour le moment
+          setAuthorized(true);
+          setLoading(false);
+          return;
+          
+          /* CODE ORIGINAL (DÉSACTIVÉ)
           try {
             const userData = JSON.parse(userDataString);
             if (!userData.isAdmin) {
@@ -95,6 +105,7 @@ const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
             setLoading(false);
             return;
           }
+          */
         }
         
         try {
