@@ -9,6 +9,7 @@ import { useAuth } from '@/features/auth/hooks/useAuthContext';
 export function useRequestsData() {
   const { toast } = useToast();
   const { user } = useAuth();
+  // Directly use the return values from useServiceRequests
   const { 
     data: requests = [], 
     isLoading, 
@@ -19,10 +20,8 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for service requests for the authenticated user
+  // Set up real-time updates for all service requests
   useEffect(() => {
-    if (!user?.id) return;
-    
     try {
       const channel = supabase
         .channel('service_requests_updates')
@@ -30,7 +29,6 @@ export function useRequestsData() {
           event: '*',
           schema: 'public',
           table: 'service_requests',
-          filter: `guest_id=eq.${user.id}`,
         }, (payload) => {
           console.log('Service request change detected:', payload);
           refetch();
@@ -49,7 +47,7 @@ export function useRequestsData() {
             
             toast({
               title: "Request Update",
-              description: `Your ${payload.new.type} request ${message}.`
+              description: `Request ${message}.`
             });
           }
         })
@@ -61,7 +59,7 @@ export function useRequestsData() {
     } catch (error) {
       console.error("Error setting up realtime updates:", error);
     }
-  }, [refetch, toast, user?.id]);
+  }, [refetch, toast]);
   
   const handleRefresh = async () => {
     setIsRefreshing(true);

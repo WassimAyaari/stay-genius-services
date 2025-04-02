@@ -4,25 +4,37 @@ import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
 import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { useLocation } from 'react-router-dom';
 
 export const useServiceRequests = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const location = useLocation();
   const userId = user?.id || localStorage.getItem('user_id');
+  
+  // Check if we're in the admin section
+  const isAdminSection = location.pathname.includes('/admin');
 
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
-    if (!userId) {
+    if (!userId && !isAdminSection) {
       console.log('No authenticated user or user_id in localStorage, returning empty service requests');
       return [];
     }
 
-    console.log('Fetching service requests for user ID:', userId);
-    
-    const { data, error } = await supabase
+    // For admin section, fetch all requests. Otherwise, fetch only user's requests
+    let query = supabase
       .from('service_requests')
       .select('*')
-      .eq('guest_id', userId)
       .order('created_at', { ascending: false });
+      
+    if (!isAdminSection) {
+      console.log('Fetching service requests for user ID:', userId);
+      query = query.eq('guest_id', userId);
+    } else {
+      console.log('Admin view: Fetching all service requests');
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching service requests:', error);
@@ -34,16 +46,22 @@ export const useServiceRequests = () => {
   };
 
   const cancelServiceRequest = async (requestId: string): Promise<void> => {
-    if (!userId) {
+    if (!userId && !isAdminSection) {
       toast.error("Veuillez vous connecter pour annuler une demande");
       throw new Error("Utilisateur non authentifié");
     }
 
-    const { error } = await supabase
+    let query = supabase
       .from('service_requests')
       .update({ status: 'cancelled' })
-      .eq('id', requestId)
-      .eq('guest_id', userId); // Ensure only the user's requests can be cancelled
+      .eq('id', requestId);
+      
+    // Only apply user filter if not in admin section
+    if (!isAdminSection) {
+      query = query.eq('guest_id', userId);
+    }
+
+    const { error } = await query;
 
     if (error) {
       console.error('Error cancelling service request:', error);
@@ -52,15 +70,15 @@ export const useServiceRequests = () => {
   };
 
   const { data, isLoading, error, refetch, isError } = useQuery({
-    queryKey: ['serviceRequests', userId],
+    queryKey: ['serviceRequests', userId, isAdminSection],
     queryFn: fetchServiceRequests,
-    enabled: true, // Toujours activer cette requête
+    enabled: true, // Always enable this query
   });
 
   const cancelMutation = useMutation({
     mutationFn: cancelServiceRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests', userId] });
+      queryClient.invalidateQueries({ queryKey: ['serviceRequests', userId, isAdminSection] });
       toast.success('Demande annulée avec succès');
     },
     onError: (error) => {
