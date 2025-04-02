@@ -10,6 +10,7 @@ import Contact from './pages/Contact';
 import Dining from './pages/dining/Dining';
 import RestaurantDetail from './pages/dining/RestaurantDetail';
 import Destination from './pages/destination/Destination';
+import Home from './pages/Home';
 import Notifications from './pages/notifications/Notifications';
 import NotificationDetails from './pages/notifications/NotificationDetails';
 
@@ -22,6 +23,7 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/contact" element={<Contact />} />
             
             <Route path="/dining" element={<Dining />} />
