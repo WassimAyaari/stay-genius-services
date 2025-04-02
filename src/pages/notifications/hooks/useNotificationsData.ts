@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
@@ -33,8 +33,7 @@ export const useNotificationsData = () => {
   const {
     bookings: allBookings = [],
     isLoading: isLoadingSpaBookings,
-    fetchUserBookings,
-    refetch: refetchSpaBookings
+    fetchUserBookings
   } = useSpaBookings();
 
   const { services = [] } = useSpaServices();
@@ -42,8 +41,6 @@ export const useNotificationsData = () => {
   // State for user's spa bookings
   const [userSpaBookings, setUserSpaBookings] = useState<SpaBooking[]>([]);
   const [isLoadingUserBookings, setIsLoadingUserBookings] = useState(false);
-  // Add state to prevent refetching on every render
-  const [hasInitiallyFetched, setHasInitiallyFetched] = useState(false);
 
   // Create a mapping of service IDs to service names
   const serviceNamesMap = services.reduce((acc, service) => {
@@ -51,58 +48,51 @@ export const useNotificationsData = () => {
     return acc;
   }, {} as Record<string, string>);
 
-  // Memoized function to load user bookings
-  const loadUserBookings = useCallback(async () => {
-    if (userId) {
-      setIsLoadingUserBookings(true);
-      try {
-        const bookings = await fetchUserBookings(userId);
-        // Ensure each booking has created_at field (using current date as fallback)
-        const typedBookings: SpaBooking[] = bookings.map(booking => ({
+  // Fetch user's spa bookings when user ID changes
+  useEffect(() => {
+    const loadUserBookings = async () => {
+      if (userId) {
+        setIsLoadingUserBookings(true);
+        try {
+          const bookings = await fetchUserBookings(userId);
+          // Convert imported SpaBooking type to the local NotificationTypes SpaBooking type
+          const typedBookings: SpaBooking[] = bookings.map(booking => ({
+            ...booking,
+            // Ensure required fields are present
+            created_at: booking.created_at || new Date().toISOString(),
+          }));
+          setUserSpaBookings(typedBookings);
+        } catch (error) {
+          console.error("Error fetching user spa bookings:", error);
+          setUserSpaBookings([]);
+        } finally {
+          setIsLoadingUserBookings(false);
+        }
+      } else if (userRoomNumber) {
+        // If no user ID but has room number, filter bookings by room number
+        const filteredBookings = allBookings.filter(booking => booking.room_number === userRoomNumber);
+        // Convert to the right type
+        const typedBookings: SpaBooking[] = filteredBookings.map(booking => ({
           ...booking,
+          // Ensure required fields are present
           created_at: booking.created_at || new Date().toISOString(),
         }));
         setUserSpaBookings(typedBookings);
-      } catch (error) {
-        console.error("Error fetching user spa bookings:", error);
+      } else {
         setUserSpaBookings([]);
-      } finally {
-        setIsLoadingUserBookings(false);
       }
-    } else if (userRoomNumber) {
-      // If no user ID but has room number, filter bookings by room number
-      const filteredBookings = allBookings.filter(booking => 
-        booking.room_number === userRoomNumber
-      );
-      // Ensure each booking has created_at field
-      const typedBookings: SpaBooking[] = filteredBookings.map(booking => ({
-        ...booking,
-        created_at: booking.created_at || new Date().toISOString(),
-      }));
-      setUserSpaBookings(typedBookings);
-    } else {
-      setUserSpaBookings([]);
-    }
+    };
+    
+    loadUserBookings();
   }, [userId, userRoomNumber, fetchUserBookings, allBookings]);
 
-  // Fetch user's spa bookings when user ID changes
+  // Force refetch on mount to ensure we have the latest data
   useEffect(() => {
-    loadUserBookings();
-  }, [loadUserBookings]);
-
-  // Force refetch on mount to ensure we have the latest data, but ONLY ONCE
-  useEffect(() => {
-    if (!hasInitiallyFetched) {
-      console.log("useNotificationsData - Initial data fetch");
-      console.log("Current room number:", userRoomNumber);
-      refetchRequests();
-      refetchReservations();
-      if (refetchSpaBookings) {
-        refetchSpaBookings();
-      }
-      setHasInitiallyFetched(true);
-    }
-  }, [refetchRequests, refetchReservations, refetchSpaBookings, userRoomNumber, hasInitiallyFetched]);
+    console.log("useNotificationsData - Refetching data on mount");
+    console.log("Current room number:", userRoomNumber);
+    refetchRequests();
+    refetchReservations();
+  }, [refetchRequests, refetchReservations, userRoomNumber]);
 
   // Set up real-time listeners
   useRealtimeNotifications(
@@ -110,8 +100,7 @@ export const useNotificationsData = () => {
     userEmail, 
     userRoomNumber, 
     refetchRequests, 
-    refetchReservations,
-    refetchSpaBookings
+    refetchReservations
   );
 
   // Convert reservations to the expected TableReservation type
@@ -128,7 +117,7 @@ export const useNotificationsData = () => {
     special_requests: res.specialRequests,
     status: res.status,
     created_at: res.createdAt,
-    updated_at: res.createdAt // Use createdAt as fallback for updated_at
+    updated_at: res.updatedAt || res.createdAt
   }));
 
   // Combine and sort notifications
@@ -147,10 +136,6 @@ export const useNotificationsData = () => {
     isAuthenticated,
     userId,
     userEmail,
-    userRoomNumber,
-    // Export the refetch functions so they can be used by the component
-    refetchRequests,
-    refetchReservations,
-    refetchSpaBookings
+    userRoomNumber
   };
 };
