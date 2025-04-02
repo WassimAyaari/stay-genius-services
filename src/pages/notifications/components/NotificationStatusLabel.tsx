@@ -12,11 +12,13 @@ export const NotificationStatusLabel: React.FC<NotificationStatusLabelProps> = (
   type 
 }) => {
   const getStatusText = (status: string, type: string) => {
-    if (type === 'reservation') {
+    if (type === 'reservation' || type === 'spa_booking') {
       switch (status) {
         case 'confirmed': return 'Confirmée';
         case 'cancelled': return 'Annulée';
         case 'pending': return 'En attente';
+        case 'in_progress': return 'En cours';
+        case 'completed': return 'Complétée';
         default: return 'En attente';
       }
     } else {

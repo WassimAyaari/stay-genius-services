@@ -35,6 +35,8 @@ import ReservationManager from '@/pages/admin/ReservationManager';
 import RestaurantManager from '@/pages/admin/RestaurantManager';
 import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
 import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
+import SpaManager from '@/pages/admin/SpaManager';
+import SpaBookingDetails from '@/pages/spa/SpaBookingDetails';
 import ChatMessages from '@/pages/admin/ChatMessages';
 import AboutEditor from '@/pages/admin/AboutEditor';
 
@@ -59,6 +61,11 @@ function App() {
               <Route path="/reservations/:id" element={
                 <AuthGuard>
                   <ReservationDetails />
+                </AuthGuard>
+              } />
+              <Route path="/spa-bookings/:id" element={
+                <AuthGuard>
+                  <SpaBookingDetails />
                 </AuthGuard>
               } />
               <Route path="/my-room" element={
@@ -115,6 +122,11 @@ function App() {
               <Route path="/admin/restaurant-menus" element={
                 <AuthGuard adminRequired>
                   <RestaurantMenuManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/spa" element={
+                <AuthGuard adminRequired>
+                  <SpaManager />
                 </AuthGuard>
               } />
               <Route path="/admin/chat" element={

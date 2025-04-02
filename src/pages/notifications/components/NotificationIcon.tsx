@@ -18,6 +18,10 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({
     return <Utensils className="h-6 w-6" />;
   }
   
+  if (notificationType === 'spa_booking') {
+    return <ShowerHead className="h-6 w-6" />;
+  }
+  
   if (!serviceType) {
     return <Search className="h-6 w-6" />;
   }
