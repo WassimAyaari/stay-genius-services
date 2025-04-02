@@ -68,6 +68,12 @@ function App() {
                   <SpaBookingDetails />
                 </AuthGuard>
               } />
+              {/* Ajout de la route alternative pour les réservations spa */}
+              <Route path="/spa/booking/:id" element={
+                <AuthGuard>
+                  <SpaBookingDetails />
+                </AuthGuard>
+              } />
               <Route path="/my-room" element={
                 <AuthGuard>
                   <MyRoom />
