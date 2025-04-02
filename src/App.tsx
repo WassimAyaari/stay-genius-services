@@ -27,6 +27,7 @@ import Contact from '@/pages/Contact';
 import Messages from '@/pages/messages/Messages';
 import ReservationDetails from '@/pages/dining/ReservationDetails';
 import Notifications from '@/pages/notifications/Notifications';
+import NotificationDetail from '@/pages/notifications/NotificationDetail';
 import Feedback from '@/pages/feedback/Feedback';
 import Shops from '@/pages/shops/Shops';
 import AdminDashboard from '@/pages/admin/Dashboard';
@@ -68,7 +69,7 @@ function App() {
                   <SpaBookingDetails />
                 </AuthGuard>
               } />
-              {/* Ajout de la route alternative pour les réservations spa */}
+              {/* Route spa booking détails */}
               <Route path="/spa/booking/:id" element={
                 <AuthGuard>
                   <SpaBookingDetails />
@@ -96,6 +97,12 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/notifications" element={<Notifications />} />
+              {/* Ajout de la route pour les détails de notification */}
+              <Route path="/notifications/:type/:id" element={
+                <AuthGuard>
+                  <NotificationDetail />
+                </AuthGuard>
+              } />
               <Route path="/feedback" element={<Feedback />} />
               <Route path="/shops" element={<Shops />} />
               

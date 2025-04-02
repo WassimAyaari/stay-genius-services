@@ -20,13 +20,17 @@ export const useNotificationDetail = (type?: string, id?: string) => {
   useEffect(() => {
     const fetchData = async () => {
       if (!type || !id) {
-        setError(new Error('Invalid notification parameters'));
+        console.error('Missing notification parameters', { type, id });
+        setError(new Error('Paramètres de notification invalides'));
         setIsLoading(false);
         return;
       }
       
       setIsLoading(true);
+      
       try {
+        console.log(`Fetching details for notification type: ${type}, id: ${id}`);
+        
         // Refresh data based on notification type
         switch (type) {
           case 'request':
@@ -45,14 +49,17 @@ export const useNotificationDetail = (type?: string, id?: string) => {
           n => n.id === id && n.type === type
         );
         
+        console.log('Found notification:', foundNotification, 'from', notifications.length, 'notifications');
+        
         if (foundNotification) {
           setNotification(foundNotification);
         } else {
-          setError(new Error('Notification not found'));
+          console.error('Notification not found in list', { type, id });
+          setError(new Error('Notification introuvable'));
         }
       } catch (err) {
         console.error('Error fetching notification details:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        setError(err instanceof Error ? err : new Error('Erreur inconnue'));
       } finally {
         setIsLoading(false);
       }

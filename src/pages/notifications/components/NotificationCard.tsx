@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -155,8 +154,14 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
     return null;
   }
 
+  // Modified to generate correct notification detail URL
+  const getNotificationDetailUrl = () => {
+    // Use consistent URL format for notification details
+    return `/notifications/${notification.type}/${notification.id}`;
+  };
+
   return (
-    <Link to={notification.link || '#'} className="block">
+    <Link to={getNotificationDetailUrl()} className="block">
       <Card className={`hover:shadow-md transition-shadow cursor-pointer ${getCardBackgroundColor(notification.status)}`}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start">

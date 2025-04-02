@@ -37,7 +37,7 @@ export const transformServiceRequests = (requests: any[]): NotificationItem[] =>
     icon: getServiceIcon(request.type),
     status: request.status || 'pending',
     time: createSafeDate(request.created_at) || new Date(),
-    link: `/my-room/request/${request.id}`,
+    link: `/requests/${request.id}`,
     data: {
       room_number: request.room_number,
       service_type: request.type,
@@ -58,7 +58,7 @@ export const transformTableReservations = (reservations: any[]): NotificationIte
     icon: '🍽️',
     status: reservation.status || 'pending',
     time: createSafeDate(reservation.createdAt || reservation.created_at) || new Date(),
-    link: `/dining/reservation/${reservation.id}`,
+    link: `/reservations/${reservation.id}`,
     data: {
       date: reservation.date,
       time: reservation.time,
