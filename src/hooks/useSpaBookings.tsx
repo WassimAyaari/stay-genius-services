@@ -66,18 +66,30 @@ export const useSpaBookings = () => {
 
   // Récupérer une réservation par ID
   const getBookingById = async (id: string): Promise<SpaBooking | null> => {
-    const { data, error } = await supabase
-      .from('spa_bookings')
-      .select('*')
-      .eq('id', id)
-      .single();
+    console.log('Fetching booking by ID:', id);
+    try {
+      const { data, error } = await supabase
+        .from('spa_bookings')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle(); // Using maybeSingle instead of single to handle not found case better
 
-    if (error) {
-      console.error('Error fetching booking:', error);
+      if (error) {
+        console.error('Error fetching booking by ID:', error);
+        return null;
+      }
+
+      if (!data) {
+        console.log('No booking found with ID:', id);
+        return null;
+      }
+
+      console.log('Found booking:', data);
+      return data as SpaBooking;
+    } catch (error) {
+      console.error('Exception in getBookingById:', error);
       return null;
     }
-
-    return data as SpaBooking;
   };
 
   // Créer une nouvelle réservation

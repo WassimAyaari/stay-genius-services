@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,9 +53,12 @@ const SpaBookingDetails = () => {
       
       setIsLoading(true);
       try {
+        console.log('Fetching booking details for ID:', id);
         const bookingData = await getBookingById(id);
+        console.log('Booking data received:', bookingData);
         
         if (!bookingData) {
+          console.error('No booking data found for ID:', id);
           toast.error("Réservation introuvable");
           navigate('/profile');
           return;
@@ -62,22 +66,40 @@ const SpaBookingDetails = () => {
         
         setBooking(bookingData);
         
-        const { data: serviceData } = await supabase
+        // Fetch the service data
+        const { data: serviceData, error: serviceError } = await supabase
           .from('spa_services')
           .select('*')
           .eq('id', bookingData.service_id)
           .single();
         
+        if (serviceError) {
+          console.error('Error fetching service:', serviceError);
+          throw serviceError;
+        }
+        
         if (serviceData) {
+          console.log('Service data received:', serviceData);
           setService(serviceData);
           
-          const { data: facilityData } = await supabase
-            .from('spa_facilities')
-            .select('*')
-            .eq('id', serviceData.facility_id)
-            .single();
-          
-          setFacility(facilityData);
+          // Fetch the facility data
+          if (serviceData.facility_id) {
+            const { data: facilityData, error: facilityError } = await supabase
+              .from('spa_facilities')
+              .select('*')
+              .eq('id', serviceData.facility_id)
+              .single();
+            
+            if (facilityError) {
+              console.error('Error fetching facility:', facilityError);
+              // Don't throw here, we can still show booking details without facility
+            }
+            
+            if (facilityData) {
+              console.log('Facility data received:', facilityData);
+              setFacility(facilityData);
+            }
+          }
         }
         
       } catch (error) {
@@ -103,6 +125,7 @@ const SpaBookingDetails = () => {
       const updatedBooking = await getBookingById(id);
       setBooking(updatedBooking);
       setIsCancelDialogOpen(false);
+      toast.success("Réservation annulée avec succès");
     } catch (error) {
       console.error('Error cancelling booking:', error);
       toast.error("Erreur lors de l'annulation de la réservation");
@@ -169,7 +192,14 @@ const SpaBookingDetails = () => {
     );
   }
 
-  const formattedDate = format(parseISO(booking.date), 'PPPP', { locale: fr });
+  // Safely parse the date with a fallback
+  let formattedDate;
+  try {
+    formattedDate = format(parseISO(booking.date), 'PPPP', { locale: fr });
+  } catch (error) {
+    console.error('Error parsing date:', error, booking.date);
+    formattedDate = booking.date;
+  }
 
   return (
     <Layout>
@@ -224,6 +254,9 @@ const SpaBookingDetails = () => {
                         </div>
                       )}
                     </>
+                  )}
+                  {!facility && (
+                    <p className="text-sm text-gray-500">Informations sur l'installation non disponibles</p>
                   )}
                 </div>
                 
