@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const ServiceRequestDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: serviceRequests, cancelRequest, isLoading: isLoadingRequests } = useServiceRequests();
+  const { data: serviceRequests = [], cancelRequest, isLoading: isLoadingRequests } = useServiceRequests();
   
   const [request, setRequest] = useState<ServiceRequest | null>(null);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -29,15 +29,21 @@ const ServiceRequestDetails = () => {
       return;
     }
     
-    // Trouver la demande
-    const foundRequest = serviceRequests.find(r => r.id === id);
-    if (foundRequest) {
-      setRequest(foundRequest);
-    } else {
-      toast.error("Demande non trouvée");
+    // Only try to find the request if serviceRequests is defined and not empty
+    if (serviceRequests && serviceRequests.length > 0) {
+      const foundRequest = serviceRequests.find(r => r.id === id);
+      if (foundRequest) {
+        setRequest(foundRequest);
+      } else {
+        toast.error("Demande non trouvée");
+        navigate('/notifications');
+      }
+    } else if (!isLoadingRequests) {
+      // If we're not still loading but have no requests, show an error
+      toast.error("Aucune demande disponible");
       navigate('/notifications');
     }
-  }, [id, serviceRequests, navigate]);
+  }, [id, serviceRequests, navigate, isLoadingRequests]);
   
   const handleCancelRequest = async () => {
     if (!request) return;
