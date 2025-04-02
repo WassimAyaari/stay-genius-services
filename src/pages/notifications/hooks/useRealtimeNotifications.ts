@@ -31,33 +31,39 @@ export const useRealtimeNotifications = (
     
     console.log("Setting up real-time listeners with user ID:", userId, "email:", userEmail, "and room number:", userRoomNumber);
     
+    // Create a no-op function for refetch since we're removing auto-refresh
+    const noopRefetch = () => {
+      // Do nothing - we've removed auto-refresh
+      console.log("Auto-refresh disabled in notifications");
+    };
+    
     const channels = [];
 
     // Table reservations listeners
     if (userId) {
-      channels.push(setupReservationListenerById(userId));
+      channels.push(setupReservationListenerById(userId, noopRefetch));
     }
     
     if (userEmail) {
-      channels.push(setupReservationListenerByEmail(userEmail));
+      channels.push(setupReservationListenerByEmail(userEmail, noopRefetch));
     }
     
     // Service requests listeners
     if (userId) {
-      channels.push(setupServiceRequestListenerById(userId));
+      channels.push(setupServiceRequestListenerById(userId, noopRefetch));
     }
 
     if (userRoomNumber) {
-      channels.push(setupServiceRequestListenerByRoom(userRoomNumber));
+      channels.push(setupServiceRequestListenerByRoom(userRoomNumber, noopRefetch));
     }
     
     // Spa bookings listeners
     if (userId) {
-      channels.push(setupSpaBookingListenerById(userId));
+      channels.push(setupSpaBookingListenerById(userId, noopRefetch));
     }
     
     if (userRoomNumber) {
-      channels.push(setupSpaBookingListenerByRoom(userRoomNumber));
+      channels.push(setupSpaBookingListenerByRoom(userRoomNumber, noopRefetch));
     }
     
     return () => {
