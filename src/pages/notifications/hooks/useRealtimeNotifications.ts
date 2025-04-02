@@ -173,7 +173,7 @@ export const useRealtimeNotifications = (
       channels.push(roomServiceChannel);
     }
     
-    // NEW: Listen for spa booking updates by user ID
+    // Listen for spa booking updates by user ID
     if (userId) {
       const spaBookingChannel = supabase
         .channel('notifications_page_spa_updates')
@@ -211,7 +211,7 @@ export const useRealtimeNotifications = (
       channels.push(spaBookingChannel);
     }
     
-    // NEW: Listen for spa booking updates by room number
+    // Listen for spa booking updates by room number
     if (userRoomNumber) {
       const roomSpaChannel = supabase
         .channel('notifications_page_room_spa_updates')

@@ -42,6 +42,8 @@ export const useNotificationsData = () => {
   // State for user's spa bookings
   const [userSpaBookings, setUserSpaBookings] = useState<SpaBooking[]>([]);
   const [isLoadingUserBookings, setIsLoadingUserBookings] = useState(false);
+  // Add state to prevent refetching on every render
+  const [hasInitiallyFetched, setHasInitiallyFetched] = useState(false);
 
   // Create a mapping of service IDs to service names
   const serviceNamesMap = services.reduce((acc, service) => {
@@ -87,14 +89,17 @@ export const useNotificationsData = () => {
     loadUserBookings();
   }, [userId, userRoomNumber, fetchUserBookings, allBookings]);
 
-  // Force refetch on mount to ensure we have the latest data
+  // Force refetch on mount to ensure we have the latest data, but ONLY ONCE
   useEffect(() => {
-    console.log("useNotificationsData - Refetching data on mount");
-    console.log("Current room number:", userRoomNumber);
-    refetchRequests();
-    refetchReservations();
-    refetchSpaBookings();
-  }, [refetchRequests, refetchReservations, refetchSpaBookings, userRoomNumber]);
+    if (!hasInitiallyFetched) {
+      console.log("useNotificationsData - Initial data fetch");
+      console.log("Current room number:", userRoomNumber);
+      refetchRequests();
+      refetchReservations();
+      refetchSpaBookings();
+      setHasInitiallyFetched(true);
+    }
+  }, [refetchRequests, refetchReservations, refetchSpaBookings, userRoomNumber, hasInitiallyFetched]);
 
   // Set up real-time listeners
   useRealtimeNotifications(
