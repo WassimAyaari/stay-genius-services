@@ -4,6 +4,7 @@ import { Room } from '@/hooks/useRoom';
 import { supabase } from '@/integrations/supabase/client';
 import { syncGuestData } from '@/features/users/services/guestService';
 import { formatDateToString } from '@/features/users/utils/validationUtils';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 export interface UserInfo {
   name: string;
@@ -13,9 +14,10 @@ export interface UserInfo {
 }
 
 export function useUserInfo(room: Room | null) {
+  const { userData } = useAuth();
   const [userInfo, setUserInfo] = useState<UserInfo>({ 
     name: '', 
-    roomNumber: room?.room_number || '' 
+    roomNumber: userData?.room_number || room?.room_number || '' 
   });
 
   // Load user profile data when component mounts
@@ -29,16 +31,22 @@ export function useUserInfo(room: Room | null) {
         const info = await getUserInfoFromDatabase(session.user.id);
         if (info) {
           setUserInfo(info);
+          // Ensure the room number is stored in localStorage
+          if (info.roomNumber) {
+            localStorage.setItem('user_room_number', info.roomNumber);
+          }
         } else {
           // No guest record yet, create basic info from auth data and sync it
+          const roomNumber = userData?.room_number || room?.room_number || localStorage.getItem('user_room_number') || '000';
           const authInfo = {
             name: session.user.user_metadata?.first_name 
               ? `${session.user.user_metadata.first_name || ''} ${session.user.user_metadata.last_name || ''}`.trim()
               : session.user.email?.split('@')[0] || 'Guest',
-            roomNumber: room?.room_number || '415',
+            roomNumber: roomNumber,
             email: session.user.email
           };
           setUserInfo(authInfo);
+          localStorage.setItem('user_room_number', roomNumber);
           
           // Create a basic guest record from auth info
           await syncAuthUserToGuest(session.user.id, authInfo);
@@ -47,11 +55,14 @@ export function useUserInfo(room: Room | null) {
         // Not authenticated, try to get from local info
         const localInfo = getLocalUserInfo();
         setUserInfo(localInfo);
+        if (localInfo.roomNumber) {
+          localStorage.setItem('user_room_number', localInfo.roomNumber);
+        }
       }
     };
     
     loadUserData();
-  }, [room]);
+  }, [room, userData]);
 
   // Sync authenticated user to guest table using our improved syncGuestData function
   const syncAuthUserToGuest = async (userId: string, userInfo: UserInfo) => {
@@ -88,9 +99,11 @@ export function useUserInfo(room: Room | null) {
       }
       
       const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
+      const roomNumber = data.room_number || userData?.room_number || room?.room_number || localStorage.getItem('user_room_number') || '000';
+      
       return {
         name: fullName || 'Guest',
-        roomNumber: data.room_number || (room?.room_number || '415'),
+        roomNumber: roomNumber,
         phone: data.phone || '',
         email: data.email || ''
       };
@@ -109,11 +122,17 @@ export function useUserInfo(room: Room | null) {
         if (userData) {
           // Format full name from first_name and last_name fields
           const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-          // Get room number from userData or fall back to room prop
-          const roomNumber = userData.room_number || room?.room_number || '415';
+          // Get room number from userData or fall back to room prop or Auth context
+          const storedRoomNumber = localStorage.getItem('user_room_number');
+          const roomNumber = userData.room_number || storedRoomNumber || room?.room_number || '000';
           // Get phone number if available
           const phone = userData.phone || '';
           const email = userData.email || '';
+          
+          // Ensure room number is stored in localStorage
+          if (roomNumber && roomNumber !== storedRoomNumber) {
+            localStorage.setItem('user_room_number', roomNumber);
+          }
           
           return {
             name: fullName || 'Guest',
@@ -127,18 +146,17 @@ export function useUserInfo(room: Room | null) {
       }
     }
     
-    // If no user data in localStorage, use room data if available
-    if (room) {
-      return {
-        name: 'Guest',
-        roomNumber: room.room_number || '415',
-      };
+    // If no user data in localStorage, use room data or Auth context if available
+    const defaultRoomNumber = userData?.room_number || room?.room_number || localStorage.getItem('user_room_number') || '000';
+    
+    // Ensure room number is stored in localStorage
+    if (defaultRoomNumber) {
+      localStorage.setItem('user_room_number', defaultRoomNumber);
     }
-
-    // Default fallback - ensure we always return something valid
+    
     return { 
       name: 'Guest', 
-      roomNumber: '415' 
+      roomNumber: defaultRoomNumber
     };
   };
 
@@ -153,6 +171,7 @@ export function useUserInfo(room: Room | null) {
     };
     
     localStorage.setItem('user_data', JSON.stringify(userDataToSave));
+    localStorage.setItem('user_room_number', info.roomNumber);
     setUserInfo(info);
     
     // If authenticated, also sync to guests table using our improved function
@@ -172,9 +191,10 @@ export function useUserInfo(room: Room | null) {
     
     // If either name or room number is missing, save with defaults
     if (!currentInfo.name || !currentInfo.roomNumber) {
+      const roomNumber = userData?.room_number || room?.room_number || localStorage.getItem('user_room_number') || '000';
       const updatedInfo = {
         name: currentInfo.name || 'Guest',
-        roomNumber: currentInfo.roomNumber || (room?.room_number || '415'),
+        roomNumber: currentInfo.roomNumber || roomNumber,
         phone: currentInfo.phone,
         email: currentInfo.email
       };

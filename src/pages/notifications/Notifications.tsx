@@ -6,14 +6,23 @@ import { NotificationsList } from './components/NotificationsList';
 import { LoadingState } from './components/LoadingState';
 import { AuthPrompt } from './components/AuthPrompt';
 import { EmptyState } from './components/EmptyState';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 const Notifications = () => {
-  const { notifications, isLoading, isAuthenticated } = useNotificationsData();
+  const { notifications, isLoading, isAuthenticated, userRoomNumber } = useNotificationsData();
 
   return (
     <Layout>
       <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-6">Mes Notifications</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Mes Notifications</h1>
+          {userRoomNumber && (
+            <div className="text-sm text-gray-600">
+              Numéro de chambre: <span className="font-medium">{userRoomNumber}</span>
+            </div>
+          )}
+        </div>
         
         {isLoading ? (
           <LoadingState />

@@ -54,9 +54,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
               
               <p className="text-sm text-gray-600">{notification.description}</p>
               
-              {notification.type === 'request' && (
+              {notification.type === 'request' && notification.data.room_number && (
                 <div className="mt-1 text-xs text-gray-500">
-                  Chambre: {notification.data.room_number || 'Non spécifiée'}
+                  Chambre: {notification.data.room_number}
                 </div>
               )}
               

@@ -40,9 +40,12 @@ export const useNotificationsData = () => {
   
   const userId = user?.id || localStorage.getItem('user_id');
   const userEmail = user?.email || localStorage.getItem('user_email');
+  const userRoomNumber = userData?.room_number || localStorage.getItem('user_room_number');
 
   // Force refetch on mount to ensure we have the latest data
   useEffect(() => {
+    console.log("useNotificationsData - Refetching data on mount");
+    console.log("Current room number:", userRoomNumber);
     refetchRequests();
     refetchReservations();
     
@@ -53,16 +56,16 @@ export const useNotificationsData = () => {
     if (userData?.email && !localStorage.getItem('user_email')) {
       localStorage.setItem('user_email', userData.email);
     }
-  }, [refetchRequests, refetchReservations, user?.email, userData?.email]);
+  }, [refetchRequests, refetchReservations, user?.email, userData?.email, userRoomNumber]);
 
   // Effet pour rafraîchir les données en temps réel
   useEffect(() => {
-    if (!userId && !userEmail) {
-      console.log("No user ID or email found, not setting up real-time listeners");
+    if (!userId && !userEmail && !userRoomNumber) {
+      console.log("No user ID, email or room number found, not setting up real-time listeners");
       return;
     }
     
-    console.log("Setting up real-time listeners with user ID:", userId, "and email:", userEmail);
+    console.log("Setting up real-time listeners with user ID:", userId, "email:", userEmail, "and room number:", userRoomNumber);
     
     const channels = [];
     
@@ -142,7 +145,7 @@ export const useNotificationsData = () => {
       channels.push(emailChannel);
     }
     
-    // Écouter les mises à jour de demandes de service
+    // Écouter les mises à jour de demandes de service par ID utilisateur
     if (userId) {
       const serviceRequestChannel = supabase
         .channel('notifications_page_service_updates')
@@ -152,7 +155,7 @@ export const useNotificationsData = () => {
           table: 'service_requests',
           filter: `guest_id=eq.${userId}`,
         }, (payload) => {
-          console.log('Notification page - service request update received:', payload);
+          console.log('Notification page - service request update received by user ID:', payload);
           
           // Show notification for status changes
           if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
@@ -177,12 +180,48 @@ export const useNotificationsData = () => {
       
       channels.push(serviceRequestChannel);
     }
+
+    // Écouter les mises à jour de demandes de service par numéro de chambre
+    if (userRoomNumber) {
+      const roomServiceChannel = supabase
+        .channel('notifications_page_room_service_updates')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `room_number=eq.${userRoomNumber}`,
+        }, (payload) => {
+          console.log('Notification page - service request update received by room number:', payload);
+          
+          // Show notification for status changes
+          if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+            const statusMap: Record<string, string> = {
+              'pending': 'est en attente',
+              'in_progress': 'est en cours de traitement',
+              'completed': 'a été complétée',
+              'cancelled': 'a été annulée'
+            };
+            
+            const status = payload.new.status;
+            const message = statusMap[status] || 'a été mise à jour';
+            
+            toast.info(`Mise à jour de demande`, {
+              description: `Votre demande de type ${payload.new.type} pour la chambre ${userRoomNumber} ${message}.`
+            });
+          }
+          
+          refetchRequests();
+        })
+        .subscribe();
+      
+      channels.push(roomServiceChannel);
+    }
     
     return () => {
       console.log("Cleaning up real-time listeners for notifications page");
       channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [userId, userEmail, refetchReservations, refetchRequests]);
+  }, [userId, userEmail, userRoomNumber, refetchReservations, refetchRequests]);
 
   // Combine and sort notifications by time (newest first)
   const notifications: NotificationItem[] = [
@@ -209,13 +248,14 @@ export const useNotificationsData = () => {
   ].sort((a, b) => b.time.getTime() - a.time.getTime());
 
   const isLoading = isLoadingRequests || isLoadingReservations;
-  const isAuthenticated = Boolean(user || localStorage.getItem('user_id'));
+  const isAuthenticated = Boolean(user || userId || userRoomNumber || localStorage.getItem('user_id'));
 
   return {
     notifications,
     isLoading,
     isAuthenticated,
     userId,
-    userEmail
+    userEmail,
+    userRoomNumber
   };
 };
