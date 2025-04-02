@@ -120,7 +120,7 @@ export const useNotificationsData = () => {
     special_requests: res.specialRequests,
     status: res.status,
     created_at: res.createdAt,
-    updated_at: res.createdAt // Fix: Use createdAt as fallback instead of non-existent updatedAt
+    updated_at: res.createdAt // Use createdAt as fallback for updated_at
   }));
 
   // Combine and sort notifications
@@ -139,6 +139,10 @@ export const useNotificationsData = () => {
     isAuthenticated,
     userId,
     userEmail,
-    userRoomNumber
+    userRoomNumber,
+    // Export the refetch functions so they can be used by the component
+    refetchRequests,
+    refetchReservations,
+    refetchSpaBookings
   };
 };

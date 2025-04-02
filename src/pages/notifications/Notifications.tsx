@@ -10,16 +10,21 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
 const Notifications = () => {
-  const { notifications, isLoading, isAuthenticated, userRoomNumber } = useNotificationsData();
-
-  // Reference to the hook to allow manual refresh
-  const hookInstance = useNotificationsData();
+  const { 
+    notifications, 
+    isLoading, 
+    isAuthenticated, 
+    userRoomNumber,
+    refetchRequests,
+    refetchReservations,
+    refetchSpaBookings
+  } = useNotificationsData();
 
   const handleRefresh = () => {
-    hookInstance.refetchRequests();
-    hookInstance.refetchReservations();
-    if (hookInstance.refetchSpaBookings) {
-      hookInstance.refetchSpaBookings();
+    refetchRequests();
+    refetchReservations();
+    if (refetchSpaBookings) {
+      refetchSpaBookings();
     }
   };
 
