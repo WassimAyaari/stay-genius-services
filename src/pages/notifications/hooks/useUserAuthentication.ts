@@ -2,12 +2,15 @@
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 export const useUserAuthentication = () => {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   
   // Get user data from context or localStorage
   const userId = user?.id || localStorage.getItem('user_id');
   const userEmail = user?.email || localStorage.getItem('user_email');
-  const userRoomNumber = user?.room_number || localStorage.getItem('room_number') || '000';
+  
+  // Get room number from userData or localStorage - this fixes the type error as we're no longer accessing
+  // room_number directly from the User object
+  const userRoomNumber = userData?.room_number || localStorage.getItem('room_number') || '000';
   
   // Store email in localStorage for future reference
   if (user?.email && !localStorage.getItem('user_email')) {
@@ -15,8 +18,8 @@ export const useUserAuthentication = () => {
   }
   
   // Store room number in localStorage if available and not already stored
-  if (user?.room_number && !localStorage.getItem('room_number')) {
-    localStorage.setItem('room_number', user.room_number);
+  if (userData?.room_number && !localStorage.getItem('room_number')) {
+    localStorage.setItem('room_number', userData.room_number);
   }
   
   const isAuthenticated = !!userId || !!userEmail;
