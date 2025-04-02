@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { cleanupDuplicateGuestRecords } from './guestService';
+import { cleanupDuplicateGuestRecords as cleanupGuestRecords } from './guestService';
 
 /**
  * Fonction centralisée pour nettoyer les entrées dupliquées pour un utilisateur spécifique
@@ -12,7 +12,7 @@ import { cleanupDuplicateGuestRecords } from './guestService';
 export const cleanupDuplicateGuestRecords = async (userId: string): Promise<void> => {
   try {
     // Appeler directement la fonction de nettoyage depuis guestService
-    await cleanupDuplicateGuestRecords(userId);
+    await cleanupGuestRecords(userId);
   } catch (error) {
     console.error('Error in cleanupDuplicateGuestRecords:', error);
   }
