@@ -21,28 +21,43 @@ export const useServiceRequests = () => {
       return [];
     }
 
-    // For admin section, fetch all requests. Otherwise, fetch only user's requests
-    let query = supabase
-      .from('service_requests')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // For admin section, fetch all requests with nested relations to get room and guest info
+    if (isAdminSection) {
+      console.log('Admin view: Fetching all service requests with related data');
       
-    if (!isAdminSection) {
-      console.log('Fetching service requests for user ID:', userId);
-      query = query.eq('guest_id', userId);
+      const { data, error } = await supabase
+        .from('service_requests')
+        .select(`
+          *,
+          request_items (*)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching service requests:', error);
+        throw error;
+      }
+
+      console.log('Service requests data retrieved:', data?.length || 0);
+      return data as ServiceRequest[];
     } else {
-      console.log('Admin view: Fetching all service requests');
+      // For user view, just fetch their own requests
+      console.log('Fetching service requests for user ID:', userId);
+      
+      const { data, error } = await supabase
+        .from('service_requests')
+        .select('*')
+        .eq('guest_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching service requests:', error);
+        throw error;
+      }
+
+      console.log('Service requests data retrieved:', data?.length || 0);
+      return data as ServiceRequest[];
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching service requests:', error);
-      throw error;
-    }
-
-    console.log('Service requests data retrieved:', data?.length || 0);
-    return data as ServiceRequest[];
   };
 
   const cancelServiceRequest = async (requestId: string): Promise<void> => {
@@ -72,7 +87,9 @@ export const useServiceRequests = () => {
   const { data, isLoading, error, refetch, isError } = useQuery({
     queryKey: ['serviceRequests', userId, isAdminSection],
     queryFn: fetchServiceRequests,
-    enabled: true, // Always enable this query
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   });
 
   const cancelMutation = useMutation({

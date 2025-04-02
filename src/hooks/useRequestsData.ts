@@ -66,6 +66,18 @@ export function useRequestsData() {
     try {
       await refetch();
       
+      // Also manually fetch the latest data to ensure we have everything
+      const { data: latestRequests, error: fetchError } = await supabase
+        .from('service_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (fetchError) {
+        console.error("Error manually fetching requests:", fetchError);
+      } else {
+        console.log(`Manually fetched ${latestRequests?.length || 0} service requests`);
+      }
+      
       toast({
         title: "Data Refreshed",
         description: "Request data has been refreshed."

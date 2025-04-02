@@ -7,7 +7,8 @@ import { useRequestsData } from '@/hooks/useRequestsData';
 import { useRequestStatusService } from '@/features/requests/services/requestStatusService';
 import { RequestsHeader } from '@/components/admin/requests/RequestsHeader';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const RequestsTab = () => {
   const { 
@@ -24,6 +25,11 @@ export const RequestsTab = () => {
   const onUpdateStatus = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     await handleUpdateStatus(requestId, newStatus, handleRefresh);
   };
+
+  // Force refresh on first render
+  React.useEffect(() => {
+    handleRefresh();
+  }, []);
 
   return (
     <Card>
@@ -44,11 +50,37 @@ export const RequestsTab = () => {
           </Alert>
         )}
 
-        <RequestsTable 
-          requests={requests as ServiceRequestWithItem[]} 
-          isLoading={isLoading || isRefreshing} 
-          onUpdateStatus={onUpdateStatus}
-        />
+        {(isLoading || isRefreshing) && (
+          <div className="flex justify-center py-4">
+            <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        )}
+
+        {!requests || requests.length === 0 ? (
+          <Alert className="mb-4">
+            <AlertTitle>No requests found</AlertTitle>
+            <AlertDescription>
+              There are currently no service requests in the system.
+              <div className="mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefresh}
+                  className="mt-2"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <RequestsTable 
+            requests={requests as ServiceRequestWithItem[]} 
+            isLoading={isLoading || isRefreshing} 
+            onUpdateStatus={onUpdateStatus}
+          />
+        )}
       </CardContent>
     </Card>
   );

@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { UserInfo } from './useUserInfo';
 import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { supabase } from '@/integrations/supabase/client';
+import { syncGuestData } from '@/features/users/services/guestService';
 
 /**
  * Creates a user profile in the database if it doesn't exist
@@ -11,39 +12,16 @@ import { supabase } from '@/integrations/supabase/client';
 const createUserProfile = async (userId: string, userInfo: UserInfo) => {
   console.log('Creating user profile in useMultiItemRequestHandler:', userId, userInfo);
   try {
-    // Extract first and last name from full name
-    const nameParts = userInfo.name.split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-    
-    // Check if guest already exists in the guests table
-    const { data: existingGuest } = await supabase
-      .from('guests')
-      .select('id')
-      .eq('user_id', userId)
-      .maybeSingle();
-    
-    if (existingGuest) {
-      console.log('Guest profile already exists, skipping creation');
-      return true;
-    }
-    
-    // Insert directly into guests table using our new function
-    const { data, error } = await supabase
-      .rpc('insert_guest_from_registration', {
-        user_id: userId,
-        first_name: firstName,
-        last_name: lastName,
-        email: '',
-        room_number: userInfo.roomNumber
-      });
-    
-    if (error) {
-      console.error("Error inserting guest data:", error);
-      return false;
-    }
-    
-    return true;
+    // Instead of using the database function with parameter ambiguity,
+    // we'll use the syncGuestData function which is more reliable
+    return await syncGuestData(userId, {
+      id: userId,
+      email: userInfo.email || '',
+      first_name: userInfo.name.split(' ')[0] || '',
+      last_name: userInfo.name.split(' ').slice(1).join(' ') || '',
+      room_number: userInfo.roomNumber || '',
+      phone: userInfo.phone || ''
+    });
   } catch (error) {
     console.error("Error in createUserProfile:", error);
     return false;
@@ -114,18 +92,7 @@ export function useMultiItemRequestHandler() {
       console.log('Attempting to create/update user profile');
       const profileCreated = await createUserProfile(userId, userInfo);
       console.log('Profile creation result:', profileCreated);
-      
-      if (!profileCreated) {
-        console.warn("Could not create or verify user profile");
-        toast({
-          title: "Request Sent",
-          description: "Your message was sent, but we couldn't register your individual requests. Please contact reception.",
-        });
-        onClose();
-        setIsSubmitting(false);
-        return;
-      }
-      
+
       // Step 3: Check if room exists and get room_id
       const { data: roomData } = await supabase
         .from('rooms')

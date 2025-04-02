@@ -60,21 +60,19 @@ export const submitRequestViaChatMessage = async (
     // Step 2: Always try to create user profile if it doesn't exist
     console.log('Attempting to create/update user profile');
     
-    // Get authenticated user
-    const { data: authData } = await supabase.auth.getSession();
-    
-    // Create user data object to sync
+    // Create user data object to sync - using the proper format
     const userData = {
       id: userId,
-      email: authData.session?.user.email || '',
+      email: userInfo.email || '',
       first_name: userInfo.name.split(' ')[0] || '',
       last_name: userInfo.name.split(' ').slice(1).join(' ') || '',
       room_number: userInfo.roomNumber || '',
       phone: userInfo.phone || ''
     };
     
-    // Sync to guests table
-    await syncGuestData(userId, userData);
+    // Sync to guests table using the syncGuestData function
+    const profileSynced = await syncGuestData(userId, userData);
+    console.log('Profile sync result:', profileSynced);
     
     // Step 3: Check if room exists and get room_id
     console.log('Checking if room exists:', userInfo.roomNumber);
