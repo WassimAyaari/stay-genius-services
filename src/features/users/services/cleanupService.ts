@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { cleanupDuplicateGuestRecords } from './guestService';
 
 /**
  * Fonction centralisée pour nettoyer les entrées dupliquées pour un utilisateur spécifique
@@ -10,9 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const cleanupDuplicateGuestRecords = async (userId: string): Promise<void> => {
   try {
-    // Importer la fonction de nettoyage depuis guestService pour éviter la duplication de code
-    const { cleanupDuplicateGuestRecords: cleanup } = await import('./guestService');
-    await cleanup(userId);
+    // Appeler directement la fonction de nettoyage depuis guestService
+    await cleanupDuplicateGuestRecords(userId);
   } catch (error) {
     console.error('Error in cleanupDuplicateGuestRecords:', error);
   }
@@ -27,9 +27,8 @@ export const cleanupDuplicateRecords = async (): Promise<void> => {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.user?.id) {
-      // Utiliser la fonction importée pour nettoyer les doublons
-      const { cleanupDuplicateGuestRecords: cleanup } = await import('./guestService');
-      await cleanup(session.user.id);
+      // Utiliser directement la fonction de nettoyage
+      await cleanupDuplicateGuestRecords(session.user.id);
     } else {
       console.log('No active session, skipping cleanup');
     }

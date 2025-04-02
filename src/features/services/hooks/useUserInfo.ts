@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Room } from '@/hooks/useRoom';
 import { supabase } from '@/integrations/supabase/client';
 import { syncGuestData } from '@/features/users/services/guestService';
+import { formatDateToString } from '@/features/users/utils/validationUtils';
 
 export interface UserInfo {
   name: string;
