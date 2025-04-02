@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { ServiceRequestType } from '@/features/types/supabaseTypes';
 
 export function useRequestsData() {
   const { toast } = useToast();
@@ -38,9 +39,17 @@ export function useRequestsData() {
             const roomNumber = userData?.room_number || localStorage.getItem('user_room_number');
             
             // Vérifier si la requête appartient à cet utilisateur (par guest_id ou room_number)
+            // Type guard to ensure payload.new exists and has the expected properties
+            const payloadNew = payload.new as ServiceRequestType | null;
+            
+            if (!payloadNew) {
+              console.log('Payload new is null or undefined');
+              return;
+            }
+            
             const isUserRequest = 
-              (payload.new?.guest_id === userId) || 
-              (roomNumber && payload.new?.room_number === roomNumber);
+              (payloadNew.guest_id === userId) || 
+              (roomNumber && payloadNew.room_number === roomNumber);
             
             if (!isUserRequest) {
               console.log('Ignoring update for request not belonging to current user');
@@ -51,21 +60,26 @@ export function useRequestsData() {
           refetch();
           
           // Afficher une notification pour les mises à jour de statut
-          if (payload.eventType === 'UPDATE' && payload.new?.status !== payload.old?.status) {
-            const statusMap = {
-              'pending': 'is now pending',
-              'in_progress': 'is now in progress',
-              'completed': 'has been completed',
-              'cancelled': 'has been cancelled'
-            };
+          if (payload.eventType === 'UPDATE') {
+            const payloadNew = payload.new as ServiceRequestType | null;
+            const payloadOld = payload.old as ServiceRequestType | null;
             
-            const status = payload.new.status;
-            const message = statusMap[status] || 'has been updated';
-            
-            toast({
-              title: "Request Update",
-              description: `Request ${message}.`
-            });
+            if (payloadNew && payloadOld && payloadNew.status !== payloadOld.status) {
+              const statusMap = {
+                'pending': 'is now pending',
+                'in_progress': 'is now in progress',
+                'completed': 'has been completed',
+                'cancelled': 'has been cancelled'
+              };
+              
+              const status = payloadNew.status;
+              const message = statusMap[status] || 'has been updated';
+              
+              toast({
+                title: "Request Update",
+                description: `Request ${message}.`
+              });
+            }
           }
         })
         .subscribe();
