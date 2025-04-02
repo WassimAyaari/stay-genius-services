@@ -41,38 +41,57 @@ export const useSpaBookings = () => {
 
   // Récupérer les réservations d'un utilisateur
   const fetchUserBookings = async (userId: string): Promise<SpaBooking[]> => {
-    const { data, error } = await supabase
-      .from('spa_bookings')
-      .select(`
-        *,
-        spa_services:service_id (
-          name,
-          price,
-          duration,
-          description,
-          category
-        )
-      `)
-      .eq('user_id', userId)
-      .order('date', { ascending: false });
+    try {
+      console.log('Fetching bookings for user ID:', userId);
+      const { data, error } = await supabase
+        .from('spa_bookings')
+        .select(`
+          *,
+          spa_services:service_id (
+            name,
+            price,
+            duration,
+            description,
+            category
+          )
+        `)
+        .eq('user_id', userId)
+        .order('date', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching user spa bookings:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching user spa bookings:', error);
+        throw error;
+      }
+
+      console.log('Found bookings for user:', data?.length || 0);
+      return data as unknown as SpaBooking[];
+    } catch (error) {
+      console.error('Exception in fetchUserBookings:', error);
+      return [];
     }
-
-    return data as unknown as SpaBooking[];
   };
 
   // Récupérer une réservation par ID
   const getBookingById = async (id: string): Promise<SpaBooking | null> => {
     console.log('Fetching booking by ID:', id);
     try {
+      // Récupérer la réservation avec les détails du service
       const { data, error } = await supabase
         .from('spa_bookings')
-        .select('*')
+        .select(`
+          *,
+          spa_services:service_id (
+            id,
+            name,
+            price,
+            duration,
+            description,
+            category,
+            facility_id
+          )
+        `)
         .eq('id', id)
-        .maybeSingle(); // Using maybeSingle instead of single to handle not found case better
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching booking by ID:', error);
@@ -84,8 +103,8 @@ export const useSpaBookings = () => {
         return null;
       }
 
-      console.log('Found booking:', data);
-      return data as SpaBooking;
+      console.log('Found booking with service details:', data);
+      return data as unknown as SpaBooking;
     } catch (error) {
       console.error('Exception in getBookingById:', error);
       return null;

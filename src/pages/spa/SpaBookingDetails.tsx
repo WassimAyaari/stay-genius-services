@@ -66,42 +66,57 @@ const SpaBookingDetails = () => {
         
         setBooking(bookingData);
         
-        // Fetch the service data
-        const { data: serviceData, error: serviceError } = await supabase
-          .from('spa_services')
-          .select('*')
-          .eq('id', bookingData.service_id)
-          .single();
-        
-        if (serviceError) {
-          console.error('Error fetching service:', serviceError);
-          throw serviceError;
-        }
-        
-        if (serviceData) {
-          console.log('Service data received:', serviceData);
-          setService(serviceData);
+        // Si les données du service sont déjà incluses dans la réponse
+        if (bookingData.spa_services) {
+          console.log('Service data found in booking:', bookingData.spa_services);
+          setService(bookingData.spa_services);
           
-          // Fetch the facility data
-          if (serviceData.facility_id) {
+          // Récupérer l'installation si l'ID est disponible
+          if (bookingData.spa_services.facility_id) {
             const { data: facilityData, error: facilityError } = await supabase
               .from('spa_facilities')
               .select('*')
-              .eq('id', serviceData.facility_id)
-              .single();
+              .eq('id', bookingData.spa_services.facility_id)
+              .maybeSingle();
             
             if (facilityError) {
               console.error('Error fetching facility:', facilityError);
-              // Don't throw here, we can still show booking details without facility
-            }
-            
-            if (facilityData) {
+            } else if (facilityData) {
               console.log('Facility data received:', facilityData);
               setFacility(facilityData);
             }
           }
+        } else {
+          // Sinon, récupérer le service séparément
+          const { data: serviceData, error: serviceError } = await supabase
+            .from('spa_services')
+            .select('*')
+            .eq('id', bookingData.service_id)
+            .maybeSingle();
+          
+          if (serviceError) {
+            console.error('Error fetching service:', serviceError);
+          } else if (serviceData) {
+            console.log('Service data received:', serviceData);
+            setService(serviceData);
+            
+            // Récupérer l'installation si l'ID est disponible
+            if (serviceData.facility_id) {
+              const { data: facilityData, error: facilityError } = await supabase
+                .from('spa_facilities')
+                .select('*')
+                .eq('id', serviceData.facility_id)
+                .maybeSingle();
+              
+              if (facilityError) {
+                console.error('Error fetching facility:', facilityError);
+              } else if (facilityData) {
+                console.log('Facility data received:', facilityData);
+                setFacility(facilityData);
+              }
+            }
+          }
         }
-        
       } catch (error) {
         console.error('Error loading booking details:', error);
         toast.error("Erreur lors du chargement des détails de la réservation");
