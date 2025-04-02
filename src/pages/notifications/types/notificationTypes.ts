@@ -39,3 +39,18 @@ export interface ServiceRequest {
   guest_name?: string;
   category_id?: string;
 }
+
+export interface SpaBooking {
+  id: string;
+  service_id: string;
+  date: string;
+  time: string;
+  guest_name: string;
+  guest_email: string;
+  guest_phone?: string;
+  room_number?: string;
+  special_requests?: string;
+  status: string;
+  created_at: string;
+  updated_at?: string;
+}

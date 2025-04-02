@@ -20,7 +20,8 @@ import {
 export const useRealtimeNotifications = (
   userId: string | null | undefined,
   userEmail: string | null | undefined,
-  userRoomNumber: string | null | undefined
+  userRoomNumber: string | null | undefined,
+  refetchCallback?: () => void
 ) => {
   // Real-time listeners for notifications
   useEffect(() => {
@@ -31,44 +32,47 @@ export const useRealtimeNotifications = (
     
     console.log("Setting up real-time listeners with user ID:", userId, "email:", userEmail, "and room number:", userRoomNumber);
     
-    // Create a no-op function for refetch since we're removing auto-refresh
-    const noopRefetch = () => {
-      // Do nothing - we've removed auto-refresh
-      console.log("Auto-refresh disabled in notifications");
+    // Create a refetch function
+    const handleRefetch = () => {
+      if (refetchCallback) {
+        refetchCallback();
+      } else {
+        console.log("Notification update received. No refetch callback provided.");
+      }
     };
     
     const channels = [];
 
     // Table reservations listeners
     if (userId) {
-      channels.push(setupReservationListenerById(userId, noopRefetch));
+      channels.push(setupReservationListenerById(userId, handleRefetch));
     }
     
     if (userEmail) {
-      channels.push(setupReservationListenerByEmail(userEmail, noopRefetch));
+      channels.push(setupReservationListenerByEmail(userEmail, handleRefetch));
     }
     
     // Service requests listeners
     if (userId) {
-      channels.push(setupServiceRequestListenerById(userId, noopRefetch));
+      channels.push(setupServiceRequestListenerById(userId, handleRefetch));
     }
 
     if (userRoomNumber) {
-      channels.push(setupServiceRequestListenerByRoom(userRoomNumber, noopRefetch));
+      channels.push(setupServiceRequestListenerByRoom(userRoomNumber, handleRefetch));
     }
     
     // Spa bookings listeners
     if (userId) {
-      channels.push(setupSpaBookingListenerById(userId, noopRefetch));
+      channels.push(setupSpaBookingListenerById(userId, handleRefetch));
     }
     
     if (userRoomNumber) {
-      channels.push(setupSpaBookingListenerByRoom(userRoomNumber, noopRefetch));
+      channels.push(setupSpaBookingListenerByRoom(userRoomNumber, handleRefetch));
     }
     
     return () => {
       console.log("Cleaning up real-time listeners for notifications page");
       channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [userId, userEmail, userRoomNumber]);
+  }, [userId, userEmail, userRoomNumber, refetchCallback]);
 };

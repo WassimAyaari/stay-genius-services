@@ -2,7 +2,8 @@
 import { 
   NotificationItem, 
   ServiceRequest, 
-  TableReservation
+  TableReservation,
+  SpaBooking
 } from '../types/notificationTypes';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -69,19 +70,52 @@ export const transformTableReservations = (reservations: TableReservation[]): No
   });
 };
 
+// Transforme une liste de réservations spa en notifications
+export const transformSpaBookings = (bookings: SpaBooking[]): NotificationItem[] => {
+  if (!Array.isArray(bookings)) return [];
+  
+  return bookings.map(booking => {
+    const bookingDate = booking.date ? new Date(booking.date) : null;
+    const formattedDate = bookingDate && !isNaN(bookingDate.getTime()) 
+      ? format(bookingDate, 'EEEE d MMMM', { locale: fr })
+      : 'Date non définie';
+    
+    return {
+      id: booking.id,
+      type: 'spa_booking',
+      title: `Réservation de spa`,
+      description: `${formattedDate} à ${booking.time}`,
+      status: booking.status,
+      time: createSafeDate(booking.created_at) || new Date(),
+      link: `/spa/booking/${booking.id}`,
+      data: {
+        serviceId: booking.service_id,
+        bookingId: booking.id,
+        status: booking.status,
+        date: booking.date,
+        time: booking.time,
+        room_number: booking.room_number,
+      }
+    };
+  });
+};
+
 // Fonction pour combiner et trier toutes les notifications
 export const combineAndSortNotifications = (
-  serviceRequests: ServiceRequest[], 
-  reservations: TableReservation[]
+  serviceRequests: ServiceRequest[] = [], 
+  reservations: TableReservation[] = [],
+  spaBookings: SpaBooking[] = []
 ): NotificationItem[] => {
   // Transformer les différents types de notification
   const requestNotifications = transformServiceRequests(serviceRequests);
   const reservationNotifications = transformTableReservations(reservations);
+  const spaNotifications = transformSpaBookings(spaBookings);
   
   // Combiner toutes les notifications
   const allNotifications = [
     ...requestNotifications,
-    ...reservationNotifications
+    ...reservationNotifications,
+    ...spaNotifications
   ];
   
   // Trier par date, les plus récentes d'abord

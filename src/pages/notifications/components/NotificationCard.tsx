@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { NotificationItem } from '../types/notificationTypes';
-import { Bell, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Bell, Calendar, CheckCircle, XCircle, Clock, ShowerHead } from 'lucide-react';
 
 interface NotificationCardProps {
   notification: NotificationItem;
@@ -17,6 +17,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
     switch (type) {
       case 'request': return <Bell className="h-5 w-5" />;
       case 'reservation': return <Calendar className="h-5 w-5" />;
+      case 'spa_booking': return <ShowerHead className="h-5 w-5" />;
       default: return <Bell className="h-5 w-5" />;
     }
   }
@@ -76,6 +77,16 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
       default: return 'bg-yellow-50';
     }
   }
+  
+  // Get type label based on notification type
+  function getTypeLabel(type: string) {
+    switch (type) {
+      case 'request': return 'Demande';
+      case 'reservation': return 'Restaurant';
+      case 'spa_booking': return 'Spa';
+      default: return 'Notification';
+    }
+  }
 
   return (
     <Link to={notification.link || '#'} className="block">
@@ -90,11 +101,17 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
               </div>
               
               <div className="flex-1">
-                <h3 className="font-medium">{notification.title}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{notification.title}</h3>
+                  <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">
+                    {getTypeLabel(notification.type)}
+                  </span>
+                </div>
+                
                 <p className="text-sm text-gray-600 mt-1 line-clamp-2">{notification.description}</p>
                 
                 {notification.data?.room_number && (
-                  <div className="mt-1 text-xs text-gray-500">
+                  <div className="mt-1.5 text-xs bg-gray-100 text-gray-700 inline-block px-2 py-0.5 rounded-full">
                     Chambre: {notification.data.room_number}
                   </div>
                 )}

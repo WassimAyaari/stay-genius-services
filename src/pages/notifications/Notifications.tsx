@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import Layout from '@/components/Layout';
 import { useNotificationsData } from './hooks/useNotificationsData';
+import { useRealtimeNotifications } from './hooks/useRealtimeNotifications';
 import { NotificationsList } from './components/NotificationsList';
 import { LoadingState } from './components/LoadingState';
 import { AuthPrompt } from './components/AuthPrompt';
@@ -14,9 +15,19 @@ const Notifications = () => {
     notifications, 
     isLoading, 
     isAuthenticated, 
+    userId,
+    userEmail,
     userRoomNumber,
-    error
+    error,
   } = useNotificationsData();
+
+  // Callback for refreshing data when realtime updates occur
+  const refetchNotifications = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  // Setup realtime notifications listeners
+  useRealtimeNotifications(userId, userEmail, userRoomNumber, refetchNotifications);
 
   // Debug log
   console.log("Notifications render:", {
@@ -35,8 +46,8 @@ const Notifications = () => {
             <h1 className="text-2xl font-bold">Mes Notifications</h1>
           </div>
           {userRoomNumber && (
-            <div className="text-sm text-gray-600">
-              Chambre: <span className="font-medium">{userRoomNumber}</span>
+            <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+              Chambre: <span className="font-bold">{userRoomNumber}</span>
             </div>
           )}
         </div>
