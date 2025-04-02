@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +47,7 @@ const SpaBookingDetails = () => {
     checkAuth();
   }, []);
 
+  // Fetch booking details
   useEffect(() => {
     const loadBooking = async () => {
       if (!id) return;
@@ -62,6 +64,7 @@ const SpaBookingDetails = () => {
         
         setBooking(bookingData);
         
+        // Fetch service details
         const { data: serviceData } = await supabase
           .from('spa_services')
           .select('*')
@@ -71,6 +74,7 @@ const SpaBookingDetails = () => {
         if (serviceData) {
           setService(serviceData);
           
+          // Fetch facility details
           const { data: facilityData } = await supabase
             .from('spa_facilities')
             .select('*')
@@ -100,6 +104,7 @@ const SpaBookingDetails = () => {
     
     try {
       await cancelBooking(id);
+      // Reload booking data
       const updatedBooking = await getBookingById(id);
       setBooking(updatedBooking);
       setIsCancelDialogOpen(false);
@@ -314,6 +319,7 @@ const SpaBookingDetails = () => {
           </CardContent>
         </Card>
         
+        {/* Edit Dialog */}
         {isEditDialogOpen && (
           <BookingDialog
             isOpen={isEditDialogOpen}
@@ -321,12 +327,13 @@ const SpaBookingDetails = () => {
             serviceId={service.id}
             onSuccess={() => {
               setIsEditDialogOpen(false);
-              navigate(0);
+              navigate(0); // Refresh the page
             }}
             existingBooking={booking}
           />
         )}
         
+        {/* Cancel Confirmation Dialog */}
         <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>

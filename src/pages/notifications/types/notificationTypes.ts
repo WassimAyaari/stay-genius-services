@@ -43,7 +43,6 @@ export interface ServiceRequest {
   };
 }
 
-// Update SpaBooking to match the structure in features/spa/types
 export interface SpaBooking {
   id: string;
   service_id: string;
@@ -57,6 +56,6 @@ export interface SpaBooking {
   room_number?: string;
   special_requests?: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  created_at?: string; // Make this optional to match the features/spa/types definition
+  created_at: string;
   updated_at?: string;
 }
