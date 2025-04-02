@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
@@ -51,43 +51,44 @@ export const useNotificationsData = () => {
     return acc;
   }, {} as Record<string, string>);
 
-  // Fetch user's spa bookings when user ID changes
-  useEffect(() => {
-    const loadUserBookings = async () => {
-      if (userId) {
-        setIsLoadingUserBookings(true);
-        try {
-          const bookings = await fetchUserBookings(userId);
-          // Ensure each booking has created_at field (using current date as fallback)
-          const typedBookings: SpaBooking[] = bookings.map(booking => ({
-            ...booking,
-            created_at: booking.created_at || new Date().toISOString(),
-          }));
-          setUserSpaBookings(typedBookings);
-        } catch (error) {
-          console.error("Error fetching user spa bookings:", error);
-          setUserSpaBookings([]);
-        } finally {
-          setIsLoadingUserBookings(false);
-        }
-      } else if (userRoomNumber) {
-        // If no user ID but has room number, filter bookings by room number
-        const filteredBookings = allBookings.filter(booking => 
-          booking.room_number === userRoomNumber
-        );
-        // Ensure each booking has created_at field
-        const typedBookings: SpaBooking[] = filteredBookings.map(booking => ({
+  // Memoized function to load user bookings
+  const loadUserBookings = useCallback(async () => {
+    if (userId) {
+      setIsLoadingUserBookings(true);
+      try {
+        const bookings = await fetchUserBookings(userId);
+        // Ensure each booking has created_at field (using current date as fallback)
+        const typedBookings: SpaBooking[] = bookings.map(booking => ({
           ...booking,
           created_at: booking.created_at || new Date().toISOString(),
         }));
         setUserSpaBookings(typedBookings);
-      } else {
+      } catch (error) {
+        console.error("Error fetching user spa bookings:", error);
         setUserSpaBookings([]);
+      } finally {
+        setIsLoadingUserBookings(false);
       }
-    };
-    
-    loadUserBookings();
+    } else if (userRoomNumber) {
+      // If no user ID but has room number, filter bookings by room number
+      const filteredBookings = allBookings.filter(booking => 
+        booking.room_number === userRoomNumber
+      );
+      // Ensure each booking has created_at field
+      const typedBookings: SpaBooking[] = filteredBookings.map(booking => ({
+        ...booking,
+        created_at: booking.created_at || new Date().toISOString(),
+      }));
+      setUserSpaBookings(typedBookings);
+    } else {
+      setUserSpaBookings([]);
+    }
   }, [userId, userRoomNumber, fetchUserBookings, allBookings]);
+
+  // Fetch user's spa bookings when user ID changes
+  useEffect(() => {
+    loadUserBookings();
+  }, [loadUserBookings]);
 
   // Force refetch on mount to ensure we have the latest data, but ONLY ONCE
   useEffect(() => {
