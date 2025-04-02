@@ -57,6 +57,22 @@ export const transformTableReservations = (reservations: any[]): NotificationIte
   }));
 };
 
+// Transform spa bookings to notifications
+export const transformSpaBookings = (bookings: any[]): NotificationItem[] => {
+  if (!Array.isArray(bookings)) return [];
+  
+  return bookings.map(booking => ({
+    id: booking.id || `spa-${Math.random().toString(36).substr(2, 9)}`,
+    type: 'spa_booking',
+    title: 'Réservation de spa',
+    description: `${booking.date} à ${booking.time}`,
+    icon: '💆',
+    status: booking.status || 'pending',
+    time: createSafeDate(booking.created_at) || new Date(),
+    link: `/spa/booking/${booking.id}`
+  }));
+};
+
 // Helper function to get an icon based on service type
 function getServiceIcon(type: string): string {
   switch (type) {
@@ -71,16 +87,19 @@ function getServiceIcon(type: string): string {
 // Combine and sort all notifications
 export const combineAndSortNotifications = (
   serviceRequests: any[] = [],
-  reservations: any[] = []
+  reservations: any[] = [],
+  spaBookings: any[] = []
 ): NotificationItem[] => {
   // Transform the different types of notifications
   const requestNotifications = transformServiceRequests(serviceRequests);
   const reservationNotifications = transformTableReservations(reservations);
+  const spaNotifications = transformSpaBookings(spaBookings);
   
   // Combine all notifications
   const allNotifications = [
     ...requestNotifications,
-    ...reservationNotifications
+    ...reservationNotifications,
+    ...spaNotifications
   ];
   
   // Sort by date, newest first

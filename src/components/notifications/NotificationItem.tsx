@@ -3,10 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { ShowerHead } from 'lucide-react';
 
 interface NotificationItemProps {
   id: string;
-  type: 'request' | 'reservation';
+  type: 'request' | 'reservation' | 'spa_booking';
   title: string;
   description: string;
   icon: string;
@@ -17,6 +18,7 @@ interface NotificationItemProps {
 
 const NotificationItem: React.FC<NotificationItemProps> = ({
   id,
+  type,
   title,
   description,
   icon,
@@ -46,12 +48,29 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     }
   }
 
+  function renderIcon() {
+    if (type === 'spa_booking') {
+      return <span className="text-lg">💆</span>;
+    }
+    return <span className="text-lg">{icon}</span>;
+  }
+
+  // Format time safely
+  function getSafeTimeAgo(date: Date) {
+    try {
+      return formatDistanceToNow(date, { addSuffix: true, locale: fr });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'récemment';
+    }
+  }
+
   return (
     <Link to={link} key={id}>
       <div className="flex items-start gap-3 p-3 cursor-pointer hover:bg-gray-200/70">
         <div className="flex-shrink-0 mt-1">
           <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200">
-            <span className="text-lg">{icon}</span>
+            {renderIcon()}
           </div>
         </div>
         <div className="flex-1 space-y-1">
@@ -63,7 +82,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           </div>
           <p className="text-xs text-gray-600">{description}</p>
           <p className="text-xs text-gray-500">
-            {formatDistanceToNow(time, { addSuffix: true, locale: fr })}
+            {getSafeTimeAgo(time)}
           </p>
         </div>
       </div>

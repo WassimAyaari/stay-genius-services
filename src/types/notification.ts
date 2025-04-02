@@ -1,7 +1,7 @@
 
 export interface NotificationItem {
   id: string;
-  type: 'request' | 'reservation';
+  type: 'request' | 'reservation' | 'spa_booking';
   title: string;
   description: string;
   icon: string;

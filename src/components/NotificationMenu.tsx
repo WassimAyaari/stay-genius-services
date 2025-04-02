@@ -48,7 +48,7 @@ const NotificationMenu = () => {
         
         <div className="max-h-80 overflow-y-auto">
           <NotificationList 
-            notifications={notifications} 
+            notifications={notifications.slice(0, 5)} 
             isAuthenticated={isAuthenticated} 
           />
         </div>

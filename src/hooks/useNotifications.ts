@@ -1,6 +1,7 @@
 
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
+import { useSpaBookings } from '@/hooks/useSpaBookings';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { NotificationItem } from '@/types/notification';
 import { useNotificationsState } from './notifications/useNotificationsState';
@@ -11,10 +12,12 @@ export const useNotifications = () => {
   const { user } = useAuth();
   const userId = user?.id || localStorage.getItem('user_id');
   const userEmail = user?.email || localStorage.getItem('user_email');
+  const userRoomNumber = user?.room_number || localStorage.getItem('user_room_number');
   
-  // Get service requests and table reservations
+  // Get service requests, table reservations and spa bookings
   const { data: serviceRequests = [], refetch: refetchServices } = useServiceRequests();
   const { reservations = [], refetch: refetchReservations } = useTableReservations();
+  const { bookings: spaBookings = [], refetch: refetchSpaBookings } = useSpaBookings();
   
   // Get notification state management
   const { hasNewNotifications, setHasNewNotifications } = useNotificationsState();
@@ -27,20 +30,24 @@ export const useNotifications = () => {
   // Force a reload on component mount
   refetchServices();
   refetchReservations();
+  refetchSpaBookings();
   
   // Set up real-time notification listeners
   useNotificationsRealtime(
     userId,
     userEmail,
+    userRoomNumber,
     refetchReservations,
     refetchServices,
+    refetchSpaBookings,
     setHasNewNotifications
   );
 
   // Combine and sort notifications
   const notifications: NotificationItem[] = combineAndSortNotifications(
     serviceRequests,
-    reservations
+    reservations,
+    spaBookings
   );
 
   // Count unread notifications
