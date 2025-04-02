@@ -1,7 +1,11 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { GuestData, UserData, CompanionData } from '../types/userTypes';
 import { syncCompanions } from './companionService';
 import { cleanupDuplicateGuestRecords } from './cleanupService';
+
+// Re-export the cleanup function
+export { cleanupDuplicateGuestRecords } from './cleanupService';
 
 /**
  * Synchronise les données d'invité avec Supabase
