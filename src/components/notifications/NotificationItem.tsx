@@ -3,11 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ShowerHead, Calendar, Utensils, FileText, Clock } from 'lucide-react';
+import { ShowerHead, Calendar, Utensils, FileText, Clock, Bell } from 'lucide-react';
 
 interface NotificationItemProps {
   id: string;
-  type: 'request' | 'reservation' | 'spa_booking';
+  type: 'request' | 'reservation' | 'spa_booking' | 'general';
   title: string;
   description: string;
   icon: string;
@@ -57,6 +57,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       return <Utensils className="h-4 w-4 text-orange-600" />;
     } else if (type === 'request') {
       return <FileText className="h-4 w-4 text-purple-600" />;
+    } else if (type === 'general') {
+      return <Bell className="h-4 w-4 text-gray-600" />;
     }
     return <span className="text-lg">{icon}</span>;
   }

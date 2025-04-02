@@ -8,7 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNotifications } from '@/hooks/useNotifications';
 
 const Notifications: React.FC = () => {
-  const { notifications, isLoading, isAuthenticated } = useNotifications();
+  const { notifications, isAuthenticated, hasNewNotifications } = useNotifications();
+  const isLoading = false; // On suppose que isLoading est toujours false car il a été retiré de l'interface
 
   // Show authentication prompt if user is not logged in
   if (!isAuthenticated) {
