@@ -13,7 +13,7 @@ import { Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Adresse email invalide' }),
-  password: z.string().min(6, { message: 'Le mot de passe doit contenir au moins 6 caractères' }),
+  password: z.string().min(1, { message: 'Le mot de passe est requis' }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -34,6 +34,8 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (values: LoginFormValues) => {
     setLoading(true);
     try {
+      console.log('Tentative de connexion avec:', values.email);
+      
       const result = await loginUser(values.email, values.password);
       
       if (result.success) {
@@ -43,13 +45,15 @@ const LoginForm: React.FC = () => {
         });
         navigate('/');
       } else {
+        console.error('Échec de la connexion:', result.error);
         toast({
           variant: 'destructive',
           title: 'Échec de la connexion',
-          description: result.error || 'Identifiants incorrects',
+          description: result.error || 'Vérifiez vos identifiants et réessayez',
         });
       }
     } catch (error: any) {
+      console.error('Erreur lors de la connexion:', error);
       toast({
         variant: 'destructive',
         title: 'Erreur',
@@ -70,7 +74,7 @@ const LoginForm: React.FC = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="votre@email.com" {...field} />
+                <Input placeholder="votre@email.com" autoComplete="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,7 +88,7 @@ const LoginForm: React.FC = () => {
             <FormItem>
               <FormLabel>Mot de passe</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="••••••••" autoComplete="current-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

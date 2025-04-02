@@ -5,6 +5,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { UserData } from '@/features/users/types/userTypes';
 import { getCurrentSession, isAuthenticated } from '../services/authService';
 import { getGuestData, syncGuestData } from '@/features/users/services/guestService';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   session: Session | null;
@@ -36,6 +37,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const { toast } = useToast();
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -66,7 +68,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
       
-      // Si nous n'avons pas pu récupérer de données, retourner null
       return null;
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -75,7 +76,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshUserData = async () => {
-    const userId = user?.id || localStorage.getItem('user_id');
+    if (!user) {
+      console.log('Aucun utilisateur, impossible de rafraîchir les données');
+      return;
+    }
+    
+    const userId = user.id;
     if (userId) {
       await fetchUserData(userId);
     }
@@ -86,55 +92,74 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       
       try {
+        // Configurer d'abord l'écouteur d'état d'authentification
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+          async (event, newSession) => {
+            console.log('Auth state changed:', event);
+            setSession(newSession);
+            setUser(newSession?.user || null);
+            
+            // Ne pas faire d'autres appels Supabase ici directement
+            // pour éviter un blocage potentiel
+            if (newSession?.user) {
+              setIsUserAuthenticated(true);
+              
+              // Utiliser setTimeout pour éviter les blocages
+              setTimeout(async () => {
+                await fetchUserData(newSession.user!.id);
+              }, 0);
+            } else {
+              setIsUserAuthenticated(false);
+              setUserData(null);
+              localStorage.removeItem('user_data');
+              localStorage.removeItem('user_id');
+            }
+          }
+        );
+        
+        // Ensuite, vérifier la session existante
         const { data } = await supabase.auth.getSession();
+        console.log('Session initiale:', data.session);
+        
         setSession(data.session);
         setUser(data.session?.user || null);
         
-        const authStatus = await isAuthenticated();
-        setIsUserAuthenticated(authStatus);
-        
-        // Get a user ID from session or localStorage
-        const userId = data.session?.user?.id || localStorage.getItem('user_id');
-        
-        if (userId) {
+        if (data.session?.user) {
+          setIsUserAuthenticated(true);
+          const userId = data.session.user.id;
+          localStorage.setItem('user_id', userId);
           await fetchUserData(userId);
         } else {
-          // Pas d'utilisateur authentifié
-          setUserData(null);
-          localStorage.removeItem('user_data');
+          const authStatus = await isAuthenticated();
+          setIsUserAuthenticated(authStatus);
+          
+          // Essayer de récupérer l'ID utilisateur du localStorage si pas de session
+          const userId = localStorage.getItem('user_id');
+          if (userId && authStatus) {
+            await fetchUserData(userId);
+          } else {
+            setUserData(null);
+            localStorage.removeItem('user_data');
+          }
         }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
         setUserData(null);
+        toast({
+          variant: "destructive",
+          title: "Erreur d'authentification",
+          description: "Un problème est survenu lors de l'initialisation de l'authentification"
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log('Auth state changed:', event);
-      setSession(newSession);
-      setUser(newSession?.user || null);
-      
-      const authStatus = await isAuthenticated();
-      setIsUserAuthenticated(authStatus);
-      
-      if (newSession?.user?.id) {
-        setTimeout(() => {
-          fetchUserData(newSession.user!.id);
-        }, 0);
-      } else {
-        // Si l'utilisateur est déconnecté, effacer les données
-        setUserData(null);
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('user_id');
-      }
-    });
-
     initializeAuth();
 
+    // Nettoyer l'abonnement à la déconnexion
     return () => {
-      authListener.subscription.unsubscribe();
+      supabase.auth.onAuthStateChange(() => {});
     };
   }, []);
 

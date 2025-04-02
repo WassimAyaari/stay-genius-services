@@ -36,18 +36,12 @@ export const isAuthenticated = async (): Promise<boolean> => {
     }
     
     if (session) {
-      console.log('Session Supabase valide trouvée');
+      console.log('Session Supabase valide trouvée:', session.user.id);
       return true;
     }
     
-    // 2. Fallback: vérifier si les données utilisateur sont dans le localStorage
-    const userDataString = localStorage.getItem('user_data');
-    const userIdString = localStorage.getItem('user_id');
-    
-    const isLocalStorageValid = !!userDataString && !!userIdString;
-    
-    console.log('Authentification via localStorage:', isLocalStorageValid);
-    return isLocalStorageValid;
+    console.log('Aucune session Supabase trouvée');
+    return false;
   } catch (error) {
     console.error('Erreur lors de la vérification de l\'authentification:', error);
     return false;

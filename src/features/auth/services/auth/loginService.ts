@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '@/features/users/types/userTypes';
 import { syncGuestData } from '@/features/users/services/guestService';
@@ -32,6 +33,8 @@ export const loginUser = async (
         error: 'Aucun utilisateur trouvé' 
       };
     }
+    
+    console.log('User authenticated successfully:', authData.user);
 
     // Récupérer les données de l'utilisateur depuis Supabase
     const { data: guestData, error: guestError } = await supabase
@@ -44,11 +47,11 @@ export const loginUser = async (
       console.error('Erreur lors de la récupération des données invité:', guestError);
     }
 
-    // Si les données existent dans Supabase, les utiliser, sinon créer un objet vide
+    // Si les données existent dans Supabase, les utiliser, sinon créer un objet avec les données minimales
     const userData: UserData = guestData ? {
       id: authData.user.id,
       email: email,
-      first_name: guestData.first_name || authData.user.user_metadata?.first_name || '',
+      first_name: guestData.first_name || authData.user.user_metadata?.first_name || 'Utilisateur',
       last_name: guestData.last_name || authData.user.user_metadata?.last_name || '',
       room_number: guestData.room_number || '',
       // Keep dates as strings to avoid conversion issues
@@ -56,13 +59,15 @@ export const loginUser = async (
       check_in_date: guestData.check_in_date || undefined,
       check_out_date: guestData.check_out_date || undefined,
       nationality: guestData.nationality,
-      profile_image: guestData.profile_image
+      profile_image: guestData.profile_image,
+      guest_type: guestData.guest_type || 'Standard Guest'
     } : {
       id: authData.user.id,
       email: email,
-      first_name: authData.user.user_metadata?.first_name || '',
+      first_name: authData.user.user_metadata?.first_name || 'Utilisateur',
       last_name: authData.user.user_metadata?.last_name || '',
-      room_number: ''
+      room_number: '',
+      guest_type: 'Standard Guest'
     };
 
     // Stocker dans le localStorage pour la compatibilité
