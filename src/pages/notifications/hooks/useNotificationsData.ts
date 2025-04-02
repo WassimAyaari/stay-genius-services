@@ -27,12 +27,14 @@ export const useNotificationsData = () => {
   // Get service requests and reservations
   const { 
     data: serviceRequests = [], 
-    isLoading: isLoadingRequests
+    isLoading: isLoadingRequests,
+    isError: isServiceRequestsError
   } = useServiceRequests();
   
   const { 
     reservations = [], 
-    isLoading: isLoadingReservations
+    isLoading: isLoadingReservations,
+    isError: isReservationsError
   } = useTableReservations();
 
   // Get spa bookings
@@ -44,9 +46,11 @@ export const useNotificationsData = () => {
 
   const { services = [] } = useSpaServices();
 
-  // State for user's spa bookings
+  // State for user's spa bookings and errors
   const [userSpaBookings, setUserSpaBookings] = useState<SpaBooking[]>([]);
   const [isLoadingUserBookings, setIsLoadingUserBookings] = useState(false);
+  const [spaBookingsError, setSpaBookingsError] = useState<Error | null>(null);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   // Create a mapping of service IDs to service names
   const serviceNamesMap = services.reduce((acc, service) => {
@@ -58,6 +62,7 @@ export const useNotificationsData = () => {
   const loadUserBookings = useCallback(async () => {
     if (userId) {
       setIsLoadingUserBookings(true);
+      setSpaBookingsError(null);
       try {
         const bookings = await fetchUserBookings(userId);
         
@@ -66,19 +71,26 @@ export const useNotificationsData = () => {
         setUserSpaBookings(typedBookings);
       } catch (error) {
         console.error("Error fetching user spa bookings:", error);
+        setSpaBookingsError(error instanceof Error ? error : new Error("Failed to fetch spa bookings"));
         setUserSpaBookings([]);
       } finally {
         setIsLoadingUserBookings(false);
       }
     } else if (userRoomNumber) {
       // If no user ID but has room number, filter bookings by room number
-      const filteredBookings = allBookings.filter(booking => 
-        booking.room_number === userRoomNumber
-      );
-      
-      // Ensure each booking has created_at field
-      const typedBookings: SpaBooking[] = filteredBookings.map(ensureCreatedAt);
-      setUserSpaBookings(typedBookings);
+      try {
+        const filteredBookings = allBookings.filter(booking => 
+          booking.room_number === userRoomNumber
+        );
+        
+        // Ensure each booking has created_at field
+        const typedBookings: SpaBooking[] = filteredBookings.map(ensureCreatedAt);
+        setUserSpaBookings(typedBookings);
+      } catch (error) {
+        console.error("Error filtering spa bookings:", error);
+        setSpaBookingsError(error instanceof Error ? error : new Error("Failed to filter spa bookings"));
+        setUserSpaBookings([]);
+      }
     } else {
       setUserSpaBookings([]);
     }
@@ -96,32 +108,42 @@ export const useNotificationsData = () => {
     userRoomNumber
   );
 
-  // Convert reservations to the expected TableReservation type and ensure created_at
-  const typedReservations: TableReservation[] = reservations.map(res => ({
-    id: res.id,
-    restaurant_id: res.restaurantId,
-    date: res.date,
-    time: res.time,
-    guests: res.guests,
-    guest_name: res.guestName || "",
-    guest_email: res.guestEmail || "",
-    guest_phone: res.guestPhone,
-    room_number: res.roomNumber,
-    special_requests: res.specialRequests,
-    status: res.status,
-    created_at: res.createdAt || new Date().toISOString(),
-    updated_at: res.createdAt || new Date().toISOString() // Use createdAt as fallback for updated_at
-  }));
+  // Create notifications when data changes
+  useEffect(() => {
+    try {
+      // Convert reservations to the expected TableReservation type and ensure created_at
+      const typedReservations: TableReservation[] = reservations.map(res => ({
+        id: res.id,
+        restaurant_id: res.restaurantId,
+        date: res.date,
+        time: res.time,
+        guests: res.guests,
+        guest_name: res.guestName || "",
+        guest_email: res.guestEmail || "",
+        guest_phone: res.guestPhone,
+        room_number: res.roomNumber,
+        special_requests: res.specialRequests,
+        status: res.status,
+        created_at: res.createdAt || new Date().toISOString(),
+        updated_at: res.createdAt || new Date().toISOString() // Use createdAt as fallback for updated_at
+      }));
 
-  // Combine and sort notifications
-  const notifications: NotificationItem[] = combineAndSortNotifications(
-    serviceRequests as ServiceRequest[], 
-    typedReservations,
-    userSpaBookings,
-    serviceNamesMap
-  );
+      // Combine and sort notifications
+      const combinedNotifications = combineAndSortNotifications(
+        serviceRequests as ServiceRequest[], 
+        typedReservations,
+        userSpaBookings,
+        serviceNamesMap
+      );
+      
+      setNotifications(combinedNotifications);
+    } catch (error) {
+      console.error("Error combining notifications:", error);
+    }
+  }, [serviceRequests, reservations, userSpaBookings, serviceNamesMap]);
 
   const isLoading = isLoadingRequests || isLoadingReservations || isLoadingSpaBookings || isLoadingUserBookings;
+  const error = isServiceRequestsError || isReservationsError || spaBookingsError;
 
   return {
     notifications,
@@ -129,6 +151,7 @@ export const useNotificationsData = () => {
     isAuthenticated,
     userId,
     userEmail,
-    userRoomNumber
+    userRoomNumber,
+    error: error ? true : false
   };
 };

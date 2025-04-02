@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Clock, ShowerHead, Utensils } from 'lucide-react';
 import type { NotificationItem } from '../types/notificationTypes';
 
 interface NotificationCardProps {
@@ -34,17 +33,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
     }
   }
 
-  // Get icon based on notification type and service type
-  function getNotificationIcon() {
-    if (notification.type === 'reservation') {
-      return <Utensils className="h-5 w-5 text-gray-600" />;
-    } else if (notification.type === 'spa_booking') {
-      return <ShowerHead className="h-5 w-5 text-gray-600" />;
-    } else {
-      return <ShowerHead className="h-5 w-5 text-gray-600" />;
-    }
-  }
-
   // Format time safely - handle invalid dates
   function formatTimeAgo(date: Date | null) {
     if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
@@ -71,41 +59,43 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
   }
 
   return (
-    <Card className={`hover:shadow-md transition-shadow ${getCardBackgroundColor(notification.status)}`}>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-1">
-              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white">
-                {notification.type === 'request' ? 
-                  <span className="text-xl">🔔</span> : 
-                notification.type === 'reservation' ? 
-                  <span className="text-xl">🍽️</span> : 
-                  <span className="text-xl">🧖</span>}
+    <Link to={notification.link} className="block">
+      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${getCardBackgroundColor(notification.status)}`}>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white">
+                  {notification.type === 'request' ? 
+                    <span className="text-xl">🔔</span> : 
+                  notification.type === 'reservation' ? 
+                    <span className="text-xl">🍽️</span> : 
+                    <span className="text-xl">🧖</span>}
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                <h3 className="font-medium">{notification.title}</h3>
+                <p className="text-sm text-gray-600 mt-1 line-clamp-2">{notification.description}</p>
+                
+                {notification.type === 'request' && notification.data?.room_number && (
+                  <div className="mt-1 text-xs text-gray-500">
+                    Chambre: {notification.data.room_number}
+                  </div>
+                )}
+                
+                <div className="mt-2 text-xs text-gray-500">
+                  {formatTimeAgo(notification.time)}
+                </div>
               </div>
             </div>
             
-            <div className="flex-1">
-              <h3 className="font-medium">{notification.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">{notification.description}</p>
-              
-              {notification.type === 'request' && notification.data.room_number && (
-                <div className="mt-1 text-xs text-gray-500">
-                  Chambre: {notification.data.room_number}
-                </div>
-              )}
-              
-              <div className="mt-2 text-xs text-gray-500">
-                {formatTimeAgo(notification.time)}
-              </div>
-            </div>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(notification.status)} ml-2 whitespace-nowrap`}>
+              {getStatusText(notification.status)}
+            </span>
           </div>
-          
-          <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(notification.status)} ml-2 whitespace-nowrap`}>
-            {getStatusText(notification.status)}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };

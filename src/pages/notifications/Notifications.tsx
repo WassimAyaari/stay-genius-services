@@ -6,13 +6,15 @@ import { NotificationsList } from './components/NotificationsList';
 import { LoadingState } from './components/LoadingState';
 import { AuthPrompt } from './components/AuthPrompt';
 import { EmptyState } from './components/EmptyState';
+import { Card } from '@/components/ui/card';
 
 const Notifications = () => {
   const { 
     notifications, 
     isLoading, 
     isAuthenticated, 
-    userRoomNumber
+    userRoomNumber,
+    error
   } = useNotificationsData();
 
   return (
@@ -31,6 +33,11 @@ const Notifications = () => {
           <LoadingState />
         ) : !isAuthenticated ? (
           <AuthPrompt />
+        ) : error ? (
+          <Card className="p-6 text-center">
+            <p className="text-gray-600">Une erreur est survenue lors du chargement des notifications.</p>
+            <p className="text-sm text-gray-500 mt-2">Veuillez réessayer plus tard.</p>
+          </Card>
         ) : notifications.length > 0 ? (
           <NotificationsList notifications={notifications} />
         ) : (

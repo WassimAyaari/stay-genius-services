@@ -16,7 +16,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const ServiceRequestDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: serviceRequests = [], cancelRequest, isLoading: isLoadingRequests } = useServiceRequests();
+  const { 
+    data: serviceRequests = [], 
+    cancelRequest, 
+    isLoading: isLoadingRequests,
+    isError
+  } = useServiceRequests();
   
   const [request, setRequest] = useState<ServiceRequest | null>(null);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -38,12 +43,12 @@ const ServiceRequestDetails = () => {
         toast.error("Demande non trouvée");
         navigate('/notifications');
       }
-    } else if (!isLoadingRequests) {
+    } else if (!isLoadingRequests && !isError) {
       // If we're not still loading but have no requests, show an error
       toast.error("Aucune demande disponible");
       navigate('/notifications');
     }
-  }, [id, serviceRequests, navigate, isLoadingRequests]);
+  }, [id, serviceRequests, navigate, isLoadingRequests, isError]);
   
   const handleCancelRequest = async () => {
     if (!request) return;
@@ -151,6 +156,25 @@ const ServiceRequestDetails = () => {
     );
   }
   
+  if (isError) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-center text-gray-500">Erreur lors du chargement des détails. Veuillez réessayer.</p>
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <Button onClick={() => navigate('/notifications')}>
+                Retour aux notifications
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!request) {
     return (
       <Layout>
