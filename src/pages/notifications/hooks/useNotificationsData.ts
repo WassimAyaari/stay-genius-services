@@ -7,7 +7,8 @@ import { useRealtimeNotifications } from './useRealtimeNotifications';
 import { useUserAuthentication } from './useUserAuthentication';
 import { combineAndSortNotifications } from '../utils/notificationTransformers';
 
-export { NotificationItem } from '../types/notificationTypes';
+// Use 'export type' for re-exporting types when isolatedModules is enabled
+export type { NotificationItem } from '../types/notificationTypes';
 
 export const useNotificationsData = () => {
   // Get user authentication data
