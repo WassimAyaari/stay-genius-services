@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 
 export interface UserData {
@@ -14,6 +13,7 @@ export interface UserData {
   profile_image?: string;
   phone?: string; // Added phone property
   companions?: CompanionData[];
+  guest_type?: string; // Add guest_type property that was missing
 }
 
 export interface CompanionData {
