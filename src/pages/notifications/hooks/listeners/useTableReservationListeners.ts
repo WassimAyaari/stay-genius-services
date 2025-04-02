@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { reservationTransformers } from '@/hooks/reservations/reservationTransformers';
 
 /**
  * Set up listener for table reservation updates by user ID
@@ -44,14 +45,8 @@ export const setupReservationListenerByEmail = (userEmail: string, refetchReserv
 export const handleReservationUpdate = (payload: any, refetchReservations: () => void) => {
   // Show notification for status changes
   if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
-    const statusMap: Record<string, string> = {
-      'pending': 'est en attente',
-      'confirmed': 'a été confirmée',
-      'cancelled': 'a été annulée'
-    };
-    
     const status = payload.new.status;
-    const message = statusMap[status] || 'a été mise à jour';
+    const message = reservationTransformers.getStatusFrench(status);
     
     const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
     const time = payload.new.time;
