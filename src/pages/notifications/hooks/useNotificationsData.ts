@@ -34,7 +34,7 @@ export const useNotificationsData = () => {
   const { 
     reservations = [], 
     isLoading: isLoadingReservations,
-    isError: isReservationsError
+    error: reservationsError
   } = useTableReservations();
 
   // Get spa bookings
@@ -143,7 +143,7 @@ export const useNotificationsData = () => {
   }, [serviceRequests, reservations, userSpaBookings, serviceNamesMap]);
 
   const isLoading = isLoadingRequests || isLoadingReservations || isLoadingSpaBookings || isLoadingUserBookings;
-  const error = isServiceRequestsError || isReservationsError || spaBookingsError;
+  const error = isServiceRequestsError || (reservationsError ? true : false) || spaBookingsError;
 
   return {
     notifications,
