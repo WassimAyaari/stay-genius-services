@@ -8,6 +8,16 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
+// Helper to safely create Date objects
+const createSafeDate = (dateString: string | null | undefined): Date | null => {
+  if (!dateString) return null;
+  
+  const date = new Date(dateString);
+  
+  // Check if the date is valid
+  return !isNaN(date.getTime()) ? date : null;
+};
+
 // Transforme une liste de demandes de service en notifications
 export const transformServiceRequests = (requests: ServiceRequest[]): NotificationItem[] => {
   return requests.map(request => ({
@@ -16,7 +26,7 @@ export const transformServiceRequests = (requests: ServiceRequest[]): Notificati
     title: `Demande de service: ${request.request_items?.name || request.type}`,
     description: request.description || 'Aucune description fournie',
     status: request.status,
-    time: new Date(request.created_at),
+    time: createSafeDate(request.created_at) || new Date(),
     link: `/my-room/request/${request.id}`,
     data: {
       requestId: request.id,
@@ -32,7 +42,9 @@ export const transformServiceRequests = (requests: ServiceRequest[]): Notificati
 export const transformTableReservations = (reservations: TableReservation[]): NotificationItem[] => {
   return reservations.map(reservation => {
     const reservationDate = new Date(reservation.date);
-    const formattedDate = format(reservationDate, 'EEEE d MMMM', { locale: fr });
+    const formattedDate = !isNaN(reservationDate.getTime()) 
+      ? format(reservationDate, 'EEEE d MMMM', { locale: fr })
+      : 'Date non définie';
     
     return {
       id: reservation.id,
@@ -40,7 +52,7 @@ export const transformTableReservations = (reservations: TableReservation[]): No
       title: `Réservation de restaurant`,
       description: `${formattedDate} à ${reservation.time} - ${reservation.guests} ${reservation.guests > 1 ? 'personnes' : 'personne'}`,
       status: reservation.status,
-      time: new Date(reservation.created_at),
+      time: createSafeDate(reservation.created_at) || new Date(),
       link: `/dining/reservation/${reservation.id}`,
       data: {
         restaurantId: reservation.restaurant_id,
@@ -57,8 +69,10 @@ export const transformTableReservations = (reservations: TableReservation[]): No
 // Transforme une liste de réservations de spa en notifications
 export const transformSpaBookings = (bookings: SpaBooking[], services: Record<string, string>): NotificationItem[] => {
   return bookings.map(booking => {
-    const bookingDate = new Date(booking.date);
-    const formattedDate = format(bookingDate, 'EEEE d MMMM', { locale: fr });
+    const bookingDate = booking.date ? new Date(booking.date) : null;
+    const formattedDate = bookingDate && !isNaN(bookingDate.getTime())
+      ? format(bookingDate, 'EEEE d MMMM', { locale: fr })
+      : 'Date non définie';
     
     return {
       id: booking.id,
@@ -66,7 +80,8 @@ export const transformSpaBookings = (bookings: SpaBooking[], services: Record<st
       title: `Réservation de spa`,
       description: `${formattedDate} à ${booking.time} - ${services[booking.service_id] || 'Service spa'}`,
       status: booking.status,
-      time: new Date(booking.created_at || ''),
+      // Ensure we have a valid date, or use current date
+      time: createSafeDate(booking.created_at) || new Date(),
       link: `/spa/booking/${booking.id}`,
       data: {
         service_id: booking.service_id,
@@ -100,6 +115,12 @@ export const combineAndSortNotifications = (
     ...spaNotifications
   ];
   
-  // Trier par date, les plus récentes d'abord
-  return allNotifications.sort((a, b) => b.time.getTime() - a.time.getTime());
+  // Trier par date, les plus récentes d'abord, ensuring we handle invalid dates
+  return allNotifications.sort((a, b) => {
+    // Default timestamps if no valid dates
+    const timeA = a.time instanceof Date && !isNaN(a.time.getTime()) ? a.time.getTime() : 0;
+    const timeB = b.time instanceof Date && !isNaN(b.time.getTime()) ? b.time.getTime() : 0;
+    
+    return timeB - timeA;
+  });
 };

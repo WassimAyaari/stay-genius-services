@@ -12,6 +12,14 @@ import { combineAndSortNotifications } from '../utils/notificationTransformers';
 // Use 'export type' for re-exporting types when isolatedModules is enabled
 export type { NotificationItem } from '../types/notificationTypes';
 
+// Helper function to ensure a SpaBooking has created_at
+const ensureCreatedAt = (booking: SpaBooking): SpaBooking => {
+  return {
+    ...booking,
+    created_at: booking.created_at || new Date().toISOString(),
+  };
+};
+
 export const useNotificationsData = () => {
   // Get user authentication data
   const { userId, userEmail, userRoomNumber, isAuthenticated } = useUserAuthentication();
@@ -57,11 +65,9 @@ export const useNotificationsData = () => {
       setIsLoadingUserBookings(true);
       try {
         const bookings = await fetchUserBookings(userId);
+        
         // Ensure each booking has created_at field (using current date as fallback)
-        const typedBookings: SpaBooking[] = bookings.map(booking => ({
-          ...booking,
-          created_at: booking.created_at || new Date().toISOString(),
-        }));
+        const typedBookings: SpaBooking[] = bookings.map(ensureCreatedAt);
         setUserSpaBookings(typedBookings);
       } catch (error) {
         console.error("Error fetching user spa bookings:", error);
@@ -74,11 +80,9 @@ export const useNotificationsData = () => {
       const filteredBookings = allBookings.filter(booking => 
         booking.room_number === userRoomNumber
       );
+      
       // Ensure each booking has created_at field
-      const typedBookings: SpaBooking[] = filteredBookings.map(booking => ({
-        ...booking,
-        created_at: booking.created_at || new Date().toISOString(),
-      }));
+      const typedBookings: SpaBooking[] = filteredBookings.map(ensureCreatedAt);
       setUserSpaBookings(typedBookings);
     } else {
       setUserSpaBookings([]);
@@ -114,7 +118,7 @@ export const useNotificationsData = () => {
     refetchSpaBookings
   );
 
-  // Convert reservations to the expected TableReservation type
+  // Convert reservations to the expected TableReservation type and ensure created_at
   const typedReservations: TableReservation[] = reservations.map(res => ({
     id: res.id,
     restaurant_id: res.restaurantId,
@@ -127,8 +131,8 @@ export const useNotificationsData = () => {
     room_number: res.roomNumber,
     special_requests: res.specialRequests,
     status: res.status,
-    created_at: res.createdAt,
-    updated_at: res.createdAt // Use createdAt as fallback for updated_at
+    created_at: res.createdAt || new Date().toISOString(),
+    updated_at: res.createdAt || new Date().toISOString() // Use createdAt as fallback for updated_at
   }));
 
   // Combine and sort notifications

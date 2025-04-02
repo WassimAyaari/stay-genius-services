@@ -44,6 +44,20 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
     }
   }
 
+  // Format time safely - handle invalid dates
+  function formatTimeAgo(date: Date | null) {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      return 'récemment';
+    }
+    
+    try {
+      return formatDistanceToNow(date, { addSuffix: true, locale: fr });
+    } catch (error) {
+      console.error('Error formatting date:', error, date);
+      return 'récemment';
+    }
+  }
+
   return (
     <Link to={notification.link}>
       <Card className={`hover:shadow-md transition-shadow border-l-4 ${getStatusColor(notification.status)}`}>
@@ -73,7 +87,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
               )}
               
               <div className="mt-2 text-xs text-gray-500">
-                {formatDistanceToNow(notification.time, { addSuffix: true, locale: fr })}
+                {formatTimeAgo(notification.time)}
               </div>
             </div>
           </div>
