@@ -69,7 +69,12 @@ const SpaBookingDetails = () => {
         // Si les données du service sont déjà incluses dans la réponse
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
-          setService(bookingData.spa_services as SpaService);
+          // Ensure the category is compatible with SpaService type
+          const serviceData: SpaService = {
+            ...bookingData.spa_services,
+            category: bookingData.spa_services.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+          };
+          setService(serviceData);
           
           // Récupérer l'installation si l'ID est disponible
           if (bookingData.spa_services.facility_id) {
@@ -98,7 +103,12 @@ const SpaBookingDetails = () => {
             console.error('Error fetching service:', serviceError);
           } else if (serviceData) {
             console.log('Service data received:', serviceData);
-            setService(serviceData);
+            // Ensure the category is compatible with SpaService type
+            const typedServiceData: SpaService = {
+              ...serviceData,
+              category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+            };
+            setService(typedServiceData);
             
             // Récupérer l'installation si l'ID est disponible
             if (serviceData.facility_id) {

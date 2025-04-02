@@ -19,7 +19,11 @@ export const useSpaServices = () => {
       throw error;
     }
 
-    return data as SpaService[];
+    // Ensure the category is properly typed
+    return (data || []).map(service => ({
+      ...service,
+      category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+    })) as SpaService[];
   };
 
   // Récupérer les services mis en avant
@@ -36,7 +40,11 @@ export const useSpaServices = () => {
       throw error;
     }
 
-    return data as SpaService[];
+    // Ensure the category is properly typed
+    return (data || []).map(service => ({
+      ...service,
+      category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+    })) as SpaService[];
   };
 
   // Réserver un traitement
@@ -78,7 +86,13 @@ export const useSpaServices = () => {
       return null;
     }
 
-    return data as SpaService;
+    if (!data) return null;
+
+    // Ensure the category is properly typed
+    return {
+      ...data,
+      category: data.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+    } as SpaService;
   };
 
   // Services data

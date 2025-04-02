@@ -19,7 +19,7 @@ export interface SpaService {
   duration: string;
   price: number;
   image: string;
-  category: 'massage' | 'facial' | 'body' | 'wellness';
+  category: 'massage' | 'facial' | 'body' | 'wellness' | string;
   facility_id: string;
   is_featured?: boolean;
   status: 'available' | 'unavailable';
