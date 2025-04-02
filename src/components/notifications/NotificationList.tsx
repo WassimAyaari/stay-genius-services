@@ -43,6 +43,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
             status={notification.status}
             time={notification.time}
             link={notification.link}
+            data={notification.data}
           />
         </DropdownMenuItem>
       ))}

@@ -37,7 +37,12 @@ export const transformServiceRequests = (requests: any[]): NotificationItem[] =>
     icon: getServiceIcon(request.type),
     status: request.status || 'pending',
     time: createSafeDate(request.created_at) || new Date(),
-    link: `/my-room/request/${request.id}`
+    link: `/my-room/request/${request.id}`,
+    data: {
+      room_number: request.room_number,
+      service_type: request.type,
+      description: request.description
+    }
   }));
 };
 
@@ -53,7 +58,15 @@ export const transformTableReservations = (reservations: any[]): NotificationIte
     icon: '🍽️',
     status: reservation.status || 'pending',
     time: createSafeDate(reservation.createdAt || reservation.created_at) || new Date(),
-    link: `/dining/reservation/${reservation.id}`
+    link: `/dining/reservation/${reservation.id}`,
+    data: {
+      date: reservation.date,
+      time: reservation.time,
+      guests: reservation.guests,
+      restaurant_id: reservation.restaurant_id,
+      room_number: reservation.room_number,
+      special_requests: reservation.special_requests
+    }
   }));
 };
 
@@ -69,7 +82,14 @@ export const transformSpaBookings = (bookings: any[]): NotificationItem[] => {
     icon: '💆',
     status: booking.status || 'pending',
     time: createSafeDate(booking.created_at) || new Date(),
-    link: `/spa/booking/${booking.id}`
+    link: `/spa/booking/${booking.id}`,
+    data: {
+      date: booking.date,
+      time: booking.time,
+      service_id: booking.service_id,
+      room_number: booking.room_number,
+      special_requests: booking.special_requests
+    }
   }));
 };
 

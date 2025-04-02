@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ShowerHead } from 'lucide-react';
+import { ShowerHead, Calendar, Utensils, FileText, Clock } from 'lucide-react';
 
 interface NotificationItemProps {
   id: string;
@@ -14,6 +14,7 @@ interface NotificationItemProps {
   status: string;
   time: Date;
   link: string;
+  data?: any;
 }
 
 const NotificationItem: React.FC<NotificationItemProps> = ({
@@ -24,7 +25,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   icon,
   status,
   time,
-  link
+  link,
+  data
 }) => {
   // Get color based on notification status
   function getStatusColor(status: string) {
@@ -50,7 +52,11 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   function renderIcon() {
     if (type === 'spa_booking') {
-      return <span className="text-lg">💆</span>;
+      return <ShowerHead className="h-4 w-4 text-blue-600" />;
+    } else if (type === 'reservation') {
+      return <Utensils className="h-4 w-4 text-orange-600" />;
+    } else if (type === 'request') {
+      return <FileText className="h-4 w-4 text-purple-600" />;
     }
     return <span className="text-lg">{icon}</span>;
   }
@@ -63,6 +69,33 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       console.error('Error formatting date:', error);
       return 'récemment';
     }
+  }
+
+  // Generate a summary based on notification type
+  function getSummary() {
+    if (type === 'spa_booking') {
+      return `Réservation pour ${data?.date || ''} à ${data?.time || ''}`;
+    } else if (type === 'reservation') {
+      return `Réservation pour ${data?.guests || ''} personne(s) le ${data?.date || ''} à ${data?.time || ''}`;
+    } else if (type === 'request') {
+      return description || 'Demande de service';
+    }
+    return description;
+  }
+
+  // Get actions based on status and type
+  function getActions() {
+    const canCancel = ['pending', 'confirmed', 'in_progress'].includes(status);
+    const canEdit = ['pending'].includes(status);
+    
+    if (!canCancel && !canEdit) return null;
+    
+    return (
+      <div className="mt-1 text-xs">
+        {canCancel && <span className="text-red-600 mr-2">Annuler</span>}
+        {canEdit && <span className="text-blue-600">Modifier</span>}
+      </div>
+    );
   }
 
   return (
@@ -80,10 +113,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               {getStatusText(status)}
             </span>
           </div>
-          <p className="text-xs text-gray-600">{description}</p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-800">{getSummary()}</p>
+          <div className="flex items-center text-xs text-gray-500">
+            <Clock className="h-3 w-3 mr-1" />
             {getSafeTimeAgo(time)}
-          </p>
+          </div>
+          {getActions()}
         </div>
       </div>
     </Link>

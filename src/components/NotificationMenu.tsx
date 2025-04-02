@@ -36,7 +36,7 @@ const NotificationMenu = () => {
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Bell className={`h-5 w-5 ${hasNewNotifications ? 'text-primary' : 'text-gray-600'}`} />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
+            <span className="absolute -top-0.5 -right-0.5 h-5 w-5 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
               {unreadCount}
             </span>
           )}

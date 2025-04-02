@@ -8,4 +8,12 @@ export interface NotificationItem {
   status: string;
   time: Date;
   link: string;
+  data?: {
+    room_number?: string;
+    date?: string;
+    time?: string;
+    guests?: number;
+    service_type?: string;
+    [key: string]: any;
+  };
 }
