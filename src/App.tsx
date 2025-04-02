@@ -34,6 +34,7 @@ import RequestManager from '@/pages/admin/RequestManager';
 import ReservationManager from '@/pages/admin/ReservationManager';
 import RestaurantManager from '@/pages/admin/RestaurantManager';
 import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
+import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
 import ChatMessages from '@/pages/admin/ChatMessages';
 import AboutEditor from '@/pages/admin/AboutEditor';
 
@@ -104,6 +105,11 @@ function App() {
               <Route path="/admin/restaurants" element={
                 <AuthGuard adminRequired>
                   <RestaurantManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/restaurants/:id/reservations" element={
+                <AuthGuard adminRequired>
+                  <RestaurantReservationsManager />
                 </AuthGuard>
               } />
               <Route path="/admin/restaurant-menus" element={

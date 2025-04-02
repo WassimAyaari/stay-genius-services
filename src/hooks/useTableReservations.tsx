@@ -12,7 +12,9 @@ export const useTableReservations = (restaurantId?: string) => {
   const { user } = useAuth();
   const userId = user?.id || localStorage.getItem('user_id');
   const userEmail = user?.email || localStorage.getItem('user_email');
-
+  
+  const isRestaurantSpecific = !!restaurantId && restaurantId !== ':id';
+  
   // Fetch user's reservations
   const fetchUserReservations = async (): Promise<TableReservation[]> => {
     if (!userId && !userEmail) {
@@ -22,7 +24,7 @@ export const useTableReservations = (restaurantId?: string) => {
     
     let reservations: TableReservation[] = [];
     
-    // Essayer d'abord en utilisant l'ID de l'utilisateur authentifié
+    // Try first using the authenticated user's ID
     if (userId) {
       console.log('Fetching reservations for user ID:', userId);
       
@@ -42,7 +44,7 @@ export const useTableReservations = (restaurantId?: string) => {
       }
     }
     
-    // Si un email est disponible, chercher aussi par email
+    // If an email is available, also search by email
     if (userEmail) {
       console.log('Fetching reservations for user email:', userEmail);
       
@@ -59,7 +61,7 @@ export const useTableReservations = (restaurantId?: string) => {
       } else if (data && data.length > 0) {
         console.log('Found reservations by email:', data.length);
         
-        // Fusionner les résultats en évitant les doublons
+        // Merge results avoiding duplicates
         const existingIds = new Set(reservations.map(r => r.id));
         const newReservations = transformReservations(data).filter(r => !existingIds.has(r.id));
         
@@ -94,17 +96,38 @@ export const useTableReservations = (restaurantId?: string) => {
   // Fetch restaurant reservations (for admin)
   const fetchRestaurantReservations = async (): Promise<TableReservation[]> => {
     if (!restaurantId || restaurantId === ':id') {
+      console.log('Invalid restaurant ID, returning empty reservations');
       return [];
     }
     
-    return fetchReservations(restaurantId);
+    console.log(`Fetching reservations for restaurant ID: ${restaurantId}`);
+    
+    try {
+      const { data, error } = await supabase
+        .from('table_reservations')
+        .select('*')
+        .eq('restaurant_id', restaurantId)
+        .order('date', { ascending: true })
+        .order('time', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching restaurant reservations:', error);
+        throw error;
+      }
+      
+      console.log(`Found ${data.length} reservations for restaurant ${restaurantId}`);
+      return transformReservations(data);
+    } catch (error) {
+      console.error('Exception fetching restaurant reservations:', error);
+      throw error;
+    }
   };
 
   // Cancel reservation
   const cancelReservation = async (reservationId: string): Promise<void> => {
-    if (!userId && !userEmail) {
-      toast.error("Veuillez vous connecter pour annuler une réservation");
-      throw new Error("Utilisateur non authentifié");
+    if (!userId && !userEmail && !isRestaurantSpecific) {
+      toast.error("Please log in to cancel a reservation");
+      throw new Error("Unauthenticated user");
     }
 
     const { error } = await supabase
@@ -121,7 +144,7 @@ export const useTableReservations = (restaurantId?: string) => {
   // Query for fetching reservations (either user's or restaurant's)
   const { data: reservations, isLoading, error, refetch } = useQuery({
     queryKey: ['tableReservations', userId, userEmail, restaurantId],
-    queryFn: restaurantId ? fetchRestaurantReservations : fetchUserReservations,
+    queryFn: isRestaurantSpecific ? fetchRestaurantReservations : fetchUserReservations,
     enabled: true,
     staleTime: 1000 * 60, // 1 minute
     refetchOnWindowFocus: true,
@@ -132,11 +155,11 @@ export const useTableReservations = (restaurantId?: string) => {
     mutationFn: cancelReservation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
-      toast.success('Réservation annulée avec succès');
+      toast.success('Reservation cancelled successfully');
     },
     onError: (error) => {
       console.error('Error cancelling reservation:', error);
-      toast.error("Erreur lors de l'annulation de la réservation");
+      toast.error("Error cancelling the reservation");
     }
   });
 
@@ -153,70 +176,96 @@ export const useTableReservations = (restaurantId?: string) => {
     mutationFn: (data: UpdateReservationStatusDTO) => apiUpdateReservationStatus(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
-      toast.success('Statut de la réservation mis à jour');
+      toast.success('Reservation status updated');
     },
     onError: (error) => {
       console.error('Error updating reservation status:', error);
-      toast.error("Erreur lors de la mise à jour du statut");
+      toast.error("Error updating reservation status");
     }
   });
 
   // Subscribe to real-time updates for table reservations
   useEffect(() => {
-    if (!userId && !userEmail) return;
-    
-    console.log("Setting up real-time listener for reservations with user ID:", userId, "and email:", userEmail);
-    
+    // For user's own reservations
     const channels = [];
     
-    // Canal pour les réservations liées à l'ID utilisateur
-    if (userId) {
-      const userIdChannel = supabase
-        .channel('reservation_updates_userId')
+    if (isRestaurantSpecific) {
+      // For admin view of restaurant reservations
+      console.log(`Setting up real-time listener for restaurant reservations: ${restaurantId}`);
+      
+      const restaurantChannel = supabase
+        .channel('restaurant_reservations')
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
           table: 'table_reservations',
-          filter: `user_id=eq.${userId}`,
+          filter: `restaurant_id=eq.${restaurantId}`,
         }, (payload) => {
-          console.log('Reservation update received by user_id:', payload);
-          handleReservationUpdate(payload);
+          console.log('Restaurant reservation update received:', payload);
+          queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
+          
+          // Show notification for new reservations
+          if (payload.eventType === 'INSERT') {
+            toast.info(`New Reservation`, {
+              description: `A new reservation has been created.`,
+              duration: 5000,
+            });
+          }
         })
         .subscribe();
         
-      channels.push(userIdChannel);
-    }
-    
-    // Si nous avons un email d'utilisateur, écoutons aussi les mises à jour basées sur l'email
-    if (userEmail) {
-      const emailChannel = supabase
-        .channel('reservation_updates_email')
-        .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: 'table_reservations',
-          filter: `guest_email=eq.${userEmail}`,
-        }, (payload) => {
-          console.log('Reservation update received by email:', payload);
-          handleReservationUpdate(payload);
-        })
-        .subscribe();
-        
-      channels.push(emailChannel);
+      channels.push(restaurantChannel);
+    } else if (userId || userEmail) {
+      // Set up channels for user's own reservations
+      console.log("Setting up real-time listener for user reservations");
+      
+      if (userId) {
+        const userIdChannel = supabase
+          .channel('reservation_updates_userId')
+          .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'table_reservations',
+            filter: `user_id=eq.${userId}`,
+          }, (payload) => {
+            console.log('Reservation update received by user_id:', payload);
+            handleReservationUpdate(payload);
+          })
+          .subscribe();
+          
+        channels.push(userIdChannel);
+      }
+      
+      if (userEmail) {
+        const emailChannel = supabase
+          .channel('reservation_updates_email')
+          .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'table_reservations',
+            filter: `guest_email=eq.${userEmail}`,
+          }, (payload) => {
+            console.log('Reservation update received by email:', payload);
+            handleReservationUpdate(payload);
+          })
+          .subscribe();
+          
+        channels.push(emailChannel);
+      }
     }
       
     const handleReservationUpdate = (payload: any) => {
-      // Pour les nouvelles réservations
+      // For new reservations
       if (payload.eventType === 'INSERT') {
-        toast.info(`Nouvelle réservation`, {
-          description: `Votre réservation a été créée avec succès.`,
+        toast.info(`New reservation`, {
+          description: `Your reservation has been created successfully.`,
           duration: 5000,
         });
         queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
         return;
       }
       
-      // Pour les mises à jour de statut
+      // For status updates
       if (payload.eventType === 'UPDATE') {
         const oldStatus = payload.old.status;
         const newStatus = payload.new.status;
@@ -249,7 +298,7 @@ export const useTableReservations = (restaurantId?: string) => {
       console.log("Cleaning up real-time listener for reservations");
       channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [userId, userEmail, queryClient, restaurantId]);
+  }, [userId, userEmail, queryClient, restaurantId, isRestaurantSpecific]);
 
   return {
     reservations: reservations || [],

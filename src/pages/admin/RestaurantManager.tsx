@@ -1,141 +1,116 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { Plus, RefreshCw } from 'lucide-react';
 import { useRestaurants } from '@/hooks/useRestaurants';
-import { Restaurant } from '@/features/dining/types';
-import { Plus } from 'lucide-react';
-import RestaurantFormDialog from '@/components/admin/restaurants/RestaurantFormDialog';
-import RestaurantTable from '@/components/admin/restaurants/RestaurantTable';
+import { RestaurantTable } from '@/components/admin/restaurants/RestaurantTable';
+import { RestaurantFormDialog } from '@/components/admin/restaurants/RestaurantFormDialog';
+import { toast } from 'sonner';
 
-type FormValues = {
-  name: string;
-  description: string;
-  cuisine: string;
-  openHours: string;
-  location: string;
-  status: 'open' | 'closed';
-  actionText: string;
-  images: string[];
-};
-
-const RestaurantManager: React.FC = () => {
-  const { toast } = useToast();
-  const { restaurants, isLoading, error, updateRestaurant, createRestaurant, deleteRestaurant } = useRestaurants();
-  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
+const RestaurantManager = () => {
+  const navigate = useNavigate();
+  const { restaurants, isLoading, refetch, deleteRestaurant } = useRestaurants();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleSubmit = async (values: FormValues) => {
+  // Force refresh on first render
+  useEffect(() => {
+    handleRefresh();
+  }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
     try {
-      if (editingRestaurant) {
-        await updateRestaurant({
-          ...editingRestaurant,
-          name: values.name,
-          description: values.description,
-          cuisine: values.cuisine,
-          openHours: values.openHours,
-          location: values.location,
-          status: values.status,
-          actionText: values.actionText,
-          images: values.images,
-        });
-        toast({
-          title: "Restaurant updated",
-          description: "The restaurant has been updated successfully.",
-        });
-      } else {
-        await createRestaurant({
-          name: values.name,
-          description: values.description,
-          cuisine: values.cuisine,
-          openHours: values.openHours,
-          location: values.location,
-          status: values.status,
-          actionText: values.actionText,
-          images: values.images,
-        });
-        toast({
-          title: "Restaurant added",
-          description: "The restaurant has been added successfully.",
-        });
-      }
-      setIsDialogOpen(false);
-      setEditingRestaurant(null);
+      await refetch();
     } catch (error) {
-      console.error("Error saving restaurant:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem saving the restaurant.",
-      });
+      console.error('Error refreshing restaurants:', error);
+      toast.error('Failed to refresh restaurants');
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
-  const handleEdit = (restaurant: Restaurant) => {
-    setEditingRestaurant(restaurant);
+  const handleEditRestaurant = (restaurant) => {
+    setSelectedRestaurant(restaurant);
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteRestaurant = async (id) => {
     try {
       await deleteRestaurant(id);
-      toast({
-        title: "Restaurant deleted",
-        description: "The restaurant has been deleted successfully.",
-      });
+      toast.success('Restaurant deleted successfully');
     } catch (error) {
-      console.error("Error deleting restaurant:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem deleting the restaurant.",
-      });
+      console.error('Error deleting restaurant:', error);
+      toast.error('Failed to delete restaurant');
     }
   };
 
-  const handleDialogOpen = () => {
-    setEditingRestaurant(null);
-    setIsDialogOpen(true);
+  const handleDialogClose = (success = false) => {
+    setIsDialogOpen(false);
+    setSelectedRestaurant(null);
+    if (success) {
+      refetch();
+    }
   };
 
-  if (isLoading) return <div className="p-8 text-center">Loading restaurants...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">Error loading restaurants: {error.message}</div>;
+  const navigateToReservations = (restaurantId) => {
+    navigate(`/admin/restaurants/${restaurantId}/reservations`);
+  };
+
+  const navigateToMenus = (restaurantId) => {
+    navigate(`/admin/restaurant-menus?restaurantId=${restaurantId}`);
+  };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Restaurant Manager</h1>
-        <Button variant="default" onClick={handleDialogOpen}>
-          <Plus className="mr-2 h-4 w-4" /> Add Restaurant
-        </Button>
+        <h1 className="text-2xl font-bold">Restaurant Management</h1>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Restaurant
+          </Button>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Restaurants</CardTitle>
-          <CardDescription>Manage your hotel's restaurants.</CardDescription>
         </CardHeader>
         <CardContent>
-          <RestaurantTable 
-            restaurants={restaurants} 
-            onEdit={handleEdit} 
-            onDelete={handleDelete} 
-          />
+          {isLoading || isRefreshing ? (
+            <div className="flex justify-center py-8">
+              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <RestaurantTable 
+              restaurants={restaurants || []} 
+              onEdit={handleEditRestaurant}
+              onDelete={handleDeleteRestaurant}
+              onViewReservations={navigateToReservations}
+              onViewMenus={navigateToMenus}
+            />
+          )}
         </CardContent>
       </Card>
 
-      <RestaurantFormDialog 
+      <RestaurantFormDialog
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        editingRestaurant={editingRestaurant}
-        onSubmit={handleSubmit}
+        onClose={handleDialogClose}
+        restaurant={selectedRestaurant}
       />
     </div>
   );
