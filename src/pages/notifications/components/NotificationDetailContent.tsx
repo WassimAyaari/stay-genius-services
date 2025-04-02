@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { NotificationItem } from '@/types/notification';
 import { RequestDetail } from './details/RequestDetail';
 import { ReservationDetail } from './details/ReservationDetail';
-import { SpaBookingDetail } from './details/SpaBookingDetail';
+import { SpaBookingDetail } from './details/spa/SpaBookingDetail';
 
 interface NotificationDetailContentProps {
   notification: NotificationItem;

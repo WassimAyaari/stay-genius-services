@@ -3,7 +3,7 @@
 
 export interface NotificationItem {
   id: string;
-  type: 'request' | 'reservation' | 'spa_booking';
+  type: 'request' | 'reservation' | 'spa_booking' | 'general';
   title: string;
   description: string;
   status: string;
