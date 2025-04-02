@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { GuestData, UserData, CompanionData } from '../types/userTypes';
 import { syncCompanions } from './companionService';
+import { cleanupDuplicateGuestRecords } from './cleanupService';
 
 /**
  * Synchronise les données d'invité avec Supabase
@@ -8,6 +9,9 @@ import { syncCompanions } from './companionService';
 export const syncGuestData = async (userId: string, userData: UserData): Promise<boolean> => {
   try {
     console.log('Syncing guest data for user:', userId);
+    
+    // Clean up any duplicate records first
+    await cleanupDuplicateGuestRecords(userId);
     
     // Vérifier si l'invité existe déjà
     const { data: existingGuest } = await supabase
@@ -95,6 +99,9 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
 export const getGuestData = async (userId: string): Promise<UserData | null> => {
   try {
     console.log('Fetching guest data from Supabase for user:', userId);
+    
+    // Clean up any duplicate records first
+    await cleanupDuplicateGuestRecords(userId);
     
     const { data: guestData, error: guestError } = await supabase
       .from('guests')

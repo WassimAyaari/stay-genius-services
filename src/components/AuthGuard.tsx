@@ -6,11 +6,63 @@ import { syncUserData } from '@/features/users/services/userService';
 import { isAuthenticated } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { cleanupDuplicateGuestRecords } from '@/features/users/services/guestService';
 
 interface AuthGuardProps {
   children: React.ReactNode;
   adminRequired?: boolean;
 }
+
+// Exporter la fonction de nettoyage pour la rendre accessible dans ce fichier
+export const cleanupDuplicateGuestRecords = async (userId: string): Promise<void> => {
+  try {
+    // Obtenir toutes les entrées pour cet utilisateur
+    const { data: duplicates, error: fetchError } = await supabase
+      .from('guests')
+      .select('id')
+      .eq('user_id', userId);
+      
+    if (fetchError) {
+      console.error('Error fetching duplicate records:', fetchError);
+      return;
+    }
+    
+    // S'il y a plus d'une entrée, conserver la plus récente et supprimer les autres
+    if (duplicates && duplicates.length > 1) {
+      console.log(`Found ${duplicates.length} duplicate records for user ${userId}, cleaning up...`);
+      
+      // Récupérer l'ID de l'entrée la plus récente
+      const { data: latestRecord, error: latestError } = await supabase
+        .from('guests')
+        .select('id')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (latestError || !latestRecord) {
+        console.error('Error finding latest record:', latestError);
+        return;
+      }
+      
+      // Supprimer toutes les autres entrées sauf la plus récente
+      const { error: deleteError } = await supabase
+        .from('guests')
+        .delete()
+        .eq('user_id', userId)
+        .neq('id', latestRecord.id);
+        
+      if (deleteError) {
+        console.error('Error deleting duplicate records:', deleteError);
+        return;
+      }
+      
+      console.log(`Successfully cleaned up duplicate records for user ${userId}`);
+    }
+  } catch (error) {
+    console.error('Error in cleanupDuplicateGuestRecords:', error);
+  }
+};
 
 const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
   const navigate = useNavigate();
@@ -54,6 +106,11 @@ const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
           setAuthorized(false);
           setLoading(false);
           return;
+        }
+        
+        // Si l'utilisateur est authentifié, nettoyer les doublons potentiels
+        if (session?.user?.id) {
+          await cleanupDuplicateGuestRecords(session.user.id);
         }
         
         // 3. Validation des données utilisateur dans localStorage
@@ -176,6 +233,10 @@ const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
         }
       } else if (event === 'SIGNED_IN' && session) {
         console.log("Événement de connexion détecté");
+        // Nettoyer les doublons potentiels lors de la connexion
+        if (session.user) {
+          cleanupDuplicateGuestRecords(session.user.id);
+        }
         setAuthorized(true);
       }
     });
