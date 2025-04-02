@@ -2,7 +2,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { SpaBooking } from '@/features/spa/types';
+import { SpaBooking, SpaService } from '@/features/spa/types';
+
+// Interface for the booking with service info as returned by Supabase
+interface ExtendedSpaBooking extends SpaBooking {
+  spa_services?: {
+    id: string;
+    name: string;
+    price: number;
+    duration: string;
+    description: string;
+    category: string;
+    facility_id?: string;
+  };
+}
 
 export const useSpaBookings = () => {
   const queryClient = useQueryClient();
@@ -28,15 +41,7 @@ export const useSpaBookings = () => {
       throw error;
     }
 
-    return data as unknown as (SpaBooking & {
-      spa_services: {
-        name: string;
-        price: number;
-        duration: string;
-        description: string;
-        category: string;
-      };
-    })[];
+    return data as unknown as SpaBooking[];
   };
 
   // Récupérer les réservations d'un utilisateur
@@ -72,7 +77,7 @@ export const useSpaBookings = () => {
   };
 
   // Récupérer une réservation par ID
-  const getBookingById = async (id: string): Promise<SpaBooking | null> => {
+  const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
     console.log('Fetching booking by ID:', id);
     try {
       // Récupérer la réservation avec les détails du service
@@ -104,7 +109,7 @@ export const useSpaBookings = () => {
       }
 
       console.log('Found booking with service details:', data);
-      return data as unknown as SpaBooking;
+      return data as unknown as ExtendedSpaBooking;
     } catch (error) {
       console.error('Exception in getBookingById:', error);
       return null;

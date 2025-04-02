@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,13 +22,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { SpaService } from '@/features/spa/types';
 
 const SpaBookingDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [booking, setBooking] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [service, setService] = useState<any>(null);
+  const [service, setService] = useState<SpaService | null>(null);
   const [facility, setFacility] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -69,7 +69,7 @@ const SpaBookingDetails = () => {
         // Si les données du service sont déjà incluses dans la réponse
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
-          setService(bookingData.spa_services);
+          setService(bookingData.spa_services as SpaService);
           
           // Récupérer l'installation si l'ID est disponible
           if (bookingData.spa_services.facility_id) {
