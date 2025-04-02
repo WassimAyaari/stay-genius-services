@@ -73,6 +73,15 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       return false;
     }
     
+    // Format dates to ensure they are strings
+    const formatDateToString = (dateValue: Date | string | undefined): string | undefined => {
+      if (!dateValue) return undefined;
+      if (dateValue instanceof Date) {
+        return dateValue.toISOString().split('T')[0];
+      }
+      return String(dateValue);
+    };
+
     // Vérifier si l'invité existe déjà
     const { data: existingGuest, error: checkError } = await supabase
       .from('guests')
@@ -96,10 +105,10 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
           last_name: userData.last_name,
           email: userData.email,
           room_number: userData.room_number,
-          birth_date: userData.birth_date,
+          birth_date: formatDateToString(userData.birth_date),
           nationality: userData.nationality,
-          check_in_date: userData.check_in_date,
-          check_out_date: userData.check_out_date,
+          check_in_date: formatDateToString(userData.check_in_date),
+          check_out_date: formatDateToString(userData.check_out_date),
           profile_image: userData.profile_image,
           phone: userData.phone,
           guest_type: userData.guest_type || 'Standard Guest'
@@ -116,20 +125,20 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       
       const { error: insertError } = await supabase
         .from('guests')
-        .insert({
+        .insert([{
           user_id: userId,
           first_name: userData.first_name,
           last_name: userData.last_name,
           email: userData.email,
           room_number: userData.room_number,
-          birth_date: userData.birth_date,
+          birth_date: formatDateToString(userData.birth_date),
           nationality: userData.nationality,
-          check_in_date: userData.check_in_date,
-          check_out_date: userData.check_out_date,
+          check_in_date: formatDateToString(userData.check_in_date),
+          check_out_date: formatDateToString(userData.check_out_date),
           profile_image: userData.profile_image,
           phone: userData.phone,
           guest_type: userData.guest_type || 'Standard Guest'
-        });
+        }]);
       
       if (insertError) {
         console.error('Error inserting guest data:', insertError);
