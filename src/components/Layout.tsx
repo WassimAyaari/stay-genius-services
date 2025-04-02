@@ -22,7 +22,7 @@ const Layout = ({
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Le header doit être visible sur toutes les pages sauf messages */}
+      {/* Header appears on all pages except the messages page */}
       {!isMessagePage && (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
           <div className="container mx-auto px-4">
