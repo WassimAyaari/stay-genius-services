@@ -8,9 +8,8 @@ export const useUserAuthentication = () => {
   const userId = user?.id || localStorage.getItem('user_id');
   const userEmail = user?.email || localStorage.getItem('user_email');
   
-  // Get room number from userData or localStorage - this fixes the type error as we're no longer accessing
-  // room_number directly from the User object
-  const userRoomNumber = userData?.room_number || localStorage.getItem('room_number') || '000';
+  // Get room number from userData or localStorage
+  const userRoomNumber = userData?.room_number || localStorage.getItem('room_number') || null;
   
   // Store email in localStorage for future reference
   if (user?.email && !localStorage.getItem('user_email')) {

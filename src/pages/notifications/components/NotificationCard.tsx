@@ -5,12 +5,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { NotificationItem } from '../types/notificationTypes';
+import { Bell, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface NotificationCardProps {
   notification: NotificationItem;
 }
 
 export const NotificationCard: React.FC<NotificationCardProps> = ({ notification }) => {
+  // Get icon based on notification type
+  function getNotificationIcon(type: string) {
+    switch (type) {
+      case 'request': return <Bell className="h-5 w-5" />;
+      case 'reservation': return <Calendar className="h-5 w-5" />;
+      default: return <Bell className="h-5 w-5" />;
+    }
+  }
+  
   // Get color based on notification status
   function getStatusColor(status: string) {
     switch (status) {
@@ -30,6 +40,15 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
       case 'cancelled': return 'Annulée';
       case 'confirmed': return 'Confirmée';
       default: return 'En attente';
+    }
+  }
+  
+  function getStatusIcon(status: string) {
+    switch (status) {
+      case 'confirmed':
+      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'cancelled': return <XCircle className="h-4 w-4 text-red-500" />;
+      default: return <Clock className="h-4 w-4 text-yellow-500" />;
     }
   }
 
@@ -59,18 +78,14 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
   }
 
   return (
-    <Link to={notification.link} className="block">
+    <Link to={notification.link || '#'} className="block">
       <Card className={`hover:shadow-md transition-shadow cursor-pointer ${getCardBackgroundColor(notification.status)}`}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 mt-1">
                 <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white">
-                  {notification.type === 'request' ? 
-                    <span className="text-xl">🔔</span> : 
-                  notification.type === 'reservation' ? 
-                    <span className="text-xl">🍽️</span> : 
-                    <span className="text-xl">🧖</span>}
+                  {getNotificationIcon(notification.type)}
                 </div>
               </div>
               
@@ -78,21 +93,23 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
                 <h3 className="font-medium">{notification.title}</h3>
                 <p className="text-sm text-gray-600 mt-1 line-clamp-2">{notification.description}</p>
                 
-                {notification.type === 'request' && notification.data?.room_number && (
+                {notification.data?.room_number && (
                   <div className="mt-1 text-xs text-gray-500">
                     Chambre: {notification.data.room_number}
                   </div>
                 )}
                 
-                <div className="mt-2 text-xs text-gray-500">
+                <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
                   {formatTimeAgo(notification.time)}
                 </div>
               </div>
             </div>
             
-            <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(notification.status)} ml-2 whitespace-nowrap`}>
-              {getStatusText(notification.status)}
-            </span>
+            <div className={`text-xs px-2 py-1 rounded-full ${getStatusColor(notification.status)} ml-2 whitespace-nowrap flex items-center gap-1`}>
+              {getStatusIcon(notification.status)}
+              <span>{getStatusText(notification.status)}</span>
+            </div>
           </div>
         </CardContent>
       </Card>

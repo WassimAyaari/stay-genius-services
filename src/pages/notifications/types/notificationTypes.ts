@@ -1,5 +1,5 @@
 
-// Définition des types pour les notifications
+// Types pour les notifications
 
 export interface NotificationItem {
   id: string;
@@ -18,14 +18,14 @@ export interface TableReservation {
   date: string;
   time: string;
   guests: number;
-  guest_name: string;
-  guest_email: string;
+  guest_name?: string;
+  guest_email?: string;
   guest_phone?: string;
   room_number?: string;
   special_requests?: string;
   status: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface ServiceRequest {
@@ -38,25 +38,4 @@ export interface ServiceRequest {
   room_number?: string;
   guest_name?: string;
   category_id?: string;
-  request_items?: {
-    name: string;
-  };
-}
-
-// Update SpaBooking to match the structure in features/spa/types
-export interface SpaBooking {
-  id: string;
-  service_id: string;
-  facility_id: string;
-  user_id?: string;
-  date: string;
-  time: string;
-  guest_name: string;
-  guest_email: string;
-  guest_phone?: string;
-  room_number?: string;
-  special_requests?: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  created_at?: string; // Make this optional to match the features/spa/types definition
-  updated_at?: string;
 }

@@ -8,6 +8,10 @@ interface NotificationsListProps {
 }
 
 export const NotificationsList: React.FC<NotificationsListProps> = ({ notifications }) => {
+  if (!notifications || notifications.length === 0) {
+    return null;
+  }
+  
   return (
     <div className="space-y-4">
       {notifications.map((notification) => (

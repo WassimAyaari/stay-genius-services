@@ -2,8 +2,7 @@
 import { 
   NotificationItem, 
   ServiceRequest, 
-  TableReservation,
-  SpaBooking
+  TableReservation
 } from '../types/notificationTypes';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -20,10 +19,12 @@ const createSafeDate = (dateString: string | null | undefined): Date | null => {
 
 // Transforme une liste de demandes de service en notifications
 export const transformServiceRequests = (requests: ServiceRequest[]): NotificationItem[] => {
+  if (!Array.isArray(requests)) return [];
+  
   return requests.map(request => ({
     id: request.id,
     type: 'request',
-    title: `Demande de service: ${request.type || 'housekeeping'}`,
+    title: `Demande de service: ${request.type || 'Service'}`,
     description: request.description || 'Aucune description fournie',
     status: request.status,
     time: createSafeDate(request.created_at) || new Date(),
@@ -40,9 +41,11 @@ export const transformServiceRequests = (requests: ServiceRequest[]): Notificati
 
 // Transforme une liste de réservations de restaurant en notifications
 export const transformTableReservations = (reservations: TableReservation[]): NotificationItem[] => {
+  if (!Array.isArray(reservations)) return [];
+  
   return reservations.map(reservation => {
-    const reservationDate = new Date(reservation.date);
-    const formattedDate = !isNaN(reservationDate.getTime()) 
+    const reservationDate = reservation.date ? new Date(reservation.date) : null;
+    const formattedDate = reservationDate && !isNaN(reservationDate.getTime()) 
       ? format(reservationDate, 'EEEE d MMMM', { locale: fr })
       : 'Date non définie';
     
@@ -66,56 +69,22 @@ export const transformTableReservations = (reservations: TableReservation[]): No
   });
 };
 
-// Transforme une liste de réservations de spa en notifications
-export const transformSpaBookings = (bookings: SpaBooking[], services: Record<string, string>): NotificationItem[] => {
-  return bookings.map(booking => {
-    const bookingDate = booking.date ? new Date(booking.date) : null;
-    const formattedDate = bookingDate && !isNaN(bookingDate.getTime())
-      ? format(bookingDate, 'EEEE d MMMM', { locale: fr })
-      : 'Date non définie';
-    
-    return {
-      id: booking.id,
-      type: 'spa_booking',
-      title: `Réservation de spa`,
-      description: `${formattedDate} à ${booking.time} - ${services[booking.service_id] || 'Service spa'}`,
-      status: booking.status,
-      // Ensure we have a valid date, or use current date
-      time: createSafeDate(booking.created_at) || new Date(),
-      link: `/spa/booking/${booking.id}`,
-      data: {
-        service_id: booking.service_id,
-        facility_id: booking.facility_id,
-        status: booking.status,
-        date: booking.date,
-        time: booking.time,
-        room_number: booking.room_number,
-        service_name: services[booking.service_id] || 'Service spa'
-      }
-    };
-  });
-};
-
 // Fonction pour combiner et trier toutes les notifications
 export const combineAndSortNotifications = (
   serviceRequests: ServiceRequest[], 
-  reservations: TableReservation[],
-  spaBookings: SpaBooking[] = [],
-  serviceNames: Record<string, string> = {}
+  reservations: TableReservation[]
 ): NotificationItem[] => {
   // Transformer les différents types de notification
   const requestNotifications = transformServiceRequests(serviceRequests);
   const reservationNotifications = transformTableReservations(reservations);
-  const spaNotifications = transformSpaBookings(spaBookings, serviceNames);
   
   // Combiner toutes les notifications
   const allNotifications = [
     ...requestNotifications,
-    ...reservationNotifications,
-    ...spaNotifications
+    ...reservationNotifications
   ];
   
-  // Trier par date, les plus récentes d'abord, ensuring we handle invalid dates
+  // Trier par date, les plus récentes d'abord
   return allNotifications.sort((a, b) => {
     // Default timestamps if no valid dates
     const timeA = a.time instanceof Date && !isNaN(a.time.getTime()) ? a.time.getTime() : 0;
