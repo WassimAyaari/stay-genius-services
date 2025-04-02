@@ -8,6 +8,9 @@ import EventsStories from '@/components/EventsStories';
 import TodayHighlightsSection from '@/components/home/TodayHighlightsSection';
 import AdditionalServicesSection from '@/components/home/AdditionalServicesSection';
 import AssistanceSection from '@/components/home/AssistanceSection';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 // Custom error boundary fallback component
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
@@ -62,6 +65,8 @@ const SectionWrapper = ({ children, id }: { children: React.ReactNode; id: strin
 
 const Index = () => {
   console.log("Index page rendering started");
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   
   return (
     <Layout>
@@ -70,6 +75,21 @@ const Index = () => {
         <SectionWrapper id="hero-section">
           <Suspense fallback={<div className="p-6 text-center">Loading hero section...</div>}>
             <HeroSection />
+            
+            {/* Bouton de connexion si l'utilisateur n'est pas authentifié */}
+            {!isAuthenticated && (
+              <div className="text-center my-6">
+                <p className="text-lg mb-4">Connectez-vous pour accéder à tous les services de l'hôtel</p>
+                <Button 
+                  variant="default" 
+                  size="lg" 
+                  onClick={() => navigate('/auth/login')}
+                  className="mx-auto"
+                >
+                  Se connecter
+                </Button>
+              </div>
+            )}
           </Suspense>
         </SectionWrapper>
 

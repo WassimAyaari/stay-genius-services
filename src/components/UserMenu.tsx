@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { useAuth } from '@/features/auth/hooks/useAuthContext';
 const UserMenu = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { userData } = useAuth();
+  const { userData, isAuthenticated } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -86,17 +87,26 @@ const UserMenu = () => {
     }
   };
 
-  // Get user initials for avatar fallback - never use "G" for Guest
+  // Get user initials for avatar fallback
   const getInitials = () => {
-    if (!userData || userData.first_name === 'Guest') return 'SA';
-    return `${userData.first_name?.charAt(0) || 'S'}${userData.last_name?.charAt(0) || 'A'}`;
+    if (!userData || !userData.first_name) return '?';
+    return `${userData.first_name?.charAt(0) || ''}${userData.last_name?.charAt(0) || ''}`;
   };
 
-  // Get user full name - never display "Guest"
+  // Get user full name
   const getFullName = () => {
-    if (!userData || userData.first_name === 'Guest') return 'Sofia Ayari';
-    return `${userData.first_name || 'Sofia'} ${userData.last_name || 'Ayari'}`.trim();
+    if (!userData) return '';
+    return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
   };
+
+  // Si l'utilisateur n'est pas authentifié, afficher un bouton de connexion
+  if (!isAuthenticated || !userData) {
+    return (
+      <Button variant="default" onClick={() => navigate('/auth/login')} className="rounded-md">
+        Se connecter
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>

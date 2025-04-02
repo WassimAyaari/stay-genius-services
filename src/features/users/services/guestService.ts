@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { GuestData, UserData, CompanionData } from '../types/userTypes';
 import { syncCompanions } from './companionService';
@@ -34,10 +33,10 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
     // Préparer les données à insérer ou mettre à jour 
     const guestData: GuestData = {
       user_id: userId,
-      first_name: userData.first_name || 'Sofia', // Default to Sofia instead of empty
-      last_name: userData.last_name || 'Ayari',   // Default to Ayari instead of empty
+      first_name: userData.first_name || '',
+      last_name: userData.last_name || '',
       email: userData.email,
-      room_number: userData.room_number || '401', // Default room number
+      room_number: userData.room_number || '',
       phone: userData.phone,
       // Safely convert date objects to ISO strings or pass strings as is
       check_in_date: userData.check_in_date ? 
@@ -63,7 +62,7 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
         undefined,
       nationality: userData.nationality,
       profile_image: userData.profile_image,
-      guest_type: userData.guest_type || 'Premium Guest', // All guests will be Premium
+      guest_type: userData.guest_type || 'Standard Guest',
     };
     
     console.log('Guest data to save:', guestData);
@@ -137,9 +136,9 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
       const userData: UserData = {
         id: userId,
         email: guestData.email || '',
-        first_name: guestData.first_name || 'Sofia', // Default to Sofia
-        last_name: guestData.last_name || 'Ayari',   // Default to Ayari
-        room_number: guestData.room_number || '401', // Default room
+        first_name: guestData.first_name || '',
+        last_name: guestData.last_name || '',
+        room_number: guestData.room_number || '',
         phone: guestData.phone,
         // Keep the dates as strings to avoid conversion issues
         birth_date: guestData.birth_date || undefined,
@@ -147,7 +146,7 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
         check_in_date: guestData.check_in_date || undefined,
         check_out_date: guestData.check_out_date || undefined,
         profile_image: guestData.profile_image,
-        guest_type: guestData.guest_type || 'Premium Guest',
+        guest_type: guestData.guest_type || 'Standard Guest',
       };
       
       // Get and add companions
@@ -163,27 +162,12 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
       return userData;
     }
     
-    // If no guest data found, return default Sofia profile
+    // Si aucune donnée n'est trouvée, retourner null plutôt que des données par défaut
     console.log('No guest data found in Supabase for user:', userId);
-    return {
-      id: userId,
-      email: '',
-      first_name: 'Sofia',
-      last_name: 'Ayari',
-      room_number: '401',
-      guest_type: 'Premium Guest'
-    };
+    return null;
   } catch (error) {
     console.error('Error fetching guest data from Supabase:', error);
-    // Return default Sofia profile on error
-    return {
-      id: userId,
-      email: '',
-      first_name: 'Sofia',
-      last_name: 'Ayari',
-      room_number: '401',
-      guest_type: 'Premium Guest'
-    };
+    return null;
   }
 };
 

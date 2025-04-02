@@ -26,15 +26,6 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-// Default user data for Sofia Ayari
-const DEFAULT_USER_DATA: UserData = {
-  email: 'sofia.ayari@example.com',
-  first_name: 'Sofia',
-  last_name: 'Ayari',
-  room_number: '401',
-  guest_type: 'Premium Guest'
-};
-
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -54,16 +45,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (guestData) {
         console.log('Données récupérées depuis Supabase:', guestData);
-        // Ensure we never use "Guest" as a name
-        if (guestData.first_name === 'Guest' || !guestData.first_name) {
-          guestData.first_name = 'Sofia';
-          guestData.last_name = 'Ayari';
-          guestData.guest_type = 'Premium Guest';
-          
-          // Save the corrected data
-          await syncGuestData(userId, guestData);
-        }
-        
         setUserData(guestData);
         localStorage.setItem('user_data', JSON.stringify(guestData));
         return guestData;
@@ -74,14 +55,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (userDataString) {
         try {
           const localUserData = JSON.parse(userDataString) as UserData;
-          
-          // Prevent "Guest" name even in localStorage
-          if (localUserData.first_name === 'Guest' || !localUserData.first_name) {
-            localUserData.first_name = 'Sofia';
-            localUserData.last_name = 'Ayari';
-            localUserData.guest_type = 'Premium Guest';
-          }
-          
           setUserData(localUserData);
           console.log('Données récupérées depuis localStorage:', localUserData);
           
@@ -93,30 +66,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
       
-      // If we have an authenticated user but no data, create default Sofia profile
-      if (user) {
-        const defaultUserData: UserData = {
-          id: userId,
-          email: user.email || DEFAULT_USER_DATA.email,
-          first_name: DEFAULT_USER_DATA.first_name,
-          last_name: DEFAULT_USER_DATA.last_name,
-          room_number: DEFAULT_USER_DATA.room_number,
-          guest_type: DEFAULT_USER_DATA.guest_type
-        };
-        
-        await syncGuestData(userId, defaultUserData);
-        setUserData(defaultUserData);
-        localStorage.setItem('user_data', JSON.stringify(defaultUserData));
-        
-        return defaultUserData;
-      }
-      
-      // Absolute fallback - return Sofia profile
-      return DEFAULT_USER_DATA;
+      // Si nous n'avons pas pu récupérer de données, retourner null
+      return null;
     } catch (error) {
       console.error('Error fetching user data:', error);
-      // Return Sofia profile on error
-      return DEFAULT_USER_DATA;
+      return null;
     }
   };
 
@@ -143,24 +97,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const userId = data.session?.user?.id || localStorage.getItem('user_id');
         
         if (userId) {
-          const userData = await fetchUserData(userId);
-          // If we still got "Guest" as name, force Sofia data
-          if (userData.first_name === 'Guest') {
-            const fixedData = { ...userData, ...DEFAULT_USER_DATA };
-            setUserData(fixedData);
-            localStorage.setItem('user_data', JSON.stringify(fixedData));
-            await syncGuestData(userId, fixedData);
-          }
+          await fetchUserData(userId);
         } else {
-          // No user ID found, set default Sofia data
-          setUserData(DEFAULT_USER_DATA);
-          localStorage.setItem('user_data', JSON.stringify(DEFAULT_USER_DATA));
+          // Pas d'utilisateur authentifié
+          setUserData(null);
+          localStorage.removeItem('user_data');
         }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
-        // Set default Sofia data on error
-        setUserData(DEFAULT_USER_DATA);
-        localStorage.setItem('user_data', JSON.stringify(DEFAULT_USER_DATA));
+        setUserData(null);
       } finally {
         setLoading(false);
       }
@@ -178,6 +123,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setTimeout(() => {
           fetchUserData(newSession.user!.id);
         }, 0);
+      } else {
+        // Si l'utilisateur est déconnecté, effacer les données
+        setUserData(null);
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user_id');
       }
     });
 
