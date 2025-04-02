@@ -9,10 +9,10 @@ import { useNotificationsRealtime } from './notifications/useNotificationsRealti
 import { combineAndSortNotifications } from './notifications/notificationUtils';
 
 export const useNotifications = () => {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const userId = user?.id || localStorage.getItem('user_id');
   const userEmail = user?.email || localStorage.getItem('user_email');
-  const userRoomNumber = user?.room_number || localStorage.getItem('user_room_number');
+  const userRoomNumber = userData?.room_number || localStorage.getItem('user_room_number');
   
   // Get service requests, table reservations and spa bookings
   const { data: serviceRequests = [], refetch: refetchServices } = useServiceRequests();
