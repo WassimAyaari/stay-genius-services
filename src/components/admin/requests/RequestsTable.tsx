@@ -57,11 +57,11 @@ export const RequestsTable = ({
                 <TableCell>{request.guest_name || 'Unknown'}</TableCell>
                 <TableCell className="capitalize">{request.type.replace('_', ' ')}</TableCell>
                 <TableCell>
-                  {request.request_items ? (
-                    <span>{request.request_items.name}</span>
-                  ) : (
-                    <span>{request.description || '-'}</span>
-                  )}
+                  {/* Safely handle display when request_items might be missing */}
+                  {request.request_items && typeof request.request_items === 'object' && 'name' in request.request_items
+                    ? <span>{request.request_items.name}</span>
+                    : <span>{request.description || '-'}</span>
+                  }
                 </TableCell>
                 <TableCell>
                   {new Date(request.created_at).toLocaleString()}

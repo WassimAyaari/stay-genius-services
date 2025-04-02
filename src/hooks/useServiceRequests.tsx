@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
@@ -21,16 +20,14 @@ export const useServiceRequests = () => {
       return [];
     }
 
-    // For admin section, fetch all requests with nested relations to get room and guest info
+    // For admin section, fetch all service requests 
+    // Don't try to join with request_items as the relationship isn't properly set up
     if (isAdminSection) {
-      console.log('Admin view: Fetching all service requests with related data');
+      console.log('Admin view: Fetching all service requests');
       
       const { data, error } = await supabase
         .from('service_requests')
-        .select(`
-          *,
-          request_items (*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
