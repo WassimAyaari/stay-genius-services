@@ -11,7 +11,8 @@ export const useRealtimeNotifications = (
   userEmail: string | null | undefined,
   userRoomNumber: string | null | undefined,
   refetchRequests: () => void,
-  refetchReservations: () => void
+  refetchReservations: () => void,
+  refetchSpaBookings: () => void
 ) => {
   // Real-time listeners for notifications
   useEffect(() => {
@@ -172,9 +173,85 @@ export const useRealtimeNotifications = (
       channels.push(roomServiceChannel);
     }
     
+    // NEW: Listen for spa booking updates by user ID
+    if (userId) {
+      const spaBookingChannel = supabase
+        .channel('notifications_page_spa_updates')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'spa_bookings',
+          filter: `user_id=eq.${userId}`,
+        }, (payload) => {
+          console.log('Notification page - spa booking update received by user ID:', payload);
+          
+          // Show notification for status changes
+          if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+            const statusMap: Record<string, string> = {
+              'pending': 'est en attente',
+              'confirmed': 'a été confirmée',
+              'cancelled': 'a été annulée',
+              'completed': 'a été complétée'
+            };
+            
+            const status = payload.new.status;
+            const message = statusMap[status] || 'a été mise à jour';
+            
+            const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
+            
+            toast.info(`Mise à jour de réservation spa`, {
+              description: `Votre réservation spa pour le ${date} à ${payload.new.time} ${message}.`
+            });
+          }
+          
+          refetchSpaBookings();
+        })
+        .subscribe();
+      
+      channels.push(spaBookingChannel);
+    }
+    
+    // NEW: Listen for spa booking updates by room number
+    if (userRoomNumber) {
+      const roomSpaChannel = supabase
+        .channel('notifications_page_room_spa_updates')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'spa_bookings',
+          filter: `room_number=eq.${userRoomNumber}`,
+        }, (payload) => {
+          console.log('Notification page - spa update received by room number:', payload);
+          
+          // Show notification for status changes
+          if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+            const statusMap: Record<string, string> = {
+              'pending': 'est en attente',
+              'confirmed': 'a été confirmée',
+              'cancelled': 'a été annulée',
+              'completed': 'a été complétée'
+            };
+            
+            const status = payload.new.status;
+            const message = statusMap[status] || 'a été mise à jour';
+            
+            const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
+            
+            toast.info(`Mise à jour de réservation spa`, {
+              description: `Votre réservation spa pour la chambre ${userRoomNumber} le ${date} ${message}.`
+            });
+          }
+          
+          refetchSpaBookings();
+        })
+        .subscribe();
+      
+      channels.push(roomSpaChannel);
+    }
+    
     return () => {
       console.log("Cleaning up real-time listeners for notifications page");
       channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [userId, userEmail, userRoomNumber, refetchReservations, refetchRequests]);
+  }, [userId, userEmail, userRoomNumber, refetchReservations, refetchRequests, refetchSpaBookings]);
 };

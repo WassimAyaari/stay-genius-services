@@ -16,6 +16,7 @@ import { CalendarIcon, Loader2 } from 'lucide-react';
 import { useSpaServices } from '@/hooks/useSpaServices';
 import { SpaService, SpaBooking } from '../types';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   date: z.date({
@@ -47,6 +48,7 @@ const timeSlots = [
 const SpaBookingForm = ({ service, onSuccess, existingBooking }: SpaBookingFormProps) => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { bookTreatment, isBooking } = useSpaServices();
+  const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -73,29 +75,77 @@ const SpaBookingForm = ({ service, onSuccess, existingBooking }: SpaBookingFormP
 
   React.useEffect(() => {
     const getUserInfo = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        // Fetch the guest record
-        const { data: guest } = await supabase
+      try {
+        // Get the current user data
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          console.log("No user found, checking localStorage");
+          // Try to get data from localStorage
+          const userData = localStorage.getItem('user_data');
+          const roomNumber = localStorage.getItem('user_room_number');
+          
+          if (userData) {
+            try {
+              const parsedUserData = JSON.parse(userData);
+              const fullName = `${parsedUserData.first_name || ''} ${parsedUserData.last_name || ''}`.trim();
+              
+              if (fullName) form.setValue('guest_name', fullName);
+              if (parsedUserData.email) form.setValue('guest_email', parsedUserData.email);
+              if (parsedUserData.phone) form.setValue('guest_phone', parsedUserData.phone);
+              if (roomNumber) form.setValue('room_number', roomNumber);
+            } catch (error) {
+              console.error("Error parsing user data from localStorage:", error);
+            }
+          }
+          return;
+        }
+        
+        // First, check if user has metadata
+        const userMetadata = user.user_metadata;
+        if (userMetadata) {
+          // Pre-fill form with metadata if available
+          const fullName = userMetadata.first_name && userMetadata.last_name 
+            ? `${userMetadata.first_name} ${userMetadata.last_name}` 
+            : userMetadata.name || '';
+          
+          if (fullName) form.setValue('guest_name', fullName);
+          if (user.email) form.setValue('guest_email', user.email);
+        }
+        
+        // Then fetch the guest record to get more detailed info
+        const { data: guest, error } = await supabase
           .from('guests')
           .select('*')
           .eq('user_id', user.id)
           .single();
 
-        if (guest) {
-          form.setValue('guest_name', `${guest.first_name} ${guest.last_name}`);
-          form.setValue('guest_email', guest.email || user.email || '');
-          form.setValue('guest_phone', guest.phone || '');
-          form.setValue('room_number', guest.room_number || '');
+        if (error) {
+          console.log("No guest record found, using default metadata");
+          return;
         }
+
+        if (guest) {
+          const fullName = `${guest.first_name || ''} ${guest.last_name || ''}`.trim();
+          if (fullName) form.setValue('guest_name', fullName);
+          if (guest.email) form.setValue('guest_email', guest.email);
+          if (guest.phone) form.setValue('guest_phone', guest.phone);
+          if (guest.room_number) form.setValue('room_number', guest.room_number);
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de récupérer vos informations. Veuillez les saisir manuellement.",
+          variant: "destructive"
+        });
       }
     };
 
     if (!existingBooking) {
       getUserInfo();
     }
-  }, [form, existingBooking]);
+  }, [form, existingBooking, toast]);
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
@@ -122,9 +172,30 @@ const SpaBookingForm = ({ service, onSuccess, existingBooking }: SpaBookingFormP
 
       // Create or update the booking
       await bookTreatment(booking);
+      
+      // Store room number in localStorage for future use
+      if (values.room_number) {
+        localStorage.setItem('user_room_number', values.room_number);
+      }
+      
+      // Store basic user info
+      const userInfo = {
+        first_name: values.guest_name.split(' ')[0],
+        last_name: values.guest_name.split(' ').slice(1).join(' '),
+        email: values.guest_email,
+        phone: values.guest_phone,
+        room_number: values.room_number
+      };
+      localStorage.setItem('user_data', JSON.stringify(userInfo));
+      
       onSuccess();
     } catch (error) {
       console.error('Error submitting booking:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la réservation. Veuillez réessayer.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }

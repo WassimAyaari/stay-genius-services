@@ -12,16 +12,39 @@ import { RefreshCw } from 'lucide-react';
 const Notifications = () => {
   const { notifications, isLoading, isAuthenticated, userRoomNumber } = useNotificationsData();
 
+  // Reference to the hook to allow manual refresh
+  const hookInstance = useNotificationsData();
+
+  const handleRefresh = () => {
+    hookInstance.refetchRequests();
+    hookInstance.refetchReservations();
+    if (hookInstance.refetchSpaBookings) {
+      hookInstance.refetchSpaBookings();
+    }
+  };
+
   return (
     <Layout>
       <div className="container py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Mes Notifications</h1>
-          {userRoomNumber && (
-            <div className="text-sm text-gray-600">
-              Numéro de chambre: <span className="font-medium">{userRoomNumber}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {userRoomNumber && (
+              <div className="text-sm text-gray-600">
+                Numéro de chambre: <span className="font-medium">{userRoomNumber}</span>
+              </div>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="flex items-center gap-1"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>Actualiser</span>
+            </Button>
+          </div>
         </div>
         
         {isLoading ? (

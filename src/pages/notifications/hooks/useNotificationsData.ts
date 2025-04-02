@@ -33,7 +33,8 @@ export const useNotificationsData = () => {
   const {
     bookings: allBookings = [],
     isLoading: isLoadingSpaBookings,
-    fetchUserBookings
+    fetchUserBookings,
+    refetch: refetchSpaBookings
   } = useSpaBookings();
 
   const { services = [] } = useSpaServices();
@@ -55,10 +56,9 @@ export const useNotificationsData = () => {
         setIsLoadingUserBookings(true);
         try {
           const bookings = await fetchUserBookings(userId);
-          // Convert imported SpaBooking type to the local NotificationTypes SpaBooking type
+          // Ensure each booking has created_at field (using current date as fallback)
           const typedBookings: SpaBooking[] = bookings.map(booking => ({
             ...booking,
-            // Ensure required fields are present
             created_at: booking.created_at || new Date().toISOString(),
           }));
           setUserSpaBookings(typedBookings);
@@ -70,11 +70,12 @@ export const useNotificationsData = () => {
         }
       } else if (userRoomNumber) {
         // If no user ID but has room number, filter bookings by room number
-        const filteredBookings = allBookings.filter(booking => booking.room_number === userRoomNumber);
-        // Convert to the right type
+        const filteredBookings = allBookings.filter(booking => 
+          booking.room_number === userRoomNumber
+        );
+        // Ensure each booking has created_at field
         const typedBookings: SpaBooking[] = filteredBookings.map(booking => ({
           ...booking,
-          // Ensure required fields are present
           created_at: booking.created_at || new Date().toISOString(),
         }));
         setUserSpaBookings(typedBookings);
@@ -92,7 +93,8 @@ export const useNotificationsData = () => {
     console.log("Current room number:", userRoomNumber);
     refetchRequests();
     refetchReservations();
-  }, [refetchRequests, refetchReservations, userRoomNumber]);
+    refetchSpaBookings();
+  }, [refetchRequests, refetchReservations, refetchSpaBookings, userRoomNumber]);
 
   // Set up real-time listeners
   useRealtimeNotifications(
@@ -100,7 +102,8 @@ export const useNotificationsData = () => {
     userEmail, 
     userRoomNumber, 
     refetchRequests, 
-    refetchReservations
+    refetchReservations,
+    refetchSpaBookings
   );
 
   // Convert reservations to the expected TableReservation type

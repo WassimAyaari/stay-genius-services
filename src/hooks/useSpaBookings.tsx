@@ -173,6 +173,6 @@ export const useSpaBookings = () => {
     isUpdating: updateBookingStatusMutation.isPending,
     isCancelling: cancelBookingMutation.isPending,
     fetchUserBookings,
-    refetch
+    refetch: refetch
   };
 };
