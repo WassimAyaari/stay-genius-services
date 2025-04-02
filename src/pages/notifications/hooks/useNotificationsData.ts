@@ -111,8 +111,14 @@ export const useNotificationsData = () => {
   // Create notifications when data changes
   useEffect(() => {
     try {
+      // Make sure serviceRequests is an array
+      const safeServiceRequests = Array.isArray(serviceRequests) ? serviceRequests : [];
+      
+      // Make sure reservations is an array
+      const safeReservations = Array.isArray(reservations) ? reservations : [];
+      
       // Convert reservations to the expected TableReservation type and ensure created_at
-      const typedReservations: TableReservation[] = reservations.map(res => ({
+      const typedReservations: TableReservation[] = safeReservations.map(res => ({
         id: res.id,
         restaurant_id: res.restaurantId,
         date: res.date,
@@ -130,20 +136,30 @@ export const useNotificationsData = () => {
 
       // Combine and sort notifications
       const combinedNotifications = combineAndSortNotifications(
-        serviceRequests as ServiceRequest[], 
+        safeServiceRequests as ServiceRequest[], 
         typedReservations,
         userSpaBookings,
         serviceNamesMap
       );
       
+      console.log("Combined notifications:", combinedNotifications.length);
       setNotifications(combinedNotifications);
     } catch (error) {
       console.error("Error combining notifications:", error);
+      // If there's an error, set an empty array to avoid breaking the UI
+      setNotifications([]);
     }
   }, [serviceRequests, reservations, userSpaBookings, serviceNamesMap]);
 
   const isLoading = isLoadingRequests || isLoadingReservations || isLoadingSpaBookings || isLoadingUserBookings;
   const error = isServiceRequestsError || (reservationsError ? true : false) || spaBookingsError;
+
+  console.log("Notifications data:", {
+    count: notifications.length,
+    isLoading,
+    isAuthenticated,
+    error: !!error
+  });
 
   return {
     notifications,

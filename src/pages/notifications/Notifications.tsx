@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { useNotificationsData } from './hooks/useNotificationsData';
 import { NotificationsList } from './components/NotificationsList';
@@ -16,6 +16,16 @@ const Notifications = () => {
     userRoomNumber,
     error
   } = useNotificationsData();
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Notifications render:", {
+      count: notifications.length,
+      isLoading,
+      isAuthenticated,
+      hasError: !!error
+    });
+  }, [notifications, isLoading, isAuthenticated, error]);
 
   return (
     <Layout>
@@ -38,7 +48,7 @@ const Notifications = () => {
             <p className="text-gray-600">Une erreur est survenue lors du chargement des notifications.</p>
             <p className="text-sm text-gray-500 mt-2">Veuillez réessayer plus tard.</p>
           </Card>
-        ) : notifications.length > 0 ? (
+        ) : notifications && notifications.length > 0 ? (
           <NotificationsList notifications={notifications} />
         ) : (
           <EmptyState />
