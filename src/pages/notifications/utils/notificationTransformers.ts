@@ -23,14 +23,14 @@ export const transformServiceRequests = (requests: ServiceRequest[]): Notificati
   return requests.map(request => ({
     id: request.id,
     type: 'request',
-    title: `Demande de service: ${request.request_items?.name || request.type}`,
+    title: `Demande de service: ${request.type || 'housekeeping'}`,
     description: request.description || 'Aucune description fournie',
     status: request.status,
     time: createSafeDate(request.created_at) || new Date(),
     link: `/my-room/request/${request.id}`,
     data: {
       requestId: request.id,
-      roomNumber: request.room_number,
+      room_number: request.room_number,
       type: request.type,
       status: request.status,
       category: request.category_id,
@@ -60,7 +60,7 @@ export const transformTableReservations = (reservations: TableReservation[]): No
         status: reservation.status,
         date: reservation.date,
         time: reservation.time,
-        roomNumber: reservation.room_number,
+        room_number: reservation.room_number,
       }
     };
   });
