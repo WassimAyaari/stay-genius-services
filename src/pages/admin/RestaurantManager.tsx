@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { RestaurantTable } from '@/components/admin/restaurants/RestaurantTable';
-import { RestaurantFormDialog } from '@/components/admin/restaurants/RestaurantFormDialog';
+import RestaurantFormDialog from '@/components/admin/restaurants/RestaurantFormDialog';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 const RestaurantManager = () => {
   const navigate = useNavigate();
-  const { restaurants, isLoading, refetch, deleteRestaurant } = useRestaurants();
+  const queryClient = useQueryClient();
+  const { restaurants, isLoading, deleteRestaurant } = useRestaurants();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -24,7 +26,7 @@ const RestaurantManager = () => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      await refetch();
+      await queryClient.invalidateQueries({ queryKey: ['restaurants'] });
     } catch (error) {
       console.error('Error refreshing restaurants:', error);
       toast.error('Failed to refresh restaurants');
@@ -52,7 +54,7 @@ const RestaurantManager = () => {
     setIsDialogOpen(false);
     setSelectedRestaurant(null);
     if (success) {
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
     }
   };
 

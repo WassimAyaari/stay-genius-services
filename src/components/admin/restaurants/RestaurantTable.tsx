@@ -49,7 +49,8 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
               <TableCell>{restaurant.location}</TableCell>
               <TableCell>
                 <Badge
-                  variant={restaurant.status === 'open' ? 'success' : 'destructive'}
+                  variant={restaurant.status === 'open' ? 'default' : 'destructive'}
+                  className={restaurant.status === 'open' ? 'bg-green-500 hover:bg-green-600' : ''}
                 >
                   {restaurant.status === 'open' ? (
                     <Utensils className="h-3 w-3 mr-1" />

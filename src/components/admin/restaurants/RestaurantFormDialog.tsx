@@ -22,15 +22,15 @@ import ImageUploader from './form/ImageUploader';
 interface RestaurantFormDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  editingRestaurant: Restaurant | null;
-  onSubmit: (values: RestaurantFormValues) => void;
+  onClose: (success?: boolean) => void;
+  restaurant: Restaurant | null;
 }
 
 const RestaurantFormDialog = ({ 
   isOpen, 
   onOpenChange, 
-  editingRestaurant, 
-  onSubmit 
+  onClose, 
+  restaurant 
 }: RestaurantFormDialogProps) => {
   const form = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantFormSchema),
@@ -48,18 +48,18 @@ const RestaurantFormDialog = ({
   
   // Update form values when editing restaurant changes or dialog opens
   useEffect(() => {
-    if (isOpen && editingRestaurant) {
+    if (isOpen && restaurant) {
       form.reset({
-        name: editingRestaurant.name,
-        description: editingRestaurant.description,
-        cuisine: editingRestaurant.cuisine,
-        openHours: editingRestaurant.openHours,
-        location: editingRestaurant.location,
-        status: editingRestaurant.status,
-        actionText: editingRestaurant.actionText || "Book a Table",
-        images: editingRestaurant.images,
+        name: restaurant.name,
+        description: restaurant.description,
+        cuisine: restaurant.cuisine,
+        openHours: restaurant.openHours,
+        location: restaurant.location,
+        status: restaurant.status,
+        actionText: restaurant.actionText || "Book a Table",
+        images: restaurant.images,
       });
-    } else if (isOpen && !editingRestaurant) {
+    } else if (isOpen && !restaurant) {
       // Reset form when opening for a new restaurant
       form.reset({
         name: "",
@@ -72,15 +72,24 @@ const RestaurantFormDialog = ({
         images: [],
       });
     }
-  }, [isOpen, editingRestaurant, form]);
+  }, [isOpen, restaurant, form]);
+
+  const onSubmit = async (values: RestaurantFormValues) => {
+    try {
+      // Handle submission logic here (you'll need to implement this)
+      onClose(true);
+    } catch (error) {
+      console.error('Error submitting restaurant form:', error);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>{editingRestaurant ? "Edit Restaurant" : "Add New Restaurant"}</DialogTitle>
+          <DialogTitle>{restaurant ? "Edit Restaurant" : "Add New Restaurant"}</DialogTitle>
           <DialogDescription>
-            {editingRestaurant 
+            {restaurant 
               ? "Update the restaurant details below." 
               : "Fill out the form below to add a new restaurant."}
           </DialogDescription>
@@ -92,7 +101,7 @@ const RestaurantFormDialog = ({
               <RestaurantDetails form={form} />
               <ImageUploader form={form} />
               <DialogFooter className="pt-4">
-                <Button type="submit">{editingRestaurant ? "Update" : "Create"}</Button>
+                <Button type="submit">{restaurant ? "Update" : "Create"}</Button>
               </DialogFooter>
             </form>
           </Form>

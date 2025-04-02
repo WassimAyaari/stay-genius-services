@@ -15,7 +15,7 @@ export const useRestaurants = () => {
   const queryClient = useQueryClient();
 
   // Use React Query for data fetching and caching
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['restaurants'],
     queryFn: fetchRestaurants,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -77,6 +77,7 @@ export const useRestaurants = () => {
     isLoading,
     isFeaturedLoading,
     error,
+    refetch,
     fetchRestaurantById,
     createRestaurant: createMutation.mutate,
     updateRestaurant: updateMutation.mutate,
