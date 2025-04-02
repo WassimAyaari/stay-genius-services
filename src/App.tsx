@@ -13,6 +13,11 @@ import Destination from './pages/destination/Destination';
 import Home from './pages/Home';
 import Notifications from './pages/notifications/Notifications';
 import NotificationDetails from './pages/notifications/NotificationDetails';
+import Profile from './pages/profile/Profile';
+import AuthGuard from './components/AuthGuard';
+import AdminDashboard from './pages/admin/Dashboard';
+import ChatMessages from './pages/admin/ChatMessages';
+import SpaManager from './pages/admin/SpaManager';
 
 const queryClient = new QueryClient();
 
@@ -22,17 +27,53 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/home" element={<Home />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/auth/login" element={<Home />} />
             
+            {/* Dining routes */}
             <Route path="/dining" element={<Dining />} />
             <Route path="/dining/:id" element={<RestaurantDetail />} />
             
+            {/* Destination route */}
             <Route path="/destination" element={<Destination />} />
             
+            {/* Profile route - protected */}
+            <Route path="/profile" element={
+              <AuthGuard>
+                <Profile />
+              </AuthGuard>
+            } />
+            
+            {/* My Room route - protected */}
+            <Route path="/my-room" element={
+              <AuthGuard>
+                <Home />
+              </AuthGuard>
+            } />
+            
+            {/* Notification routes */}
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/notifications/:type/:id" element={<NotificationDetails />} />
+            
+            {/* Admin routes - protected */}
+            <Route path="/admin" element={
+              <AuthGuard adminRequired={true}>
+                <AdminDashboard />
+              </AuthGuard>
+            } />
+            <Route path="/admin/chat" element={
+              <AuthGuard adminRequired={true}>
+                <ChatMessages />
+              </AuthGuard>
+            } />
+            <Route path="/admin/spa" element={
+              <AuthGuard adminRequired={true}>
+                <SpaManager />
+              </AuthGuard>
+            } />
             
             {/* Catch all other routes with NotFound */}
             <Route path="*" element={<NotFound />} />
