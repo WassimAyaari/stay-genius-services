@@ -530,6 +530,164 @@ export type Database = {
         }
         Relationships: []
       }
+      spa_bookings: {
+        Row: {
+          created_at: string | null
+          date: string
+          facility_id: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string | null
+          id: string
+          room_number: string | null
+          service_id: string | null
+          special_requests: string | null
+          status: string
+          time: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          facility_id?: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone?: string | null
+          id?: string
+          room_number?: string | null
+          service_id?: string | null
+          special_requests?: string | null
+          status?: string
+          time: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          facility_id?: string | null
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string | null
+          id?: string
+          room_number?: string | null
+          service_id?: string | null
+          special_requests?: string | null
+          status?: string
+          time?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spa_bookings_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "spa_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spa_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "spa_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spa_facilities: {
+        Row: {
+          capacity: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          opening_hours: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          opening_hours?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          opening_hours?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      spa_services: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          duration: string
+          facility_id: string | null
+          id: string
+          image: string | null
+          is_featured: boolean | null
+          name: string
+          price: number
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          duration: string
+          facility_id?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          name: string
+          price: number
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          duration?: string
+          facility_id?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spa_services_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "spa_facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       table_reservations: {
         Row: {
           created_at: string | null

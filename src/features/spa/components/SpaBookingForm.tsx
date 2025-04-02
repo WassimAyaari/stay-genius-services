@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { useSpaServices } from '@/hooks/useSpaServices';
-import { SpaService } from '../types';
+import { SpaService, SpaBooking } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
@@ -106,7 +106,7 @@ const SpaBookingForm = ({ service, onSuccess, existingBooking }: SpaBookingFormP
       const userId = user?.id;
 
       // Format the booking
-      const booking = {
+      const booking: Omit<SpaBooking, 'id'> = {
         service_id: service.id,
         facility_id: service.facility_id,
         user_id: userId,

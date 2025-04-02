@@ -1,28 +1,44 @@
 
-import { ServiceRequest } from '@/features/rooms/types';
-import { TableReservation } from '@/features/dining/types';
+// Définition des types pour les notifications
 
-// Define a type for the combined notification items
-export type NotificationItem = {
+export interface NotificationItem {
   id: string;
-  type: 'request' | 'reservation';
+  type: 'request' | 'reservation' | 'spa_booking';
   title: string;
   description: string;
   status: string;
   time: Date;
   link: string;
-  data: {
-    type?: string;
-    room_number?: string;
-    [key: string]: any;
-  };
-};
+  data: any;
+}
 
-export type NotificationsState = {
-  notifications: NotificationItem[];
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  userId?: string | null;
-  userEmail?: string | null;
-  userRoomNumber?: string | null;
-};
+export interface TableReservation {
+  id: string;
+  restaurant_id: string;
+  date: string;
+  time: string;
+  guests: number;
+  guest_name: string;
+  guest_email: string;
+  guest_phone?: string;
+  room_number?: string;
+  special_requests?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceRequest {
+  id: string;
+  type: string;
+  description?: string;
+  status: string;
+  created_at: string;
+  updated_at?: string;
+  room_number?: string;
+  guest_name?: string;
+  category_id?: string;
+  request_items?: {
+    name: string;
+  };
+}

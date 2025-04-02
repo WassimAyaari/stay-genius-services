@@ -1,126 +1,118 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter 
+} from '@/components/ui/dialog';
+import { 
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage 
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
 import { useSpaFacilities } from '@/hooks/useSpaFacilities';
 import { SpaFacility } from '@/features/spa/types';
 
-const formSchema = z.object({
+const facilitySchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
-  description: z.string().min(1, "La description est requise"),
-  location: z.string().min(1, "L'emplacement est requis"),
+  description: z.string().optional(),
+  location: z.string().optional(),
   image_url: z.string().optional(),
-  capacity: z.string().optional(),
   opening_hours: z.string().optional(),
-  status: z.enum(['open', 'closed'])
+  capacity: z.number().int().optional(),
+  status: z.enum(['open', 'closed']).default('open'),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FacilityFormValues = z.infer<typeof facilitySchema>;
 
 interface SpaFacilityDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  facility: SpaFacility | null;
-  onClose: (success: boolean) => void;
+  facility?: SpaFacility;
 }
 
-const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacilityDialogProps) => {
+const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({ 
+  open, 
+  onOpenChange,
+  facility
+}) => {
   const { createFacility, updateFacility, isCreating, isUpdating } = useSpaFacilities();
+  const isSubmitting = isCreating || isUpdating;
   const isEditing = !!facility;
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  
+  const form = useForm<FacilityFormValues>({
+    resolver: zodResolver(facilitySchema),
     defaultValues: {
-      name: "",
-      description: "",
-      location: "",
-      image_url: "",
-      capacity: "",
-      opening_hours: "",
-      status: "open"
+      name: '',
+      description: '',
+      location: '',
+      image_url: '',
+      opening_hours: '',
+      capacity: 0,
+      status: 'open' as const,
     }
   });
 
-  // Set form values when editing
-  React.useEffect(() => {
-    if (isOpen && facility) {
+  useEffect(() => {
+    if (facility) {
       form.reset({
         name: facility.name,
-        description: facility.description || "",
-        location: facility.location || "",
-        image_url: facility.image_url || "",
-        capacity: facility.capacity ? String(facility.capacity) : "",
-        opening_hours: facility.opening_hours || "",
-        status: facility.status as 'open' | 'closed'
+        description: facility.description || '',
+        location: facility.location || '',
+        image_url: facility.image_url || '',
+        opening_hours: facility.opening_hours || '',
+        capacity: facility.capacity || 0,
+        status: facility.status,
       });
-    } else if (isOpen) {
+    } else {
       form.reset({
-        name: "",
-        description: "",
-        location: "",
-        image_url: "",
-        capacity: "",
-        opening_hours: "",
-        status: "open"
+        name: '',
+        description: '',
+        location: '',
+        image_url: '',
+        opening_hours: '',
+        capacity: 0,
+        status: 'open' as const,
       });
     }
-  }, [isOpen, facility, form]);
+  }, [facility, form]);
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (data: FacilityFormValues) => {
     try {
       if (isEditing && facility) {
         await updateFacility({
-          id: facility.id,
-          ...values,
-          capacity: values.capacity ? parseInt(values.capacity) : null
+          ...facility,
+          ...data,
         });
       } else {
         await createFacility({
-          ...values,
-          capacity: values.capacity ? parseInt(values.capacity) : null
+          ...data,
+          status: data.status || 'open',
         });
       }
-      onClose(true);
+      
+      onOpenChange(false);
     } catch (error) {
-      console.error('Error submitting facility form:', error);
+      console.error('Error submitting form:', error);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Modifier l'installation" : "Ajouter une installation"}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? 'Modifier' : 'Ajouter'} une installation spa</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? "Modifiez les détails de l'installation ci-dessous."
-              : "Remplissez le formulaire pour ajouter une nouvelle installation spa."}
+            {isEditing 
+              ? 'Modifiez les détails de cette installation spa'
+              : 'Remplissez les informations pour créer une nouvelle installation spa'
+            }
           </DialogDescription>
         </DialogHeader>
-
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -128,7 +120,7 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom</FormLabel>
+                  <FormLabel>Nom*</FormLabel>
                   <FormControl>
                     <Input placeholder="Nom de l'installation" {...field} />
                   </FormControl>
@@ -136,7 +128,7 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
                 </FormItem>
               )}
             />
-
+            
             <FormField
               control={form.control}
               name="description"
@@ -144,9 +136,9 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Description de l'installation"
-                      {...field}
+                    <Textarea 
+                      placeholder="Description de l'installation" 
+                      {...field} 
                       rows={3}
                     />
                   </FormControl>
@@ -154,7 +146,7 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
                 </FormItem>
               )}
             />
-
+            
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -163,13 +155,13 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
                   <FormItem>
                     <FormLabel>Emplacement</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: 2ème étage" {...field} />
+                      <Input placeholder="Ex: Niveau 4" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="capacity"
@@ -177,10 +169,11 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
                   <FormItem>
                     <FormLabel>Capacité</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Nombre de personnes"
+                      <Input 
+                        type="number" 
+                        placeholder="Capacité" 
                         {...field}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -188,21 +181,7 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="image_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL de l'image</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            
             <FormField
               control={form.control}
               name="opening_hours"
@@ -216,51 +195,39 @@ const SpaFacilityDialog = ({ isOpen, onOpenChange, facility, onClose }: SpaFacil
                 </FormItem>
               )}
             />
-
+            
             <FormField
               control={form.control}
-              name="status"
+              name="image_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Statut</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un statut" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="open">Ouvert</SelectItem>
-                      <SelectItem value="closed">Fermé</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>URL de l'image</FormLabel>
+                  <FormControl>
+                    <Input placeholder="URL de l'image" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onClose(false)}
-                disabled={isCreating || isUpdating}
+            
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
               >
                 Annuler
               </Button>
-              <Button
-                type="submit"
-                disabled={isCreating || isUpdating}
-              >
-                {(isCreating || isUpdating) && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {isEditing ? "Mettre à jour" : "Créer"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enregistrement...
+                  </>
+                ) : isEditing ? 'Mettre à jour' : 'Créer'}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

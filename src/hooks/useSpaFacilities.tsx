@@ -1,113 +1,107 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SpaFacility } from '@/features/spa/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { SpaFacility } from '@/features/spa/types';
 
 export const useSpaFacilities = () => {
   const queryClient = useQueryClient();
 
-  // Get all spa facilities
-  const { data: facilities = [], isLoading, refetch } = useQuery({
-    queryKey: ['spaFacilities'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('spa_facilities')
-        .select('*')
-        .order('name');
+  // Récupérer toutes les installations spa
+  const fetchFacilities = async () => {
+    const { data, error } = await supabase
+      .from('spa_facilities')
+      .select('*')
+      .order('name');
 
-      if (error) {
-        throw error;
-      }
-
-      return data as SpaFacility[];
+    if (error) {
+      console.error('Error fetching spa facilities:', error);
+      throw error;
     }
-  });
 
-  // Create a new facility
+    return data as SpaFacility[];
+  };
+
+  // Récupérer une installation par ID
+  const getFacilityById = async (id: string) => {
+    const { data, error } = await supabase
+      .from('spa_facilities')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching facility:', error);
+      return null;
+    }
+
+    return data as SpaFacility;
+  };
+
+  // Créer une nouvelle installation
   const createFacilityMutation = useMutation({
     mutationFn: async (facility: Omit<SpaFacility, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('spa_facilities')
         .insert(facility)
-        .select()
+        .select('id')
         .single();
 
       if (error) {
+        console.error('Error creating facility:', error);
         throw error;
       }
 
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['spaFacilities'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-facilities'] });
       toast.success('Installation créée avec succès');
     },
     onError: (error) => {
-      console.error('Error creating facility:', error);
+      console.error('Error in create facility mutation:', error);
       toast.error('Erreur lors de la création de l\'installation');
-    }
+    },
   });
 
-  // Update a facility
+  // Mettre à jour une installation
   const updateFacilityMutation = useMutation({
-    mutationFn: async ({ id, ...facility }: Partial<SpaFacility> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('spa_facilities')
-        .update(facility)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['spaFacilities'] });
-      toast.success('Installation mise à jour avec succès');
-    },
-    onError: (error) => {
-      console.error('Error updating facility:', error);
-      toast.error('Erreur lors de la mise à jour de l\'installation');
-    }
-  });
-
-  // Delete a facility
-  const deleteFacilityMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, ...facility }: SpaFacility) => {
       const { error } = await supabase
         .from('spa_facilities')
-        .delete()
+        .update(facility)
         .eq('id', id);
 
       if (error) {
+        console.error('Error updating facility:', error);
         throw error;
       }
 
-      return id;
+      return { id };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['spaFacilities'] });
-      toast.success('Installation supprimée avec succès');
+      queryClient.invalidateQueries({ queryKey: ['spa-facilities'] });
+      toast.success('Installation mise à jour avec succès');
     },
     onError: (error) => {
-      console.error('Error deleting facility:', error);
-      toast.error('Erreur lors de la suppression de l\'installation');
-    }
+      console.error('Error in update facility mutation:', error);
+      toast.error('Erreur lors de la mise à jour de l\'installation');
+    },
+  });
+
+  const { data = [], isLoading, error } = useQuery({
+    queryKey: ['spa-facilities'],
+    queryFn: fetchFacilities,
   });
 
   return {
-    facilities,
+    facilities: data,
     isLoading,
-    refetch,
+    error,
+    getFacilityById,
     createFacility: createFacilityMutation.mutate,
     updateFacility: updateFacilityMutation.mutate,
-    deleteFacility: deleteFacilityMutation.mutate,
     isCreating: createFacilityMutation.isPending,
     isUpdating: updateFacilityMutation.isPending,
-    isDeleting: deleteFacilityMutation.isPending
   };
 };

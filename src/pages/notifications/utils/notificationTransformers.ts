@@ -1,81 +1,73 @@
 
-import { ServiceRequest } from '@/features/rooms/types';
-import { TableReservation } from '@/features/dining/types';
-import type { NotificationItem } from '../types/notificationTypes';
+import { 
+  SpaBooking, 
+  ServiceRequest, 
+  TableReservation, 
+  NotificationItem 
+} from '../types/notificationTypes';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
-// Helper function to format date for display
-const formatDate = (dateString: string): Date => {
-  return new Date(dateString);
-};
-
-// Transform service requests into notification items
-const transformServiceRequests = (requests: ServiceRequest[]): NotificationItem[] => {
-  return requests.map(request => {
-    const title = `Demande de service: ${request.type}`;
-    let description = request.description || '';
-    if (description.length > 60) {
-      description = `${description.substring(0, 60)}...`;
-    }
-
-    return {
-      id: request.id,
-      type: 'request',
-      title,
-      description,
+// Transforme une liste de demandes de service en notifications
+export const transformServiceRequests = (requests: ServiceRequest[]): NotificationItem[] => {
+  return requests.map(request => ({
+    id: request.id,
+    type: 'request',
+    title: `Demande de service: ${request.request_items?.name || request.type}`,
+    description: request.description || 'Aucune description fournie',
+    status: request.status,
+    time: new Date(request.created_at),
+    link: `/my-room/request/${request.id}`,
+    data: {
+      requestId: request.id,
+      roomNumber: request.room_number,
+      type: request.type,
       status: request.status,
-      time: formatDate(request.created_at),
-      link: `/requests/${request.id}`,
-      data: {
-        type: request.type,
-        room_number: request.room_number,
-        status: request.status,
-        guest_name: request.guest_name
-      }
-    };
-  });
+      category: request.category_id,
+    }
+  }));
 };
 
-// Transform table reservations into notification items
-const transformTableReservations = (reservations: TableReservation[]): NotificationItem[] => {
+// Transforme une liste de réservations de restaurant en notifications
+export const transformTableReservations = (reservations: TableReservation[]): NotificationItem[] => {
   return reservations.map(reservation => {
-    const title = 'Réservation de table';
-    const description = `Date: ${reservation.date}, Heure: ${reservation.time}`;
-
+    const reservationDate = new Date(reservation.date);
+    const formattedDate = format(reservationDate, 'EEEE d MMMM', { locale: fr });
+    
     return {
       id: reservation.id,
       type: 'reservation',
-      title,
-      description,
+      title: `Réservation de restaurant`,
+      description: `${formattedDate} à ${reservation.time} - ${reservation.guests} ${reservation.guests > 1 ? 'personnes' : 'personne'}`,
       status: reservation.status,
-      time: formatDate(reservation.created_at),
-      link: `/reservations/${reservation.id}`,
+      time: new Date(reservation.created_at),
+      link: `/dining/reservation/${reservation.id}`,
       data: {
-        reservation_id: reservation.id,
-        restaurant_id: reservation.restaurant_id,
+        restaurantId: reservation.restaurant_id,
+        reservationId: reservation.id,
         status: reservation.status,
         date: reservation.date,
         time: reservation.time,
-        guests: reservation.guests,
-        room_number: reservation.room_number
+        roomNumber: reservation.room_number,
       }
     };
   });
 };
 
-// Transform spa bookings into notification items
-const transformSpaBookings = (bookings: any[]): NotificationItem[] => {
+// Transforme une liste de réservations de spa en notifications
+export const transformSpaBookings = (bookings: SpaBooking[], services: Record<string, string>): NotificationItem[] => {
   return bookings.map(booking => {
-    const title = 'Réservation de spa';
-    const description = `Date: ${booking.date}, Heure: ${booking.time}`;
+    const bookingDate = new Date(booking.date);
+    const formattedDate = format(bookingDate, 'EEEE d MMMM', { locale: fr });
     
     return {
       id: booking.id,
       type: 'spa_booking',
-      title,
-      description,
+      title: `Réservation de spa`,
+      description: `${formattedDate} à ${booking.time} - ${services[booking.service_id] || 'Service spa'}`,
       status: booking.status,
-      time: formatDate(booking.created_at),
-      link: `/spa-bookings/${booking.id}`,
+      time: new Date(booking.created_at || ''),
+      link: `/spa/booking/${booking.id}`,
       data: {
         service_id: booking.service_id,
         facility_id: booking.facility_id,
@@ -83,30 +75,8 @@ const transformSpaBookings = (bookings: any[]): NotificationItem[] => {
         date: booking.date,
         time: booking.time,
         room_number: booking.room_number,
-        service_name: booking.spa_services?.name
+        service_name: services[booking.service_id] || 'Service spa'
       }
     };
   });
-};
-
-// Combine and sort all notifications
-export const combineAndSortNotifications = (
-  serviceRequests: ServiceRequest[],
-  tableReservations: TableReservation[],
-  spaBookings: any[] = []
-): NotificationItem[] => {
-  // Transform each type to the common notification format
-  const requestNotifications = transformServiceRequests(serviceRequests);
-  const reservationNotifications = transformTableReservations(tableReservations);
-  const spaNotifications = transformSpaBookings(spaBookings);
-  
-  // Combine all notifications
-  const allNotifications = [
-    ...requestNotifications,
-    ...reservationNotifications,
-    ...spaNotifications
-  ];
-  
-  // Sort by time, most recent first
-  return allNotifications.sort((a, b) => b.time.getTime() - a.time.getTime());
 };
