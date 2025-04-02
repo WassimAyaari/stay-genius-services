@@ -17,7 +17,11 @@ export type NotificationItem = {
   status: string;
   time: Date;
   link: string;
-  data: ServiceRequest | TableReservation;
+  data: {
+    type?: string;
+    room_number?: string;
+    [key: string]: any;
+  };
 };
 
 export const useNotificationsData = () => {

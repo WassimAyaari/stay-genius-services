@@ -40,7 +40,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-1">
               <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
-                <span className="text-xl">{notification.data.type === 'request' ? '🔔' : '🍽️'}</span>
+                <span className="text-xl">{notification.type === 'request' ? '🔔' : '🍽️'}</span>
               </div>
             </div>
             

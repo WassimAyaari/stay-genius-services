@@ -22,16 +22,13 @@ export const useServiceRequests = () => {
       return [];
     }
 
-    // For admin section, fetch all service requests with request_items
+    // For admin section, fetch all service requests
     if (isAdminSection) {
-      console.log('Admin view: Fetching all service requests with request_items');
+      console.log('Admin view: Fetching all service requests');
       
       const { data, error } = await supabase
         .from('service_requests')
-        .select(`
-          *,
-          request_items(*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -48,10 +45,7 @@ export const useServiceRequests = () => {
         
         const { data, error } = await supabase
           .from('service_requests')
-          .select(`
-            *,
-            request_items(*)
-          `)
+          .select('*')
           .eq('room_number', userRoomNumber)
           .order('created_at', { ascending: false });
 
@@ -70,10 +64,7 @@ export const useServiceRequests = () => {
         
         const { data, error } = await supabase
           .from('service_requests')
-          .select(`
-            *,
-            request_items(*)
-          `)
+          .select('*')
           .eq('guest_id', userId)
           .order('created_at', { ascending: false });
 
