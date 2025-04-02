@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
-import { NotificationItem, SpaBooking } from '../types/notificationTypes';
+import { NotificationItem, SpaBooking as NotificationSpaBooking } from '../types/notificationTypes';
 import { useUserAuthentication } from './useUserAuthentication';
 import { combineAndSortNotifications } from '../utils/notificationTransformers';
+import { SpaBooking as FeatureSpaBooking } from '@/features/spa/types';
 
 export const useNotificationsData = () => {
   // Get user authentication data
@@ -27,7 +28,7 @@ export const useNotificationsData = () => {
   
   // Get spa bookings
   const { 
-    bookings: spaBookings = [], 
+    bookings: spaBookingsData = [], 
     isLoading: isLoadingSpaBookings,
     error: spaBookingsError,
     fetchUserBookings
@@ -35,7 +36,7 @@ export const useNotificationsData = () => {
   
   // State for notifications and errors
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [userSpaBookings, setUserSpaBookings] = useState<SpaBooking[]>([]);
+  const [userSpaBookings, setUserSpaBookings] = useState<NotificationSpaBooking[]>([]);
   const [combinedError, setCombinedError] = useState<boolean>(false);
   
   // Fetch user spa bookings when userId is available
@@ -46,7 +47,26 @@ export const useNotificationsData = () => {
       try {
         if (userId) {
           const bookings = await fetchUserBookings(userId);
-          setUserSpaBookings(bookings || []);
+          
+          // Convert from feature type to notification type
+          const convertedBookings: NotificationSpaBooking[] = bookings.map(booking => ({
+            id: booking.id,
+            service_id: booking.service_id,
+            facility_id: booking.facility_id,
+            user_id: booking.user_id,
+            date: booking.date,
+            time: booking.time,
+            guest_name: booking.guest_name,
+            guest_email: booking.guest_email,
+            guest_phone: booking.guest_phone,
+            room_number: booking.room_number,
+            special_requests: booking.special_requests,
+            status: booking.status,
+            created_at: booking.created_at,
+            updated_at: booking.updated_at
+          }));
+          
+          setUserSpaBookings(convertedBookings);
         }
       } catch (error) {
         console.error("Error fetching user spa bookings:", error);
@@ -81,10 +101,26 @@ export const useNotificationsData = () => {
       const safeReservations = Array.isArray(reservations) ? reservations : [];
       const safeSpaBookings = Array.isArray(userSpaBookings) ? userSpaBookings : [];
       
+      // Convert dining TableReservation to notification TableReservation if needed
+      const convertedReservations = safeReservations.map(res => ({
+        id: res.id,
+        restaurant_id: res.restaurantId || '',
+        date: res.date,
+        time: res.time,
+        guests: res.guests,
+        guest_name: res.guestName,
+        guest_email: res.guestEmail,
+        guest_phone: res.guestPhone,
+        room_number: res.roomNumber,
+        special_requests: res.specialRequests,
+        status: res.status,
+        created_at: res.createdAt
+      }));
+      
       // Combine and sort notifications
       const combinedNotifications = combineAndSortNotifications(
         safeServiceRequests, 
-        safeReservations,
+        convertedReservations,
         safeSpaBookings
       );
       

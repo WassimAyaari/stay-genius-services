@@ -22,7 +22,8 @@ export const setupSpaBookingListenerById = (
       console.log('Spa booking update received by user ID:', payload);
       
       // Notify the user about the status change
-      if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+      if (payload.eventType === 'UPDATE' && payload.new && payload.old && 
+          payload.new.status !== payload.old.status) {
         notifySpaBookingStatusChange(payload.new.status);
       }
       
@@ -51,7 +52,8 @@ export const setupSpaBookingListenerByRoom = (
       console.log('Spa booking update received by room number:', payload);
       
       // Notify the user about the status change
-      if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+      if (payload.eventType === 'UPDATE' && payload.new && payload.old && 
+          payload.new.status !== payload.old.status) {
         notifySpaBookingStatusChange(payload.new.status);
       }
       

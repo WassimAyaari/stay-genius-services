@@ -24,7 +24,7 @@ export interface TableReservation {
   room_number?: string;
   special_requests?: string;
   status: string;
-  created_at: string;
+  created_at?: string;
   updated_at?: string;
 }
 
@@ -43,6 +43,8 @@ export interface ServiceRequest {
 export interface SpaBooking {
   id: string;
   service_id: string;
+  facility_id?: string;
+  user_id?: string;
   date: string;
   time: string;
   guest_name: string;
@@ -51,6 +53,6 @@ export interface SpaBooking {
   room_number?: string;
   special_requests?: string;
   status: string;
-  created_at: string;
+  created_at?: string;
   updated_at?: string;
 }
