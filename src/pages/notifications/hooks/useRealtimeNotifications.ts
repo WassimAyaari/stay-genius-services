@@ -23,7 +23,7 @@ export const useRealtimeNotifications = (
   userRoomNumber: string | null | undefined,
   refetchRequests: () => void,
   refetchReservations: () => void,
-  refetchSpaBookings: () => void
+  refetchSpaBookings: (() => void) | undefined
 ) => {
   // Real-time listeners for notifications
   useEffect(() => {
@@ -55,11 +55,11 @@ export const useRealtimeNotifications = (
     }
     
     // Spa bookings listeners
-    if (userId) {
+    if (userId && refetchSpaBookings) {
       channels.push(setupSpaBookingListenerById(userId, refetchSpaBookings));
     }
     
-    if (userRoomNumber) {
+    if (userRoomNumber && refetchSpaBookings) {
       channels.push(setupSpaBookingListenerByRoom(userRoomNumber, refetchSpaBookings));
     }
     

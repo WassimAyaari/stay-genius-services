@@ -96,7 +96,9 @@ export const useNotificationsData = () => {
       console.log("Current room number:", userRoomNumber);
       refetchRequests();
       refetchReservations();
-      refetchSpaBookings();
+      if (refetchSpaBookings) {
+        refetchSpaBookings();
+      }
       setHasInitiallyFetched(true);
     }
   }, [refetchRequests, refetchReservations, refetchSpaBookings, userRoomNumber, hasInitiallyFetched]);
