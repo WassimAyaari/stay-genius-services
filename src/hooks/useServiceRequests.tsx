@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
@@ -17,7 +16,7 @@ export const useServiceRequests = () => {
   const isAdminSection = location.pathname.includes('/admin');
 
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
-    if (!userId && !isAdminSection) {
+    if (!userId && !userRoomNumber && !isAdminSection) {
       console.log('No authenticated user or user_id in localStorage, returning empty service requests');
       return [];
     }
@@ -39,11 +38,29 @@ export const useServiceRequests = () => {
       console.log('Service requests data retrieved:', data?.length || 0);
       return data as ServiceRequest[];
     } else {
-      // Pour un utilisateur normal, vérifier d'abord s'il a un numéro de chambre
-      if (!userRoomNumber) {
-        console.log('User has no room number associated, fetching by guest_id only');
+      // Pour un utilisateur normal, privilégier le filtrage par numéro de chambre
+      if (userRoomNumber) {
+        console.log(`Fetching service requests for room number: ${userRoomNumber}`);
         
-        // Récupérer uniquement par guest_id s'il n'y a pas de numéro de chambre
+        const { data, error } = await supabase
+          .from('service_requests')
+          .select('*')
+          .eq('room_number', userRoomNumber)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching service requests by room number:', error);
+          throw error;
+        }
+
+        console.log(`Retrieved ${data?.length || 0} service requests for room ${userRoomNumber}`);
+        return data as ServiceRequest[];
+      }
+      
+      // Si pas de numéro de chambre, filtrer par ID utilisateur
+      if (userId) {
+        console.log(`Fetching service requests for user ID: ${userId}`);
+        
         const { data, error } = await supabase
           .from('service_requests')
           .select('*')
@@ -59,22 +76,7 @@ export const useServiceRequests = () => {
         return data as ServiceRequest[];
       }
       
-      // Récupérer par guest_id ET room_number pour plus de sécurité
-      console.log(`Fetching service requests for user ID: ${userId} and room: ${userRoomNumber}`);
-      
-      const { data, error } = await supabase
-        .from('service_requests')
-        .select('*')
-        .or(`guest_id.eq.${userId},room_number.eq.${userRoomNumber}`)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching service requests:', error);
-        throw error;
-      }
-
-      console.log(`Retrieved ${data?.length || 0} service requests for user and room`);
-      return data as ServiceRequest[];
+      return [];
     }
   };
 

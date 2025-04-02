@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -49,8 +50,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserData(guestData);
         localStorage.setItem('user_data', JSON.stringify(guestData));
         
-        // Stocker également le numéro de chambre séparément pour un accès plus facile
+        // Stocker le numéro de chambre séparément uniquement s'il existe
         if (guestData.room_number) {
+          console.log('Stockage du numéro de chambre dans localStorage:', guestData.room_number);
           localStorage.setItem('user_room_number', guestData.room_number);
         }
         
@@ -65,8 +67,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserData(localUserData);
           console.log('Données récupérées depuis localStorage:', localUserData);
           
-          // Stocker également le numéro de chambre
+          // Stocker le numéro de chambre uniquement s'il existe
           if (localUserData.room_number) {
+            console.log('Stockage du numéro de chambre depuis localStorage:', localUserData.room_number);
             localStorage.setItem('user_room_number', localUserData.room_number);
           }
           

@@ -16,11 +16,29 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
       return null;
     }
     
+    // Récupérer tous les enregistrements pour vérifier s'il y a des doublons
+    const { data: allRecords, error: recordsError } = await supabase
+      .from('guests')
+      .select('id')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+      
+    if (recordsError) {
+      console.error('Error checking for duplicate records:', recordsError);
+    } else if (allRecords && allRecords.length > 1) {
+      // S'il y a des doublons, nettoyer
+      console.log(`Found ${allRecords.length} records for user ${userId}, cleaning up duplicates`);
+      await cleanupDuplicateGuestRecords(userId);
+    }
+    
+    // Maintenant récupérer l'enregistrement le plus récent
     const { data, error } = await supabase
       .from('guests')
       .select('*')
       .eq('user_id', userId)
-      .maybeSingle();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
     
     if (error) {
       console.error('Error fetching guest data:', error);
@@ -58,7 +76,7 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
 
 /**
  * Synchronise les données d'un invité avec Supabase
- * Utilise upsert pour éviter les doublons
+ * Utilise un INSERT avec ON CONFLICT pour éviter les doublons
  */
 export const syncGuestData = async (userId: string, userData: UserData): Promise<boolean> => {
   try {
@@ -76,7 +94,7 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       first_name: userData.first_name,
       last_name: userData.last_name,
       email: userData.email,
-      room_number: userData.room_number,
+      room_number: userData.room_number || '',
       birth_date: formatDateToString(userData.birth_date),
       nationality: userData.nationality,
       check_in_date: formatDateToString(userData.check_in_date),
@@ -86,13 +104,35 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       guest_type: userData.guest_type || 'Standard Guest'
     };
     
-    // Utiliser upsert pour éviter les doublons
-    const { error } = await supabase
+    // D'abord vérifier si l'enregistrement existe déjà
+    const { data: existingGuest, error: checkError } = await supabase
       .from('guests')
-      .upsert([guestData], { 
-        onConflict: 'user_id',
-        ignoreDuplicates: false // Mettre à jour en cas de conflit
-      });
+      .select('id')
+      .eq('user_id', userId)
+      .limit(1)
+      .single();
+      
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking existing guest:', checkError);
+    }
+    
+    let result;
+    if (existingGuest) {
+      // Mettre à jour l'enregistrement existant
+      console.log('Updating existing guest record with ID:', existingGuest.id);
+      result = await supabase
+        .from('guests')
+        .update(guestData)
+        .eq('id', existingGuest.id);
+    } else {
+      // Insérer un nouvel enregistrement
+      console.log('Creating new guest record');
+      result = await supabase
+        .from('guests')
+        .insert([guestData]);
+    }
+    
+    const { error } = result;
     
     if (error) {
       console.error('Error syncing guest data:', error);
@@ -100,6 +140,13 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
     }
     
     console.log('Guest data synchronized successfully for user ID:', userId);
+    
+    // Si l'opération a réussi, s'assurer que localStorage est à jour
+    localStorage.setItem('user_data', JSON.stringify(userData));
+    if (userData.room_number) {
+      localStorage.setItem('user_room_number', userData.room_number);
+    }
+    
     return true;
   } catch (error) {
     console.error('Exception when syncing guest data:', error);
@@ -109,8 +156,6 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
 
 /**
  * Nettoie les doublons potentiels dans la table des invités
- * Cette fonction est conservée pour la compatibilité avec le code existant
- * mais n'est plus nécessaire avec l'utilisation de upsert
  */
 export const cleanupDuplicateGuestRecords = async (userId: string): Promise<boolean> => {
   try {
@@ -137,12 +182,12 @@ export const cleanupDuplicateGuestRecords = async (userId: string): Promise<bool
       return true;
     }
     
+    console.log(`Cleaning up ${data.length - 1} duplicate guest records for user ID:`, userId);
+    
     // Garder le premier enregistrement (le plus récent) et supprimer les autres
     const recordsToDelete = data.slice(1).map(record => record.id);
     
     if (recordsToDelete.length > 0) {
-      console.log(`Cleaning up ${recordsToDelete.length} duplicate guest records for user ID:`, userId);
-      
       const { error: deleteError } = await supabase
         .from('guests')
         .delete()
