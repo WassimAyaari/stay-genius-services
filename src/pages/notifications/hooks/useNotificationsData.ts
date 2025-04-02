@@ -1,8 +1,10 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
-import type { NotificationItem } from '../types/notificationTypes';
+import { useSpaBookings } from '@/hooks/useSpaBookings';
+import { useSpaServices } from '@/hooks/useSpaServices';
+import { NotificationItem, SpaBooking } from '../types/notificationTypes';
 import { useRealtimeNotifications } from './useRealtimeNotifications';
 import { useUserAuthentication } from './useUserAuthentication';
 import { combineAndSortNotifications } from '../utils/notificationTransformers';
@@ -27,6 +29,50 @@ export const useNotificationsData = () => {
     refetch: refetchReservations 
   } = useTableReservations();
 
+  // Get spa bookings
+  const {
+    bookings: allBookings = [],
+    isLoading: isLoadingSpaBookings,
+    fetchUserBookings
+  } = useSpaBookings();
+
+  const { services = [] } = useSpaServices();
+
+  // State for user's spa bookings
+  const [userSpaBookings, setUserSpaBookings] = useState<SpaBooking[]>([]);
+  const [isLoadingUserBookings, setIsLoadingUserBookings] = useState(false);
+
+  // Create a mapping of service IDs to service names
+  const serviceNamesMap = services.reduce((acc, service) => {
+    acc[service.id] = service.name;
+    return acc;
+  }, {} as Record<string, string>);
+
+  // Fetch user's spa bookings when user ID changes
+  useEffect(() => {
+    const loadUserBookings = async () => {
+      if (userId) {
+        setIsLoadingUserBookings(true);
+        try {
+          const bookings = await fetchUserBookings(userId);
+          setUserSpaBookings(bookings);
+        } catch (error) {
+          console.error("Error fetching user spa bookings:", error);
+          setUserSpaBookings([]);
+        } finally {
+          setIsLoadingUserBookings(false);
+        }
+      } else if (userRoomNumber) {
+        // If no user ID but has room number, filter bookings by room number
+        setUserSpaBookings(allBookings.filter(booking => booking.room_number === userRoomNumber));
+      } else {
+        setUserSpaBookings([]);
+      }
+    };
+    
+    loadUserBookings();
+  }, [userId, userRoomNumber, fetchUserBookings, allBookings]);
+
   // Force refetch on mount to ensure we have the latest data
   useEffect(() => {
     console.log("useNotificationsData - Refetching data on mount");
@@ -47,10 +93,12 @@ export const useNotificationsData = () => {
   // Combine and sort notifications
   const notifications: NotificationItem[] = combineAndSortNotifications(
     serviceRequests, 
-    reservations
+    reservations,
+    userSpaBookings,
+    serviceNamesMap
   );
 
-  const isLoading = isLoadingRequests || isLoadingReservations;
+  const isLoading = isLoadingRequests || isLoadingReservations || isLoadingSpaBookings || isLoadingUserBookings;
 
   return {
     notifications,

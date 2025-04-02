@@ -8,7 +8,7 @@ export const useSpaServices = () => {
   const queryClient = useQueryClient();
 
   // Récupérer tous les services spa
-  const fetchServices = async () => {
+  const fetchServices = async (): Promise<SpaService[]> => {
     const { data, error } = await supabase
       .from('spa_services')
       .select('*')
@@ -23,7 +23,7 @@ export const useSpaServices = () => {
   };
 
   // Récupérer les services mis en avant
-  const fetchFeaturedServices = async () => {
+  const fetchFeaturedServices = async (): Promise<SpaService[]> => {
     const { data, error } = await supabase
       .from('spa_services')
       .select('*')
@@ -41,7 +41,7 @@ export const useSpaServices = () => {
 
   // Réserver un traitement
   const bookTreatmentMutation = useMutation({
-    mutationFn: async (booking: Omit<SpaBooking, 'id'>) => {
+    mutationFn: async (booking: Omit<SpaBooking, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('spa_bookings')
         .insert(booking)
@@ -66,7 +66,7 @@ export const useSpaServices = () => {
   });
 
   // Récupérer un service par ID
-  const getServiceById = async (id: string) => {
+  const getServiceById = async (id: string): Promise<SpaService | null> => {
     const { data, error } = await supabase
       .from('spa_services')
       .select('*')
@@ -82,7 +82,7 @@ export const useSpaServices = () => {
   };
 
   // Services data
-  const { data: services = [], isLoading: isLoadingServices, error: servicesError } = useQuery({
+  const { data: services = [], isLoading: isLoadingServices, error: servicesError, refetch: refetchServices } = useQuery({
     queryKey: ['spa-services'],
     queryFn: fetchServices,
   });
@@ -104,5 +104,6 @@ export const useSpaServices = () => {
     getServiceById,
     bookTreatment: bookTreatmentMutation.mutate,
     isBooking: bookTreatmentMutation.isPending,
+    refetch: refetchServices
   };
 };

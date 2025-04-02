@@ -1,93 +1,86 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, ChevronLeft, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import SpaFacilitiesTab from './spa/SpaFacilitiesTab';
 import SpaServicesTab from './spa/SpaServicesTab';
 import SpaBookingsTab from './spa/SpaBookingsTab';
-import { useSpaFacilities } from '@/hooks/useSpaFacilities';
+import Layout from '@/components/Layout';
+import { useQueryClient } from '@tanstack/react-query';
 
-const SpaManager = () => {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('facilities');
-  const { facilities, isLoading, refetch } = useSpaFacilities();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await refetch();
-      toast({
-        title: "Mise à jour réussie",
-        description: "Les données ont été actualisées"
-      });
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'actualiser les données"
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
+export default function SpaManager() {
+  const queryClient = useQueryClient();
+
+  const refreshSpaData = () => {
+    queryClient.invalidateQueries({ queryKey: ['spa-facilities'] });
+    queryClient.invalidateQueries({ queryKey: ['spa-services'] });
+    queryClient.invalidateQueries({ queryKey: ['spa-bookings'] });
   };
 
-  return (
-    <div className="container py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center">
-          <Button variant="outline" size="sm" asChild className="mr-4">
-            <a href="/admin">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Retour
-            </a>
-          </Button>
-          <h1 className="text-2xl font-bold">Gestion du Spa</h1>
-        </div>
-        
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Actualiser
-        </Button>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Spa & Bien-être</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-3 mb-6">
-              <TabsTrigger value="facilities">Centres & Installations</TabsTrigger>
-              <TabsTrigger value="services">Services & Traitements</TabsTrigger>
-              <TabsTrigger value="bookings">Réservations</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="facilities">
-              <SpaFacilitiesTab facilities={facilities} isLoading={isLoading} onRefresh={refetch} />
-            </TabsContent>
-            
-            <TabsContent value="services">
-              <SpaServicesTab facilities={facilities} />
-            </TabsContent>
-            
-            <TabsContent value="bookings">
-              <SpaBookingsTab />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+  React.useEffect(() => {
+    refreshSpaData();
+  }, []);
 
-export default SpaManager;
+  return (
+    <Layout>
+      <div className="container py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Gestion du Spa</h1>
+          <p className="text-muted-foreground mt-1">
+            Gérez les installations, services et réservations du spa
+          </p>
+        </div>
+
+        <Tabs defaultValue="bookings">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="bookings">Réservations</TabsTrigger>
+            <TabsTrigger value="facilities">Installations</TabsTrigger>
+            <TabsTrigger value="services">Services</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="bookings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Réservations</CardTitle>
+                <CardDescription>
+                  Gérez les réservations de spa et leurs statuts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SpaBookingsTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="facilities">
+            <Card>
+              <CardHeader>
+                <CardTitle>Installations</CardTitle>
+                <CardDescription>
+                  Gérez les différentes installations de spa
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SpaFacilitiesTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="services">
+            <Card>
+              <CardHeader>
+                <CardTitle>Services</CardTitle>
+                <CardDescription>
+                  Gérez les services offerts dans chaque installation
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SpaServicesTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Layout>
+  );
+}

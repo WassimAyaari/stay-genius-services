@@ -42,3 +42,20 @@ export interface ServiceRequest {
     name: string;
   };
 }
+
+export interface SpaBooking {
+  id: string;
+  service_id: string;
+  facility_id: string;
+  user_id?: string;
+  date: string;
+  time: string;
+  guest_name: string;
+  guest_email: string;
+  guest_phone?: string;
+  room_number?: string;
+  special_requests?: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  created_at: string;
+  updated_at?: string;
+}

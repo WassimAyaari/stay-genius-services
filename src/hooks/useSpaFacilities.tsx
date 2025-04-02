@@ -8,7 +8,7 @@ export const useSpaFacilities = () => {
   const queryClient = useQueryClient();
 
   // Récupérer toutes les installations spa
-  const fetchFacilities = async () => {
+  const fetchFacilities = async (): Promise<SpaFacility[]> => {
     const { data, error } = await supabase
       .from('spa_facilities')
       .select('*')
@@ -23,7 +23,7 @@ export const useSpaFacilities = () => {
   };
 
   // Récupérer une installation par ID
-  const getFacilityById = async (id: string) => {
+  const getFacilityById = async (id: string): Promise<SpaFacility | null> => {
     const { data, error } = await supabase
       .from('spa_facilities')
       .select('*')
@@ -89,7 +89,32 @@ export const useSpaFacilities = () => {
     },
   });
 
-  const { data = [], isLoading, error } = useQuery({
+  // Supprimer une installation
+  const deleteFacilityMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('spa_facilities')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting facility:', error);
+        throw error;
+      }
+
+      return { id };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['spa-facilities'] });
+      toast.success('Installation supprimée avec succès');
+    },
+    onError: (error) => {
+      console.error('Error in delete facility mutation:', error);
+      toast.error('Erreur lors de la suppression de l\'installation');
+    },
+  });
+
+  const { data = [], isLoading, error, refetch } = useQuery({
     queryKey: ['spa-facilities'],
     queryFn: fetchFacilities,
   });
@@ -101,7 +126,10 @@ export const useSpaFacilities = () => {
     getFacilityById,
     createFacility: createFacilityMutation.mutate,
     updateFacility: updateFacilityMutation.mutate,
+    deleteFacility: deleteFacilityMutation.mutate,
     isCreating: createFacilityMutation.isPending,
     isUpdating: updateFacilityMutation.isPending,
+    isDeleting: deleteFacilityMutation.isPending,
+    refetch
   };
 };

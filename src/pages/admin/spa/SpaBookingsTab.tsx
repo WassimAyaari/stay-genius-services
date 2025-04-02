@@ -1,369 +1,289 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, parseISO } from 'date-fns';
+import { RefreshCw, Calendar, Clock, User, Phone, Mail, MapPin, FileText, Search } from 'lucide-react';
+import { toast } from 'sonner';
+import { useSpaBookings } from '@/hooks/useSpaBookings';
+import { useSpaServices } from '@/hooks/useSpaServices';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { RefreshCw, Search, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { SpaBooking } from '@/features/spa/types';
 
-const SpaBookingsTab = () => {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+export default function SpaBookingsTab() {
+  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
-  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState<string>('');
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [dateFilter, setDateFilter] = useState<string>('');
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
+  const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
 
-  const fetchBookings = async () => {
-    setIsLoading(true);
-    try {
-      let query = supabase
-        .from('spa_bookings')
-        .select(`
-          *,
-          spa_services:service_id (name, price, duration, category),
-          spa_facilities:facility_id (name, location)
-        `)
-        .order('date', { ascending: false });
+  const { bookings, isLoading, updateBookingStatus, refetch } = useSpaBookings();
 
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+  React.useEffect(() => {
+    const loadServiceNames = async () => {
+      setIsLoadingServices(true);
+      try {
+        const { data, error } = await supabase
+          .from('spa_bookings')
+          .select(`
+            id,
+            service_id,
+            spa_services:service_id (
+              name
+            )
+          `);
+
+        if (error) throw error;
+
+        const servicesMap: Record<string, string> = {};
+        data.forEach((booking: any) => {
+          if (booking.service_id && booking.spa_services?.name) {
+            servicesMap[booking.service_id] = booking.spa_services.name;
+          }
+        });
+
+        setServiceNames(servicesMap);
+      } catch (error) {
+        console.error('Error loading service names:', error);
+        toast.error('Erreur lors du chargement des noms de services');
+      } finally {
+        setIsLoadingServices(false);
       }
+    };
 
-      const { data, error } = await query;
+    loadServiceNames();
+  }, [bookings]);
 
-      if (error) throw error;
-      setBookings(data || []);
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger les réservations",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBookings();
-  }, [statusFilter]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
-  };
-
-  const handleRefresh = () => {
-    fetchBookings();
-  };
-
-  const handleOpenStatusDialog = (booking: any) => {
-    setSelectedBooking(booking);
-    setNewStatus(booking.status);
-    setIsStatusDialogOpen(true);
-  };
-
-  const handleOpenCancelDialog = (booking: any) => {
-    setSelectedBooking(booking);
-    setIsCancelDialogOpen(true);
-  };
-
-  const handleStatusUpdate = async () => {
-    if (!selectedBooking || !newStatus) return;
-
+  const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('spa_bookings')
-        .update({ status: newStatus })
-        .eq('id', selectedBooking.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "Statut mis à jour avec succès",
-      });
-
-      fetchBookings();
-      setIsStatusDialogOpen(false);
+      await updateBookingStatus({ id: bookingId, status: newStatus });
+      toast.success('Statut mis à jour avec succès');
     } catch (error) {
-      console.error('Error updating booking status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
-      });
+      toast.error('Erreur lors de la mise à jour du statut');
+      console.error('Error updating status:', error);
     }
   };
 
-  const handleCancelBooking = async () => {
-    if (!selectedBooking) return;
-
+  const handleCancelBooking = async (bookingId: string) => {
     try {
-      const { error } = await supabase
-        .from('spa_bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', selectedBooking.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "Réservation annulée avec succès",
-      });
-
-      fetchBookings();
-      setIsCancelDialogOpen(false);
+      await updateBookingStatus({ id: bookingId, status: 'cancelled' });
+      toast.success('Réservation annulée avec succès');
     } catch (error) {
-      console.error('Error cancelling booking:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'annuler la réservation",
-      });
+      toast.error('Erreur lors de l\'annulation de la réservation');
+      console.error('Error canceling booking:', error);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return <Badge className="bg-green-100 text-green-800">Confirmée</Badge>;
-      case 'completed':
-        return <Badge className="bg-green-100 text-green-800">Complétée</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-100 text-red-800">Annulée</Badge>;
-      case 'in_progress':
-        return <Badge className="bg-blue-100 text-blue-800">En cours</Badge>;
-      default:
-        return <Badge className="bg-yellow-100 text-yellow-800">En attente</Badge>;
-    }
-  };
-
-  const filteredBookings = bookings.filter(booking => {
-    if (searchQuery === '') return true;
+  const filteredBookings = bookings.filter((booking: SpaBooking & { spa_services?: { name: string } }) => {
+    const matchesSearch = 
+      (booking.guest_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+       booking.guest_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       booking.room_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       (serviceNames[booking.service_id] || booking.spa_services?.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const searchTerms = searchQuery.toLowerCase();
-    return (
-      booking.guest_name?.toLowerCase().includes(searchTerms) ||
-      booking.guest_email?.toLowerCase().includes(searchTerms) ||
-      booking.room_number?.toLowerCase().includes(searchTerms) ||
-      booking.spa_services?.name?.toLowerCase().includes(searchTerms)
-    );
+    const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
+    
+    const matchesDate = !dateFilter || booking.date === dateFilter;
+    
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
-  return (
-    <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-            <Input
-              placeholder="Rechercher..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={handleSearch}
-            />
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
+      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'En attente';
+      case 'confirmed': return 'Confirmée';
+      case 'cancelled': return 'Annulée';
+      case 'completed': return 'Terminée';
+      default: return status;
+    }
+  };
+
+  const renderBookingCard = (booking: SpaBooking & { spa_services?: { name: string } }) => {
+    const bookingDate = new Date(booking.date);
+    const formattedDate = format(bookingDate, 'EEEE d MMMM yyyy', { locale: fr });
+    const serviceName = serviceNames[booking.service_id] || booking.spa_services?.name || 'Service inconnu';
+    
+    return (
+      <Card key={booking.id} className="mb-4">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-lg">Réservation #{booking.id.substring(0, 8)}</CardTitle>
+            <div className="text-sm text-muted-foreground mt-1">{serviceName}</div>
+          </div>
+          <Badge className={getStatusBadgeColor(booking.status)}>
+            {getStatusText(booking.status)}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span className="text-sm">{formattedDate}</span>
+              </div>
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span className="text-sm">{booking.time}</span>
+              </div>
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span className="text-sm">{booking.guest_name}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span className="text-sm">{booking.guest_email}</span>
+              </div>
+              {booking.guest_phone && (
+                <div className="flex items-center">
+                  <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <span className="text-sm">{booking.guest_phone}</span>
+                </div>
+              )}
+              {booking.room_number && (
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <span className="text-sm">Chambre {booking.room_number}</span>
+                </div>
+              )}
+            </div>
           </div>
           
-          <Select
-            value={statusFilter}
-            onValueChange={handleStatusChange}
-          >
-            <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Filtrer par statut" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="pending">En attente</SelectItem>
-              <SelectItem value="confirmed">Confirmée</SelectItem>
-              <SelectItem value="in_progress">En cours</SelectItem>
-              <SelectItem value="completed">Complétée</SelectItem>
-              <SelectItem value="cancelled">Annulée</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
+          {booking.special_requests && (
+            <div className="mt-4">
+              <div className="flex items-center mb-2">
+                <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span className="text-sm font-medium">Demandes spéciales</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{booking.special_requests}</p>
+            </div>
+          )}
+          
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+              <>
+                <Label className="text-sm mr-2">Statut:</Label>
+                <Select
+                  defaultValue={booking.status}
+                  onValueChange={(value) => handleStatusChange(booking.id, value)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sélectionner le statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="confirmed">Confirmée</SelectItem>
+                    <SelectItem value="completed">Terminée</SelectItem>
+                    <SelectItem value="cancelled">Annulée</SelectItem>
+                  </SelectContent>
+                </Select>
+              </>
+            )}
+            
+            {booking.status === 'pending' && (
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => handleCancelBooking(booking.id)}
+                className="ml-auto"
+              >
+                Annuler
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Réservations Spa</h2>
         <Button
           variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          className="w-full md:w-auto"
+          onClick={() => refetch()}
+          className="flex items-center"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Actualiser
         </Button>
       </div>
-
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+      
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <Label htmlFor="search" className="text-sm">Recherche</Label>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="search"
+              placeholder="Nom, email, chambre..."
+              className="pl-9"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="status-filter" className="text-sm">Statut</Label>
+          <Select
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+          >
+            <SelectTrigger id="status-filter">
+              <SelectValue placeholder="Tous les statuts" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              <SelectItem value="pending">En attente</SelectItem>
+              <SelectItem value="confirmed">Confirmées</SelectItem>
+              <SelectItem value="completed">Terminées</SelectItem>
+              <SelectItem value="cancelled">Annulées</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <Label htmlFor="date-filter" className="text-sm">Date</Label>
+          <Input
+            id="date-filter"
+            type="date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+          />
+        </div>
+      </div>
+      
+      {isLoading || isLoadingServices ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Chargement des réservations...</p>
         </div>
       ) : filteredBookings.length === 0 ? (
-        <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground mb-4">Aucune réservation trouvée</p>
-            <Button variant="outline" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualiser
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Aucune réservation trouvée</p>
+        </div>
       ) : (
-        <div className="rounded-md border overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Heure</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Chambre</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredBookings.map((booking) => (
-                  <TableRow key={booking.id}>
-                    <TableCell className="font-medium">
-                      {booking.spa_services?.name || 'Service inconnu'}
-                      <p className="text-xs text-muted-foreground">
-                        {booking.spa_facilities?.name || 'Installation inconnue'}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      {booking.date ? format(parseISO(booking.date), 'P', { locale: fr }) : '-'}
-                    </TableCell>
-                    <TableCell>{booking.time || '-'}</TableCell>
-                    <TableCell>
-                      <div className="font-medium">{booking.guest_name}</div>
-                      <div className="text-xs text-muted-foreground">{booking.guest_email}</div>
-                    </TableCell>
-                    <TableCell>{booking.room_number || '-'}</TableCell>
-                    <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenStatusDialog(booking)}
-                          disabled={booking.status === 'cancelled'}
-                        >
-                          <Clock className="h-4 w-4 mr-1" />
-                          Statut
-                        </Button>
-                        {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenCancelDialog(booking)}
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Annuler
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+        <div>
+          {filteredBookings.map(renderBookingCard)}
         </div>
       )}
-
-      {/* Status Dialog */}
-      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mettre à jour le statut</DialogTitle>
-            <DialogDescription>
-              Modifier le statut de la réservation pour {selectedBooking?.spa_services?.name || 'ce service'}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <Select value={newStatus} onValueChange={setNewStatus}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-                    En attente
-                  </div>
-                </SelectItem>
-                <SelectItem value="confirmed">
-                  <div className="flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-2 text-blue-500" />
-                    Confirmée
-                  </div>
-                </SelectItem>
-                <SelectItem value="in_progress">
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2 text-blue-500" />
-                    En cours
-                  </div>
-                </SelectItem>
-                <SelectItem value="completed">
-                  <div className="flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                    Complétée
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsStatusDialogOpen(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleStatusUpdate}>
-              Mettre à jour
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Cancel Confirmation Dialog */}
-      <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Annuler la réservation</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelBooking} className="bg-red-600 hover:bg-red-700">
-              Confirmer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
-};
-
-export default SpaBookingsTab;
+}

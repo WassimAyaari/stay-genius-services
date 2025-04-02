@@ -1,163 +1,153 @@
-
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
+import { SpaService, SpaFacility } from '@/features/spa/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const formSchema = z.object({
-  name: z.string().min(1, "Le nom est requis"),
-  description: z.string().min(1, "La description est requise"),
-  duration: z.string().min(1, "La durée est requise"),
-  price: z.string().min(1, "Le prix est requis").refine(val => !isNaN(Number(val)), {
-    message: "Le prix doit être un nombre",
-  }),
+const serviceSchema = z.object({
+  name: z.string().min(1, { message: "Le nom est requis" }),
+  description: z.string().min(1, { message: "La description est requise" }),
+  duration: z.string().min(1, { message: "La durée est requise" }),
+  price: z.number().positive({ message: "Le prix doit être supérieur à 0" }),
+  category: z.string().min(1, { message: "La catégorie est requise" }),
+  facility_id: z.string().min(1, { message: "L'installation est requise" }),
+  is_featured: z.boolean().default(false),
   image: z.string().optional(),
-  category: z.enum(['massage', 'facial', 'body', 'wellness']),
   status: z.enum(['available', 'unavailable']),
-  is_featured: z.boolean().default(false)
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type ServiceFormValues = z.infer<typeof serviceSchema>;
 
-interface SpaServiceDialogProps {
-  isOpen: boolean;
+export interface SpaServiceDialogProps {
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  service: any | null;
-  facilityId: string;
+  service: SpaService | null;
+  facilities: SpaFacility[];
   onClose: (success: boolean) => void;
 }
 
-const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }: SpaServiceDialogProps) => {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const isEditing = !!service;
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+export default function SpaServiceDialog({ 
+  open, 
+  onOpenChange, 
+  service, 
+  facilities,
+  onClose 
+}: SpaServiceDialogProps) {
+  const form = useForm<ServiceFormValues>({
+    resolver: zodResolver(serviceSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      duration: "",
-      price: "",
-      image: "",
-      category: "massage",
-      status: "available",
-      is_featured: false
-    }
+      name: service?.name || '',
+      description: service?.description || '',
+      duration: service?.duration || '',
+      price: service?.price || 0,
+      category: service?.category || 'massage',
+      facility_id: service?.facility_id || '',
+      is_featured: service?.is_featured || false,
+      image: service?.image || '',
+      status: (service?.status as 'available' | 'unavailable') || 'available',
+    },
   });
 
-  // Set form values when editing
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   React.useEffect(() => {
-    if (isOpen && service) {
+    if (service) {
       form.reset({
         name: service.name,
-        description: service.description || "",
-        duration: service.duration || "",
-        price: service.price ? String(service.price) : "",
-        image: service.image || "",
-        category: service.category || "massage",
-        status: service.status || "available",
-        is_featured: !!service.is_featured
+        description: service.description,
+        duration: service.duration,
+        price: service.price,
+        category: service.category,
+        facility_id: service.facility_id,
+        is_featured: service.is_featured || false,
+        image: service.image || '',
+        status: (service.status as 'available' | 'unavailable') || 'available',
       });
-    } else if (isOpen) {
+    } else {
       form.reset({
-        name: "",
-        description: "",
-        duration: "",
-        price: "",
-        image: "",
-        category: "massage",
-        status: "available",
-        is_featured: false
+        name: '',
+        description: '',
+        duration: '',
+        price: 0,
+        category: 'massage',
+        facility_id: facilities.length > 0 ? facilities[0].id : '',
+        is_featured: false,
+        image: '',
+        status: 'available',
       });
     }
-  }, [isOpen, service, form]);
+  }, [service, form, facilities]);
 
-  const onSubmit = async (values: FormValues) => {
-    if (!facilityId) {
-      toast.error("Id d'installation manquant");
-      return;
-    }
-
+  const onSubmit = async (values: ServiceFormValues) => {
     setIsSubmitting(true);
-    
     try {
-      const serviceData = {
-        name: values.name,
-        description: values.description,
-        duration: values.duration,
-        price: parseFloat(values.price),
-        image: values.image || null,
-        category: values.category,
-        status: values.status,
-        facility_id: facilityId,
-        is_featured: values.is_featured
-      };
-
-      if (isEditing) {
+      if (service) {
+        // Update existing service
         const { error } = await supabase
           .from('spa_services')
-          .update(serviceData)
+          .update({
+            name: values.name,
+            description: values.description,
+            duration: values.duration,
+            price: values.price,
+            category: values.category,
+            facility_id: values.facility_id,
+            is_featured: values.is_featured,
+            image: values.image,
+            status: values.status,
+          })
           .eq('id', service.id);
-
+          
         if (error) throw error;
         toast.success('Service mis à jour avec succès');
       } else {
+        // Create new service
         const { error } = await supabase
           .from('spa_services')
-          .insert(serviceData);
-
+          .insert({
+            name: values.name,
+            description: values.description,
+            duration: values.duration,
+            price: values.price,
+            category: values.category,
+            facility_id: values.facility_id,
+            is_featured: values.is_featured,
+            image: values.image,
+            status: values.status,
+          });
+          
         if (error) throw error;
         toast.success('Service créé avec succès');
       }
-
+      
       onClose(true);
     } catch (error) {
-      console.error('Error submitting service:', error);
-      toast.error('Une erreur est survenue');
+      console.error('Error saving service:', error);
+      toast.error('Erreur lors de l\'enregistrement du service');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Modifier le service" : "Ajouter un service"}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Modifiez les détails du service ci-dessous."
-              : "Remplissez le formulaire pour ajouter un nouveau service."}
-          </DialogDescription>
+          <DialogTitle>{service ? 'Modifier le service' : 'Ajouter un service'}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -179,11 +169,7 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Description du service"
-                      {...field}
-                      rows={3}
-                    />
+                    <Textarea placeholder="Description du service" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -198,7 +184,7 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
                   <FormItem>
                     <FormLabel>Durée</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: 60 minutes" {...field} />
+                      <Input placeholder="Ex: 60 min" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -210,13 +196,13 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prix ($)</FormLabel>
+                    <FormLabel>Prix (€)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        step="0.01"
-                        placeholder="Ex: 120"
+                        placeholder="Prix"
                         {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -224,20 +210,6 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL de l'image</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -249,6 +221,7 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -257,8 +230,8 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="massage">Massage</SelectItem>
-                        <SelectItem value="facial">Soins du visage</SelectItem>
-                        <SelectItem value="body">Soins du corps</SelectItem>
+                        <SelectItem value="facial">Soin du visage</SelectItem>
+                        <SelectItem value="body">Soin du corps</SelectItem>
                         <SelectItem value="wellness">Bien-être</SelectItem>
                       </SelectContent>
                     </Select>
@@ -269,6 +242,37 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
 
               <FormField
                 control={form.control}
+                name="facility_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Installation</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une installation" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {facilities.map((facility) => (
+                          <SelectItem key={facility.id} value={facility.id}>
+                            {facility.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
@@ -276,17 +280,32 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un statut" />
+                          <SelectValue placeholder="Sélectionner le statut" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="available">Disponible</SelectItem>
-                        <SelectItem value="unavailable">Non disponible</SelectItem>
+                        <SelectItem value="unavailable">Indisponible</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL de l'image</FormLabel>
+                    <FormControl>
+                      <Input placeholder="URL de l'image" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -297,47 +316,39 @@ const SpaServiceDialog = ({ isOpen, onOpenChange, service, facilityId, onClose }
               control={form.control}
               name="is_featured"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Mettre en avant</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      Afficher ce service sur la page d'accueil
+                    </div>
+                  </div>
                   <FormControl>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Mettre en avant</FormLabel>
-                    <p className="text-sm text-muted-foreground">
-                      Ce service sera affiché dans les services en vedette
-                    </p>
-                  </div>
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end space-x-2 pt-4">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onClose(false)}
+                onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Annuler
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {isEditing ? "Mettre à jour" : "Créer"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Enregistrement...' : service ? 'Mettre à jour' : 'Créer'}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default SpaServiceDialog;
+}

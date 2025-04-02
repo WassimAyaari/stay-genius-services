@@ -7,13 +7,8 @@ import { SpaBooking } from '@/features/spa/types';
 export const useSpaBookings = () => {
   const queryClient = useQueryClient();
 
-  // Récupérer toutes les réservations de l'utilisateur actuel
-  const fetchUserBookings = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return [];
-    }
-
+  // Récupérer toutes les réservations spa
+  const fetchBookings = async (): Promise<SpaBooking[]> => {
     const { data, error } = await supabase
       .from('spa_bookings')
       .select(`
@@ -26,7 +21,6 @@ export const useSpaBookings = () => {
           category
         )
       `)
-      .eq('user_id', user.id)
       .order('date', { ascending: false });
 
     if (error) {
@@ -34,19 +28,19 @@ export const useSpaBookings = () => {
       throw error;
     }
 
-    return data as (SpaBooking & { 
-      spa_services: { 
+    return data as unknown as (SpaBooking & {
+      spa_services: {
         name: string;
         price: number;
         duration: string;
         description: string;
         category: string;
-      } 
+      };
     })[];
   };
 
-  // Récupérer une réservation par ID
-  const getBookingById = async (id: string): Promise<SpaBooking | null> => {
+  // Récupérer les réservations d'un utilisateur
+  const fetchUserBookings = async (userId: string): Promise<SpaBooking[]> => {
     const { data, error } = await supabase
       .from('spa_bookings')
       .select(`
@@ -59,6 +53,22 @@ export const useSpaBookings = () => {
           category
         )
       `)
+      .eq('user_id', userId)
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching user spa bookings:', error);
+      throw error;
+    }
+
+    return data as unknown as SpaBooking[];
+  };
+
+  // Récupérer une réservation par ID
+  const getBookingById = async (id: string): Promise<SpaBooking | null> => {
+    const { data, error } = await supabase
+      .from('spa_bookings')
+      .select('*')
       .eq('id', id)
       .single();
 
@@ -70,17 +80,17 @@ export const useSpaBookings = () => {
     return data as SpaBooking;
   };
 
-  // Créer ou mettre à jour une réservation
-  const bookTreatmentMutation = useMutation({
-    mutationFn: async (booking: Omit<SpaBooking, 'id'>) => {
+  // Créer une nouvelle réservation
+  const createBookingMutation = useMutation({
+    mutationFn: async (booking: Omit<SpaBooking, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('spa_bookings')
         .insert(booking)
-        .select('id')
+        .select()
         .single();
 
       if (error) {
-        console.error('Error booking treatment:', error);
+        console.error('Error creating booking:', error);
         throw error;
       }
 
@@ -88,48 +98,54 @@ export const useSpaBookings = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spa-bookings'] });
-      toast.success('Réservation effectuée avec succès');
+      toast.success('Réservation créée avec succès');
     },
     onError: (error) => {
-      console.error('Error in booking mutation:', error);
-      toast.error('Erreur lors de la réservation');
+      console.error('Error in create booking mutation:', error);
+      toast.error('Erreur lors de la création de la réservation');
     },
   });
 
   // Mettre à jour le statut d'une réservation
-  const updateBookingStatus = async (id: string, status: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
-    const { error } = await supabase
-      .from('spa_bookings')
-      .update({ status })
-      .eq('id', id);
+  const updateBookingStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from('spa_bookings')
+        .update({ status })
+        .eq('id', id);
 
-    if (error) {
-      console.error('Error updating booking status:', error);
-      throw error;
-    }
+      if (error) {
+        console.error('Error updating booking status:', error);
+        throw error;
+      }
 
-    queryClient.invalidateQueries({ queryKey: ['spa-bookings'] });
-    return true;
-  };
+      return { id, status };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['spa-bookings'] });
+      toast.success('Statut de la réservation mis à jour');
+    },
+    onError: (error) => {
+      console.error('Error in update booking status mutation:', error);
+      toast.error('Erreur lors de la mise à jour du statut');
+    },
+  });
 
-  // Annuler une réservation
-  const cancelBooking = async (id: string) => {
-    return updateBookingStatus(id, 'cancelled');
-  };
-
-  const { data = [], isLoading, error } = useQuery({
+  const { data = [], isLoading, error, refetch } = useQuery({
     queryKey: ['spa-bookings'],
-    queryFn: fetchUserBookings,
+    queryFn: fetchBookings,
   });
 
   return {
-    data,
+    bookings: data,
     isLoading,
     error,
     getBookingById,
-    bookTreatment: bookTreatmentMutation.mutate,
-    isBooking: bookTreatmentMutation.isPending,
-    updateBookingStatus,
-    cancelBooking,
+    createBooking: createBookingMutation.mutate,
+    updateBookingStatus: updateBookingStatusMutation.mutate,
+    isCreating: createBookingMutation.isPending,
+    isUpdating: updateBookingStatusMutation.isPending,
+    fetchUserBookings,
+    refetch
   };
 };

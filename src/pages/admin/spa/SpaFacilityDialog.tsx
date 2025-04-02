@@ -1,126 +1,115 @@
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter 
-} from '@/components/ui/dialog';
-import { 
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage 
-} from '@/components/ui/form';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useSpaFacilities } from '@/hooks/useSpaFacilities';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { SpaFacility } from '@/features/spa/types';
+import { useSpaFacilities } from '@/hooks/useSpaFacilities';
 
 const facilitySchema = z.object({
-  name: z.string().min(1, "Le nom est requis"),
+  name: z.string().min(1, { message: "Le nom est requis" }),
   description: z.string().optional(),
   location: z.string().optional(),
+  capacity: z.number().int().nonnegative().optional(),
   image_url: z.string().optional(),
   opening_hours: z.string().optional(),
-  capacity: z.number().int().optional(),
-  status: z.enum(['open', 'closed']).default('open'),
+  status: z.enum(['open', 'closed']),
 });
 
 type FacilityFormValues = z.infer<typeof facilitySchema>;
 
-interface SpaFacilityDialogProps {
+export interface SpaFacilityDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  facility?: SpaFacility;
+  facility: SpaFacility | null;
+  onClose: (success: boolean) => void;
 }
 
-const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({ 
-  open, 
-  onOpenChange,
-  facility
-}) => {
+export default function SpaFacilityDialog({ open, onOpenChange, facility, onClose }: SpaFacilityDialogProps) {
   const { createFacility, updateFacility, isCreating, isUpdating } = useSpaFacilities();
-  const isSubmitting = isCreating || isUpdating;
-  const isEditing = !!facility;
-  
+  const isLoading = isCreating || isUpdating;
+
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(facilitySchema),
     defaultValues: {
-      name: '',
-      description: '',
-      location: '',
-      image_url: '',
-      opening_hours: '',
-      capacity: 0,
-      status: 'open' as const,
-    }
+      name: facility?.name || '',
+      description: facility?.description || '',
+      location: facility?.location || '',
+      capacity: facility?.capacity || 0,
+      image_url: facility?.image_url || '',
+      opening_hours: facility?.opening_hours || '',
+      status: (facility?.status as 'open' | 'closed') || 'open',
+    },
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (facility) {
       form.reset({
         name: facility.name,
         description: facility.description || '',
         location: facility.location || '',
+        capacity: facility.capacity || 0,
         image_url: facility.image_url || '',
         opening_hours: facility.opening_hours || '',
-        capacity: facility.capacity || 0,
-        status: facility.status,
+        status: (facility.status as 'open' | 'closed') || 'open',
       });
     } else {
       form.reset({
         name: '',
         description: '',
         location: '',
+        capacity: 0,
         image_url: '',
         opening_hours: '',
-        capacity: 0,
-        status: 'open' as const,
+        status: 'open',
       });
     }
   }, [facility, form]);
 
-  const onSubmit = async (data: FacilityFormValues) => {
-    try {
-      if (isEditing && facility) {
-        await updateFacility({
-          ...facility,
-          ...data,
-        });
-      } else {
-        await createFacility({
-          ...data,
-          status: data.status || 'open',
-        });
-      }
-      
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Error submitting form:', error);
+  const onSubmit = (values: FacilityFormValues) => {
+    if (facility) {
+      updateFacility({
+        ...values,
+        id: facility.id,
+      } as SpaFacility, {
+        onSuccess: () => {
+          onClose(true);
+        },
+      });
+    } else {
+      createFacility({
+        ...values,
+        name: values.name
+      } as Omit<SpaFacility, 'id' | 'created_at' | 'updated_at'>, {
+        onSuccess: () => {
+          onClose(true);
+        },
+      });
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Modifier' : 'Ajouter'} une installation spa</DialogTitle>
-          <DialogDescription>
-            {isEditing 
-              ? 'Modifiez les détails de cette installation spa'
-              : 'Remplissez les informations pour créer une nouvelle installation spa'
-            }
-          </DialogDescription>
+          <DialogTitle>{facility ? 'Modifier l\'installation' : 'Ajouter une installation'}</DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom*</FormLabel>
+                  <FormLabel>Nom</FormLabel>
                   <FormControl>
                     <Input placeholder="Nom de l'installation" {...field} />
                   </FormControl>
@@ -128,7 +117,7 @@ const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -136,17 +125,13 @@ const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Description de l'installation" 
-                      {...field} 
-                      rows={3}
-                    />
+                    <Textarea placeholder="Description de l'installation" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -155,13 +140,13 @@ const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({
                   <FormItem>
                     <FormLabel>Emplacement</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: Niveau 4" {...field} />
+                      <Input placeholder="Emplacement" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="capacity"
@@ -169,11 +154,11 @@ const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({
                   <FormItem>
                     <FormLabel>Capacité</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="Capacité" 
+                      <Input
+                        type="number"
+                        placeholder="Capacité"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -181,21 +166,49 @@ const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({
                 )}
               />
             </div>
-            
-            <FormField
-              control={form.control}
-              name="opening_hours"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Heures d'ouverture</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: 9h-20h tous les jours" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="opening_hours"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Heures d'ouverture</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: 9h-20h tous les jours" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Statut</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner le statut" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="open">Ouvert</SelectItem>
+                        <SelectItem value="closed">Fermé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="image_url"
@@ -209,23 +222,18 @@ const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
+                disabled={isLoading}
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enregistrement...
-                  </>
-                ) : isEditing ? 'Mettre à jour' : 'Créer'}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Enregistrement...' : facility ? 'Mettre à jour' : 'Créer'}
               </Button>
             </DialogFooter>
           </form>
@@ -233,6 +241,4 @@ const SpaFacilityDialog: React.FC<SpaFacilityDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
-
-export default SpaFacilityDialog;
+}

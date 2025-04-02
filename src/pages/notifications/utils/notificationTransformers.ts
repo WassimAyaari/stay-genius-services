@@ -1,9 +1,9 @@
 
 import { 
-  SpaBooking, 
+  NotificationItem, 
   ServiceRequest, 
-  TableReservation, 
-  NotificationItem 
+  TableReservation,
+  SpaBooking
 } from '../types/notificationTypes';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -79,4 +79,27 @@ export const transformSpaBookings = (bookings: SpaBooking[], services: Record<st
       }
     };
   });
+};
+
+// Fonction pour combiner et trier toutes les notifications
+export const combineAndSortNotifications = (
+  serviceRequests: ServiceRequest[], 
+  reservations: TableReservation[],
+  spaBookings: SpaBooking[] = [],
+  serviceNames: Record<string, string> = {}
+): NotificationItem[] => {
+  // Transformer les différents types de notification
+  const requestNotifications = transformServiceRequests(serviceRequests);
+  const reservationNotifications = transformTableReservations(reservations);
+  const spaNotifications = transformSpaBookings(spaBookings, serviceNames);
+  
+  // Combiner toutes les notifications
+  const allNotifications = [
+    ...requestNotifications,
+    ...reservationNotifications,
+    ...spaNotifications
+  ];
+  
+  // Trier par date, les plus récentes d'abord
+  return allNotifications.sort((a, b) => b.time.getTime() - a.time.getTime());
 };
