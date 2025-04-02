@@ -1,6 +1,7 @@
 
 import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 
 type RequestStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 
@@ -30,6 +31,11 @@ export function useRequestStatusService() {
       
       toast({
         title: "Statut Mis à Jour",
+        description: `Le statut de la demande est maintenant ${translatedStatus}`
+      });
+
+      // Afficher également une notification avec Sonner pour plus de visibilité
+      sonnerToast.success(`Statut mis à jour`, {
         description: `Le statut de la demande est maintenant ${translatedStatus}`
       });
       

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { TableReservation } from '@/features/dining/types';
 import { ServiceRequest } from '@/features/rooms/types';
 import { NotificationItem } from '@/types/notification';
+import { toast } from 'sonner';
 
 export const useNotifications = () => {
   const { user } = useAuth();
@@ -51,6 +52,22 @@ export const useNotifications = () => {
           console.log('Notification reservation update received by ID:', payload);
           setHasNewNotifications(true);
           refetchReservations();
+          
+          // Afficher un toast pour les mises à jour de statut
+          if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+            const statusMap: Record<string, string> = {
+              'pending': 'est en attente',
+              'confirmed': 'a été confirmée',
+              'cancelled': 'a été annulée'
+            };
+            
+            const status = payload.new.status;
+            const message = statusMap[status] || 'a été mise à jour';
+            
+            toast.info(`Mise à jour de réservation`, {
+              description: `Votre réservation de table ${message}.`
+            });
+          }
         })
         .subscribe();
       
@@ -70,6 +87,22 @@ export const useNotifications = () => {
           console.log('Notification reservation email update received:', payload);
           setHasNewNotifications(true);
           refetchReservations();
+          
+          // Afficher un toast pour les mises à jour de statut
+          if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+            const statusMap: Record<string, string> = {
+              'pending': 'est en attente',
+              'confirmed': 'a été confirmée',
+              'cancelled': 'a été annulée'
+            };
+            
+            const status = payload.new.status;
+            const message = statusMap[status] || 'a été mise à jour';
+            
+            toast.info(`Mise à jour de réservation`, {
+              description: `Votre réservation de table ${message}.`
+            });
+          }
         })
         .subscribe();
       
@@ -89,6 +122,23 @@ export const useNotifications = () => {
           console.log('Notification service update received:', payload);
           setHasNewNotifications(true);
           refetchServices();
+          
+          // Afficher un toast pour les mises à jour de statut
+          if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+            const statusMap: Record<string, string> = {
+              'pending': 'est en attente',
+              'in_progress': 'est en cours de traitement',
+              'completed': 'a été complétée',
+              'cancelled': 'a été annulée'
+            };
+            
+            const status = payload.new.status;
+            const message = statusMap[status] || 'a été mise à jour';
+            
+            toast.info(`Mise à jour de demande`, {
+              description: `Votre demande de service ${message}.`
+            });
+          }
         })
         .subscribe();
       

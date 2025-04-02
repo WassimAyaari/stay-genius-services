@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
@@ -21,13 +22,16 @@ export const useServiceRequests = () => {
       return [];
     }
 
-    // For admin section, fetch all service requests 
+    // For admin section, fetch all service requests with request_items
     if (isAdminSection) {
-      console.log('Admin view: Fetching all service requests');
+      console.log('Admin view: Fetching all service requests with request_items');
       
       const { data, error } = await supabase
         .from('service_requests')
-        .select('*')
+        .select(`
+          *,
+          request_items(*)
+        `)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -44,7 +48,10 @@ export const useServiceRequests = () => {
         
         const { data, error } = await supabase
           .from('service_requests')
-          .select('*')
+          .select(`
+            *,
+            request_items(*)
+          `)
           .eq('room_number', userRoomNumber)
           .order('created_at', { ascending: false });
 
@@ -63,7 +70,10 @@ export const useServiceRequests = () => {
         
         const { data, error } = await supabase
           .from('service_requests')
-          .select('*')
+          .select(`
+            *,
+            request_items(*)
+          `)
           .eq('guest_id', userId)
           .order('created_at', { ascending: false });
 
