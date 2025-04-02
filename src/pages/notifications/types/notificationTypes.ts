@@ -9,7 +9,7 @@ export interface NotificationItem {
   status: string;
   time: Date;
   link: string;
-  data: any;
+  data?: any; // Changed from required to optional to match the global type
 }
 
 export interface TableReservation {

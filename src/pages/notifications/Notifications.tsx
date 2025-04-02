@@ -6,10 +6,23 @@ import { EmptyState } from './components/EmptyState';
 import { AuthPrompt } from './components/AuthPrompt';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNotifications } from '@/hooks/useNotifications';
+import { NotificationItem as NotificationItemType } from './types/notificationTypes';
 
 const Notifications: React.FC = () => {
   const { notifications, isAuthenticated, hasNewNotifications } = useNotifications();
   const isLoading = false; // On suppose que isLoading est toujours false car il a été retiré de l'interface
+
+  // Transform notifications to match the expected type if needed
+  const typedNotifications: NotificationItemType[] = notifications.map(notification => ({
+    id: notification.id,
+    type: notification.type,
+    title: notification.title,
+    description: notification.description,
+    status: notification.status,
+    time: notification.time,
+    link: notification.link,
+    data: notification.data
+  }));
 
   // Show authentication prompt if user is not logged in
   if (!isAuthenticated) {
@@ -27,8 +40,8 @@ const Notifications: React.FC = () => {
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
           </div>
-        ) : notifications.length > 0 ? (
-          <NotificationsList notifications={notifications} />
+        ) : typedNotifications.length > 0 ? (
+          <NotificationsList notifications={typedNotifications} />
         ) : (
           <EmptyState />
         )}

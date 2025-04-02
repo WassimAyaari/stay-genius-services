@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -113,6 +114,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
   }
 
   function getSummary() {
+    // Check if data exists before trying to access its properties
+    if (!notification.data) return null;
+    
     if (notification.type === 'spa_booking') {
       return (
         <div className="mt-1.5">
