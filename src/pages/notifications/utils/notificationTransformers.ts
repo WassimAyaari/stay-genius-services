@@ -1,7 +1,7 @@
 
 import { ServiceRequest } from '@/features/rooms/types';
 import { TableReservation } from '@/features/dining/types';
-import { NotificationItem } from '../types/notificationTypes';
+import type { NotificationItem } from '../types/notificationTypes';
 
 /**
  * Transforms service requests into notification items

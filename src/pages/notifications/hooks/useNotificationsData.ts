@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
-import { NotificationItem } from '../types/notificationTypes';
+import type { NotificationItem } from '../types/notificationTypes';
 import { useRealtimeNotifications } from './useRealtimeNotifications';
 import { useUserAuthentication } from './useUserAuthentication';
 import { combineAndSortNotifications } from '../utils/notificationTransformers';

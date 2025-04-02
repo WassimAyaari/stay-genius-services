@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NotificationCard } from './NotificationCard';
-import { NotificationItem } from '../hooks/useNotificationsData';
+import type { NotificationItem } from '../types/notificationTypes';
 
 interface NotificationsListProps {
   notifications: NotificationItem[];

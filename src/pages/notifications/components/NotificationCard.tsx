@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { NotificationItem } from '../hooks/useNotificationsData';
+import type { NotificationItem } from '../types/notificationTypes';
 
 interface NotificationCardProps {
   notification: NotificationItem;
