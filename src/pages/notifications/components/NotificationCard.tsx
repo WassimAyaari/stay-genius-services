@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Clock } from 'lucide-react';
 import type { NotificationItem } from '../types/notificationTypes';
 
 interface NotificationCardProps {
@@ -29,7 +30,17 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
       case 'completed': return 'Complétée';
       case 'cancelled': return 'Annulée';
       case 'confirmed': return 'Confirmée';
-      default: return status;
+      default: return 'En attente';
+    }
+  }
+
+  // Get status icon based on notification status
+  function getStatusIcon(status: string) {
+    switch (status) {
+      case 'pending':
+        return <Clock className="h-4 w-4 text-yellow-600 mr-1" />;
+      default:
+        return null;
     }
   }
 
@@ -47,7 +58,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
             <div className="flex-1">
               <div className="flex justify-between items-center mb-1">
                 <h3 className="font-medium">{notification.title}</h3>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(notification.status)}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(notification.status)} flex items-center`}>
+                  {getStatusIcon(notification.status)}
                   {getStatusText(notification.status)}
                 </span>
               </div>
