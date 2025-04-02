@@ -1,4 +1,3 @@
-
 // Type définitions for notifications
 export interface NotificationItem {
   id: string;
@@ -8,7 +7,7 @@ export interface NotificationItem {
   icon: string;
   status: string;
   time: Date;
-  link?: string;
+  link: string;
   data?: {
     room_number?: string;
     service_type?: string;
