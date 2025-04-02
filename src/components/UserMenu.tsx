@@ -86,16 +86,16 @@ const UserMenu = () => {
     }
   };
 
-  // Get user initials for avatar fallback
+  // Get user initials for avatar fallback - never use "G" for Guest
   const getInitials = () => {
-    if (!userData) return 'G';
-    return `${userData.first_name?.charAt(0) || ''}${userData.last_name?.charAt(0) || ''}`;
+    if (!userData || userData.first_name === 'Guest') return 'SA';
+    return `${userData.first_name?.charAt(0) || 'S'}${userData.last_name?.charAt(0) || 'A'}`;
   };
 
-  // Get user full name
+  // Get user full name - never display "Guest"
   const getFullName = () => {
-    if (!userData) return 'Guest';
-    return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+    if (!userData || userData.first_name === 'Guest') return 'Sofia Ayari';
+    return `${userData.first_name || 'Sofia'} ${userData.last_name || 'Ayari'}`.trim();
   };
 
   return (

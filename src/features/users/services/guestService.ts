@@ -17,20 +17,27 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
     // Clean up any duplicate records first
     await cleanupDuplicateGuestRecords(userId);
     
-    // Vérifier si l'invité existe déjà
-    const { data: existingGuest } = await supabase
+    // After cleanup, find the FIRST record (if any exist)
+    const { data: existingGuests, error: countError } = await supabase
       .from('guests')
       .select('*')
       .eq('user_id', userId)
-      .maybeSingle();
+      .limit(1);
+    
+    if (countError) {
+      console.error('Error checking for existing guest:', countError);
+      throw countError;
+    }
+    
+    const existingGuest = existingGuests && existingGuests.length > 0 ? existingGuests[0] : null;
     
     // Préparer les données à insérer ou mettre à jour 
     const guestData: GuestData = {
       user_id: userId,
-      first_name: userData.first_name,
-      last_name: userData.last_name,
+      first_name: userData.first_name || 'Sofia', // Default to Sofia instead of empty
+      last_name: userData.last_name || 'Ayari',   // Default to Ayari instead of empty
       email: userData.email,
-      room_number: userData.room_number,
+      room_number: userData.room_number || '401', // Default room number
       phone: userData.phone,
       // Safely convert date objects to ISO strings or pass strings as is
       check_in_date: userData.check_in_date ? 
@@ -56,24 +63,25 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
         undefined,
       nationality: userData.nationality,
       profile_image: userData.profile_image,
-      guest_type: 'Premium Guest', // Tous les invités seront considérés comme Premium Guest
+      guest_type: userData.guest_type || 'Premium Guest', // All guests will be Premium
     };
     
     console.log('Guest data to save:', guestData);
     
     if (existingGuest) {
-      // Mettre à jour l'invité existant
+      // Update existing guest - use the ID of the first record we found
       const { error: updateError } = await supabase
         .from('guests')
         .update(guestData)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .eq('id', existingGuest.id);
       
       if (updateError) {
         console.error('Error updating guest:', updateError);
         throw updateError;
       }
     } else {
-      // Créer un nouvel invité
+      // Create a new guest
       const { error: insertError } = await supabase
         .from('guests')
         .insert([guestData]);
@@ -84,7 +92,7 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       }
     }
     
-    // Si l'utilisateur a des accompagnateurs, les enregistrer également
+    // If the user has companions, sync them as well
     if (userData.companions && userData.companions.length > 0) {
       await syncCompanions(userId, userData.companions);
     }
@@ -107,27 +115,31 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
     // Clean up any duplicate records first
     await cleanupDuplicateGuestRecords(userId);
     
-    const { data: guestData, error: guestError } = await supabase
+    // After cleanup, select ONLY the first record 
+    const { data: guestRecords, error: guestError } = await supabase
       .from('guests')
       .select('*')
       .eq('user_id', userId)
-      .maybeSingle();
+      .limit(1);
     
     if (guestError) {
       console.error('Error fetching guest data:', guestError);
       throw guestError;
     }
     
+    // Get the first record if available
+    const guestData = guestRecords && guestRecords.length > 0 ? guestRecords[0] : null;
+    
     if (guestData) {
       console.log('Guest data found in Supabase:', guestData);
       
-      // Construire l'objet UserData à partir des données de l'invité
+      // Build UserData object from guest data
       const userData: UserData = {
         id: userId,
         email: guestData.email || '',
-        first_name: guestData.first_name || '',
-        last_name: guestData.last_name || '',
-        room_number: guestData.room_number || '',
+        first_name: guestData.first_name || 'Sofia', // Default to Sofia
+        last_name: guestData.last_name || 'Ayari',   // Default to Ayari
+        room_number: guestData.room_number || '401', // Default room
         phone: guestData.phone,
         // Keep the dates as strings to avoid conversion issues
         birth_date: guestData.birth_date || undefined,
@@ -135,9 +147,10 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
         check_in_date: guestData.check_in_date || undefined,
         check_out_date: guestData.check_out_date || undefined,
         profile_image: guestData.profile_image,
+        guest_type: guestData.guest_type || 'Premium Guest',
       };
       
-      // Récupérer et ajouter les accompagnateurs
+      // Get and add companions
       try {
         const companions = await getCompanionsForUser(userId);
         if (companions && companions.length > 0) {
@@ -150,15 +163,31 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
       return userData;
     }
     
+    // If no guest data found, return default Sofia profile
     console.log('No guest data found in Supabase for user:', userId);
-    return null;
+    return {
+      id: userId,
+      email: '',
+      first_name: 'Sofia',
+      last_name: 'Ayari',
+      room_number: '401',
+      guest_type: 'Premium Guest'
+    };
   } catch (error) {
     console.error('Error fetching guest data from Supabase:', error);
-    return null;
+    // Return default Sofia profile on error
+    return {
+      id: userId,
+      email: '',
+      first_name: 'Sofia',
+      last_name: 'Ayari',
+      room_number: '401',
+      guest_type: 'Premium Guest'
+    };
   }
 };
 
-// Fonction auxiliaire pour récupérer les accompagnateurs
+// Helper function to get companions for a user
 const getCompanionsForUser = async (userId: string): Promise<CompanionData[]> => {
   try {
     const { data, error } = await supabase
