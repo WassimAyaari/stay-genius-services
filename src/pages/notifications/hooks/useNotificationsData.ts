@@ -117,7 +117,7 @@ export const useNotificationsData = () => {
     special_requests: res.specialRequests,
     status: res.status,
     created_at: res.createdAt,
-    updated_at: res.updatedAt || res.createdAt
+    updated_at: res.createdAt // Fix: Use createdAt as fallback instead of non-existent updatedAt
   }));
 
   // Combine and sort notifications
