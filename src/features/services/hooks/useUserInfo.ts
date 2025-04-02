@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Room } from '@/hooks/useRoom';
 import { supabase } from '@/integrations/supabase/client';
+import { syncGuestData } from '@/features/users/services/guestService';
 
 export interface UserInfo {
   name: string;
@@ -50,11 +51,12 @@ export function useUserInfo(room: Room | null) {
     loadUserData();
   }, [room]);
 
-  // Sync authenticated user to guest table
+  // Sync authenticated user to guest table using our improved syncGuestData function
   const syncAuthUserToGuest = async (userId: string, userInfo: UserInfo) => {
     try {
+      // Convertir UserInfo en UserData
       const userData = {
-        user_id: userId,
+        id: userId,
         first_name: userInfo.name.split(' ')[0] || '',
         last_name: userInfo.name.split(' ').slice(1).join(' ') || '',
         email: userInfo.email || '',
@@ -62,13 +64,8 @@ export function useUserInfo(room: Room | null) {
         phone: userInfo.phone || ''
       };
       
-      const { error } = await supabase
-        .from('guests')
-        .upsert([userData], { onConflict: 'user_id' });
-        
-      if (error) {
-        console.error("Error syncing auth user to guest:", error);
-      }
+      // Utiliser notre fonction améliorée qui gère les doublons
+      await syncGuestData(userId, userData);
     } catch (error) {
       console.error("Failed to sync auth user to guest:", error);
     }
@@ -156,7 +153,7 @@ export function useUserInfo(room: Room | null) {
     localStorage.setItem('user_data', JSON.stringify(userDataToSave));
     setUserInfo(info);
     
-    // If authenticated, also sync to guests table
+    // If authenticated, also sync to guests table using our improved function
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {

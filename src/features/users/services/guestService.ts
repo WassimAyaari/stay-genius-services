@@ -3,6 +3,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '../types/userTypes';
 
 /**
+ * Convertit une date en chaîne de caractères formatée
+ * @param dateValue Date à convertir
+ * @returns Chaîne de caractères formatée YYYY-MM-DD ou undefined
+ */
+const formatDateToString = (dateValue: Date | string | undefined): string | undefined => {
+  if (!dateValue) return undefined;
+  if (dateValue instanceof Date) {
+    return dateValue.toISOString().split('T')[0];
+  }
+  return String(dateValue);
+};
+
+/**
+ * Vérifie si un UUID est valide
+ * @param uuid UUID à vérifier
+ * @returns true si l'UUID est valide, false sinon
+ */
+const isValidUuid = (uuid: string): boolean => {
+  return Boolean(uuid && uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i));
+};
+
+/**
  * Récupère les données d'un invité depuis Supabase
  */
 export const getGuestData = async (userId: string): Promise<UserData | null> => {
@@ -10,7 +32,7 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
     console.log('Fetching guest data for user ID:', userId);
     
     // Vérifier si l'UUID est valide
-    if (!userId || !userId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!isValidUuid(userId)) {
       console.error('Invalid user ID format:', userId);
       return null;
     }
@@ -19,16 +41,11 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
       .from('guests')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
     
     if (error) {
-      if (error.code === 'PGRST116') {  // Code pour "No rows returned"
-        console.log('No guest data found for user ID:', userId);
-        return null;
-      } else {
-        console.error('Error fetching guest data:', error);
-        return null;
-      }
+      console.error('Error fetching guest data:', error);
+      return null;
     }
     
     if (!data) {
@@ -62,88 +79,45 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
 
 /**
  * Synchronise les données d'un invité avec Supabase
+ * Utilise upsert pour éviter les doublons
  */
 export const syncGuestData = async (userId: string, userData: UserData): Promise<boolean> => {
   try {
     console.log('Syncing guest data for user ID:', userId);
     
     // Vérifier si l'UUID est valide
-    if (!userId || !userId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!isValidUuid(userId)) {
       console.error('Invalid user ID format:', userId);
       return false;
     }
     
-    // Format dates to ensure they are strings
-    const formatDateToString = (dateValue: Date | string | undefined): string | undefined => {
-      if (!dateValue) return undefined;
-      if (dateValue instanceof Date) {
-        return dateValue.toISOString().split('T')[0];
-      }
-      return String(dateValue);
+    // Préparer les données avec les dates correctement formatées
+    const guestData = {
+      user_id: userId,
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      email: userData.email,
+      room_number: userData.room_number,
+      birth_date: formatDateToString(userData.birth_date),
+      nationality: userData.nationality,
+      check_in_date: formatDateToString(userData.check_in_date),
+      check_out_date: formatDateToString(userData.check_out_date),
+      profile_image: userData.profile_image,
+      phone: userData.phone,
+      guest_type: userData.guest_type || 'Standard Guest'
     };
-
-    // Vérifier si l'invité existe déjà
-    const { data: existingGuest, error: checkError } = await supabase
+    
+    // Utiliser upsert pour éviter les doublons
+    const { error } = await supabase
       .from('guests')
-      .select('id')
-      .eq('user_id', userId)
-      .maybeSingle();
+      .upsert([guestData], { 
+        onConflict: 'user_id',
+        ignoreDuplicates: false // Mettre à jour en cas de conflit
+      });
     
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking existing guest:', checkError);
+    if (error) {
+      console.error('Error syncing guest data:', error);
       return false;
-    }
-    
-    if (existingGuest) {
-      // Mettre à jour l'invité existant
-      console.log('Updating existing guest record for user ID:', userId);
-      
-      const { error: updateError } = await supabase
-        .from('guests')
-        .update({
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          email: userData.email,
-          room_number: userData.room_number,
-          birth_date: formatDateToString(userData.birth_date),
-          nationality: userData.nationality,
-          check_in_date: formatDateToString(userData.check_in_date),
-          check_out_date: formatDateToString(userData.check_out_date),
-          profile_image: userData.profile_image,
-          phone: userData.phone,
-          guest_type: userData.guest_type || 'Standard Guest'
-        })
-        .eq('user_id', userId);
-      
-      if (updateError) {
-        console.error('Error updating guest data:', updateError);
-        return false;
-      }
-    } else {
-      // Créer un nouvel invité
-      console.log('Creating new guest record for user ID:', userId);
-      
-      const { error: insertError } = await supabase
-        .from('guests')
-        .insert([{
-          user_id: userId,
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          email: userData.email,
-          room_number: userData.room_number,
-          birth_date: formatDateToString(userData.birth_date),
-          nationality: userData.nationality,
-          check_in_date: formatDateToString(userData.check_in_date),
-          check_out_date: formatDateToString(userData.check_out_date),
-          profile_image: userData.profile_image,
-          phone: userData.phone,
-          guest_type: userData.guest_type || 'Standard Guest'
-        }]);
-      
-      if (insertError) {
-        console.error('Error inserting guest data:', insertError);
-        return false;
-      }
     }
     
     console.log('Guest data synchronized successfully for user ID:', userId);
@@ -155,16 +129,19 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
 };
 
 /**
- * Nettoyer les doublons potentiels dans la table des invités
+ * Nettoie les doublons potentiels dans la table des invités
+ * Cette fonction est conservée pour la compatibilité avec le code existant
+ * mais n'est plus nécessaire avec l'utilisation de upsert
  */
 export const cleanupDuplicateGuestRecords = async (userId: string): Promise<boolean> => {
   try {
     // Vérifier si l'UUID est valide
-    if (!userId || !userId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!isValidUuid(userId)) {
       console.error('Invalid user ID format:', userId);
       return false;
     }
     
+    // Récupérer tous les enregistrements pour cet utilisateur
     const { data, error } = await supabase
       .from('guests')
       .select('id')
@@ -176,8 +153,8 @@ export const cleanupDuplicateGuestRecords = async (userId: string): Promise<bool
       return false;
     }
     
+    // S'il n'y a pas plus d'un enregistrement, pas besoin de nettoyage
     if (!data || data.length <= 1) {
-      // Pas de doublons à nettoyer
       return true;
     }
     
@@ -196,6 +173,8 @@ export const cleanupDuplicateGuestRecords = async (userId: string): Promise<bool
         console.error('Error deleting duplicate guest records:', deleteError);
         return false;
       }
+      
+      console.log(`Successfully cleaned up duplicate records for user ID: ${userId}`);
     }
     
     return true;
