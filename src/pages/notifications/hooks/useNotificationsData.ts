@@ -4,7 +4,7 @@ import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
 import { useSpaServices } from '@/hooks/useSpaServices';
-import { NotificationItem, SpaBooking } from '../types/notificationTypes';
+import { NotificationItem, SpaBooking, ServiceRequest, TableReservation } from '../types/notificationTypes';
 import { useRealtimeNotifications } from './useRealtimeNotifications';
 import { useUserAuthentication } from './useUserAuthentication';
 import { combineAndSortNotifications } from '../utils/notificationTransformers';
@@ -55,7 +55,13 @@ export const useNotificationsData = () => {
         setIsLoadingUserBookings(true);
         try {
           const bookings = await fetchUserBookings(userId);
-          setUserSpaBookings(bookings);
+          // Convert imported SpaBooking type to the local NotificationTypes SpaBooking type
+          const typedBookings: SpaBooking[] = bookings.map(booking => ({
+            ...booking,
+            // Ensure required fields are present
+            created_at: booking.created_at || new Date().toISOString(),
+          }));
+          setUserSpaBookings(typedBookings);
         } catch (error) {
           console.error("Error fetching user spa bookings:", error);
           setUserSpaBookings([]);
@@ -64,7 +70,14 @@ export const useNotificationsData = () => {
         }
       } else if (userRoomNumber) {
         // If no user ID but has room number, filter bookings by room number
-        setUserSpaBookings(allBookings.filter(booking => booking.room_number === userRoomNumber));
+        const filteredBookings = allBookings.filter(booking => booking.room_number === userRoomNumber);
+        // Convert to the right type
+        const typedBookings: SpaBooking[] = filteredBookings.map(booking => ({
+          ...booking,
+          // Ensure required fields are present
+          created_at: booking.created_at || new Date().toISOString(),
+        }));
+        setUserSpaBookings(typedBookings);
       } else {
         setUserSpaBookings([]);
       }
@@ -90,10 +103,27 @@ export const useNotificationsData = () => {
     refetchReservations
   );
 
+  // Convert reservations to the expected TableReservation type
+  const typedReservations: TableReservation[] = reservations.map(res => ({
+    id: res.id,
+    restaurant_id: res.restaurantId,
+    date: res.date,
+    time: res.time,
+    guests: res.guests,
+    guest_name: res.guestName || "",
+    guest_email: res.guestEmail || "",
+    guest_phone: res.guestPhone,
+    room_number: res.roomNumber,
+    special_requests: res.specialRequests,
+    status: res.status,
+    created_at: res.createdAt,
+    updated_at: res.updatedAt || res.createdAt
+  }));
+
   // Combine and sort notifications
   const notifications: NotificationItem[] = combineAndSortNotifications(
-    serviceRequests, 
-    reservations,
+    serviceRequests as ServiceRequest[], 
+    typedReservations,
     userSpaBookings,
     serviceNamesMap
   );

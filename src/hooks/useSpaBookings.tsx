@@ -131,6 +131,31 @@ export const useSpaBookings = () => {
     },
   });
 
+  // Add cancellation functionality
+  const cancelBookingMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('spa_bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error cancelling booking:', error);
+        throw error;
+      }
+
+      return { id, status: 'cancelled' };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['spa-bookings'] });
+      toast.success('Réservation annulée avec succès');
+    },
+    onError: (error) => {
+      console.error('Error in cancel booking mutation:', error);
+      toast.error('Erreur lors de l\'annulation de la réservation');
+    },
+  });
+
   const { data = [], isLoading, error, refetch } = useQuery({
     queryKey: ['spa-bookings'],
     queryFn: fetchBookings,
@@ -143,8 +168,10 @@ export const useSpaBookings = () => {
     getBookingById,
     createBooking: createBookingMutation.mutate,
     updateBookingStatus: updateBookingStatusMutation.mutate,
+    cancelBooking: cancelBookingMutation.mutate,
     isCreating: createBookingMutation.isPending,
     isUpdating: updateBookingStatusMutation.isPending,
+    isCancelling: cancelBookingMutation.isPending,
     fetchUserBookings,
     refetch
   };
