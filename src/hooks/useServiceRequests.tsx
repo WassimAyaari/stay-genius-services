@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest } from '@/features/rooms/types';
@@ -7,9 +8,10 @@ import { useLocation } from 'react-router-dom';
 
 export const useServiceRequests = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const location = useLocation();
   const userId = user?.id || localStorage.getItem('user_id');
+  const userRoomNumber = userData?.room_number || localStorage.getItem('user_room_number');
   
   // Check if we're in the admin section
   const isAdminSection = location.pathname.includes('/admin');
@@ -21,7 +23,6 @@ export const useServiceRequests = () => {
     }
 
     // For admin section, fetch all service requests 
-    // Don't try to join with request_items as the relationship isn't properly set up
     if (isAdminSection) {
       console.log('Admin view: Fetching all service requests');
       
@@ -38,13 +39,33 @@ export const useServiceRequests = () => {
       console.log('Service requests data retrieved:', data?.length || 0);
       return data as ServiceRequest[];
     } else {
-      // For user view, just fetch their own requests
-      console.log('Fetching service requests for user ID:', userId);
+      // Pour un utilisateur normal, vérifier d'abord s'il a un numéro de chambre
+      if (!userRoomNumber) {
+        console.log('User has no room number associated, fetching by guest_id only');
+        
+        // Récupérer uniquement par guest_id s'il n'y a pas de numéro de chambre
+        const { data, error } = await supabase
+          .from('service_requests')
+          .select('*')
+          .eq('guest_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching service requests by guest_id:', error);
+          throw error;
+        }
+
+        console.log(`Retrieved ${data?.length || 0} service requests by guest_id`);
+        return data as ServiceRequest[];
+      }
+      
+      // Récupérer par guest_id ET room_number pour plus de sécurité
+      console.log(`Fetching service requests for user ID: ${userId} and room: ${userRoomNumber}`);
       
       const { data, error } = await supabase
         .from('service_requests')
         .select('*')
-        .eq('guest_id', userId)
+        .or(`guest_id.eq.${userId},room_number.eq.${userRoomNumber}`)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -52,7 +73,7 @@ export const useServiceRequests = () => {
         throw error;
       }
 
-      console.log('Service requests data retrieved:', data?.length || 0);
+      console.log(`Retrieved ${data?.length || 0} service requests for user and room`);
       return data as ServiceRequest[];
     }
   };
@@ -70,6 +91,7 @@ export const useServiceRequests = () => {
       
     // Only apply user filter if not in admin section
     if (!isAdminSection) {
+      // Ajouter une vérification du guest_id pour s'assurer que l'utilisateur ne peut annuler que ses propres demandes
       query = query.eq('guest_id', userId);
     }
 
@@ -82,7 +104,7 @@ export const useServiceRequests = () => {
   };
 
   const { data, isLoading, error, refetch, isError } = useQuery({
-    queryKey: ['serviceRequests', userId, isAdminSection],
+    queryKey: ['serviceRequests', userId, userRoomNumber, isAdminSection],
     queryFn: fetchServiceRequests,
     staleTime: 1000 * 60, // 1 minute
     refetchOnWindowFocus: true,
@@ -92,7 +114,7 @@ export const useServiceRequests = () => {
   const cancelMutation = useMutation({
     mutationFn: cancelServiceRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['serviceRequests', userId, isAdminSection] });
+      queryClient.invalidateQueries({ queryKey: ['serviceRequests', userId, userRoomNumber, isAdminSection] });
       toast.success('Demande annulée avec succès');
     },
     onError: (error) => {

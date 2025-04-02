@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -49,6 +48,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('Données récupérées depuis Supabase:', guestData);
         setUserData(guestData);
         localStorage.setItem('user_data', JSON.stringify(guestData));
+        
+        // Stocker également le numéro de chambre séparément pour un accès plus facile
+        if (guestData.room_number) {
+          localStorage.setItem('user_room_number', guestData.room_number);
+        }
+        
         return guestData;
       }
       
@@ -59,6 +64,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const localUserData = JSON.parse(userDataString) as UserData;
           setUserData(localUserData);
           console.log('Données récupérées depuis localStorage:', localUserData);
+          
+          // Stocker également le numéro de chambre
+          if (localUserData.room_number) {
+            localStorage.setItem('user_room_number', localUserData.room_number);
+          }
           
           await syncGuestData(userId, localUserData);
           

@@ -8,8 +8,8 @@ import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 export function useRequestsData() {
   const { toast } = useToast();
-  const { user } = useAuth();
-  // Directly use the return values from useServiceRequests
+  const { user, userData } = useAuth();
+  // Directement utiliser les valeurs retournées par useServiceRequests
   const { 
     data: requests = [], 
     isLoading, 
@@ -20,7 +20,7 @@ export function useRequestsData() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Set up real-time updates for all service requests
+  // Configuration des mises à jour en temps réel pour toutes les demandes de service
   useEffect(() => {
     try {
       const channel = supabase
@@ -31,9 +31,26 @@ export function useRequestsData() {
           table: 'service_requests',
         }, (payload) => {
           console.log('Service request change detected:', payload);
+          
+          // Pour les utilisateurs non-admin, vérifier si la requête leur appartient
+          if (!window.location.pathname.includes('/admin')) {
+            const userId = user?.id || localStorage.getItem('user_id');
+            const roomNumber = userData?.room_number || localStorage.getItem('user_room_number');
+            
+            // Vérifier si la requête appartient à cet utilisateur (par guest_id ou room_number)
+            const isUserRequest = 
+              (payload.new?.guest_id === userId) || 
+              (roomNumber && payload.new?.room_number === roomNumber);
+            
+            if (!isUserRequest) {
+              console.log('Ignoring update for request not belonging to current user');
+              return;
+            }
+          }
+          
           refetch();
           
-          // Show notification for status updates
+          // Afficher une notification pour les mises à jour de statut
           if (payload.eventType === 'UPDATE' && payload.new?.status !== payload.old?.status) {
             const statusMap = {
               'pending': 'is now pending',
@@ -59,24 +76,12 @@ export function useRequestsData() {
     } catch (error) {
       console.error("Error setting up realtime updates:", error);
     }
-  }, [refetch, toast]);
+  }, [refetch, toast, user?.id, userData?.room_number]);
   
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
       await refetch();
-      
-      // Also manually fetch the latest data to ensure we have everything
-      const { data: latestRequests, error: fetchError } = await supabase
-        .from('service_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (fetchError) {
-        console.error("Error manually fetching requests:", fetchError);
-      } else {
-        console.log(`Manually fetched ${latestRequests?.length || 0} service requests`);
-      }
       
       toast({
         title: "Data Refreshed",

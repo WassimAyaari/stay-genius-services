@@ -13,8 +13,42 @@ export const createServiceRequest = async (requestData: {
   status?: string;
   request_item_id?: string;
   category_id?: string;
+  room_number?: string;
+  guest_name?: string;
 }) => {
   try {
+    // Assurez-vous que les données room_number et guest_name sont présentes
+    if (!requestData.room_number) {
+      // Essayez de récupérer le numéro de chambre à partir du localStorage
+      const userDataStr = localStorage.getItem('user_data');
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          if (userData.room_number) {
+            requestData.room_number = userData.room_number;
+          }
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
+    }
+
+    if (!requestData.guest_name) {
+      // Essayez de récupérer le nom de l'invité à partir du localStorage
+      const userDataStr = localStorage.getItem('user_data');
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+          if (fullName) {
+            requestData.guest_name = fullName || 'Guest';
+          }
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
+    }
+
     const { data, error } = await supabase
       .from('service_requests')
       .insert({
@@ -45,9 +79,11 @@ export const requestService = async (
   category_id?: string
 ) => {
   try {
-    // Get guest_id from local storage or use a default
+    // Get guest_id and user data from local storage
     const userDataStr = localStorage.getItem('user_data');
     let guest_id = '00000000-0000-0000-0000-000000000000'; // Default guest ID
+    let guest_name = 'Guest';
+    let room_number = '';
 
     if (userDataStr) {
       try {
@@ -55,9 +91,22 @@ export const requestService = async (
         if (userData.id) {
           guest_id = userData.id;
         }
+        
+        // Récupérer le nom complet
+        guest_name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Guest';
+        
+        // Privilégier le numéro de chambre de l'utilisateur authentifié
+        if (userData.room_number) {
+          room_number = userData.room_number;
+        }
       } catch (error) {
         console.error("Error parsing user data:", error);
       }
+    }
+
+    // Si le numéro de chambre n'est pas disponible dans user_data, essayer d'utiliser le roomId
+    if (!room_number && !roomId.includes('-')) {
+      room_number = roomId;
     }
 
     // First, check if the roomId is in room number format (e.g., "406")
@@ -91,12 +140,19 @@ export const requestService = async (
     
     console.log('Submitting service request with room_id:', actualRoomId);
     
+    // Save the room number to localStorage for future reference if it's not a UUID
+    if (room_number && !localStorage.getItem('user_room_number')) {
+      localStorage.setItem('user_room_number', room_number);
+    }
+    
     // Insert the request with the correct room_id
     const { data, error } = await supabase
       .from('service_requests')
       .insert({
         guest_id,
         room_id: actualRoomId,
+        room_number: room_number || roomId.includes('-') ? undefined : roomId,
+        guest_name,
         type,
         description,
         request_item_id,
