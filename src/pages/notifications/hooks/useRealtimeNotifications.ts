@@ -20,10 +20,7 @@ import {
 export const useRealtimeNotifications = (
   userId: string | null | undefined,
   userEmail: string | null | undefined,
-  userRoomNumber: string | null | undefined,
-  refetchRequests: () => void,
-  refetchReservations: () => void,
-  refetchSpaBookings: (() => void) | undefined
+  userRoomNumber: string | null | undefined
 ) => {
   // Real-time listeners for notifications
   useEffect(() => {
@@ -38,34 +35,34 @@ export const useRealtimeNotifications = (
 
     // Table reservations listeners
     if (userId) {
-      channels.push(setupReservationListenerById(userId, refetchReservations));
+      channels.push(setupReservationListenerById(userId));
     }
     
     if (userEmail) {
-      channels.push(setupReservationListenerByEmail(userEmail, refetchReservations));
+      channels.push(setupReservationListenerByEmail(userEmail));
     }
     
     // Service requests listeners
     if (userId) {
-      channels.push(setupServiceRequestListenerById(userId, refetchRequests));
+      channels.push(setupServiceRequestListenerById(userId));
     }
 
     if (userRoomNumber) {
-      channels.push(setupServiceRequestListenerByRoom(userRoomNumber, refetchRequests));
+      channels.push(setupServiceRequestListenerByRoom(userRoomNumber));
     }
     
     // Spa bookings listeners
-    if (userId && refetchSpaBookings) {
-      channels.push(setupSpaBookingListenerById(userId, refetchSpaBookings));
+    if (userId) {
+      channels.push(setupSpaBookingListenerById(userId));
     }
     
-    if (userRoomNumber && refetchSpaBookings) {
-      channels.push(setupSpaBookingListenerByRoom(userRoomNumber, refetchSpaBookings));
+    if (userRoomNumber) {
+      channels.push(setupSpaBookingListenerByRoom(userRoomNumber));
     }
     
     return () => {
       console.log("Cleaning up real-time listeners for notifications page");
       channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [userId, userEmail, userRoomNumber, refetchReservations, refetchRequests, refetchSpaBookings]);
+  }, [userId, userEmail, userRoomNumber]);
 };

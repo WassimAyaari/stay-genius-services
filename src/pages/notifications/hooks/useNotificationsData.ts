@@ -27,22 +27,19 @@ export const useNotificationsData = () => {
   // Get service requests and reservations
   const { 
     data: serviceRequests = [], 
-    isLoading: isLoadingRequests, 
-    refetch: refetchRequests 
+    isLoading: isLoadingRequests
   } = useServiceRequests();
   
   const { 
     reservations = [], 
-    isLoading: isLoadingReservations, 
-    refetch: refetchReservations 
+    isLoading: isLoadingReservations
   } = useTableReservations();
 
   // Get spa bookings
   const {
     bookings: allBookings = [],
     isLoading: isLoadingSpaBookings,
-    fetchUserBookings,
-    refetch: refetchSpaBookings
+    fetchUserBookings
   } = useSpaBookings();
 
   const { services = [] } = useSpaServices();
@@ -50,8 +47,6 @@ export const useNotificationsData = () => {
   // State for user's spa bookings
   const [userSpaBookings, setUserSpaBookings] = useState<SpaBooking[]>([]);
   const [isLoadingUserBookings, setIsLoadingUserBookings] = useState(false);
-  // Add state to prevent refetching on every render
-  const [hasInitiallyFetched, setHasInitiallyFetched] = useState(false);
 
   // Create a mapping of service IDs to service names
   const serviceNamesMap = services.reduce((acc, service) => {
@@ -94,28 +89,11 @@ export const useNotificationsData = () => {
     loadUserBookings();
   }, [loadUserBookings]);
 
-  // Force refetch on mount to ensure we have the latest data, but ONLY ONCE
-  useEffect(() => {
-    if (!hasInitiallyFetched) {
-      console.log("useNotificationsData - Initial data fetch");
-      console.log("Current room number:", userRoomNumber);
-      refetchRequests();
-      refetchReservations();
-      if (refetchSpaBookings) {
-        refetchSpaBookings();
-      }
-      setHasInitiallyFetched(true);
-    }
-  }, [refetchRequests, refetchReservations, refetchSpaBookings, userRoomNumber, hasInitiallyFetched]);
-
   // Set up real-time listeners
   useRealtimeNotifications(
     userId, 
     userEmail, 
-    userRoomNumber, 
-    refetchRequests, 
-    refetchReservations,
-    refetchSpaBookings
+    userRoomNumber
   );
 
   // Convert reservations to the expected TableReservation type and ensure created_at
@@ -151,10 +129,6 @@ export const useNotificationsData = () => {
     isAuthenticated,
     userId,
     userEmail,
-    userRoomNumber,
-    // Export the refetch functions so they can be used by the component
-    refetchRequests,
-    refetchReservations,
-    refetchSpaBookings
+    userRoomNumber
   };
 };
