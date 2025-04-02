@@ -99,7 +99,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   }
 
   return (
-    <Link to={link} key={id}>
+    <Link to={`/notifications/${type}/${id}`} key={id}>
       <div className="flex items-start gap-3 p-3 cursor-pointer hover:bg-gray-200/70">
         <div className="flex-shrink-0 mt-1">
           <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200">

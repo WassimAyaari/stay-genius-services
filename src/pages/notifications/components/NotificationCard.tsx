@@ -156,7 +156,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
   }
 
   return (
-    <Link to={notification.link || '#'} className="block">
+    <Link to={`/notifications/${notification.type}/${notification.id}`} className="block">
       <Card className={`hover:shadow-md transition-shadow cursor-pointer ${getCardBackgroundColor(notification.status)}`}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start">
