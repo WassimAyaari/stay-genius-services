@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -20,15 +20,28 @@ const NotificationMenu = () => {
     unreadCount, 
     isAuthenticated,
     hasNewNotifications, 
-    setHasNewNotifications 
+    setHasNewNotifications,
+    refetchServices,
+    refetchReservations,
+    refetchSpaBookings
   } = useNotifications();
 
   // Reset the "new notifications" indicator when the menu is opened
-  const handleOpenChange = (open: boolean) => {
+  // and refresh notifications data to ensure we have the latest data
+  const handleOpenChange = useCallback((open: boolean) => {
     if (open) {
       setHasNewNotifications(false);
+      
+      // Refresh all notifications data when menu opens
+      Promise.all([
+        refetchServices(),
+        refetchReservations(),
+        refetchSpaBookings()
+      ]).catch(err => {
+        console.error('Failed to refresh notifications:', err);
+      });
     }
-  };
+  }, [setHasNewNotifications, refetchServices, refetchReservations, refetchSpaBookings]);
 
   return (
     <DropdownMenu onOpenChange={handleOpenChange}>

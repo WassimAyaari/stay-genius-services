@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { NotificationItem } from '@/types/notification';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -18,6 +18,11 @@ export const RequestDetail: React.FC<RequestDetailProps> = ({ notification }) =>
   const { cancelRequest, isCancelling } = useServiceRequests();
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   
+  // Prevent multiple re-renders by logging only once
+  useEffect(() => {
+    console.log('RequestDetail rendered with notification ID:', notification.id);
+  }, [notification.id]);
+  
   const handleCancelRequest = async () => {
     try {
       await cancelRequest(notification.id);
@@ -33,7 +38,7 @@ export const RequestDetail: React.FC<RequestDetailProps> = ({ notification }) =>
   
   return (
     <>
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader className="pb-2">
           <RequestDetailHeader 
             serviceType={notification.data?.service_type}

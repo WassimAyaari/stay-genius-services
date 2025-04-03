@@ -7,6 +7,7 @@ import { NotificationItem } from '@/types/notification';
 import { useNotificationsState } from './notifications/useNotificationsState';
 import { useNotificationsRealtime } from './notifications/useNotificationsRealtime';
 import { combineAndSortNotifications } from './notifications/notificationUtils';
+import { useEffect } from 'react';
 
 export const useNotifications = () => {
   const { user, userData } = useAuth();
@@ -23,14 +24,25 @@ export const useNotifications = () => {
   const { hasNewNotifications, setHasNewNotifications } = useNotificationsState();
   
   // Store email in localStorage for future reference
-  if (user?.email && !localStorage.getItem('user_email')) {
-    localStorage.setItem('user_email', user.email);
-  }
+  useEffect(() => {
+    if (user?.email && !localStorage.getItem('user_email')) {
+      localStorage.setItem('user_email', user.email);
+    }
+  }, [user?.email]);
   
-  // Force a reload on component mount
-  refetchServices();
-  refetchReservations();
-  refetchSpaBookings();
+  // Force a reload only once on mount to avoid excessive refetching
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      // Use Promise.all to fetch all data in parallel
+      await Promise.all([
+        refetchServices(),
+        refetchReservations(),
+        refetchSpaBookings()
+      ]);
+    };
+    
+    fetchInitialData();
+  }, [refetchServices, refetchReservations, refetchSpaBookings]);
   
   // Set up real-time notification listeners
   useNotificationsRealtime(
@@ -62,6 +74,9 @@ export const useNotifications = () => {
     unreadCount,
     isAuthenticated,
     hasNewNotifications,
-    setHasNewNotifications
+    setHasNewNotifications,
+    refetchServices,
+    refetchReservations,
+    refetchSpaBookings
   };
 };

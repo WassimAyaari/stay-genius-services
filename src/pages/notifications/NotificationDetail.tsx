@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { NotificationDetailHeader } from './components/NotificationDetailHeader';
@@ -17,6 +17,13 @@ const NotificationDetail: React.FC = () => {
   const handleBack = () => {
     navigate('/notifications');
   };
+
+  // Pour éviter des rendus multiples, on utilise useEffect pour logger
+  useEffect(() => {
+    if (notification) {
+      console.log('Notification détail rendu avec:', notification.id, notification.type);
+    }
+  }, [notification]);
 
   // Show loading state while fetching data
   if (isLoading) {
