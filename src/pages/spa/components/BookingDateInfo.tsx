@@ -13,13 +13,21 @@ const BookingDateInfo: React.FC<BookingDateInfoProps> = ({ date, time }) => {
   // Utiliser un bloc try-catch pour éviter les erreurs de parsing de date
   let formattedDate;
   try {
-    // S'assurer que le format de date est valide avant le parsing
-    formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
+    // S'assurer que la date est une chaîne non vide avant de tenter le parsing
+    if (date && typeof date === 'string' && date.trim() !== '') {
+      formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
+    } else {
+      formattedDate = "Date non disponible";
+      console.error('Date invalide reçue:', date);
+    }
   } catch (error) {
-    console.error('Error parsing date:', error, date);
+    console.error('Erreur lors du parsing de la date:', error, date);
     // Fallback en cas d'erreur
-    formattedDate = date;
+    formattedDate = "Date non disponible";
   }
+  
+  // Vérifier que le temps est disponible
+  const displayTime = time && time.trim() !== '' ? time : "Heure non spécifiée";
   
   return (
     <div className="space-y-3">
@@ -28,7 +36,7 @@ const BookingDateInfo: React.FC<BookingDateInfoProps> = ({ date, time }) => {
         <Calendar className="h-4 w-4 text-gray-500" />
         <div>
           <p className="font-medium">Date et heure</p>
-          <p className="text-gray-600">{formattedDate} à {time}</p>
+          <p className="text-gray-600">{formattedDate} à {displayTime}</p>
         </div>
       </div>
     </div>

@@ -102,7 +102,7 @@ export const useSpaBookingsFetching = () => {
           )
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching booking by ID:', error);
@@ -114,6 +114,11 @@ export const useSpaBookingsFetching = () => {
         console.log('No booking found with ID:', id);
         toast.error('Réservation introuvable');
         return null;
+      }
+
+      // Vérifier que des données sont présentes pour éviter les erreurs
+      if (!data.spa_services) {
+        console.warn('No service data found for booking:', id);
       }
 
       console.log('Found booking with service details:', data);
