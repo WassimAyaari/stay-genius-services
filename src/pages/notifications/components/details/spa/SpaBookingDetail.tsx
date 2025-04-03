@@ -12,8 +12,6 @@ import { SpaBookingActions } from './SpaBookingActions';
 import { SpaBookingLoader } from './SpaBookingLoader';
 import { SpaBookingNotFound } from './SpaBookingNotFound';
 import { useSpaBookingDetail } from './useSpaBookingDetail';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, AlertCircle } from 'lucide-react';
 
 interface SpaBookingDetailProps {
   notification: NotificationItem;
@@ -27,45 +25,27 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     isLoading,
     error,
     handleCancelBooking,
-    handleViewDetails,
-    handleRetry
+    handleViewDetails
   } = useSpaBookingDetail(notification);
 
   if (isLoading) {
     return <SpaBookingLoader />;
   }
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-xl font-medium mb-2">Erreur de chargement</h3>
-          <p className="text-gray-500 mb-4">
-            Impossible de charger les détails de cette réservation.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Button 
-              variant="outline" 
-              onClick={handleRetry}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span>Réessayer</span>
-            </Button>
-            <Button 
-              onClick={handleViewDetails}
-            >
-              Voir la page détaillée
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  if (error || !booking) {
+    return <SpaBookingNotFound 
+      onViewDetails={handleViewDetails} 
+      bookingId={notification.id}
+      errorMessage={error}
+    />;
   }
 
-  if (!booking || !service) {
-    return <SpaBookingNotFound onViewDetails={handleViewDetails} />;
+  if (!service) {
+    return <SpaBookingNotFound 
+      onViewDetails={handleViewDetails} 
+      bookingId={notification.id}
+      errorMessage="Les détails du service pour cette réservation sont introuvables"
+    />;
   }
 
   return (

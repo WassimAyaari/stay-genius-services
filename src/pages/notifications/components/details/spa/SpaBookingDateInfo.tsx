@@ -10,17 +10,17 @@ interface SpaBookingDateInfoProps {
 }
 
 export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, time }) => {
-  // Add a safety check for date format
-  const formatDate = (dateString: string) => {
-    try {
-      return format(parseISO(dateString), 'PPPP', { locale: fr });
-    } catch (error) {
-      console.error('Error formatting date:', error, dateString);
-      return dateString;
-    }
-  };
+  let formattedDate;
   
-  const formattedDate = formatDate(date);
+  try {
+    if (!date) {
+      throw new Error('Date is undefined or null');
+    }
+    formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
+  } catch (error) {
+    console.error('Error parsing date:', error, 'Original date value:', date);
+    formattedDate = date || 'Date non disponible';
+  }
   
   return (
     <div className="space-y-3">
@@ -29,7 +29,10 @@ export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, ti
         <Calendar className="h-4 w-4 text-gray-500" />
         <div>
           <p className="font-medium">Date et heure</p>
-          <p className="text-gray-600">{formattedDate} à {time}</p>
+          <p className="text-gray-600">
+            {formattedDate}
+            {time ? ` à ${time}` : ''}
+          </p>
         </div>
       </div>
     </div>

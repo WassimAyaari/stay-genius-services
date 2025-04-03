@@ -2,7 +2,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SpaBooking } from '@/features/spa/types';
-import { toast } from 'sonner';
 
 export interface ExtendedSpaBooking extends SpaBooking {
   spa_services?: {
@@ -19,7 +18,7 @@ export interface ExtendedSpaBooking extends SpaBooking {
 }
 
 export const useSpaBookingsFetching = () => {
-  // Récupérer toutes les réservations spa
+  // Fetch all spa bookings
   const fetchBookings = async (): Promise<SpaBooking[]> => {
     try {
       const { data, error } = await supabase
@@ -33,9 +32,9 @@ export const useSpaBookingsFetching = () => {
             duration,
             description,
             category,
-            facility_id,
             image,
-            status
+            status,
+            facility_id
           )
         `)
         .order('date', { ascending: false });
@@ -52,7 +51,7 @@ export const useSpaBookingsFetching = () => {
     }
   };
 
-  // Récupérer les réservations d'un utilisateur
+  // Fetch bookings for a specific user
   const fetchUserBookings = async (userId: string): Promise<SpaBooking[]> => {
     try {
       console.log('Fetching bookings for user ID:', userId);
@@ -67,9 +66,9 @@ export const useSpaBookingsFetching = () => {
             duration,
             description,
             category,
-            facility_id,
             image,
-            status
+            status,
+            facility_id
           )
         `)
         .eq('user_id', userId)
@@ -88,11 +87,16 @@ export const useSpaBookingsFetching = () => {
     }
   };
 
-  // Récupérer une réservation par ID avec tous les détails nécessaires
+  // Fetch a booking by ID
   const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
+    if (!id) {
+      console.error('No booking ID provided to getBookingById');
+      return null;
+    }
+    
     console.log('Fetching booking by ID:', id);
     try {
-      // Récupérer la réservation avec les détails du service
+      // Get the booking with service details
       const { data, error } = await supabase
         .from('spa_bookings')
         .select(`
@@ -104,9 +108,9 @@ export const useSpaBookingsFetching = () => {
             duration,
             description,
             category,
-            facility_id,
             image,
-            status
+            status,
+            facility_id
           )
         `)
         .eq('id', id)
@@ -114,25 +118,37 @@ export const useSpaBookingsFetching = () => {
 
       if (error) {
         console.error('Error fetching booking by ID:', error);
-        toast.error('Erreur lors du chargement de la réservation');
         return null;
       }
 
       if (!data) {
         console.log('No booking found with ID:', id);
-        return null;
-      }
-
-      // Vérifier que des données sont présentes pour éviter les erreurs
-      if (!data.spa_services) {
-        console.warn('No service data found for booking:', id);
+        
+        // Double-check if the booking exists without the joins
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('spa_bookings')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+        
+        if (simpleError) {
+          console.error('Error fetching simple booking by ID:', simpleError);
+          return null;
+        }
+        
+        if (!simpleData) {
+          console.log('No booking exists with ID:', id);
+          return null;
+        }
+        
+        console.log('Found booking without service details:', simpleData);
+        return simpleData as ExtendedSpaBooking;
       }
 
       console.log('Found booking with service details:', data);
       return data as unknown as ExtendedSpaBooking;
     } catch (error) {
       console.error('Exception in getBookingById:', error);
-      toast.error('Erreur réseau lors du chargement de la réservation');
       return null;
     }
   };
@@ -140,8 +156,6 @@ export const useSpaBookingsFetching = () => {
   const { data = [], isLoading, error, refetch } = useQuery({
     queryKey: ['spa-bookings'],
     queryFn: fetchBookings,
-    retry: 2,
-    staleTime: 60000, // 1 minute
   });
 
   return {

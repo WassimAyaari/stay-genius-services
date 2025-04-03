@@ -15,7 +15,7 @@ interface UseBookingDetailsState {
   facility: SpaFacility | null;
   isLoading: boolean;
   userId: string | null;
-  error: Error | null;
+  error: string | null;
 }
 
 export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
@@ -30,7 +30,6 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
   
   const { getBookingById, cancelBooking } = useSpaBookings();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,7 +44,15 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
   
   useEffect(() => {
     const loadBooking = async () => {
-      if (!id) return;
+      if (!id) {
+        console.error('No booking ID provided');
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          error: 'Aucun identifiant de réservation fourni'
+        }));
+        return;
+      }
       
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
@@ -56,17 +63,17 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
         
         if (!bookingData) {
           console.error('No booking data found for ID:', id);
-          toast.error("Réservation introuvable");
           setState(prev => ({ 
             ...prev, 
-            isLoading: false, 
-            error: new Error('Réservation introuvable')
+            isLoading: false,
+            error: `Réservation avec ID ${id} introuvable`
           }));
           return;
         }
         
-        setState(prev => ({ ...prev, booking: bookingData, error: null }));
+        setState(prev => ({ ...prev, booking: bookingData }));
         
+        // First, try to get service data from the booking data if it includes it
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
           const serviceData: SpaService = {
@@ -78,45 +85,13 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
           };
           setState(prev => ({ ...prev, service: serviceData }));
           
+          // If the service has a facility_id, get the facility data
           if (serviceData.facility_id) {
-            const { data: facilityData, error: facilityError } = await supabase
-              .from('spa_facilities')
-              .select('*')
-              .eq('id', serviceData.facility_id)
-              .maybeSingle();
-            
-            if (facilityError) {
-              console.error('Error fetching facility:', facilityError);
-            } else if (facilityData) {
-              console.log('Facility data received:', facilityData);
-              setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
-            }
-          }
-        } else {
-          // Fetch service separately if not included in booking data
-          const { data: serviceData, error: serviceError } = await supabase
-            .from('spa_services')
-            .select('*')
-            .eq('id', bookingData.service_id)
-            .maybeSingle();
-          
-          if (serviceError) {
-            console.error('Error fetching service:', serviceError);
-          } else if (serviceData) {
-            console.log('Service data received:', serviceData);
-            const typedServiceData: SpaService = {
-              ...serviceData,
-              category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
-              image: serviceData.image || '',
-              status: serviceData.status || 'available',
-            };
-            setState(prev => ({ ...prev, service: typedServiceData }));
-            
-            if (typedServiceData.facility_id) {
+            try {
               const { data: facilityData, error: facilityError } = await supabase
                 .from('spa_facilities')
                 .select('*')
-                .eq('id', typedServiceData.facility_id)
+                .eq('id', serviceData.facility_id)
                 .maybeSingle();
               
               if (facilityError) {
@@ -125,16 +100,69 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
                 console.log('Facility data received:', facilityData);
                 setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
               }
+            } catch (error) {
+              console.error('Exception when fetching facility:', error);
             }
+          }
+        } else {
+          // If the booking doesn't include service data, fetch it separately
+          try {
+            console.log('Fetching service data for service ID:', bookingData.service_id);
+            const { data: serviceData, error: serviceError } = await supabase
+              .from('spa_services')
+              .select('*')
+              .eq('id', bookingData.service_id)
+              .maybeSingle();
+            
+            if (serviceError) {
+              console.error('Error fetching service:', serviceError);
+              setState(prev => ({ 
+                ...prev,
+                error: "Erreur lors du chargement des détails du service"
+              }));
+            } else if (serviceData) {
+              console.log('Service data received separately:', serviceData);
+              const typedServiceData: SpaService = {
+                ...serviceData,
+                category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+                image: serviceData.image || '',
+                status: serviceData.status || 'available',
+              };
+              setState(prev => ({ ...prev, service: typedServiceData }));
+              
+              // If the service has a facility_id, get the facility data
+              if (typedServiceData.facility_id) {
+                try {
+                  const { data: facilityData, error: facilityError } = await supabase
+                    .from('spa_facilities')
+                    .select('*')
+                    .eq('id', typedServiceData.facility_id)
+                    .maybeSingle();
+                  
+                  if (facilityError) {
+                    console.error('Error fetching facility:', facilityError);
+                  } else if (facilityData) {
+                    console.log('Facility data received:', facilityData);
+                    setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
+                  }
+                } catch (error) {
+                  console.error('Exception when fetching facility:', error);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Exception when fetching service:', error);
+            setState(prev => ({ 
+              ...prev,
+              error: "Erreur lors du chargement des détails du service"
+            }));
           }
         }
       } catch (error) {
         console.error('Error loading booking details:', error);
-        toast.error("Erreur lors du chargement des détails de la réservation");
         setState(prev => ({ 
-          ...prev, 
-          error: error instanceof Error ? error : new Error('Erreur de chargement'),
-          isLoading: false 
+          ...prev,
+          error: "Erreur lors du chargement des détails de la réservation"
         }));
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
@@ -142,12 +170,7 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     };
     
     loadBooking();
-  }, [id, getBookingById, retryCount]);
-  
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
-    toast.info("Tentative de rechargement des données...");
-  };
+  }, [id, getBookingById]);
   
   const handleEdit = () => {
     setIsEditDialogOpen(true);
@@ -158,7 +181,6 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     
     try {
       await cancelBooking(id);
-      // Rafraîchir les données après annulation
       const updatedBooking = await getBookingById(id);
       setState(prev => ({ ...prev, booking: updatedBooking }));
       toast.success("Réservation annulée avec succès");
@@ -179,7 +201,6 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     canCancel,
     canEdit,
     handleEdit,
-    handleCancelBooking,
-    handleRetry
+    handleCancelBooking
   };
 };
