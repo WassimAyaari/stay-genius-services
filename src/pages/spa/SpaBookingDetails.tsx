@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,20 +66,17 @@ const SpaBookingDetails = () => {
         
         setBooking(bookingData);
         
-        // Si les données du service sont déjà incluses dans la réponse
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
-          // Ensure all required properties exist with defaults if needed
           const serviceData: SpaService = {
             ...bookingData.spa_services,
             category: bookingData.spa_services.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
             image: bookingData.spa_services.image || '',
             status: bookingData.spa_services.status || 'available',
-            facility_id: bookingData.spa_services.facility_id || '' // Add default to ensure it's never undefined
+            facility_id: bookingData.spa_services.facility_id || ''
           };
           setService(serviceData);
           
-          // Récupérer l'installation si l'ID est disponible
           if (serviceData.facility_id) {
             const { data: facilityData, error: facilityError } = await supabase
               .from('spa_facilities')
@@ -96,7 +92,6 @@ const SpaBookingDetails = () => {
             }
           }
         } else {
-          // Sinon, récupérer le service séparément
           const { data: serviceData, error: serviceError } = await supabase
             .from('spa_services')
             .select('*')
@@ -107,17 +102,15 @@ const SpaBookingDetails = () => {
             console.error('Error fetching service:', serviceError);
           } else if (serviceData) {
             console.log('Service data received:', serviceData);
-            // Ensure all required properties exist with defaults if needed
             const typedServiceData: SpaService = {
               ...serviceData,
               category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
               image: serviceData.image || '',
               status: serviceData.status || 'available',
-              facility_id: serviceData.facility_id || '' // Add default to ensure it's never undefined
+              facility_id: serviceData.facility_id || ''
             };
             setService(typedServiceData);
             
-            // Récupérer l'installation si l'ID est disponible
             if (typedServiceData.facility_id) {
               const { data: facilityData, error: facilityError } = await supabase
                 .from('spa_facilities')
@@ -224,7 +217,6 @@ const SpaBookingDetails = () => {
     );
   }
 
-  // Safely parse the date with a fallback
   let formattedDate;
   try {
     formattedDate = format(parseISO(booking.date), 'PPPP', { locale: fr });

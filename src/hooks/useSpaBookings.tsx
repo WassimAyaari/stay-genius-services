@@ -13,6 +13,8 @@ interface ExtendedSpaBooking extends SpaBooking {
     duration: string;
     description: string;
     category: string;
+    image?: string;
+    status?: string;
     facility_id?: string;
   };
 }
@@ -92,7 +94,9 @@ export const useSpaBookings = () => {
             duration,
             description,
             category,
-            facility_id
+            facility_id,
+            image,
+            status
           )
         `)
         .eq('id', id)

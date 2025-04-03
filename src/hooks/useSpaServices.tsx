@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -18,11 +19,11 @@ export const useSpaServices = () => {
       throw error;
     }
 
-    // Ensure the category is properly typed and all required fields have values
+    // Ensure all required fields have values and proper typing
     return (data || []).map(service => ({
       ...service,
       category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
-      image: service.image || '',
+      image: service.image || '', // Ensure image is never undefined
       status: service.status as 'available' | 'unavailable' | string,
       facility_id: service.facility_id || '' // Provide empty string default
     })) as SpaService[];
@@ -42,11 +43,11 @@ export const useSpaServices = () => {
       throw error;
     }
 
-    // Ensure the category is properly typed and all required fields have values
+    // Ensure all required fields have values and proper typing
     return (data || []).map(service => ({
       ...service,
       category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
-      image: service.image || '',
+      image: service.image || '', // Ensure image is never undefined
       status: service.status as 'available' | 'unavailable' | string,
       facility_id: service.facility_id || '' // Provide empty string default
     })) as SpaService[];
@@ -93,11 +94,11 @@ export const useSpaServices = () => {
 
     if (!data) return null;
 
-    // Ensure the category is properly typed and all required fields have values
+    // Ensure all required fields have values and proper typing
     return {
       ...data,
       category: data.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
-      image: data.image || '',
+      image: data.image || '', // Ensure image is never undefined
       status: data.status as 'available' | 'unavailable' | string,
       facility_id: data.facility_id || '' // Provide empty string default
     } as SpaService;
