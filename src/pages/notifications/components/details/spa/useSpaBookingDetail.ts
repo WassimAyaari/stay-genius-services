@@ -5,6 +5,7 @@ import { useSpaBookings } from '@/hooks/useSpaBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { NotificationItem } from '@/types/notification';
 import { useNavigate } from 'react-router-dom';
+import { SpaBooking } from '@/features/spa/types';
 
 export interface BookingDetailState {
   booking: any | null;
@@ -57,7 +58,11 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
           console.error('Error with direct booking query:', directBookingError);
         } else if (directBookingData) {
           console.log('Found booking via direct query:', directBookingData);
-          bookingData = directBookingData;
+          // Cast the status to the required type to satisfy TypeScript
+          bookingData = {
+            ...directBookingData,
+            status: directBookingData.status as SpaBooking['status']
+          };
         }
       }
       

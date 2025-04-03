@@ -121,7 +121,12 @@ export const useSpaBookingsFetching = () => {
         // On continue pour essayer la stratégie 2
       } else if (data) {
         console.log('Found booking with service details:', data);
-        return data as unknown as ExtendedSpaBooking;
+        // Ensure correct typing for status
+        const typedData = {
+          ...data,
+          status: data.status as SpaBooking['status']
+        };
+        return typedData as ExtendedSpaBooking;
       }
 
       // Stratégie 2: Récupérer la réservation sans le join
@@ -144,19 +149,25 @@ export const useSpaBookingsFetching = () => {
       
       console.log('Found booking without service details:', simpleData);
       
+      // Ensure correct typing for status
+      const typedSimpleData = {
+        ...simpleData,
+        status: simpleData.status as SpaBooking['status']
+      };
+      
       // Stratégie 3: Récupérer le service séparément
-      if (simpleData.service_id) {
+      if (typedSimpleData.service_id) {
         try {
           const { data: serviceData, error: serviceError } = await supabase
             .from('spa_services')
             .select('*')
-            .eq('id', simpleData.service_id)
+            .eq('id', typedSimpleData.service_id)
             .maybeSingle();
             
           if (!serviceError && serviceData) {
             console.log('Found service separately:', serviceData);
             return {
-              ...simpleData,
+              ...typedSimpleData,
               spa_services: serviceData
             } as ExtendedSpaBooking;
           }
@@ -165,7 +176,7 @@ export const useSpaBookingsFetching = () => {
         }
       }
       
-      return simpleData as ExtendedSpaBooking;
+      return typedSimpleData as ExtendedSpaBooking;
     } catch (error) {
       console.error('Exception in getBookingById:', error);
       return null;
