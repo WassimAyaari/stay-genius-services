@@ -27,12 +27,14 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     handleViewDetails
   } = useSpaBookingDetail(notification);
 
+  console.log('SpaBookingDetail render:', { booking, service, facility, isLoading, notificationId: notification?.id });
+
   if (isLoading) {
     return <SpaBookingLoader />;
   }
 
   if (!booking || !service) {
-    return <SpaBookingNotFound onViewDetails={handleViewDetails} />;
+    return <SpaBookingNotFound onViewDetails={handleViewDetails} bookingId={notification.id} />;
   }
 
   return (
