@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,7 +73,9 @@ const SpaBookingDetails = () => {
           // Ensure the category is compatible with SpaService type
           const serviceData: SpaService = {
             ...bookingData.spa_services,
-            category: bookingData.spa_services.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+            category: bookingData.spa_services.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+            image: bookingData.spa_services.image || '',
+            status: bookingData.spa_services.status as 'available' | 'unavailable' | string
           };
           setService(serviceData);
           
@@ -106,7 +109,9 @@ const SpaBookingDetails = () => {
             // Ensure the category is compatible with SpaService type
             const typedServiceData: SpaService = {
               ...serviceData,
-              category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+              category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+              image: serviceData.image || '',
+              status: serviceData.status as 'available' | 'unavailable' | string
             };
             setService(typedServiceData);
             

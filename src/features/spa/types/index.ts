@@ -22,7 +22,7 @@ export interface SpaService {
   category: 'massage' | 'facial' | 'body' | 'wellness' | string;
   facility_id: string;
   is_featured?: boolean;
-  status: 'available' | 'unavailable';
+  status: 'available' | 'unavailable' | string;
   created_at?: string;
   updated_at?: string;
 }

@@ -22,7 +22,9 @@ export const useSpaServices = () => {
     // Ensure the category is properly typed
     return (data || []).map(service => ({
       ...service,
-      category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+      category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+      image: service.image || '',
+      status: service.status as 'available' | 'unavailable' | string
     })) as SpaService[];
   };
 
@@ -43,7 +45,9 @@ export const useSpaServices = () => {
     // Ensure the category is properly typed
     return (data || []).map(service => ({
       ...service,
-      category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+      category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+      image: service.image || '',
+      status: service.status as 'available' | 'unavailable' | string
     })) as SpaService[];
   };
 
@@ -91,7 +95,9 @@ export const useSpaServices = () => {
     // Ensure the category is properly typed
     return {
       ...data,
-      category: data.category as 'massage' | 'facial' | 'body' | 'wellness' | string
+      category: data.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+      image: data.image || '',
+      status: data.status as 'available' | 'unavailable' | string
     } as SpaService;
   };
 
