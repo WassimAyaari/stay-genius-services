@@ -36,6 +36,12 @@ const SpaBookingDetails = () => {
     handleRetry
   } = useBookingDetails({ id });
 
+  // Ajouter plus de logs pour le débogage
+  React.useEffect(() => {
+    console.log("Booking details component rendered with id:", id);
+    console.log("Current booking state:", { booking, service, facility, isLoading, error });
+  }, [id, booking, service, facility, isLoading, error]);
+
   if (isLoading) {
     return (
       <Layout>
@@ -65,7 +71,7 @@ const SpaBookingDetails = () => {
       <Layout>
         <div className="container max-w-4xl py-8">
           <BookingDetailsHeader />
-          <BookingNotFound />
+          <BookingNotFound onRetry={handleRetry} />
         </div>
       </Layout>
     );
@@ -113,6 +119,7 @@ const SpaBookingDetails = () => {
             serviceId={service.id}
             onSuccess={() => {
               setIsEditDialogOpen(false);
+              // Utiliser navigate(0) pour rafraîchir complètement la page
               navigate(0);
             }}
             existingBooking={booking}

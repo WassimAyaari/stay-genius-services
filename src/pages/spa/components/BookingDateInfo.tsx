@@ -10,11 +10,14 @@ interface BookingDateInfoProps {
 }
 
 const BookingDateInfo: React.FC<BookingDateInfoProps> = ({ date, time }) => {
+  // Utiliser un bloc try-catch pour éviter les erreurs de parsing de date
   let formattedDate;
   try {
+    // S'assurer que le format de date est valide avant le parsing
     formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
   } catch (error) {
     console.error('Error parsing date:', error, date);
+    // Fallback en cas d'erreur
     formattedDate = date;
   }
   

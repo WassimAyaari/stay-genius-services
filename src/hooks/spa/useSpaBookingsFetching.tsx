@@ -80,7 +80,7 @@ export const useSpaBookingsFetching = () => {
     }
   };
 
-  // Récupérer une réservation par ID
+  // Récupérer une réservation par ID avec tous les détails nécessaires
   const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
     console.log('Fetching booking by ID:', id);
     try {
@@ -102,7 +102,7 @@ export const useSpaBookingsFetching = () => {
           )
         `)
         .eq('id', id)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Error fetching booking by ID:', error);
@@ -128,7 +128,7 @@ export const useSpaBookingsFetching = () => {
   const { data = [], isLoading, error, refetch } = useQuery({
     queryKey: ['spa-bookings'],
     queryFn: fetchBookings,
-    retry: 1,
+    retry: 2,
     staleTime: 60000, // 1 minute
   });
 

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ const BookingNotFound: React.FC<BookingNotFoundProps> = ({ onRetry }) => {
   return (
     <Card>
       <CardContent className="p-6 text-center">
-        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
         <h3 className="text-xl font-medium mb-2">Réservation introuvable</h3>
         <p className="text-gray-500 mb-4">
           La réservation que vous recherchez n'existe pas ou a été supprimée.
@@ -31,8 +31,9 @@ const BookingNotFound: React.FC<BookingNotFoundProps> = ({ onRetry }) => {
               <span>Réessayer</span>
             </Button>
           )}
-          <Button onClick={() => navigate('/profile')}>
-            Retour au profil
+          <Button onClick={() => navigate('/spa')} className="flex items-center gap-2">
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Voir tous les services</span>
           </Button>
         </div>
       </CardContent>

@@ -133,7 +133,8 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
         toast.error("Erreur lors du chargement des détails de la réservation");
         setState(prev => ({ 
           ...prev, 
-          error: error instanceof Error ? error : new Error('Erreur de chargement') 
+          error: error instanceof Error ? error : new Error('Erreur de chargement'),
+          isLoading: false 
         }));
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
@@ -157,6 +158,7 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     
     try {
       await cancelBooking(id);
+      // Rafraîchir les données après annulation
       const updatedBooking = await getBookingById(id);
       setState(prev => ({ ...prev, booking: updatedBooking }));
       toast.success("Réservation annulée avec succès");
