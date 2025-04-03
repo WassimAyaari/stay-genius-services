@@ -15,7 +15,6 @@ interface UseBookingDetailsState {
   facility: SpaFacility | null;
   isLoading: boolean;
   userId: string | null;
-  error: string | null;
 }
 
 export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
@@ -24,8 +23,7 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     service: null,
     facility: null,
     isLoading: true,
-    userId: null,
-    error: null
+    userId: null
   });
   
   const { getBookingById, cancelBooking } = useSpaBookings();
@@ -44,17 +42,9 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
   
   useEffect(() => {
     const loadBooking = async () => {
-      if (!id) {
-        console.error('No booking ID provided');
-        setState(prev => ({ 
-          ...prev, 
-          isLoading: false,
-          error: 'Aucun identifiant de réservation fourni'
-        }));
-        return;
-      }
+      if (!id) return;
       
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
         console.log('Fetching booking details for ID:', id);
@@ -63,17 +53,13 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
         
         if (!bookingData) {
           console.error('No booking data found for ID:', id);
-          setState(prev => ({ 
-            ...prev, 
-            isLoading: false,
-            error: `Réservation avec ID ${id} introuvable`
-          }));
+          toast.error("Réservation introuvable");
+          setState(prev => ({ ...prev, isLoading: false }));
           return;
         }
         
         setState(prev => ({ ...prev, booking: bookingData }));
         
-        // First, try to get service data from the booking data if it includes it
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
           const serviceData: SpaService = {
@@ -85,13 +71,45 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
           };
           setState(prev => ({ ...prev, service: serviceData }));
           
-          // If the service has a facility_id, get the facility data
           if (serviceData.facility_id) {
-            try {
+            const { data: facilityData, error: facilityError } = await supabase
+              .from('spa_facilities')
+              .select('*')
+              .eq('id', serviceData.facility_id)
+              .maybeSingle();
+            
+            if (facilityError) {
+              console.error('Error fetching facility:', facilityError);
+            } else if (facilityData) {
+              console.log('Facility data received:', facilityData);
+              setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
+            }
+          }
+        } else {
+          // Fetch service separately if not included in booking data
+          const { data: serviceData, error: serviceError } = await supabase
+            .from('spa_services')
+            .select('*')
+            .eq('id', bookingData.service_id)
+            .maybeSingle();
+          
+          if (serviceError) {
+            console.error('Error fetching service:', serviceError);
+          } else if (serviceData) {
+            console.log('Service data received:', serviceData);
+            const typedServiceData: SpaService = {
+              ...serviceData,
+              category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+              image: serviceData.image || '',
+              status: serviceData.status || 'available',
+            };
+            setState(prev => ({ ...prev, service: typedServiceData }));
+            
+            if (typedServiceData.facility_id) {
               const { data: facilityData, error: facilityError } = await supabase
                 .from('spa_facilities')
                 .select('*')
-                .eq('id', serviceData.facility_id)
+                .eq('id', typedServiceData.facility_id)
                 .maybeSingle();
               
               if (facilityError) {
@@ -100,70 +118,12 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
                 console.log('Facility data received:', facilityData);
                 setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
               }
-            } catch (error) {
-              console.error('Exception when fetching facility:', error);
             }
-          }
-        } else {
-          // If the booking doesn't include service data, fetch it separately
-          try {
-            console.log('Fetching service data for service ID:', bookingData.service_id);
-            const { data: serviceData, error: serviceError } = await supabase
-              .from('spa_services')
-              .select('*')
-              .eq('id', bookingData.service_id)
-              .maybeSingle();
-            
-            if (serviceError) {
-              console.error('Error fetching service:', serviceError);
-              setState(prev => ({ 
-                ...prev,
-                error: "Erreur lors du chargement des détails du service"
-              }));
-            } else if (serviceData) {
-              console.log('Service data received separately:', serviceData);
-              const typedServiceData: SpaService = {
-                ...serviceData,
-                category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
-                image: serviceData.image || '',
-                status: serviceData.status || 'available',
-              };
-              setState(prev => ({ ...prev, service: typedServiceData }));
-              
-              // If the service has a facility_id, get the facility data
-              if (typedServiceData.facility_id) {
-                try {
-                  const { data: facilityData, error: facilityError } = await supabase
-                    .from('spa_facilities')
-                    .select('*')
-                    .eq('id', typedServiceData.facility_id)
-                    .maybeSingle();
-                  
-                  if (facilityError) {
-                    console.error('Error fetching facility:', facilityError);
-                  } else if (facilityData) {
-                    console.log('Facility data received:', facilityData);
-                    setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
-                  }
-                } catch (error) {
-                  console.error('Exception when fetching facility:', error);
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Exception when fetching service:', error);
-            setState(prev => ({ 
-              ...prev,
-              error: "Erreur lors du chargement des détails du service"
-            }));
           }
         }
       } catch (error) {
         console.error('Error loading booking details:', error);
-        setState(prev => ({ 
-          ...prev,
-          error: "Erreur lors du chargement des détails de la réservation"
-        }));
+        toast.error("Erreur lors du chargement des détails de la réservation");
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
       }

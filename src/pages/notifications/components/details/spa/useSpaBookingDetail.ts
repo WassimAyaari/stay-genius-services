@@ -11,7 +11,6 @@ export interface BookingDetailState {
   service: any | null;
   facility: any | null;
   isLoading: boolean;
-  error: string | null;
 }
 
 export const useSpaBookingDetail = (notification: NotificationItem) => {
@@ -20,95 +19,48 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
     booking: null,
     service: null,
     facility: null,
-    isLoading: true,
-    error: null
+    isLoading: true
   });
   
   const { getBookingById, cancelBooking } = useSpaBookings();
   
   useEffect(() => {
     const loadBookingDetails = async () => {
-      if (!notification || !notification.id) {
-        console.error('No notification or notification ID provided');
-        setState(prev => ({ 
-          ...prev, 
-          isLoading: false,
-          error: 'Aucun identifiant de réservation fourni'
-        }));
-        return;
-      }
+      if (!notification || !notification.id) return;
       
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        console.log('Loading booking details for notification ID:', notification.id);
         const bookingData = await getBookingById(notification.id);
-        console.log('Booking data received:', bookingData);
         
         if (!bookingData) {
-          console.error('No booking data found for ID:', notification.id);
-          setState(prev => ({ 
-            ...prev, 
-            isLoading: false,
-            error: `Réservation avec ID ${notification.id} introuvable`
-          }));
+          toast.error("Réservation introuvable");
           return;
         }
         
         setState(prev => ({ ...prev, booking: bookingData }));
         
-        // Get service details
-        try {
-          const { data: serviceData, error: serviceError } = await supabase
-            .from('spa_services')
-            .select('*')
-            .eq('id', bookingData.service_id)
-            .maybeSingle();
+        const { data: serviceData } = await supabase
+          .from('spa_services')
+          .select('*')
+          .eq('id', bookingData.service_id)
+          .single();
+        
+        if (serviceData) {
+          setState(prev => ({ ...prev, service: serviceData }));
           
-          if (serviceError) {
-            console.error('Error fetching service:', serviceError);
-            setState(prev => ({
-              ...prev,
-              error: "Erreur lors du chargement des détails du service"
-            }));
-          } else if (serviceData) {
-            console.log('Service data received:', serviceData);
-            setState(prev => ({ ...prev, service: serviceData }));
-            
-            // Get facility details if service has a facility_id
-            if (serviceData.facility_id) {
-              try {
-                const { data: facilityData, error: facilityError } = await supabase
-                  .from('spa_facilities')
-                  .select('*')
-                  .eq('id', serviceData.facility_id)
-                  .maybeSingle();
-                
-                if (facilityError) {
-                  console.error('Error fetching facility:', facilityError);
-                } else if (facilityData) {
-                  console.log('Facility data received:', facilityData);
-                  setState(prev => ({ ...prev, facility: facilityData }));
-                }
-              } catch (error) {
-                console.error('Exception when fetching facility:', error);
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Exception when fetching service:', error);
-          setState(prev => ({
-            ...prev,
-            error: "Erreur lors du chargement des détails du service"
-          }));
+          const { data: facilityData } = await supabase
+            .from('spa_facilities')
+            .select('*')
+            .eq('id', serviceData.facility_id)
+            .single();
+          
+          setState(prev => ({ ...prev, facility: facilityData }));
         }
         
       } catch (error) {
         console.error('Error loading booking details:', error);
-        setState(prev => ({
-          ...prev,
-          error: "Erreur lors du chargement des détails de la réservation"
-        }));
+        toast.error("Erreur lors du chargement des détails de la réservation");
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
       }

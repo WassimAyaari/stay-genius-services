@@ -18,40 +18,31 @@ export interface ExtendedSpaBooking extends SpaBooking {
 }
 
 export const useSpaBookingsFetching = () => {
-  // Fetch all spa bookings
+  // Récupérer toutes les réservations spa
   const fetchBookings = async (): Promise<SpaBooking[]> => {
-    try {
-      const { data, error } = await supabase
-        .from('spa_bookings')
-        .select(`
-          *,
-          spa_services:service_id (
-            id,
-            name,
-            price,
-            duration,
-            description,
-            category,
-            image,
-            status,
-            facility_id
-          )
-        `)
-        .order('date', { ascending: false });
+    const { data, error } = await supabase
+      .from('spa_bookings')
+      .select(`
+        *,
+        spa_services:service_id (
+          name,
+          price,
+          duration,
+          description,
+          category
+        )
+      `)
+      .order('date', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching spa bookings:', error);
-        throw error;
-      }
-
-      return data as unknown as SpaBooking[];
-    } catch (error) {
-      console.error('Exception in fetchBookings:', error);
-      return [];
+    if (error) {
+      console.error('Error fetching spa bookings:', error);
+      throw error;
     }
+
+    return data as unknown as SpaBooking[];
   };
 
-  // Fetch bookings for a specific user
+  // Récupérer les réservations d'un utilisateur
   const fetchUserBookings = async (userId: string): Promise<SpaBooking[]> => {
     try {
       console.log('Fetching bookings for user ID:', userId);
@@ -60,15 +51,11 @@ export const useSpaBookingsFetching = () => {
         .select(`
           *,
           spa_services:service_id (
-            id,
             name,
             price,
             duration,
             description,
-            category,
-            image,
-            status,
-            facility_id
+            category
           )
         `)
         .eq('user_id', userId)
@@ -87,16 +74,11 @@ export const useSpaBookingsFetching = () => {
     }
   };
 
-  // Fetch a booking by ID
+  // Récupérer une réservation par ID
   const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
-    if (!id) {
-      console.error('No booking ID provided to getBookingById');
-      return null;
-    }
-    
     console.log('Fetching booking by ID:', id);
     try {
-      // Get the booking with service details
+      // Récupérer la réservation avec les détails du service
       const { data, error } = await supabase
         .from('spa_bookings')
         .select(`
@@ -108,9 +90,9 @@ export const useSpaBookingsFetching = () => {
             duration,
             description,
             category,
+            facility_id,
             image,
-            status,
-            facility_id
+            status
           )
         `)
         .eq('id', id)
@@ -123,26 +105,7 @@ export const useSpaBookingsFetching = () => {
 
       if (!data) {
         console.log('No booking found with ID:', id);
-        
-        // Double-check if the booking exists without the joins
-        const { data: simpleData, error: simpleError } = await supabase
-          .from('spa_bookings')
-          .select('*')
-          .eq('id', id)
-          .maybeSingle();
-        
-        if (simpleError) {
-          console.error('Error fetching simple booking by ID:', simpleError);
-          return null;
-        }
-        
-        if (!simpleData) {
-          console.log('No booking exists with ID:', id);
-          return null;
-        }
-        
-        console.log('Found booking without service details:', simpleData);
-        return simpleData as ExtendedSpaBooking;
+        return null;
       }
 
       console.log('Found booking with service details:', data);
