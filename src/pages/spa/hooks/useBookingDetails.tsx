@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useSpaBookings } from '@/hooks/useSpaBookings';
+import { useSpaBookings, ExtendedSpaBooking } from '@/hooks/useSpaBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SpaService, SpaFacility, SpaBooking } from '@/features/spa/types';
@@ -67,6 +67,7 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
             category: bookingData.spa_services.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
             image: bookingData.spa_services.image || '',
             status: bookingData.spa_services.status || 'available',
+            facility_id: bookingData.spa_services.facility_id || '',
           };
           setState(prev => ({ ...prev, service: serviceData }));
           
