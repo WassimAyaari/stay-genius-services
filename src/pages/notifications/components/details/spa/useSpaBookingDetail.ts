@@ -11,7 +11,6 @@ export interface BookingDetailState {
   service: any | null;
   facility: any | null;
   isLoading: boolean;
-  error: Error | null;
 }
 
 export const useSpaBookingDetail = (notification: NotificationItem) => {
@@ -20,92 +19,55 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
     booking: null,
     service: null,
     facility: null,
-    isLoading: true,
-    error: null
+    isLoading: true
   });
   
   const { getBookingById, cancelBooking } = useSpaBookings();
-  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     const loadBookingDetails = async () => {
-      if (!notification || !notification.id) {
-        setState(prev => ({ 
-          ...prev, 
-          isLoading: false, 
-          error: new Error('Identifiant de notification manquant') 
-        }));
-        return;
-      }
+      if (!notification || !notification.id) return;
       
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        console.log('Loading booking details for notification ID:', notification.id);
         const bookingData = await getBookingById(notification.id);
         
         if (!bookingData) {
-          console.log('No booking found for ID:', notification.id);
-          setState(prev => ({ 
-            ...prev, 
-            isLoading: false, 
-            booking: null,
-            service: null,
-            facility: null,
-            error: new Error('Réservation introuvable') 
-          }));
+          toast.error("Réservation introuvable");
           return;
         }
         
-        console.log('Booking data loaded:', bookingData);
         setState(prev => ({ ...prev, booking: bookingData }));
         
-        if (bookingData.spa_services) {
-          console.log('Service data found in booking:', bookingData.spa_services);
-          setState(prev => ({ ...prev, service: bookingData.spa_services }));
+        const { data: serviceData } = await supabase
+          .from('spa_services')
+          .select('*')
+          .eq('id', bookingData.service_id)
+          .single();
+        
+        if (serviceData) {
+          setState(prev => ({ ...prev, service: serviceData }));
           
-          if (bookingData.spa_services.facility_id) {
-            try {
-              const { data: facilityData, error: facilityError } = await supabase
-                .from('spa_facilities')
-                .select('*')
-                .eq('id', bookingData.spa_services.facility_id)
-                .maybeSingle();
-              
-              if (facilityError) {
-                console.error('Error fetching facility:', facilityError);
-              } else if (facilityData) {
-                console.log('Facility data loaded:', facilityData);
-                setState(prev => ({ ...prev, facility: facilityData }));
-              }
-            } catch (error) {
-              console.error('Error loading facility data:', error);
-              // Continue without facility data
-            }
-          }
-        } else {
-          console.error('Service data missing in booking');
+          const { data: facilityData } = await supabase
+            .from('spa_facilities')
+            .select('*')
+            .eq('id', serviceData.facility_id)
+            .single();
+          
+          setState(prev => ({ ...prev, facility: facilityData }));
         }
         
       } catch (error) {
         console.error('Error loading booking details:', error);
-        setState(prev => ({ 
-          ...prev, 
-          error: error instanceof Error ? error : new Error('Erreur de chargement'),
-          isLoading: false
-        }));
+        toast.error("Erreur lors du chargement des détails de la réservation");
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
       }
     };
     
     loadBookingDetails();
-  }, [notification, getBookingById, retryCount]);
-
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
-    toast.info("Tentative de rechargement des données...");
-  };
+  }, [notification, getBookingById]);
 
   const handleCancelBooking = async (id: string) => {
     if (!id) return;
@@ -130,7 +92,6 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
   return {
     ...state,
     handleCancelBooking,
-    handleViewDetails,
-    handleRetry
+    handleViewDetails
   };
 };

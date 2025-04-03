@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Calendar } from 'lucide-react';
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface BookingDateInfoProps {
@@ -10,30 +10,13 @@ interface BookingDateInfoProps {
 }
 
 const BookingDateInfo: React.FC<BookingDateInfoProps> = ({ date, time }) => {
-  // Utiliser un bloc try-catch pour éviter les erreurs de parsing de date
-  let formattedDate = '';
-  
+  let formattedDate;
   try {
-    if (date) {
-      // Parse the date and check if it's valid
-      const parsedDate = parseISO(date);
-      if (isValid(parsedDate)) {
-        formattedDate = format(parsedDate, 'PPPP', { locale: fr });
-      } else {
-        console.error('Invalid date format:', date);
-        formattedDate = date || 'Date non spécifiée';
-      }
-    } else {
-      formattedDate = 'Date non spécifiée';
-    }
+    formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
   } catch (error) {
     console.error('Error parsing date:', error, date);
-    // Fallback en cas d'erreur
-    formattedDate = date || 'Date non spécifiée';
+    formattedDate = date;
   }
-  
-  // Vérifier que time existe
-  const displayTime = time || 'Heure non spécifiée';
   
   return (
     <div className="space-y-3">
@@ -42,7 +25,7 @@ const BookingDateInfo: React.FC<BookingDateInfoProps> = ({ date, time }) => {
         <Calendar className="h-4 w-4 text-gray-500" />
         <div>
           <p className="font-medium">Date et heure</p>
-          <p className="text-gray-600">{formattedDate} à {displayTime}</p>
+          <p className="text-gray-600">{formattedDate} à {time}</p>
         </div>
       </div>
     </div>

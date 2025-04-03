@@ -2,7 +2,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SpaBooking } from '@/features/spa/types';
-import { toast } from 'sonner';
 
 export interface ExtendedSpaBooking extends SpaBooking {
   spa_services?: {
@@ -21,35 +20,26 @@ export interface ExtendedSpaBooking extends SpaBooking {
 export const useSpaBookingsFetching = () => {
   // Récupérer toutes les réservations spa
   const fetchBookings = async (): Promise<SpaBooking[]> => {
-    try {
-      const { data, error } = await supabase
-        .from('spa_bookings')
-        .select(`
-          *,
-          spa_services:service_id (
-            id,
-            name,
-            price,
-            duration,
-            description,
-            category,
-            image,
-            status,
-            facility_id
-          )
-        `)
-        .order('date', { ascending: false });
+    const { data, error } = await supabase
+      .from('spa_bookings')
+      .select(`
+        *,
+        spa_services:service_id (
+          name,
+          price,
+          duration,
+          description,
+          category
+        )
+      `)
+      .order('date', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching spa bookings:', error);
-        throw error;
-      }
-
-      return data as unknown as SpaBooking[];
-    } catch (error) {
-      console.error('Exception in fetchBookings:', error);
-      return [];
+    if (error) {
+      console.error('Error fetching spa bookings:', error);
+      throw error;
     }
+
+    return data as unknown as SpaBooking[];
   };
 
   // Récupérer les réservations d'un utilisateur
@@ -61,15 +51,11 @@ export const useSpaBookingsFetching = () => {
         .select(`
           *,
           spa_services:service_id (
-            id,
             name,
             price,
             duration,
             description,
-            category,
-            image,
-            status,
-            facility_id
+            category
           )
         `)
         .eq('user_id', userId)
@@ -88,13 +74,8 @@ export const useSpaBookingsFetching = () => {
     }
   };
 
-  // Récupérer une réservation par ID avec tous les détails nécessaires
+  // Récupérer une réservation par ID
   const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
-    if (!id) {
-      console.error('Missing booking ID');
-      return null;
-    }
-    
     console.log('Fetching booking by ID:', id);
     try {
       // Récupérer la réservation avec les détails du service
@@ -138,8 +119,6 @@ export const useSpaBookingsFetching = () => {
   const { data = [], isLoading, error, refetch } = useQuery({
     queryKey: ['spa-bookings'],
     queryFn: fetchBookings,
-    retry: 2,
-    staleTime: 60000, // 1 minute
   });
 
   return {

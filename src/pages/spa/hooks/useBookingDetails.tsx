@@ -15,7 +15,6 @@ interface UseBookingDetailsState {
   facility: SpaFacility | null;
   isLoading: boolean;
   userId: string | null;
-  error: Error | null;
 }
 
 export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
@@ -24,13 +23,11 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     service: null,
     facility: null,
     isLoading: true,
-    userId: null,
-    error: null
+    userId: null
   });
   
   const { getBookingById, cancelBooking } = useSpaBookings();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,35 +42,22 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
   
   useEffect(() => {
     const loadBooking = async () => {
-      if (!id) {
-        setState(prev => ({ 
-          ...prev, 
-          isLoading: false, 
-          error: new Error('Identifiant de réservation manquant') 
-        }));
-        return;
-      }
+      if (!id) return;
       
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
         console.log('Fetching booking details for ID:', id);
         const bookingData = await getBookingById(id);
+        console.log('Booking data received:', bookingData);
         
         if (!bookingData) {
           console.error('No booking data found for ID:', id);
-          setState(prev => ({ 
-            ...prev, 
-            isLoading: false, 
-            booking: null,
-            service: null,
-            facility: null,
-            error: new Error('Réservation introuvable') 
-          }));
+          toast.error("Réservation introuvable");
+          setState(prev => ({ ...prev, isLoading: false }));
           return;
         }
         
-        console.log('Booking data received:', bookingData);
         setState(prev => ({ ...prev, booking: bookingData }));
         
         if (bookingData.spa_services) {
@@ -88,11 +72,44 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
           setState(prev => ({ ...prev, service: serviceData }));
           
           if (serviceData.facility_id) {
-            try {
+            const { data: facilityData, error: facilityError } = await supabase
+              .from('spa_facilities')
+              .select('*')
+              .eq('id', serviceData.facility_id)
+              .maybeSingle();
+            
+            if (facilityError) {
+              console.error('Error fetching facility:', facilityError);
+            } else if (facilityData) {
+              console.log('Facility data received:', facilityData);
+              setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
+            }
+          }
+        } else {
+          // Fetch service separately if not included in booking data
+          const { data: serviceData, error: serviceError } = await supabase
+            .from('spa_services')
+            .select('*')
+            .eq('id', bookingData.service_id)
+            .maybeSingle();
+          
+          if (serviceError) {
+            console.error('Error fetching service:', serviceError);
+          } else if (serviceData) {
+            console.log('Service data received:', serviceData);
+            const typedServiceData: SpaService = {
+              ...serviceData,
+              category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
+              image: serviceData.image || '',
+              status: serviceData.status || 'available',
+            };
+            setState(prev => ({ ...prev, service: typedServiceData }));
+            
+            if (typedServiceData.facility_id) {
               const { data: facilityData, error: facilityError } = await supabase
                 .from('spa_facilities')
                 .select('*')
-                .eq('id', serviceData.facility_id)
+                .eq('id', typedServiceData.facility_id)
                 .maybeSingle();
               
               if (facilityError) {
@@ -101,38 +118,19 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
                 console.log('Facility data received:', facilityData);
                 setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
               }
-            } catch (error) {
-              console.error('Error fetching facility data:', error);
-              // Continue sans facility data
             }
           }
-        } else {
-          console.error('No service data found in booking');
-          setState(prev => ({ 
-            ...prev, 
-            isLoading: false, 
-            error: new Error('Données de service manquantes') 
-          }));
         }
       } catch (error) {
         console.error('Error loading booking details:', error);
-        setState(prev => ({ 
-          ...prev, 
-          error: error instanceof Error ? error : new Error('Erreur de chargement'),
-          isLoading: false 
-        }));
+        toast.error("Erreur lors du chargement des détails de la réservation");
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
       }
     };
     
     loadBooking();
-  }, [id, getBookingById, retryCount]);
-  
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
-    toast.info("Tentative de rechargement des données...");
-  };
+  }, [id, getBookingById]);
   
   const handleEdit = () => {
     setIsEditDialogOpen(true);
@@ -143,7 +141,6 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     
     try {
       await cancelBooking(id);
-      // Rafraîchir les données après annulation
       const updatedBooking = await getBookingById(id);
       setState(prev => ({ ...prev, booking: updatedBooking }));
       toast.success("Réservation annulée avec succès");
@@ -164,7 +161,6 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     canCancel,
     canEdit,
     handleEdit,
-    handleCancelBooking,
-    handleRetry
+    handleCancelBooking
   };
 };
