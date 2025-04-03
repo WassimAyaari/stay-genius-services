@@ -42,4 +42,5 @@ export interface SpaBooking {
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   created_at?: string;
   updated_at?: string;
+  spa_services?: Partial<SpaService>;
 }
