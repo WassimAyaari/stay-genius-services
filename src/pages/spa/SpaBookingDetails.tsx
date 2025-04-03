@@ -70,21 +70,22 @@ const SpaBookingDetails = () => {
         // Si les données du service sont déjà incluses dans la réponse
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
-          // Ensure the category is compatible with SpaService type
+          // Ensure all required properties exist with defaults if needed
           const serviceData: SpaService = {
             ...bookingData.spa_services,
             category: bookingData.spa_services.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
             image: bookingData.spa_services.image || '',
-            status: bookingData.spa_services.status as 'available' | 'unavailable' | string
+            status: bookingData.spa_services.status || 'available',
+            facility_id: bookingData.spa_services.facility_id || '' // Add default to ensure it's never undefined
           };
           setService(serviceData);
           
           // Récupérer l'installation si l'ID est disponible
-          if (bookingData.spa_services.facility_id) {
+          if (serviceData.facility_id) {
             const { data: facilityData, error: facilityError } = await supabase
               .from('spa_facilities')
               .select('*')
-              .eq('id', bookingData.spa_services.facility_id)
+              .eq('id', serviceData.facility_id)
               .maybeSingle();
             
             if (facilityError) {
@@ -106,21 +107,22 @@ const SpaBookingDetails = () => {
             console.error('Error fetching service:', serviceError);
           } else if (serviceData) {
             console.log('Service data received:', serviceData);
-            // Ensure the category is compatible with SpaService type
+            // Ensure all required properties exist with defaults if needed
             const typedServiceData: SpaService = {
               ...serviceData,
               category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
               image: serviceData.image || '',
-              status: serviceData.status as 'available' | 'unavailable' | string
+              status: serviceData.status || 'available',
+              facility_id: serviceData.facility_id || '' // Add default to ensure it's never undefined
             };
             setService(typedServiceData);
             
             // Récupérer l'installation si l'ID est disponible
-            if (serviceData.facility_id) {
+            if (typedServiceData.facility_id) {
               const { data: facilityData, error: facilityError } = await supabase
                 .from('spa_facilities')
                 .select('*')
-                .eq('id', serviceData.facility_id)
+                .eq('id', typedServiceData.facility_id)
                 .maybeSingle();
               
               if (facilityError) {

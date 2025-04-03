@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -19,12 +18,13 @@ export const useSpaServices = () => {
       throw error;
     }
 
-    // Ensure the category is properly typed
+    // Ensure the category is properly typed and all required fields have values
     return (data || []).map(service => ({
       ...service,
       category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
       image: service.image || '',
-      status: service.status as 'available' | 'unavailable' | string
+      status: service.status as 'available' | 'unavailable' | string,
+      facility_id: service.facility_id || '' // Provide empty string default
     })) as SpaService[];
   };
 
@@ -42,12 +42,13 @@ export const useSpaServices = () => {
       throw error;
     }
 
-    // Ensure the category is properly typed
+    // Ensure the category is properly typed and all required fields have values
     return (data || []).map(service => ({
       ...service,
       category: service.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
       image: service.image || '',
-      status: service.status as 'available' | 'unavailable' | string
+      status: service.status as 'available' | 'unavailable' | string,
+      facility_id: service.facility_id || '' // Provide empty string default
     })) as SpaService[];
   };
 
@@ -92,12 +93,13 @@ export const useSpaServices = () => {
 
     if (!data) return null;
 
-    // Ensure the category is properly typed
+    // Ensure the category is properly typed and all required fields have values
     return {
       ...data,
       category: data.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
       image: data.image || '',
-      status: data.status as 'available' | 'unavailable' | string
+      status: data.status as 'available' | 'unavailable' | string,
+      facility_id: data.facility_id || '' // Provide empty string default
     } as SpaService;
   };
 
