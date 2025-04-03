@@ -27,6 +27,8 @@ export const SpaBookingNotFound: React.FC<SpaBookingNotFoundProps> = ({
     }
   };
 
+  console.log('Rendering SpaBookingNotFound with error:', errorMessage);
+
   return (
     <Card className="shadow-sm">
       <CardContent className="p-6 text-center">

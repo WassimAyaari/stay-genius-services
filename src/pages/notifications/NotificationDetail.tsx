@@ -23,15 +23,21 @@ const NotificationDetail: React.FC = () => {
     if (notification) {
       console.log('Notification détail rendu avec:', notification.id, notification.type);
     }
-  }, [notification]);
+    
+    if (error) {
+      console.error('Erreur de chargement notification:', error);
+    }
+  }, [notification, error]);
 
   // Show loading state while fetching data
   if (isLoading) {
+    console.log('Affichage état de chargement pour notification');
     return <LoadingState />;
   }
 
   // Show not found state if there's an error or no notification
   if (error || !notification) {
+    console.log('Notification non trouvée ou erreur:', error);
     return <NotFoundState onBack={handleBack} />;
   }
 

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { NotificationItem } from '@/types/notification';
@@ -28,6 +28,14 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     handleViewDetails
   } = useSpaBookingDetail(notification);
 
+  // Ajouter des logs pour déboguer l'affichage des données
+  useEffect(() => {
+    console.log('SpaBookingDetail rendering with booking data:', booking);
+    console.log('SpaBookingDetail rendering with service data:', service);
+    console.log('SpaBookingDetail rendering with facility data:', facility);
+    console.log('SpaBookingDetail rendering with error:', error);
+  }, [booking, service, facility, error]);
+
   if (isLoading) {
     return <SpaBookingLoader />;
   }
@@ -49,7 +57,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
   }
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <SpaBookingDetailHeader status={booking.status} />
       
       <CardContent>
