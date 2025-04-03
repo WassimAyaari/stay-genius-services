@@ -31,6 +31,18 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     handleRetry
   } = useSpaBookingDetail(notification);
 
+  // Add console logs for debugging
+  React.useEffect(() => {
+    console.log('SpaBookingDetail component rendered with:', { 
+      notificationId: notification?.id,
+      bookingData: booking,
+      serviceData: service,
+      facilityData: facility,
+      isLoading,
+      error
+    });
+  }, [notification, booking, service, facility, isLoading, error]);
+
   if (isLoading) {
     return <SpaBookingLoader />;
   }
@@ -42,7 +54,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-xl font-medium mb-2">Erreur de chargement</h3>
           <p className="text-gray-500 mb-4">
-            Impossible de charger les détails de cette réservation.
+            Impossible de charger les détails de cette réservation. {error.message}
           </p>
           <div className="flex justify-center gap-3">
             <Button 
@@ -65,7 +77,10 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
   }
 
   if (!booking || !service) {
-    return <SpaBookingNotFound onViewDetails={handleViewDetails} />;
+    return <SpaBookingNotFound 
+      onViewDetails={handleViewDetails} 
+      bookingId={notification.id} 
+    />;
   }
 
   return (
@@ -86,7 +101,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
           <SpaBookingContactInfo booking={booking} />
           
           <SpaBookingActions 
-            bookingId={notification.id} 
+            bookingId={booking.id} 
             status={booking.status} 
             onCancelBooking={handleCancelBooking} 
           />

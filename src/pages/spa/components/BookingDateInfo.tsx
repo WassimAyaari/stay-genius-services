@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Calendar } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface BookingDateInfoProps {
@@ -15,8 +15,14 @@ const BookingDateInfo: React.FC<BookingDateInfoProps> = ({ date, time }) => {
   
   try {
     if (date) {
-      // S'assurer que le format de date est valide avant le parsing
-      formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
+      // Parse the date and check if it's valid
+      const parsedDate = parseISO(date);
+      if (isValid(parsedDate)) {
+        formattedDate = format(parsedDate, 'PPPP', { locale: fr });
+      } else {
+        console.error('Invalid date format:', date);
+        formattedDate = date || 'Date non spécifiée';
+      }
     } else {
       formattedDate = 'Date non spécifiée';
     }

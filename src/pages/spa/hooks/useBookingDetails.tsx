@@ -65,6 +65,9 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
           setState(prev => ({ 
             ...prev, 
             isLoading: false, 
+            booking: null,
+            service: null,
+            facility: null,
             error: new Error('Réservation introuvable') 
           }));
           return;

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Calendar } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface SpaBookingDateInfoProps {
@@ -10,7 +10,30 @@ interface SpaBookingDateInfoProps {
 }
 
 export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, time }) => {
-  const formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
+  // Utiliser un bloc try-catch pour éviter les erreurs de parsing de date
+  let formattedDate = '';
+  
+  try {
+    if (date) {
+      // Parse the date and check if it's valid
+      const parsedDate = parseISO(date);
+      if (isValid(parsedDate)) {
+        formattedDate = format(parsedDate, 'PPPP', { locale: fr });
+      } else {
+        console.error('Invalid date format in SpaBookingDateInfo:', date);
+        formattedDate = date;
+      }
+    } else {
+      formattedDate = 'Date non spécifiée';
+    }
+  } catch (error) {
+    console.error('Error parsing date in SpaBookingDateInfo:', error, date);
+    // Fallback en cas d'erreur
+    formattedDate = date || 'Date non spécifiée';
+  }
+  
+  // Vérifier que time existe
+  const displayTime = time || 'Heure non spécifiée';
   
   return (
     <div className="space-y-3">
@@ -19,7 +42,7 @@ export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, ti
         <Calendar className="h-4 w-4 text-gray-500" />
         <div>
           <p className="font-medium">Date et heure</p>
-          <p className="text-gray-600">{formattedDate} à {time}</p>
+          <p className="text-gray-600">{formattedDate} à {displayTime}</p>
         </div>
       </div>
     </div>
