@@ -15,6 +15,7 @@ interface UseBookingDetailsState {
   facility: SpaFacility | null;
   isLoading: boolean;
   userId: string | null;
+  error: string | null;
 }
 
 export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
@@ -23,7 +24,8 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     service: null,
     facility: null,
     isLoading: true,
-    userId: null
+    userId: null,
+    error: null
   });
   
   const { getBookingById, cancelBooking } = useSpaBookings();
@@ -44,11 +46,15 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     const loadBooking = async () => {
       if (!id) {
         console.error('No booking ID provided');
-        setState(prev => ({ ...prev, isLoading: false }));
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          error: 'Aucun identifiant de réservation fourni'
+        }));
         return;
       }
       
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       
       try {
         console.log('Fetching booking details for ID:', id);
@@ -57,8 +63,11 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
         
         if (!bookingData) {
           console.error('No booking data found for ID:', id);
-          toast.error("Réservation introuvable");
-          setState(prev => ({ ...prev, isLoading: false }));
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false,
+            error: `Réservation avec ID ${id} introuvable`
+          }));
           return;
         }
         
@@ -107,7 +116,10 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
             
             if (serviceError) {
               console.error('Error fetching service:', serviceError);
-              toast.error("Erreur lors du chargement des détails du service");
+              setState(prev => ({ 
+                ...prev,
+                error: "Erreur lors du chargement des détails du service"
+              }));
             } else if (serviceData) {
               console.log('Service data received separately:', serviceData);
               const typedServiceData: SpaService = {
@@ -140,12 +152,18 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
             }
           } catch (error) {
             console.error('Exception when fetching service:', error);
-            toast.error("Erreur lors du chargement des détails du service");
+            setState(prev => ({ 
+              ...prev,
+              error: "Erreur lors du chargement des détails du service"
+            }));
           }
         }
       } catch (error) {
         console.error('Error loading booking details:', error);
-        toast.error("Erreur lors du chargement des détails de la réservation");
+        setState(prev => ({ 
+          ...prev,
+          error: "Erreur lors du chargement des détails de la réservation"
+        }));
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
       }

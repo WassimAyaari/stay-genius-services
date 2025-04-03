@@ -89,6 +89,11 @@ export const useSpaBookingsFetching = () => {
 
   // Fetch a booking by ID
   const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
+    if (!id) {
+      console.error('No booking ID provided to getBookingById');
+      return null;
+    }
+    
     console.log('Fetching booking by ID:', id);
     try {
       // Get the booking with service details

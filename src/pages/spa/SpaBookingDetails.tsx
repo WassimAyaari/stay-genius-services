@@ -25,6 +25,7 @@ const SpaBookingDetails = () => {
     service,
     facility,
     isLoading,
+    error,
     isEditDialogOpen,
     setIsEditDialogOpen,
     canCancel,
@@ -37,18 +38,33 @@ const SpaBookingDetails = () => {
     return (
       <Layout>
         <div className="container max-w-4xl py-8">
+          <BookingDetailsHeader />
           <BookingLoadingState />
         </div>
       </Layout>
     );
   }
 
-  if (!booking || !service) {
+  if (error || !booking) {
     return (
       <Layout>
         <div className="container max-w-4xl py-8">
           <BookingDetailsHeader />
-          <BookingNotFound bookingId={id} />
+          <BookingNotFound bookingId={id} errorMessage={error} />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!service) {
+    return (
+      <Layout>
+        <div className="container max-w-4xl py-8">
+          <BookingDetailsHeader />
+          <BookingNotFound 
+            bookingId={id} 
+            errorMessage="Les détails du service pour cette réservation sont introuvables" 
+          />
         </div>
       </Layout>
     );

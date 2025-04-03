@@ -23,6 +23,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     service,
     facility,
     isLoading,
+    error,
     handleCancelBooking,
     handleViewDetails
   } = useSpaBookingDetail(notification);
@@ -31,8 +32,20 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     return <SpaBookingLoader />;
   }
 
-  if (!booking || !service) {
-    return <SpaBookingNotFound onViewDetails={handleViewDetails} bookingId={notification.id} />;
+  if (error || !booking) {
+    return <SpaBookingNotFound 
+      onViewDetails={handleViewDetails} 
+      bookingId={notification.id}
+      errorMessage={error}
+    />;
+  }
+
+  if (!service) {
+    return <SpaBookingNotFound 
+      onViewDetails={handleViewDetails} 
+      bookingId={notification.id}
+      errorMessage="Les détails du service pour cette réservation sont introuvables"
+    />;
   }
 
   return (

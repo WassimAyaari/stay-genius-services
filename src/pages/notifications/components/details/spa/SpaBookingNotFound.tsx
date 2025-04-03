@@ -7,16 +7,17 @@ import { AlertCircle } from 'lucide-react';
 interface SpaBookingNotFoundProps {
   onViewDetails: () => void;
   bookingId?: string;
+  errorMessage?: string;
 }
 
-export const SpaBookingNotFound: React.FC<SpaBookingNotFoundProps> = ({ onViewDetails, bookingId }) => {
+export const SpaBookingNotFound: React.FC<SpaBookingNotFoundProps> = ({ onViewDetails, bookingId, errorMessage }) => {
   return (
     <Card>
       <CardContent className="p-6 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
         <h3 className="text-xl font-medium mb-2">Réservation introuvable</h3>
         <p className="text-gray-600 mb-4">
-          Impossible de trouver les détails de cette réservation.
+          {errorMessage || "Impossible de trouver les détails de cette réservation."}
           {bookingId && <span className="block text-sm mt-1">ID: {bookingId}</span>}
         </p>
         <Button 

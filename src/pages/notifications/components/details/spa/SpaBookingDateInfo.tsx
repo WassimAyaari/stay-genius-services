@@ -13,9 +13,12 @@ export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, ti
   let formattedDate;
   
   try {
+    if (!date) {
+      throw new Error('Date is undefined or null');
+    }
     formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
   } catch (error) {
-    console.error('Error parsing date:', error, date);
+    console.error('Error parsing date:', error, 'Original date value:', date);
     formattedDate = date || 'Date non disponible';
   }
   
