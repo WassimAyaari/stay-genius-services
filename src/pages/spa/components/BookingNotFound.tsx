@@ -19,6 +19,7 @@ const BookingNotFound: React.FC<BookingNotFoundProps> = ({ onRetry }) => {
         <h3 className="text-xl font-medium mb-2">Réservation introuvable</h3>
         <p className="text-gray-500 mb-4">
           La réservation que vous recherchez n'existe pas ou a été supprimée.
+          Veuillez vérifier l'identifiant de réservation et réessayer.
         </p>
         <div className="flex justify-center gap-3">
           {onRetry && (

@@ -29,15 +29,23 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
   
   useEffect(() => {
     const loadBookingDetails = async () => {
-      if (!notification || !notification.id) return;
+      if (!notification || !notification.id) {
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false, 
+          error: new Error('Identifiant de notification manquant') 
+        }));
+        return;
+      }
       
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
       try {
+        console.log('Loading booking details for notification ID:', notification.id);
         const bookingData = await getBookingById(notification.id);
         
         if (!bookingData) {
-          toast.error("Réservation introuvable");
+          console.log('No booking found for ID:', notification.id);
           setState(prev => ({ 
             ...prev, 
             isLoading: false, 
@@ -46,44 +54,42 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
           return;
         }
         
+        console.log('Booking data loaded:', bookingData);
         setState(prev => ({ ...prev, booking: bookingData }));
         
-        try {
-          const { data: serviceData, error: serviceError } = await supabase
-            .from('spa_services')
-            .select('*')
-            .eq('id', bookingData.service_id)
-            .maybeSingle();
+        if (bookingData.spa_services) {
+          console.log('Service data found in booking:', bookingData.spa_services);
+          setState(prev => ({ ...prev, service: bookingData.spa_services }));
           
-          if (serviceError) {
-            console.error('Error fetching service:', serviceError);
-          } else if (serviceData) {
-            setState(prev => ({ ...prev, service: serviceData }));
-            
-            if (serviceData.facility_id) {
+          if (bookingData.spa_services.facility_id) {
+            try {
               const { data: facilityData, error: facilityError } = await supabase
                 .from('spa_facilities')
                 .select('*')
-                .eq('id', serviceData.facility_id)
+                .eq('id', bookingData.spa_services.facility_id)
                 .maybeSingle();
               
               if (facilityError) {
                 console.error('Error fetching facility:', facilityError);
               } else if (facilityData) {
+                console.log('Facility data loaded:', facilityData);
                 setState(prev => ({ ...prev, facility: facilityData }));
               }
+            } catch (error) {
+              console.error('Error loading facility data:', error);
+              // Continue without facility data
             }
           }
-        } catch (error) {
-          console.error('Error fetching related data:', error);
+        } else {
+          console.error('Service data missing in booking');
         }
         
       } catch (error) {
         console.error('Error loading booking details:', error);
-        toast.error("Erreur lors du chargement des détails de la réservation");
         setState(prev => ({ 
           ...prev, 
-          error: error instanceof Error ? error : new Error('Erreur de chargement') 
+          error: error instanceof Error ? error : new Error('Erreur de chargement'),
+          isLoading: false
         }));
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));

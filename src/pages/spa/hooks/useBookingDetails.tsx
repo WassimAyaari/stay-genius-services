@@ -45,27 +45,33 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
   
   useEffect(() => {
     const loadBooking = async () => {
-      if (!id) return;
+      if (!id) {
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false, 
+          error: new Error('Identifiant de réservation manquant') 
+        }));
+        return;
+      }
       
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
       try {
         console.log('Fetching booking details for ID:', id);
         const bookingData = await getBookingById(id);
-        console.log('Booking data received:', bookingData);
         
         if (!bookingData) {
           console.error('No booking data found for ID:', id);
-          toast.error("Réservation introuvable");
           setState(prev => ({ 
             ...prev, 
             isLoading: false, 
-            error: new Error('Réservation introuvable')
+            error: new Error('Réservation introuvable') 
           }));
           return;
         }
         
-        setState(prev => ({ ...prev, booking: bookingData, error: null }));
+        console.log('Booking data received:', bookingData);
+        setState(prev => ({ ...prev, booking: bookingData }));
         
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
@@ -79,44 +85,11 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
           setState(prev => ({ ...prev, service: serviceData }));
           
           if (serviceData.facility_id) {
-            const { data: facilityData, error: facilityError } = await supabase
-              .from('spa_facilities')
-              .select('*')
-              .eq('id', serviceData.facility_id)
-              .maybeSingle();
-            
-            if (facilityError) {
-              console.error('Error fetching facility:', facilityError);
-            } else if (facilityData) {
-              console.log('Facility data received:', facilityData);
-              setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
-            }
-          }
-        } else {
-          // Fetch service separately if not included in booking data
-          const { data: serviceData, error: serviceError } = await supabase
-            .from('spa_services')
-            .select('*')
-            .eq('id', bookingData.service_id)
-            .maybeSingle();
-          
-          if (serviceError) {
-            console.error('Error fetching service:', serviceError);
-          } else if (serviceData) {
-            console.log('Service data received:', serviceData);
-            const typedServiceData: SpaService = {
-              ...serviceData,
-              category: serviceData.category as 'massage' | 'facial' | 'body' | 'wellness' | string,
-              image: serviceData.image || '',
-              status: serviceData.status || 'available',
-            };
-            setState(prev => ({ ...prev, service: typedServiceData }));
-            
-            if (typedServiceData.facility_id) {
+            try {
               const { data: facilityData, error: facilityError } = await supabase
                 .from('spa_facilities')
                 .select('*')
-                .eq('id', typedServiceData.facility_id)
+                .eq('id', serviceData.facility_id)
                 .maybeSingle();
               
               if (facilityError) {
@@ -125,12 +98,21 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
                 console.log('Facility data received:', facilityData);
                 setState(prev => ({ ...prev, facility: facilityData as SpaFacility }));
               }
+            } catch (error) {
+              console.error('Error fetching facility data:', error);
+              // Continue sans facility data
             }
           }
+        } else {
+          console.error('No service data found in booking');
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false, 
+            error: new Error('Données de service manquantes') 
+          }));
         }
       } catch (error) {
         console.error('Error loading booking details:', error);
-        toast.error("Erreur lors du chargement des détails de la réservation");
         setState(prev => ({ 
           ...prev, 
           error: error instanceof Error ? error : new Error('Erreur de chargement'),

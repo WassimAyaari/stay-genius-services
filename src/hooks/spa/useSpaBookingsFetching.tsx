@@ -27,11 +27,15 @@ export const useSpaBookingsFetching = () => {
         .select(`
           *,
           spa_services:service_id (
+            id,
             name,
             price,
             duration,
             description,
-            category
+            category,
+            image,
+            status,
+            facility_id
           )
         `)
         .order('date', { ascending: false });
@@ -57,11 +61,15 @@ export const useSpaBookingsFetching = () => {
         .select(`
           *,
           spa_services:service_id (
+            id,
             name,
             price,
             duration,
             description,
-            category
+            category,
+            image,
+            status,
+            facility_id
           )
         `)
         .eq('user_id', userId)
@@ -82,6 +90,11 @@ export const useSpaBookingsFetching = () => {
 
   // Récupérer une réservation par ID avec tous les détails nécessaires
   const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
+    if (!id) {
+      console.error('Missing booking ID');
+      return null;
+    }
+    
     console.log('Fetching booking by ID:', id);
     try {
       // Récupérer la réservation avec les détails du service
@@ -102,17 +115,15 @@ export const useSpaBookingsFetching = () => {
           )
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching booking by ID:', error);
-        toast.error('Erreur lors du chargement de la réservation');
         return null;
       }
 
       if (!data) {
         console.log('No booking found with ID:', id);
-        toast.error('Réservation introuvable');
         return null;
       }
 
@@ -120,7 +131,6 @@ export const useSpaBookingsFetching = () => {
       return data as unknown as ExtendedSpaBooking;
     } catch (error) {
       console.error('Exception in getBookingById:', error);
-      toast.error('Erreur réseau lors du chargement de la réservation');
       return null;
     }
   };
