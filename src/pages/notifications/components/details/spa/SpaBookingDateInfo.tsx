@@ -10,7 +10,17 @@ interface SpaBookingDateInfoProps {
 }
 
 export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, time }) => {
-  const formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
+  // Add a safety check for date format
+  const formatDate = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), 'PPPP', { locale: fr });
+    } catch (error) {
+      console.error('Error formatting date:', error, dateString);
+      return dateString;
+    }
+  };
+  
+  const formattedDate = formatDate(date);
   
   return (
     <div className="space-y-3">

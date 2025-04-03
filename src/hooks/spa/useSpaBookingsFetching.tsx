@@ -27,11 +27,15 @@ export const useSpaBookingsFetching = () => {
         .select(`
           *,
           spa_services:service_id (
+            id,
             name,
             price,
             duration,
             description,
-            category
+            category,
+            facility_id,
+            image,
+            status
           )
         `)
         .order('date', { ascending: false });
@@ -57,11 +61,15 @@ export const useSpaBookingsFetching = () => {
         .select(`
           *,
           spa_services:service_id (
+            id,
             name,
             price,
             duration,
             description,
-            category
+            category,
+            facility_id,
+            image,
+            status
           )
         `)
         .eq('user_id', userId)
@@ -112,7 +120,6 @@ export const useSpaBookingsFetching = () => {
 
       if (!data) {
         console.log('No booking found with ID:', id);
-        toast.error('Réservation introuvable');
         return null;
       }
 
