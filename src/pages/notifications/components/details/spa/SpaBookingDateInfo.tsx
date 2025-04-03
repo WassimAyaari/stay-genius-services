@@ -10,14 +10,7 @@ interface SpaBookingDateInfoProps {
 }
 
 export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, time }) => {
-  let formattedDate;
-  
-  try {
-    formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
-  } catch (error) {
-    console.error('Error parsing date:', error, date);
-    formattedDate = date;
-  }
+  const formattedDate = format(parseISO(date), 'PPPP', { locale: fr });
   
   return (
     <div className="space-y-3">

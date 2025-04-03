@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SpaBooking } from '@/features/spa/types';
+import { toast } from 'sonner';
 
 export interface ExtendedSpaBooking extends SpaBooking {
   spa_services?: {
@@ -21,7 +22,6 @@ export const useSpaBookingsFetching = () => {
   // Récupérer toutes les réservations spa
   const fetchBookings = async (): Promise<SpaBooking[]> => {
     try {
-      console.log('Récupération de toutes les réservations spa');
       const { data, error } = await supabase
         .from('spa_bookings')
         .select(`
@@ -37,22 +37,21 @@ export const useSpaBookingsFetching = () => {
         .order('date', { ascending: false });
 
       if (error) {
-        console.error('Erreur lors de la récupération des réservations spa:', error);
+        console.error('Error fetching spa bookings:', error);
         throw error;
       }
 
-      console.log(`${data?.length || 0} réservations récupérées`);
       return data as unknown as SpaBooking[];
     } catch (error) {
-      console.error('Exception dans fetchBookings:', error);
-      throw error;
+      console.error('Exception in fetchBookings:', error);
+      return [];
     }
   };
 
   // Récupérer les réservations d'un utilisateur
   const fetchUserBookings = async (userId: string): Promise<SpaBooking[]> => {
     try {
-      console.log('Récupération des réservations pour l\'utilisateur:', userId);
+      console.log('Fetching bookings for user ID:', userId);
       const { data, error } = await supabase
         .from('spa_bookings')
         .select(`
@@ -69,28 +68,22 @@ export const useSpaBookingsFetching = () => {
         .order('date', { ascending: false });
 
       if (error) {
-        console.error('Erreur lors de la récupération des réservations utilisateur:', error);
+        console.error('Error fetching user spa bookings:', error);
         throw error;
       }
 
-      console.log(`${data?.length || 0} réservations trouvées pour l'utilisateur`);
+      console.log('Found bookings for user:', data?.length || 0);
       return data as unknown as SpaBooking[];
     } catch (error) {
-      console.error('Exception dans fetchUserBookings:', error);
+      console.error('Exception in fetchUserBookings:', error);
       return [];
     }
   };
 
-  // Récupérer une réservation par ID
+  // Récupérer une réservation par ID avec tous les détails nécessaires
   const getBookingById = async (id: string): Promise<ExtendedSpaBooking | null> => {
+    console.log('Fetching booking by ID:', id);
     try {
-      console.log('Récupération de la réservation par ID:', id);
-      
-      if (!id) {
-        console.error('ID de réservation invalide');
-        return null;
-      }
-      
       // Récupérer la réservation avec les détails du service
       const { data, error } = await supabase
         .from('spa_bookings')
@@ -112,19 +105,27 @@ export const useSpaBookingsFetching = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('Erreur lors de la récupération de la réservation par ID:', error);
+        console.error('Error fetching booking by ID:', error);
+        toast.error('Erreur lors du chargement de la réservation');
         return null;
       }
 
       if (!data) {
-        console.log('Aucune réservation trouvée avec l\'ID:', id);
+        console.log('No booking found with ID:', id);
+        toast.error('Réservation introuvable');
         return null;
       }
 
-      console.log('Réservation trouvée avec les détails du service:', data);
+      // Vérifier que des données sont présentes pour éviter les erreurs
+      if (!data.spa_services) {
+        console.warn('No service data found for booking:', id);
+      }
+
+      console.log('Found booking with service details:', data);
       return data as unknown as ExtendedSpaBooking;
     } catch (error) {
-      console.error('Exception dans getBookingById:', error);
+      console.error('Exception in getBookingById:', error);
+      toast.error('Erreur réseau lors du chargement de la réservation');
       return null;
     }
   };
@@ -132,6 +133,8 @@ export const useSpaBookingsFetching = () => {
   const { data = [], isLoading, error, refetch } = useQuery({
     queryKey: ['spa-bookings'],
     queryFn: fetchBookings,
+    retry: 2,
+    staleTime: 60000, // 1 minute
   });
 
   return {

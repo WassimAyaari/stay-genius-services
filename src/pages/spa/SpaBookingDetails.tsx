@@ -13,6 +13,7 @@ import BookingActionButtons from './components/BookingActionButtons';
 import BookingStatusBadge from './components/BookingStatusBadge';
 import BookingNotFound from './components/BookingNotFound';
 import BookingLoadingState from './components/BookingLoadingState';
+import BookingErrorState from './components/BookingErrorState';
 import { useBookingDetails } from './hooks/useBookingDetails';
 import BookingDialog from '@/features/spa/components/SpaBookingDialog';
 
@@ -25,13 +26,21 @@ const SpaBookingDetails = () => {
     service,
     facility,
     isLoading,
+    error,
     isEditDialogOpen,
     setIsEditDialogOpen,
     canCancel,
     canEdit,
     handleEdit,
-    handleCancelBooking
+    handleCancelBooking,
+    handleRetry
   } = useBookingDetails({ id });
+
+  // Ajouter plus de logs pour le débogage
+  React.useEffect(() => {
+    console.log("Booking details component rendered with id:", id);
+    console.log("Current booking state:", { booking, service, facility, isLoading, error });
+  }, [id, booking, service, facility, isLoading, error]);
 
   if (isLoading) {
     return (
@@ -43,12 +52,26 @@ const SpaBookingDetails = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Layout>
+        <div className="container max-w-4xl py-8">
+          <BookingDetailsHeader />
+          <BookingErrorState 
+            message="Impossible de charger les détails de cette réservation. Veuillez réessayer."
+            onRetry={handleRetry}
+          />
+        </div>
+      </Layout>
+    );
+  }
+
   if (!booking || !service) {
     return (
       <Layout>
         <div className="container max-w-4xl py-8">
           <BookingDetailsHeader />
-          <BookingNotFound />
+          <BookingNotFound onRetry={handleRetry} />
         </div>
       </Layout>
     );
@@ -96,6 +119,7 @@ const SpaBookingDetails = () => {
             serviceId={service.id}
             onSuccess={() => {
               setIsEditDialogOpen(false);
+              // Utiliser navigate(0) pour rafraîchir complètement la page
               navigate(0);
             }}
             existingBooking={booking}
