@@ -2,7 +2,7 @@
 import React from 'react';
 import { CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Spa } from 'lucide-react';
+import { ShowerHead } from 'lucide-react';
 
 interface SpaBookingDetailHeaderProps {
   status: string;
@@ -33,7 +33,7 @@ export const SpaBookingDetailHeader: React.FC<SpaBookingDetailHeaderProps> = ({ 
     <CardHeader className="flex flex-row items-center justify-between">
       <div className="flex items-center">
         <div className="bg-indigo-100 p-2 rounded-full mr-3">
-          <Spa className="h-5 w-5 text-indigo-600" />
+          <ShowerHead className="h-5 w-5 text-indigo-600" />
         </div>
         <div>
           <h2 className="text-lg font-medium">Réservation de spa</h2>
