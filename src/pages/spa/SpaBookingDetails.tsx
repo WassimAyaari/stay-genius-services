@@ -48,7 +48,7 @@ const SpaBookingDetails = () => {
       <Layout>
         <div className="container max-w-4xl py-8">
           <BookingDetailsHeader />
-          <BookingNotFound />
+          <BookingNotFound bookingId={id} />
         </div>
       </Layout>
     );

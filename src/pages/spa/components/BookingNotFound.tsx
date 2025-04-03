@@ -5,7 +5,11 @@ import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-const BookingNotFound: React.FC = () => {
+interface BookingNotFoundProps {
+  bookingId?: string;
+}
+
+const BookingNotFound: React.FC<BookingNotFoundProps> = ({ bookingId }) => {
   const navigate = useNavigate();
   
   return (
@@ -15,6 +19,7 @@ const BookingNotFound: React.FC = () => {
         <h3 className="text-xl font-medium mb-2">Réservation introuvable</h3>
         <p className="text-gray-500 mb-4">
           La réservation que vous recherchez n'existe pas ou a été supprimée.
+          {bookingId && <span className="block text-sm mt-1">ID: {bookingId}</span>}
         </p>
         <Button onClick={() => navigate('/profile')}>
           Retour au profil

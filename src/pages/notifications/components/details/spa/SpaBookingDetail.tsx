@@ -32,7 +32,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
   }
 
   if (!booking || !service) {
-    return <SpaBookingNotFound onViewDetails={handleViewDetails} />;
+    return <SpaBookingNotFound onViewDetails={handleViewDetails} bookingId={notification.id} />;
   }
 
   return (
