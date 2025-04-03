@@ -44,7 +44,13 @@ export const useSpaBookingsFetching = () => {
         throw error;
       }
 
-      return data as unknown as SpaBooking[];
+      // Ensure we properly type the data that comes back
+      const typedData = data?.map(booking => ({
+        ...booking,
+        status: booking.status as SpaBooking['status']
+      }));
+
+      return typedData as SpaBooking[];
     } catch (error) {
       console.error('Exception in fetchBookings:', error);
       return [];
@@ -80,7 +86,14 @@ export const useSpaBookingsFetching = () => {
       }
 
       console.log('Found bookings for user:', data?.length || 0);
-      return data as unknown as SpaBooking[];
+      
+      // Ensure we properly type the data that comes back
+      const typedData = data?.map(booking => ({
+        ...booking,
+        status: booking.status as SpaBooking['status']
+      }));
+
+      return typedData as SpaBooking[];
     } catch (error) {
       console.error('Exception in fetchUserBookings:', error);
       return [];

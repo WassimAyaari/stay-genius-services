@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { SpaBooking } from '@/features/spa/types';
 
 export interface BookingDetailState {
-  booking: any | null;
+  booking: SpaBooking | null;
   service: any | null;
   facility: any | null;
   isLoading: boolean;
@@ -153,6 +153,8 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
         }));
       }
       
+      setState(prev => ({ ...prev, isLoading: false }));
+      
     } catch (error) {
       console.error('Error loading booking details:', error);
       setState(prev => ({
@@ -160,8 +162,6 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
         isLoading: false,
         error: "Erreur lors du chargement des détails de la réservation"
       }));
-    } finally {
-      setState(prev => ({ ...prev, isLoading: false }));
     }
   }, [notification, getBookingById]);
   
@@ -174,9 +174,11 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
     
     try {
       await cancelBooking(id);
+      toast.success("Réservation annulée avec succès");
+      
+      // Recharger les données pour afficher le nouveau statut
       const updatedBooking = await getBookingById(id);
       setState(prev => ({ ...prev, booking: updatedBooking }));
-      toast.success("Réservation annulée avec succès");
     } catch (error) {
       console.error('Error cancelling booking:', error);
       toast.error("Erreur lors de l'annulation de la réservation");

@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Edit, XCircle } from 'lucide-react';
 
 interface SpaBookingActionsProps {
   bookingId: string;
@@ -28,6 +29,7 @@ export const SpaBookingActions: React.FC<SpaBookingActionsProps> = ({
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   
   const canCancel = status === 'pending' || status === 'confirmed';
+  const canEdit = status === 'pending';
   
   const handleViewDetails = () => {
     navigate(`/spa/booking/${bookingId}`);
@@ -40,22 +42,35 @@ export const SpaBookingActions: React.FC<SpaBookingActionsProps> = ({
   
   return (
     <>
-      <div className="flex justify-end gap-4 pt-4">
+      <div className="flex flex-wrap gap-3 justify-start pt-4">
+        {canEdit && (
+          <Button 
+            variant="secondary"
+            onClick={() => navigate(`/spa/booking/${bookingId}?edit=true`)}
+            className="bg-blue-50 text-blue-600 hover:bg-blue-100"
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            Modifier
+          </Button>
+        )}
+        
+        {canCancel && (
+          <Button
+            variant="destructive"
+            onClick={() => setIsCancelDialogOpen(true)}
+            className="bg-red-50 text-red-600 hover:bg-red-100"
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            Annuler
+          </Button>
+        )}
+        
         <Button 
           variant="outline" 
           onClick={handleViewDetails}
         >
           Voir les détails complets
         </Button>
-        
-        {canCancel && (
-          <Button
-            variant="destructive"
-            onClick={() => setIsCancelDialogOpen(true)}
-          >
-            Annuler la réservation
-          </Button>
-        )}
       </div>
       
       <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>

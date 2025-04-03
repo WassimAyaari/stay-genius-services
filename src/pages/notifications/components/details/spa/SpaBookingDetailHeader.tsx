@@ -1,7 +1,8 @@
 
 import React from 'react';
+import { CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CardHeader, CardTitle } from '@/components/ui/card';
+import { Spa } from 'lucide-react';
 
 interface SpaBookingDetailHeaderProps {
   status: string;
@@ -27,15 +28,21 @@ export const SpaBookingDetailHeader: React.FC<SpaBookingDetailHeaderProps> = ({ 
       default: return 'En attente';
     }
   };
-
+  
   return (
-    <CardHeader>
-      <div className="flex justify-between items-center">
-        <CardTitle>Détails de la réservation</CardTitle>
-        <Badge className={getStatusColor(status)}>
-          {getStatusText(status)}
-        </Badge>
+    <CardHeader className="flex flex-row items-center justify-between">
+      <div className="flex items-center">
+        <div className="bg-indigo-100 p-2 rounded-full mr-3">
+          <Spa className="h-5 w-5 text-indigo-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-medium">Réservation de spa</h2>
+          <p className="text-sm text-gray-500">Service bien-être</p>
+        </div>
       </div>
+      <Badge className={getStatusColor(status)}>
+        {getStatusText(status)}
+      </Badge>
     </CardHeader>
   );
 };
