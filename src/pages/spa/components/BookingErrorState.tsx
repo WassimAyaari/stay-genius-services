@@ -35,9 +35,9 @@ const BookingErrorState: React.FC<BookingErrorStateProps> = ({
               <span>Réessayer</span>
             </Button>
           )}
-          <Button onClick={() => navigate('/spa')} className="flex items-center gap-2">
+          <Button onClick={() => navigate('/profile')} className="flex items-center gap-2">
             <Home className="h-4 w-4" />
-            <span>Retour aux services spa</span>
+            <span>Retour au profil</span>
           </Button>
         </div>
       </CardContent>
