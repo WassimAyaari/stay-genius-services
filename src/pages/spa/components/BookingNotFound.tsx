@@ -1,11 +1,15 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-const BookingNotFound: React.FC = () => {
+interface BookingNotFoundProps {
+  onRetry?: () => void;
+}
+
+const BookingNotFound: React.FC<BookingNotFoundProps> = ({ onRetry }) => {
   const navigate = useNavigate();
   
   return (
@@ -16,9 +20,21 @@ const BookingNotFound: React.FC = () => {
         <p className="text-gray-500 mb-4">
           La réservation que vous recherchez n'existe pas ou a été supprimée.
         </p>
-        <Button onClick={() => navigate('/profile')}>
-          Retour au profil
-        </Button>
+        <div className="flex justify-center gap-3">
+          {onRetry && (
+            <Button 
+              variant="outline" 
+              onClick={onRetry}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Réessayer</span>
+            </Button>
+          )}
+          <Button onClick={() => navigate('/profile')}>
+            Retour au profil
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

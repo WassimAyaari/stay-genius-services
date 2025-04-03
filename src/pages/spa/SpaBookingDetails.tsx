@@ -13,6 +13,7 @@ import BookingActionButtons from './components/BookingActionButtons';
 import BookingStatusBadge from './components/BookingStatusBadge';
 import BookingNotFound from './components/BookingNotFound';
 import BookingLoadingState from './components/BookingLoadingState';
+import BookingErrorState from './components/BookingErrorState';
 import { useBookingDetails } from './hooks/useBookingDetails';
 import BookingDialog from '@/features/spa/components/SpaBookingDialog';
 
@@ -25,12 +26,14 @@ const SpaBookingDetails = () => {
     service,
     facility,
     isLoading,
+    error,
     isEditDialogOpen,
     setIsEditDialogOpen,
     canCancel,
     canEdit,
     handleEdit,
-    handleCancelBooking
+    handleCancelBooking,
+    handleRetry
   } = useBookingDetails({ id });
 
   if (isLoading) {
@@ -38,6 +41,20 @@ const SpaBookingDetails = () => {
       <Layout>
         <div className="container max-w-4xl py-8">
           <BookingLoadingState />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container max-w-4xl py-8">
+          <BookingDetailsHeader />
+          <BookingErrorState 
+            message="Impossible de charger les détails de cette réservation. Veuillez réessayer."
+            onRetry={handleRetry}
+          />
         </div>
       </Layout>
     );

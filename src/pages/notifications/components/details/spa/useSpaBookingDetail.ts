@@ -11,6 +11,7 @@ export interface BookingDetailState {
   service: any | null;
   facility: any | null;
   isLoading: boolean;
+  error: Error | null;
 }
 
 export const useSpaBookingDetail = (notification: NotificationItem) => {
@@ -19,55 +20,83 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
     booking: null,
     service: null,
     facility: null,
-    isLoading: true
+    isLoading: true,
+    error: null
   });
   
   const { getBookingById, cancelBooking } = useSpaBookings();
+  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     const loadBookingDetails = async () => {
       if (!notification || !notification.id) return;
       
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       
       try {
         const bookingData = await getBookingById(notification.id);
         
         if (!bookingData) {
           toast.error("Réservation introuvable");
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false, 
+            error: new Error('Réservation introuvable') 
+          }));
           return;
         }
         
         setState(prev => ({ ...prev, booking: bookingData }));
         
-        const { data: serviceData } = await supabase
-          .from('spa_services')
-          .select('*')
-          .eq('id', bookingData.service_id)
-          .single();
-        
-        if (serviceData) {
-          setState(prev => ({ ...prev, service: serviceData }));
-          
-          const { data: facilityData } = await supabase
-            .from('spa_facilities')
+        try {
+          const { data: serviceData, error: serviceError } = await supabase
+            .from('spa_services')
             .select('*')
-            .eq('id', serviceData.facility_id)
-            .single();
+            .eq('id', bookingData.service_id)
+            .maybeSingle();
           
-          setState(prev => ({ ...prev, facility: facilityData }));
+          if (serviceError) {
+            console.error('Error fetching service:', serviceError);
+          } else if (serviceData) {
+            setState(prev => ({ ...prev, service: serviceData }));
+            
+            if (serviceData.facility_id) {
+              const { data: facilityData, error: facilityError } = await supabase
+                .from('spa_facilities')
+                .select('*')
+                .eq('id', serviceData.facility_id)
+                .maybeSingle();
+              
+              if (facilityError) {
+                console.error('Error fetching facility:', facilityError);
+              } else if (facilityData) {
+                setState(prev => ({ ...prev, facility: facilityData }));
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching related data:', error);
         }
         
       } catch (error) {
         console.error('Error loading booking details:', error);
         toast.error("Erreur lors du chargement des détails de la réservation");
+        setState(prev => ({ 
+          ...prev, 
+          error: error instanceof Error ? error : new Error('Erreur de chargement') 
+        }));
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
       }
     };
     
     loadBookingDetails();
-  }, [notification, getBookingById]);
+  }, [notification, getBookingById, retryCount]);
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    toast.info("Tentative de rechargement des données...");
+  };
 
   const handleCancelBooking = async (id: string) => {
     if (!id) return;
@@ -92,6 +121,7 @@ export const useSpaBookingDetail = (notification: NotificationItem) => {
   return {
     ...state,
     handleCancelBooking,
-    handleViewDetails
+    handleViewDetails,
+    handleRetry
   };
 };

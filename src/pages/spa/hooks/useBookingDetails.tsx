@@ -15,6 +15,7 @@ interface UseBookingDetailsState {
   facility: SpaFacility | null;
   isLoading: boolean;
   userId: string | null;
+  error: Error | null;
 }
 
 export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
@@ -23,11 +24,13 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     service: null,
     facility: null,
     isLoading: true,
-    userId: null
+    userId: null,
+    error: null
   });
   
   const { getBookingById, cancelBooking } = useSpaBookings();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -44,7 +47,7 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     const loadBooking = async () => {
       if (!id) return;
       
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       
       try {
         console.log('Fetching booking details for ID:', id);
@@ -54,11 +57,15 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
         if (!bookingData) {
           console.error('No booking data found for ID:', id);
           toast.error("Réservation introuvable");
-          setState(prev => ({ ...prev, isLoading: false }));
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false, 
+            error: new Error('Réservation introuvable')
+          }));
           return;
         }
         
-        setState(prev => ({ ...prev, booking: bookingData }));
+        setState(prev => ({ ...prev, booking: bookingData, error: null }));
         
         if (bookingData.spa_services) {
           console.log('Service data found in booking:', bookingData.spa_services);
@@ -124,13 +131,22 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
       } catch (error) {
         console.error('Error loading booking details:', error);
         toast.error("Erreur lors du chargement des détails de la réservation");
+        setState(prev => ({ 
+          ...prev, 
+          error: error instanceof Error ? error : new Error('Erreur de chargement') 
+        }));
       } finally {
         setState(prev => ({ ...prev, isLoading: false }));
       }
     };
     
     loadBooking();
-  }, [id, getBookingById]);
+  }, [id, getBookingById, retryCount]);
+  
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    toast.info("Tentative de rechargement des données...");
+  };
   
   const handleEdit = () => {
     setIsEditDialogOpen(true);
@@ -161,6 +177,7 @@ export const useBookingDetails = ({ id }: UseBookingDetailsProps) => {
     canCancel,
     canEdit,
     handleEdit,
-    handleCancelBooking
+    handleCancelBooking,
+    handleRetry
   };
 };
