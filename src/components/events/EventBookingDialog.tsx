@@ -32,7 +32,7 @@ const EventBookingDialog = ({
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-0">
+      <DialogContent className="sm:max-w-[500px] p-0 max-h-[90vh]">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>
             {isEditing ? `Modifier votre réservation - ${eventTitle}` : `Réserver - ${eventTitle}`}
@@ -43,7 +43,7 @@ const EventBookingDialog = ({
               : "Remplissez le formulaire ci-dessous pour réserver votre place à cet événement."}
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="max-h-[80vh]">
+        <ScrollArea className="max-h-[70vh]">
           <div className="p-6 pt-2">
             {eventId && (
               <EventReservationForm 

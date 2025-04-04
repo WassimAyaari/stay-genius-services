@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const EventsManager = () => {
   const { events, loading: eventsLoading, createEvent, updateEvent, deleteEvent } = useEvents();
@@ -71,16 +72,16 @@ const EventsManager = () => {
 
   return (
     <Layout>
-      <div className="container py-8">
+      <div className="container py-8 flex flex-col h-[calc(100vh-64px)] overflow-hidden">
         <h1 className="text-2xl font-bold mb-6">Gestion des Événements et Promotions</h1>
         
-        <Tabs defaultValue="events">
+        <Tabs defaultValue="events" className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="mb-6">
             <TabsTrigger value="events">Événements</TabsTrigger>
             <TabsTrigger value="stories">Stories</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="events">
+          <TabsContent value="events" className="flex-1 overflow-hidden flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">Liste des événements et promotions</h2>
               <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
@@ -90,114 +91,118 @@ const EventsManager = () => {
                     Ajouter un événement
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[550px]">
+                <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-auto">
                   <DialogHeader>
                     <DialogTitle>{editingEvent ? 'Modifier l\'événement' : 'Ajouter un événement'}</DialogTitle>
                   </DialogHeader>
-                  <EventForm 
-                    onSubmit={editingEvent ? handleUpdateEvent : handleCreateEvent} 
-                    initialData={editingEvent} 
-                  />
+                  <ScrollArea className="max-h-[70vh]">
+                    <EventForm 
+                      onSubmit={editingEvent ? handleUpdateEvent : handleCreateEvent} 
+                      initialData={editingEvent} 
+                    />
+                  </ScrollArea>
                 </DialogContent>
               </Dialog>
             </div>
             
-            <Card className="mb-6">
+            <Card className="mb-6 flex-1 overflow-hidden flex flex-col">
               {eventsLoading ? (
                 <div className="p-6 text-center">Chargement des événements...</div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Image</TableHead>
-                      <TableHead>Titre</TableHead>
-                      <TableHead>Catégorie</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Lieu</TableHead>
-                      <TableHead>À la une</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {events.length === 0 ? (
+                <ScrollArea className="h-full">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-4">
-                          Aucun événement trouvé
-                        </TableCell>
+                        <TableHead>Image</TableHead>
+                        <TableHead>Titre</TableHead>
+                        <TableHead>Catégorie</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Lieu</TableHead>
+                        <TableHead>À la une</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ) : (
-                      events.map((event) => (
-                        <TableRow key={event.id}>
-                          <TableCell>
-                            <div className="h-12 w-12 rounded overflow-hidden">
-                              <img 
-                                src={event.image} 
-                                alt={event.title} 
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          </TableCell>
-                          <TableCell>{event.title}</TableCell>
-                          <TableCell>{event.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
-                          <TableCell>
-                            {format(new Date(event.date), 'dd/MM/yyyy')}
-                            {event.time && <div className="text-xs">{event.time}</div>}
-                          </TableCell>
-                          <TableCell>{event.location || '-'}</TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => handleToggleFeature(event)}
-                            >
-                              {event.is_featured ? (
-                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                              ) : (
-                                <StarOff className="h-4 w-4 text-gray-500" />
-                              )}
-                            </Button>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <Trash className="h-4 w-4 text-red-500" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => deleteEvent(event.id)}
-                                      className="bg-red-500 hover:bg-red-600"
-                                    >
-                                      Supprimer
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
+                    </TableHeader>
+                    <TableBody>
+                      {events.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-4">
+                            Aucun événement trouvé
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                      ) : (
+                        events.map((event) => (
+                          <TableRow key={event.id}>
+                            <TableCell>
+                              <div className="h-12 w-12 rounded overflow-hidden">
+                                <img 
+                                  src={event.image} 
+                                  alt={event.title} 
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            </TableCell>
+                            <TableCell>{event.title}</TableCell>
+                            <TableCell>{event.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
+                            <TableCell>
+                              {format(new Date(event.date), 'dd/MM/yyyy')}
+                              {event.time && <div className="text-xs">{event.time}</div>}
+                            </TableCell>
+                            <TableCell>{event.location || '-'}</TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleToggleFeature(event)}
+                              >
+                                {event.is_featured ? (
+                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                ) : (
+                                  <StarOff className="h-4 w-4 text-gray-500" />
+                                )}
+                              </Button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <Trash className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={() => deleteEvent(event.id)}
+                                        className="bg-red-500 hover:bg-red-600"
+                                      >
+                                        Supprimer
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               )}
             </Card>
           </TabsContent>
           
-          <TabsContent value="stories">
+          <TabsContent value="stories" className="flex-1 overflow-hidden flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">Liste des stories</h2>
               <Dialog open={isStoryDialogOpen} onOpenChange={setIsStoryDialogOpen}>
@@ -207,101 +212,105 @@ const EventsManager = () => {
                     Ajouter une story
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[550px]">
+                <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-auto">
                   <DialogHeader>
                     <DialogTitle>{editingStory ? 'Modifier la story' : 'Ajouter une story'}</DialogTitle>
                   </DialogHeader>
-                  <StoryForm 
-                    onSubmit={editingStory ? handleUpdateStory : handleCreateStory} 
-                    initialData={editingStory} 
-                  />
+                  <ScrollArea className="max-h-[70vh]">
+                    <StoryForm 
+                      onSubmit={editingStory ? handleUpdateStory : handleCreateStory} 
+                      initialData={editingStory} 
+                    />
+                  </ScrollArea>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <Card>
+            <Card className="flex-1 overflow-hidden">
               {storiesLoading ? (
                 <div className="p-6 text-center">Chargement des stories...</div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Image</TableHead>
-                      <TableHead>Titre</TableHead>
-                      <TableHead>Catégorie</TableHead>
-                      <TableHead>Créée le</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {stories.length === 0 ? (
+                <ScrollArea className="h-full">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-4">
-                          Aucune story trouvée
-                        </TableCell>
+                        <TableHead>Image</TableHead>
+                        <TableHead>Titre</TableHead>
+                        <TableHead>Catégorie</TableHead>
+                        <TableHead>Créée le</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ) : (
-                      stories.map((story) => (
-                        <TableRow key={story.id}>
-                          <TableCell>
-                            <div className="h-12 w-12 rounded-full overflow-hidden">
-                              <img 
-                                src={story.image} 
-                                alt={story.title} 
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          </TableCell>
-                          <TableCell>{story.title}</TableCell>
-                          <TableCell>{story.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
-                          <TableCell>{format(new Date(story.created_at), 'dd/MM/yyyy')}</TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleToggleActive(story)}
-                              className={story.is_active ? 'text-green-500' : 'text-gray-500'}
-                            >
-                              {story.is_active ? 'Active' : 'Inactive'}
-                            </Button>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button variant="ghost" size="icon" onClick={() => handleEditStory(story)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <Trash className="h-4 w-4 text-red-500" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Êtes-vous sûr de vouloir supprimer cette story ? Cette action est irréversible.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => deleteStory(story.id)}
-                                      className="bg-red-500 hover:bg-red-600"
-                                    >
-                                      Supprimer
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
+                    </TableHeader>
+                    <TableBody>
+                      {stories.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-4">
+                            Aucune story trouvée
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                      ) : (
+                        stories.map((story) => (
+                          <TableRow key={story.id}>
+                            <TableCell>
+                              <div className="h-12 w-12 rounded-full overflow-hidden">
+                                <img 
+                                  src={story.image} 
+                                  alt={story.title} 
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            </TableCell>
+                            <TableCell>{story.title}</TableCell>
+                            <TableCell>{story.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
+                            <TableCell>{format(new Date(story.created_at), 'dd/MM/yyyy')}</TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleToggleActive(story)}
+                                className={story.is_active ? 'text-green-500' : 'text-gray-500'}
+                              >
+                                {story.is_active ? 'Active' : 'Inactive'}
+                              </Button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button variant="ghost" size="icon" onClick={() => handleEditStory(story)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <Trash className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Êtes-vous sûr de vouloir supprimer cette story ? Cette action est irréversible.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={() => deleteStory(story.id)}
+                                        className="bg-red-500 hover:bg-red-600"
+                                      >
+                                        Supprimer
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               )}
             </Card>
           </TabsContent>
