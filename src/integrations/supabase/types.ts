@@ -81,6 +81,48 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          image: string
+          is_featured: boolean | null
+          location: string | null
+          time: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          image: string
+          is_featured?: boolean | null
+          location?: string | null
+          time?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          image?: string
+          is_featured?: boolean | null
+          location?: string | null
+          time?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guests: {
         Row: {
           birth_date: string | null
@@ -687,6 +729,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stories: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          image: string
+          is_active: boolean | null
+          seen: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          image: string
+          is_active?: boolean | null
+          seen?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image?: string
+          is_active?: boolean | null
+          seen?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       table_reservations: {
         Row: {

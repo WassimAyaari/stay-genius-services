@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/features/auth/hooks/useAuthContext';
@@ -39,6 +40,7 @@ import SpaManager from '@/pages/admin/SpaManager';
 import SpaBookingDetails from '@/pages/spa/SpaBookingDetails';
 import ChatMessages from '@/pages/admin/ChatMessages';
 import AboutEditor from '@/pages/admin/AboutEditor';
+import EventsManager from '@/pages/admin/EventsManager';
 
 const queryClient = new QueryClient();
 
@@ -131,6 +133,11 @@ function App() {
               <Route path="/admin/spa" element={
                 <AuthGuard adminRequired>
                   <SpaManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/events" element={
+                <AuthGuard adminRequired>
+                  <EventsManager />
                 </AuthGuard>
               } />
               <Route path="/admin/chat" element={

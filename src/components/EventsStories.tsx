@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import StoryViewer from './StoryViewer';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useStories } from '@/hooks/useStories';
 import { 
   Carousel, 
   CarouselContent, 
@@ -11,72 +13,19 @@ import {
   type CarouselApi
 } from '@/components/ui/carousel';
 
-export interface StoryProps {
-  id: number;
-  title: string;
-  image: string;
-  category: 'event' | 'promo';
-  description?: string;
-  seen?: boolean;
-}
-
-export const stories: StoryProps[] = [
-  {
-    id: 1,
-    title: "Wine Tasting",
-    image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    category: "event",
-    description: "Join our sommelier for an exclusive wine tasting event featuring premium selections from around the world."
-  },
-  {
-    id: 2,
-    title: "Chef's Special",
-    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    category: "event",
-    description: "Experience a culinary journey with our executive chef's special tasting menu featuring seasonal ingredients."
-  },
-  {
-    id: 3,
-    title: "Spa Day",
-    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    category: "promo",
-    description: "Enjoy 20% off on our signature spa treatments. Package includes a 60-minute massage and facial.",
-    seen: true
-  },
-  {
-    id: 4,
-    title: "Stay Discount",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    category: "promo",
-    description: "Book 5 nights and get 15% off your entire stay, plus complimentary breakfast and spa access."
-  },
-  {
-    id: 5,
-    title: "Cocktail Hour",
-    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    category: "event",
-    description: "Learn how to make signature cocktails with our expert mixologists. Includes tastings and recipe cards."
-  },
-  {
-    id: 6,
-    title: "Weekend Deal",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    category: "promo",
-    description: "Book our weekend package and enjoy special amenities including spa credits and dining discounts."
-  }
-];
-
 const EventsStories: React.FC = () => {
-  const [viewedStories, setViewedStories] = useState<number[]>([]);
+  const { stories, loading, markAsSeen } = useStories();
+  const [viewedStories, setViewedStories] = useState<string[]>([]);
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const isMobile = useIsMobile();
   
-  const markAsSeen = (id: number, index: number) => {
+  const handleMarkAsSeen = async (id: string, index: number) => {
     if (!viewedStories.includes(id)) {
       setViewedStories([...viewedStories, id]);
+      await markAsSeen(id);
     }
     setSelectedStoryIndex(index);
     setStoryViewerOpen(true);
@@ -95,12 +44,38 @@ const EventsStories: React.FC = () => {
       carouselApi.off("select", onSelect);
     };
   }, [carouselApi]);
+
+  if (loading) {
+    return (
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-secondary">Événements & Promos</h2>
+          <Link to="/events" className="text-primary text-sm font-medium">Voir tout</Link>
+        </div>
+        
+        <div className="overflow-x-auto pb-4">
+          <div className="flex space-x-4">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex flex-col items-center space-y-1">
+                <div className="h-16 w-16 rounded-full bg-gray-200 animate-pulse"></div>
+                <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (stories.length === 0) {
+    return null;
+  }
   
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-secondary">Events & Promos</h2>
-        <Link to="/events" className="text-primary text-sm font-medium">View all</Link>
+        <h2 className="text-2xl font-bold text-secondary">Événements & Promos</h2>
+        <Link to="/events" className="text-primary text-sm font-medium">Voir tout</Link>
       </div>
       
       {isMobile ? (
@@ -114,11 +89,11 @@ const EventsStories: React.FC = () => {
             className="w-full"
           >
             <CarouselContent className="py-2">
-              {stories.map((story, index) => (
+              {stories.filter(story => story.is_active).map((story, index) => (
                 <CarouselItem key={story.id} className="basis-auto pl-4 pr-2">
                   <button 
                     className="flex flex-col items-center space-y-1 bg-transparent border-none"
-                    onClick={() => markAsSeen(story.id, index)}
+                    onClick={() => handleMarkAsSeen(story.id, index)}
                   >
                     <div className={cn(
                       "p-1 rounded-full", 
@@ -145,11 +120,11 @@ const EventsStories: React.FC = () => {
       ) : (
         <div className="overflow-x-auto pb-4">
           <div className="flex space-x-4 pb-2">
-            {stories.map((story, index) => (
+            {stories.filter(story => story.is_active).map((story, index) => (
               <button 
                 key={story.id} 
                 className="flex flex-col items-center space-y-1 bg-transparent border-none"
-                onClick={() => markAsSeen(story.id, index)}
+                onClick={() => handleMarkAsSeen(story.id, index)}
               >
                 <div className={cn(
                   "p-1 rounded-full", 
@@ -175,7 +150,7 @@ const EventsStories: React.FC = () => {
       
       {storyViewerOpen && (
         <StoryViewer 
-          stories={stories} 
+          stories={stories.filter(story => story.is_active)} 
           initialStoryIndex={selectedStoryIndex}
           onClose={() => setStoryViewerOpen(false)}
         />

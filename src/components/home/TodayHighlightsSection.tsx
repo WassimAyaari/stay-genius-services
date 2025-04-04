@@ -3,66 +3,79 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UtensilsCrossed, Wine } from 'lucide-react';
+import { UtensilsCrossed, Wine, Calendar, MapPin } from 'lucide-react';
+import { useTodayHighlights } from '@/hooks/useTodayHighlights';
+import { format } from 'date-fns';
 
 const TodayHighlightsSection = () => {
+  const { todayEvents, loading } = useTodayHighlights();
+
+  if (loading) {
+    return (
+      <section className="px-6 mb-10">
+        <h2 className="text-2xl font-bold text-secondary mb-4">Les Événements du Jour</h2>
+        <div className="grid grid-cols-1 gap-4">
+          <Card className="p-4 h-32 animate-pulse bg-gray-100" />
+          <Card className="p-4 h-32 animate-pulse bg-gray-100" />
+        </div>
+      </section>
+    );
+  }
+
+  if (todayEvents.length === 0) {
+    return (
+      <section className="px-6 mb-10">
+        <h2 className="text-2xl font-bold text-secondary mb-4">Les Événements du Jour</h2>
+        <Card className="p-6 text-center">
+          <p className="text-gray-500">Aucun événement prévu aujourd'hui</p>
+          <Link to="/events">
+            <Button variant="link" className="mt-2">
+              Voir tous les événements à venir
+            </Button>
+          </Link>
+        </Card>
+      </section>
+    );
+  }
+
   return (
     <section className="px-6 mb-10">
-      <h2 className="text-2xl font-bold text-secondary mb-4">Today's Highlights</h2>
+      <h2 className="text-2xl font-bold text-secondary mb-4">Les Événements du Jour</h2>
       <div className="grid grid-cols-1 gap-4">
-        <Card className="overflow-hidden">
-          <div className="flex items-center">
-            <div className="relative w-1/3 h-32">
-              <img 
-                src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-                alt="Wine Tasting" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4 flex-1">
-              <div className="flex items-start justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <Wine className="w-5 h-5 text-primary" />
-                  <h3 className="text-lg font-semibold text-secondary">Wine Tasting</h3>
-                </div>
-                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Today</span>
+        {todayEvents.map((event) => (
+          <Card key={event.id} className="overflow-hidden">
+            <div className="flex items-center">
+              <div className="relative w-1/3 h-32">
+                <img 
+                  src={event.image} 
+                  alt={event.title} 
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <p className="text-gray-600 text-sm mb-2">Today at 6 PM - Wine Cellar</p>
-              <Link to="/activities">
-                <Button size="sm" className="w-full sm:w-auto">
-                  Book Now
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="overflow-hidden">
-          <div className="flex items-center">
-            <div className="relative w-1/3 h-32">
-              <img 
-                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-                alt="Chef's Special Dinner" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4 flex-1">
-              <div className="flex items-start justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <UtensilsCrossed className="w-5 h-5 text-primary" />
-                  <h3 className="text-lg font-semibold text-secondary">Chef's Special Dinner</h3>
+              <div className="p-4 flex-1">
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    {event.category === 'event' ? (
+                      <Calendar className="w-5 h-5 text-primary" />
+                    ) : (
+                      <Wine className="w-5 h-5 text-primary" />
+                    )}
+                    <h3 className="text-lg font-semibold text-secondary">{event.title}</h3>
+                  </div>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Aujourd'hui</span>
                 </div>
-                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Tonight</span>
+                <p className="text-gray-600 text-sm mb-2">
+                  {event.time} {event.location && `- ${event.location}`}
+                </p>
+                <Link to="/events">
+                  <Button size="sm" className="w-full sm:w-auto">
+                    {event.category === 'event' ? 'Réserver' : 'En profiter'}
+                  </Button>
+                </Link>
               </div>
-              <p className="text-gray-600 text-sm mb-2">Tonight at 7 PM - Main Restaurant</p>
-              <Link to="/dining">
-                <Button size="sm" className="w-full sm:w-auto">
-                  Reserve
-                </Button>
-              </Link>
             </div>
-          </div>
-        </Card>
+          </Card>
+        ))}
       </div>
     </section>
   );

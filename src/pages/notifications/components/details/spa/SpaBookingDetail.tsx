@@ -11,8 +11,14 @@ interface SpaBookingDetailProps {
 export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = React.memo(({ notification }) => {
   const navigate = useNavigate();
   
-  // Instead of using useEffect with a timeout, just trigger navigation immediately
-  navigate(`/spa/booking/${notification.id}`);
+  React.useEffect(() => {
+    // Redirect to the spa booking detail page after a short delay
+    const timer = setTimeout(() => {
+      navigate(`/spa/booking/${notification.id}`);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [notification.id, navigate]);
   
   return <SpaBookingLoader />;
 });
