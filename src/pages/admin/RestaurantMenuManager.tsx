@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   Card, 
@@ -40,14 +40,14 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { MenuItem } from '@/features/dining/types';
-import { Pencil, Trash2, Plus, Image, ArrowLeft, Upload } from 'lucide-react';
+import { Pencil, Trash2, Plus, Image, ArrowLeft, Upload, Restaurant } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -75,7 +75,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const RestaurantMenuManager: React.FC = () => {
-  const { id: restaurantId } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const restaurantId = searchParams.get('restaurantId');
   const { toast } = useToast();
   const { 
     menuItems, 
@@ -84,8 +85,8 @@ const RestaurantMenuManager: React.FC = () => {
     updateMenuItem, 
     createMenuItem, 
     deleteMenuItem 
-  } = useRestaurantMenus(restaurantId || '');
-  const { restaurants } = useRestaurants();
+  } = useRestaurantMenus(restaurantId || undefined);
+  const { restaurants, isLoading: isLoadingRestaurants } = useRestaurants();
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -133,7 +134,14 @@ const RestaurantMenuManager: React.FC = () => {
   }, [isDialogOpen, editingItem, form]);
 
   const handleSubmit = async (values: FormValues) => {
-    if (!restaurantId) return;
+    if (!restaurantId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a restaurant first.",
+      });
+      return;
+    }
     
     try {
       if (editingItem) {
@@ -264,34 +272,90 @@ const RestaurantMenuManager: React.FC = () => {
     }
   };
 
-  if (isLoading) return <div className="p-8 text-center">Loading menu items...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">Error loading menu items: {error.message}</div>;
-  if (!restaurant) return <div className="p-8 text-center text-red-500">Restaurant not found</div>;
+  const handleRestaurantChange = (id: string) => {
+    setSearchParams({ restaurantId: id });
+  };
+
+  const RestaurantSelector = () => (
+    <div className="space-y-6 py-12">
+      <div className="text-center space-y-2">
+        <Restaurant className="mx-auto h-12 w-12 text-muted-foreground" />
+        <h2 className="text-2xl font-bold">Sélectionner un restaurant</h2>
+        <p className="text-muted-foreground">Veuillez choisir un restaurant pour gérer son menu</p>
+      </div>
+      
+      {isLoadingRestaurants ? (
+        <div className="text-center py-4">Chargement des restaurants...</div>
+      ) : restaurants && restaurants.length > 0 ? (
+        <div className="max-w-md mx-auto">
+          <Select onValueChange={handleRestaurantChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choisir un restaurant" />
+            </SelectTrigger>
+            <SelectContent>
+              {restaurants.map((restaurant) => (
+                <SelectItem key={restaurant.id} value={restaurant.id}>
+                  {restaurant.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <div className="mt-4 text-center">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/admin/restaurants">
+                <Plus className="mr-2 h-4 w-4" />
+                Créer un restaurant
+              </Link>
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-4 space-y-4">
+          <p className="text-muted-foreground">Aucun restaurant trouvé</p>
+          <Button asChild>
+            <Link to="/admin/restaurants">
+              <Plus className="mr-2 h-4 w-4" />
+              Créer un restaurant
+            </Link>
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
+  if (isLoadingRestaurants) return <div className="p-8 text-center">Chargement des restaurants...</div>;
+  if (!restaurantId) return <RestaurantSelector />;
+  if (error) return <div className="p-8 text-center text-red-500">Erreur lors du chargement des menus : {error.message}</div>;
+  if (!restaurant) return (
+    <div className="p-8 text-center">
+      <h2 className="text-xl text-red-500 mb-4">Restaurant non trouvé</h2>
+      <RestaurantSelector />
+    </div>
+  );
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/admin/restaurants">
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back
-            </Link>
+          <Button variant="outline" size="sm" onClick={() => setSearchParams({})}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> Changer de restaurant
           </Button>
-          <h1 className="text-2xl font-bold">{restaurant.name} Menu</h1>
+          <h1 className="text-2xl font-bold">{restaurant.name} - Menu</h1>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="default" onClick={handleDialogOpen}>
-              <Plus className="mr-2 h-4 w-4" /> Add Menu Item
+              <Plus className="mr-2 h-4 w-4" /> Ajouter un plat
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>{editingItem ? "Edit Menu Item" : "Add New Menu Item"}</DialogTitle>
+              <DialogTitle>{editingItem ? "Modifier le plat" : "Ajouter un plat"}</DialogTitle>
               <DialogDescription>
                 {editingItem 
-                  ? "Update the menu item details below." 
-                  : "Fill out the form below to add a new menu item."}
+                  ? "Modifiez les informations du plat." 
+                  : "Remplissez le formulaire pour ajouter un nouveau plat."}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[calc(90vh-180px)] pr-4">
@@ -302,9 +366,9 @@ const RestaurantMenuManager: React.FC = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>Nom</FormLabel>
                         <FormControl>
-                          <Input placeholder="Menu item name" {...field} />
+                          <Input placeholder="Nom du plat" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -318,7 +382,7 @@ const RestaurantMenuManager: React.FC = () => {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Item description" 
+                            placeholder="Description du plat" 
                             {...field} 
                             className="min-h-[100px]"
                           />
@@ -333,7 +397,7 @@ const RestaurantMenuManager: React.FC = () => {
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price</FormLabel>
+                          <FormLabel>Prix</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -351,9 +415,9 @@ const RestaurantMenuManager: React.FC = () => {
                       name="category"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Category</FormLabel>
+                          <FormLabel>Catégorie</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. Appetizers, Main Course" {...field} />
+                            <Input placeholder="Ex: Entrées, Plats principaux" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -371,7 +435,7 @@ const RestaurantMenuManager: React.FC = () => {
                         {/* URL Input */}
                         <FormControl>
                           <Input 
-                            placeholder="Image URL (optional)" 
+                            placeholder="URL de l'image (optionnel)" 
                             {...field} 
                             value={field.value || ""}
                             disabled={isProcessing}
@@ -401,14 +465,14 @@ const RestaurantMenuManager: React.FC = () => {
                           />
                           <Upload className="h-10 w-10 text-muted-foreground mb-2" />
                           <p className="text-sm text-muted-foreground text-center mb-1">
-                            Drop an image here or click to browse
+                            Déposez une image ici ou cliquez pour naviguer
                           </p>
                           <p className="text-xs text-muted-foreground text-center">
-                            Images will be compressed to ~30KB and converted to WebP
+                            Les images seront compressées à ~30KB et converties au format WebP
                           </p>
                           {isProcessing && (
                             <p className="text-xs text-primary mt-2 animate-pulse">
-                              Processing image...
+                              Traitement de l'image...
                             </p>
                           )}
                         </div>
@@ -419,7 +483,7 @@ const RestaurantMenuManager: React.FC = () => {
                             <div className="relative aspect-video rounded-md overflow-hidden border">
                               <img 
                                 src={field.value} 
-                                alt="Menu item preview" 
+                                alt="Aperçu du plat" 
                                 className="object-cover w-full h-full"
                               />
                               <Button
@@ -436,7 +500,7 @@ const RestaurantMenuManager: React.FC = () => {
                         )}
                         
                         <FormDescription>
-                          Upload an image or provide a URL for the menu item.
+                          Téléchargez une image ou fournissez une URL pour le plat.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -450,9 +514,9 @@ const RestaurantMenuManager: React.FC = () => {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                           <div className="space-y-0.5">
-                            <FormLabel>Featured Item</FormLabel>
+                            <FormLabel>À la une</FormLabel>
                             <FormDescription>
-                              Featured items appear in special sections.
+                              Les plats mis en avant apparaissent dans des sections spéciales.
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -469,18 +533,18 @@ const RestaurantMenuManager: React.FC = () => {
                       name="status"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Status</FormLabel>
+                          <FormLabel>Statut</FormLabel>
                           <Select 
                             onValueChange={field.onChange} 
                             defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
+                                <SelectValue placeholder="Sélectionner un statut" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="available">Available</SelectItem>
-                              <SelectItem value="unavailable">Unavailable</SelectItem>
+                              <SelectItem value="available">Disponible</SelectItem>
+                              <SelectItem value="unavailable">Indisponible</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -489,7 +553,7 @@ const RestaurantMenuManager: React.FC = () => {
                     />
                   </div>
                   <DialogFooter className="pt-4">
-                    <Button type="submit">{editingItem ? "Update" : "Create"}</Button>
+                    <Button type="submit">{editingItem ? "Mettre à jour" : "Créer"}</Button>
                   </DialogFooter>
                 </form>
               </Form>
@@ -500,91 +564,94 @@ const RestaurantMenuManager: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Menu Items</CardTitle>
-          <CardDescription>Manage menu items for {restaurant.name}.</CardDescription>
+          <CardTitle>Menu de {restaurant.name}</CardTitle>
+          <CardDescription>Gérez les plats du restaurant.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Featured</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {menuItems?.length ? (
-                menuItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.category}</TableCell>
-                    <TableCell>${item.price.toFixed(2)}</TableCell>
-                    <TableCell>
-                      {item.isFeatured ? (
-                        <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                          Featured
+          {isLoading ? (
+            <div className="text-center py-4">Chargement du menu...</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Catégorie</TableHead>
+                  <TableHead>Prix</TableHead>
+                  <TableHead>Mise en avant</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {menuItems?.length ? (
+                  menuItems.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell>{item.category}</TableCell>
+                      <TableCell>{item.price.toFixed(2)} €</TableCell>
+                      <TableCell>
+                        {item.isFeatured ? (
+                          <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                            À la une
+                          </span>
+                        ) : null}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          item.status === "available" 
+                            ? "bg-green-100 text-green-800" 
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                          {item.status === "available" ? "Disponible" : "Indisponible"}
                         </span>
-                      ) : null}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        item.status === "available" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-red-100 text-red-800"
-                      }`}>
-                        {item.status === "available" ? "Available" : "Unavailable"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEdit(item)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the
-                                menu item.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(item.id)}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEdit(item)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Cette action ne peut pas être annulée. Le plat sera définitivement supprimé.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(item.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Supprimer
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      Aucun plat trouvé. Ajoutez votre premier plat pour commencer.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    No menu items found. Add your first item to get started.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -592,3 +659,9 @@ const RestaurantMenuManager: React.FC = () => {
 };
 
 export default RestaurantMenuManager;
+
+function useToast() {
+  return {
+    toast
+  };
+}
