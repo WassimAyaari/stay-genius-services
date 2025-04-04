@@ -13,6 +13,10 @@ import { SpaBookingLoader } from './SpaBookingLoader';
 import { SpaBookingNotFound } from './SpaBookingNotFound';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { SpaBookingDateInfo } from './SpaBookingDateInfo';
+import { SpaBookingServiceInfo } from './SpaBookingServiceInfo';
+import { SpaBookingFacilityInfo } from './SpaBookingFacilityInfo';
+import { SpaBookingContactInfo } from './SpaBookingContactInfo';
 
 interface SpaBookingDetailProps {
   notification: NotificationItem;
@@ -23,6 +27,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
   const {
     booking,
     service,
+    facility,
     isLoading,
     error,
     handleCancelBooking,
@@ -44,15 +49,6 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
         errorMessage={error}
       />
     );
-  }
-
-  // Format the date for display
-  let formattedDate;
-  try {
-    formattedDate = format(parseISO(booking.date), 'PPPP', { locale: fr });
-  } catch (e) {
-    console.error('Error formatting date:', e);
-    formattedDate = booking.date;
   }
 
   // Get the appropriate status label and badge color
@@ -114,7 +110,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
         
         <h1 className="text-2xl font-bold">Réservation de spa</h1>
         <div className="text-sm text-muted-foreground">
-          Réservation spa
+          Détails de votre réservation
         </div>
       </div>
 
@@ -127,7 +123,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
               </div>
               <div>
                 <h2 className="text-lg font-medium">Résumé</h2>
-                <p className="text-sm text-gray-500">{formattedDate} à {booking.time}</p>
+                {service && <p className="text-sm text-gray-500">{service.name}</p>}
               </div>
             </div>
             <Badge className={getStatusBadgeClass(booking.status)}>
@@ -135,51 +131,39 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
             </Badge>
           </div>
           
-          <div className="space-y-4">
-            <ul className="space-y-2 list-none">
-              <li>
-                <span className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span>Date: {formattedDate}</span>
-                </span>
-              </li>
-              <li>
-                <span className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-500" />
-                  <span>Heure: {booking.time}</span>
-                </span>
-              </li>
-              {booking.room_number && (
-                <li>
-                  <span className="flex items-center gap-2">
-                    <Home className="h-4 w-4 text-gray-500" />
-                    <span>Chambre: {booking.room_number}</span>
-                  </span>
-                </li>
-              )}
-            </ul>
+          {service && (
+            <SpaBookingServiceInfo service={service} />
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <SpaBookingDateInfo date={booking.date} time={booking.time} />
+            {facility && <SpaBookingFacilityInfo facility={facility} />}
+          </div>
+          
+          <Separator className="my-6" />
+          
+          <SpaBookingContactInfo booking={booking} />
               
-            <Separator className="my-4" />
+          <Separator className="my-6" />
+          
+          <div className="flex flex-row gap-3">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={handleModify}
+            >
+              Modifier
+            </Button>
             
-            <div className="flex flex-row gap-3">
-              <Button 
-                variant="outline" 
+            {canCancel && (
+              <Button
+                variant="destructive"
                 className="flex-1"
-                onClick={handleModify}
+                onClick={handleCancellation}
               >
-                Modifier
+                Annuler
               </Button>
-              
-              {canCancel && (
-                <Button
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={handleCancellation}
-                >
-                  Annuler
-                </Button>
-              )}
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>

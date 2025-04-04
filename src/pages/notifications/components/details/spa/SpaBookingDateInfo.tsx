@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -25,16 +25,18 @@ export const SpaBookingDateInfo: React.FC<SpaBookingDateInfoProps> = ({ date, ti
   return (
     <div className="space-y-3">
       <h3 className="font-medium">Détails de la réservation</h3>
-      <div className="flex items-center gap-2 text-sm">
-        <Calendar className="h-4 w-4 text-gray-500" />
-        <div>
-          <p className="font-medium">Date et heure</p>
-          <p className="text-gray-600">
-            {formattedDate}
-            {time ? ` à ${time}` : ''}
-          </p>
-        </div>
-      </div>
+      <ul className="space-y-2">
+        <li className="flex items-center gap-2 text-sm">
+          <Calendar className="h-4 w-4 text-gray-500" />
+          <span>Date: {formattedDate}</span>
+        </li>
+        {time && (
+          <li className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-gray-500" />
+            <span>Heure: {time}</span>
+          </li>
+        )}
+      </ul>
     </div>
   );
 };
