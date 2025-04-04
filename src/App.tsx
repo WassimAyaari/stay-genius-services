@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/features/auth/hooks/useAuthContext';
@@ -59,17 +58,11 @@ function App() {
                   <ServiceRequestDetails />
                 </AuthGuard>
               } />
-              <Route path="/reservations/:id" element={
+              <Route path="/dining/reservations/:id" element={
                 <AuthGuard>
                   <ReservationDetails />
                 </AuthGuard>
               } />
-              <Route path="/spa-bookings/:id" element={
-                <AuthGuard>
-                  <SpaBookingDetails />
-                </AuthGuard>
-              } />
-              {/* Route spa booking détails */}
               <Route path="/spa/booking/:id" element={
                 <AuthGuard>
                   <SpaBookingDetails />
@@ -97,7 +90,6 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/notifications" element={<Notifications />} />
-              {/* Ajout de la route pour les détails de notification */}
               <Route path="/notifications/:type/:id" element={
                 <AuthGuard>
                   <NotificationDetail />
@@ -106,7 +98,6 @@ function App() {
               <Route path="/feedback" element={<Feedback />} />
               <Route path="/shops" element={<Shops />} />
               
-              {/* Admin routes */}
               <Route path="/admin" element={
                 <AuthGuard adminRequired>
                   <AdminDashboard />
@@ -156,7 +147,6 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             
-            {/* Toaster component for notifications */}
             <Toaster richColors position="top-right" closeButton />
             <ShadcnToaster />
           </AuthProvider>

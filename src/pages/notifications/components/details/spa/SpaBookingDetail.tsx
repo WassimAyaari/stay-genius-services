@@ -14,6 +14,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = React.memo(({ n
   // Redirection vers la page SpaBookingDetails
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Use the same format of URLs as used in the notification dropdown
       navigate(`/spa/booking/${notification.id}`);
     }, 100);
     

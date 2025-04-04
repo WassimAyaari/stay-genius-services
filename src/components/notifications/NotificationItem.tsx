@@ -34,7 +34,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       case 'spa_booking': 
         return `/spa/booking/${id}`;
       case 'reservation': 
-        return `/reservations/${id}`;
+        return `/dining/reservations/${id}`;
       case 'request': 
         return `/requests/${id}`;
       default: 
