@@ -47,7 +47,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { MenuItem } from '@/features/dining/types';
-import { Pencil, Trash2, Plus, Image, ArrowLeft, Upload, Restaurant } from 'lucide-react';
+import { Pencil, Trash2, Plus, Image, ArrowLeft, Upload, Store } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -77,7 +77,6 @@ type FormValues = z.infer<typeof formSchema>;
 const RestaurantMenuManager: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const restaurantId = searchParams.get('restaurantId');
-  const { toast } = useToast();
   const { 
     menuItems, 
     isLoading, 
@@ -135,10 +134,8 @@ const RestaurantMenuManager: React.FC = () => {
 
   const handleSubmit = async (values: FormValues) => {
     if (!restaurantId) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select a restaurant first.",
+      toast("Error", {
+        description: "Please select a restaurant first."
       });
       return;
     }
@@ -156,9 +153,8 @@ const RestaurantMenuManager: React.FC = () => {
           isFeatured: values.isFeatured,
           status: values.status,
         });
-        toast({
-          title: "Menu item updated",
-          description: "The menu item has been updated successfully.",
+        toast("Menu item updated", {
+          description: "The menu item has been updated successfully."
         });
       } else {
         await createMenuItem({
@@ -171,9 +167,8 @@ const RestaurantMenuManager: React.FC = () => {
           isFeatured: values.isFeatured,
           status: values.status,
         });
-        toast({
-          title: "Menu item added",
-          description: "The menu item has been added successfully.",
+        toast("Menu item added", {
+          description: "The menu item has been added successfully."
         });
       }
       setIsDialogOpen(false);
@@ -181,10 +176,8 @@ const RestaurantMenuManager: React.FC = () => {
       setEditingItem(null);
     } catch (error) {
       console.error("Error saving menu item:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem saving the menu item.",
+      toast("Error", {
+        description: "There was a problem saving the menu item."
       });
     }
   };
@@ -197,16 +190,13 @@ const RestaurantMenuManager: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteMenuItem(id);
-      toast({
-        title: "Menu item deleted",
-        description: "The menu item has been deleted successfully.",
+      toast("Menu item deleted", {
+        description: "The menu item has been deleted successfully."
       });
     } catch (error) {
       console.error("Error deleting menu item:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem deleting the menu item.",
+      toast("Error", {
+        description: "There was a problem deleting the menu item."
       });
     }
   };
@@ -218,10 +208,8 @@ const RestaurantMenuManager: React.FC = () => {
 
   const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Only image files are accepted.",
+      toast("Error", {
+        description: "Only image files are accepted."
       });
       return;
     }
@@ -232,10 +220,8 @@ const RestaurantMenuManager: React.FC = () => {
       form.setValue("image", compressedImageDataUrl);
     } catch (error) {
       console.error("Error processing image:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was a problem processing the image.",
+      toast("Error", {
+        description: "There was a problem processing the image."
       });
     } finally {
       setIsProcessing(false);
@@ -279,7 +265,7 @@ const RestaurantMenuManager: React.FC = () => {
   const RestaurantSelector = () => (
     <div className="space-y-6 py-12">
       <div className="text-center space-y-2">
-        <Restaurant className="mx-auto h-12 w-12 text-muted-foreground" />
+        <Store className="mx-auto h-12 w-12 text-muted-foreground" />
         <h2 className="text-2xl font-bold">Sélectionner un restaurant</h2>
         <p className="text-muted-foreground">Veuillez choisir un restaurant pour gérer son menu</p>
       </div>
