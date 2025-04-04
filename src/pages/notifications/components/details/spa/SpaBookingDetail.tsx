@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { NotificationItem } from '@/types/notification';
@@ -98,24 +98,24 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
       </div>
 
       <Card className="shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-center">
-            <div className="bg-indigo-100 p-2 rounded-full mr-3">
-              <ShowerHead className="h-5 w-5 text-indigo-600" />
+        <CardContent className="pt-6">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center">
+              <div className="bg-indigo-100 p-2 rounded-full mr-3">
+                <ShowerHead className="h-5 w-5 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-medium">Résumé</h2>
+                <p className="text-sm text-gray-500">{formattedDate} à {booking.time}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-medium">Résumé</h2>
-              <p className="text-sm text-gray-500">{formattedDate} à {booking.time}</p>
-            </div>
+            <Badge className={getStatusBadgeClass(booking.status)}>
+              {getStatusLabel(booking.status)}
+            </Badge>
           </div>
-          <Badge className={getStatusBadgeClass(booking.status)}>
-            {getStatusLabel(booking.status)}
-          </Badge>
-        </CardHeader>
-        
-        <CardContent>
+          
           <div className="space-y-4">
-            <ul className="space-y-2 list-disc ml-5">
+            <ul className="space-y-2 list-none">
               <li>
                 <span className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-500" />
@@ -137,10 +137,6 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
                 </li>
               )}
             </ul>
-            
-            <div className="text-muted-foreground text-sm mt-2">
-              il y a environ 2 heures
-            </div>
               
             <Separator className="my-4" />
             
