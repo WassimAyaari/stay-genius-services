@@ -8,12 +8,11 @@ interface SpaBookingDetailProps {
   notification: NotificationItem;
 }
 
-export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification }) => {
+export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = React.memo(({ notification }) => {
   const navigate = useNavigate();
   
   // Redirection vers la page SpaBookingDetails
   useEffect(() => {
-    // Petit délai pour permettre l'animation de chargement
     const timer = setTimeout(() => {
       navigate(`/spa/booking/${notification.id}`);
     }, 100);
@@ -22,4 +21,6 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
   }, [notification.id, navigate]);
   
   return <SpaBookingLoader />;
-};
+});
+
+SpaBookingDetail.displayName = 'SpaBookingDetail';

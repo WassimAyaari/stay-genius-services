@@ -10,7 +10,7 @@ interface NotificationDetailContentProps {
   notification: NotificationItem;
 }
 
-export const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({
+export const NotificationDetailContent: React.FC<NotificationDetailContentProps> = React.memo(({
   notification
 }) => {
   // Render different detail components based on notification type
@@ -34,4 +34,6 @@ export const NotificationDetailContent: React.FC<NotificationDetailContentProps>
   };
 
   return renderDetailComponent();
-};
+});
+
+NotificationDetailContent.displayName = 'NotificationDetailContent';

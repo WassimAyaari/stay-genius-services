@@ -18,7 +18,7 @@ const NotificationDetail: React.FC = () => {
     navigate('/notifications');
   };
 
-  // Pour éviter des rendus multiples, on utilise useEffect pour logger
+  // Log des données de notification - utile pour le débogage
   useEffect(() => {
     if (notification) {
       console.log('Notification détail rendu avec:', notification.id, notification.type);
@@ -29,16 +29,19 @@ const NotificationDetail: React.FC = () => {
     }
   }, [notification, error]);
 
-  // Show loading state while fetching data
+  // Afficher l'état de chargement pendant la récupération des données
   if (isLoading) {
-    console.log('Affichage état de chargement pour notification');
     return <LoadingState />;
   }
 
-  // Show not found state if there's an error or no notification
+  // Afficher l'état "non trouvé" s'il y a une erreur ou pas de notification
   if (error || !notification) {
-    console.log('Notification non trouvée ou erreur:', error);
-    return <NotFoundState onBack={handleBack} />;
+    return (
+      <NotFoundState 
+        onBack={handleBack} 
+        errorMessage={error instanceof Error ? error.message : String(error)}
+      />
+    );
   }
 
   return (

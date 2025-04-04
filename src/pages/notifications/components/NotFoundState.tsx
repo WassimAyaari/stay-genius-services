@@ -1,31 +1,47 @@
 
 import React from 'react';
-import Layout from '@/components/Layout';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileX2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
 interface NotFoundStateProps {
   onBack: () => void;
+  errorMessage?: string;
 }
 
-export const NotFoundState: React.FC<NotFoundStateProps> = ({ onBack }) => {
+export const NotFoundState: React.FC<NotFoundStateProps> = React.memo(({ 
+  onBack, 
+  errorMessage 
+}) => {
   return (
-    <Layout>
-      <div className="container py-8 max-w-md">
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <FileX2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Notification introuvable</h2>
-            <p className="text-muted-foreground mb-6">
-              Impossible de trouver les détails de cette notification.
-            </p>
-            <Button onClick={onBack}>
-              Retour aux notifications
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </Layout>
+    <div className="container py-8">
+      <Button 
+        variant="ghost" 
+        onClick={onBack} 
+        className="mb-4"
+      >
+        &larr; Retour
+      </Button>
+      
+      <Card className="max-w-md mx-auto">
+        <CardContent className="pt-6 flex flex-col items-center text-center p-8">
+          <div className="rounded-full bg-red-100 p-3 mb-4">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          
+          <h2 className="text-xl font-semibold mb-2">Notification introuvable</h2>
+          
+          <p className="text-muted-foreground mb-6">
+            {errorMessage || "Nous n'avons pas pu trouver la notification demandée."}
+          </p>
+          
+          <Button onClick={onBack}>
+            Retour aux notifications
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
-};
+});
+
+NotFoundState.displayName = 'NotFoundState';
