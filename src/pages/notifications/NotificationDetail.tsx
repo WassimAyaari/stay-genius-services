@@ -1,83 +1,55 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { useNotificationDetail } from './hooks/useNotificationDetail';
 import { NotificationDetailHeader } from './components/NotificationDetailHeader';
 import { NotificationDetailContent } from './components/NotificationDetailContent';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingState } from './components/LoadingState';
+import { NotFoundState } from './components/NotFoundState';
+import { useNotificationDetail } from './hooks/useNotificationDetail';
 
-const NotificationDetail = () => {
-  const { id } = useParams<{ id: string }>();
+const NotificationDetail: React.FC = () => {
+  const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
-  const { notification, isLoading, error } = useNotificationDetail(id);
+  const { notification, isLoading, error } = useNotificationDetail(type, id);
 
+  // Navigation handler
   const handleBack = () => {
     navigate('/notifications');
   };
 
-  const getNotificationTitle = () => {
-    switch (notification?.type) {
-      case 'request':
-        return 'Demande de service';
-      case 'reservation':
-        return 'Réservation restaurant';
-      case 'spa_booking':
-        return 'Réservation spa';
-      default:
-        return 'Notification';
+  // Pour éviter des rendus multiples, on utilise useEffect pour logger
+  useEffect(() => {
+    if (notification) {
+      console.log('Notification détail rendu avec:', notification.id, notification.type);
     }
-  };
+    
+    if (error) {
+      console.error('Erreur de chargement notification:', error);
+    }
+  }, [notification, error]);
 
+  // Show loading state while fetching data
   if (isLoading) {
-    return (
-      <Layout>
-        <div className="container py-8">
-          <div onClick={handleBack} className="flex items-center mb-6 cursor-pointer">
-            <span className="text-sm">← Retour aux notifications</span>
-          </div>
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-4 w-32 mb-8" />
-          <Skeleton className="h-[300px] w-full rounded-lg" />
-        </div>
-      </Layout>
-    );
+    console.log('Affichage état de chargement pour notification');
+    return <LoadingState />;
   }
 
+  // Show not found state if there's an error or no notification
   if (error || !notification) {
-    return (
-      <Layout>
-        <div className="container py-8">
-          <div onClick={handleBack} className="flex items-center mb-6 cursor-pointer">
-            <span className="text-sm">← Retour aux notifications</span>
-          </div>
-          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-            <h2 className="text-lg font-medium text-red-800 mb-2">Notification introuvable</h2>
-            <p className="text-red-700">
-              {error instanceof Error ? error.message : error || "Nous n'avons pas pu trouver cette notification. Elle a peut-être été supprimée."}
-            </p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Rediriger les réservations de restaurant vers la page dédiée
-  if (notification.type === 'reservation' && notification.id) {
-    if (window.location.pathname.includes('/notifications/')) {
-      navigate(`/dining/reservation/${notification.id}`);
-      return null;
-    }
+    console.log('Notification non trouvée ou erreur:', error);
+    return <NotFoundState onBack={handleBack} />;
   }
 
   return (
     <Layout>
       <div className="container py-8">
-        <NotificationDetailHeader
-          title={getNotificationTitle()}
+        <NotificationDetailHeader 
+          title={notification.title}
           type={notification.type}
           onBack={handleBack}
         />
+        
         <NotificationDetailContent notification={notification} />
       </div>
     </Layout>
