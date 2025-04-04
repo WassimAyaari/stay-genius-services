@@ -2,6 +2,22 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EventReservation, CreateEventReservationDTO, UpdateEventReservationStatusDTO } from '@/types/event';
 
+// Define the Supabase table structure for proper typing
+interface EventReservationRow {
+  id: string;
+  event_id: string;
+  user_id: string | null;
+  guest_name: string | null;
+  guest_email: string | null;
+  guest_phone: string | null;
+  room_number: string | null;
+  date: string;
+  guests: number;
+  special_requests: string | null;
+  status: string;
+  created_at: string;
+}
+
 // Fetch reservations for an event
 export const fetchEventReservations = async (eventId?: string): Promise<EventReservation[]> => {
   let query = supabase
@@ -21,7 +37,7 @@ export const fetchEventReservations = async (eventId?: string): Promise<EventRes
   }
 
   // Map the data to our EventReservation type
-  return data ? data.map(item => ({
+  return data ? (data as EventReservationRow[]).map(item => ({
     id: item.id,
     eventId: item.event_id,
     userId: item.user_id || undefined,
@@ -74,9 +90,8 @@ export const createEventReservation = async (reservation: CreateEventReservation
   };
   
   try {
-    // Use 'any' type to avoid TypeScript errors with the new table
     const { data, error } = await supabase
-      .from('event_reservations' as any)
+      .from('event_reservations')
       .insert(reservationData)
       .select()
       .single();
@@ -90,19 +105,22 @@ export const createEventReservation = async (reservation: CreateEventReservation
       throw new Error('Aucune donnée retournée lors de la création de la réservation');
     }
 
+    // Properly cast the returned data to our expected structure
+    const result = data as unknown as EventReservationRow;
+    
     return {
-      id: data.id,
-      eventId: data.event_id,
-      userId: data.user_id || undefined,
-      guestName: data.guest_name || undefined,
-      guestEmail: data.guest_email || undefined,
-      guestPhone: data.guest_phone || undefined,
-      roomNumber: data.room_number || undefined,
-      date: data.date,
-      guests: data.guests,
-      specialRequests: data.special_requests || undefined,
-      status: data.status as 'pending' | 'confirmed' | 'cancelled',
-      createdAt: data.created_at
+      id: result.id,
+      eventId: result.event_id,
+      userId: result.user_id || undefined,
+      guestName: result.guest_name || undefined,
+      guestEmail: result.guest_email || undefined,
+      guestPhone: result.guest_phone || undefined,
+      roomNumber: result.room_number || undefined,
+      date: result.date,
+      guests: result.guests,
+      specialRequests: result.special_requests || undefined,
+      status: result.status as 'pending' | 'confirmed' | 'cancelled',
+      createdAt: result.created_at
     };
   } catch (error: any) {
     console.error('Error creating event reservation:', error);
@@ -114,7 +132,7 @@ export const createEventReservation = async (reservation: CreateEventReservation
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
     const { error } = await supabase
-      .from('event_reservations' as any)
+      .from('event_reservations')
       .update({ status: data.status })
       .eq('id', data.id);
     
@@ -140,7 +158,7 @@ export const fetchUserEventReservations = async (
   if (userId) {
     try {
       const { data, error } = await supabase
-        .from('event_reservations' as any)
+        .from('event_reservations')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -148,7 +166,7 @@ export const fetchUserEventReservations = async (
       if (error) throw error;
       
       if (data && data.length > 0) {
-        const mappedData = data.map(item => ({
+        const mappedData = (data as EventReservationRow[]).map(item => ({
           id: item.id,
           eventId: item.event_id,
           userId: item.user_id || undefined,
@@ -174,7 +192,7 @@ export const fetchUserEventReservations = async (
   if (userEmail) {
     try {
       const { data, error } = await supabase
-        .from('event_reservations' as any)
+        .from('event_reservations')
         .select('*')
         .eq('guest_email', userEmail)
         .order('created_at', { ascending: false });
@@ -184,7 +202,7 @@ export const fetchUserEventReservations = async (
       if (data && data.length > 0) {
         // Avoid duplicates
         const existingIds = new Set(reservations.map(r => r.id));
-        const newReservations = data
+        const newReservations = (data as EventReservationRow[])
           .filter(item => !existingIds.has(item.id))
           .map(item => ({
             id: item.id,
