@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { NotificationItem } from '@/types/notification';
 import { RequestDetail } from './details/request/RequestDetail';
-import { ReservationDetail } from './details/ReservationDetail';
+import { ReservationDetail } from './details/reservation/ReservationDetail';
 import { SpaBookingDetail } from './details/spa/SpaBookingDetail';
 
 interface NotificationDetailContentProps {
