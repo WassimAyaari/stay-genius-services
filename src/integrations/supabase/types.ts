@@ -81,6 +81,59 @@ export type Database = {
         }
         Relationships: []
       }
+      event_reservations: {
+        Row: {
+          created_at: string
+          date: string
+          event_id: string
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          guests: number
+          id: string
+          room_number: string | null
+          special_requests: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          event_id: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests: number
+          id?: string
+          room_number?: string | null
+          special_requests?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          event_id?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests?: number
+          id?: string
+          room_number?: string | null
+          special_requests?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_reservations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: string
