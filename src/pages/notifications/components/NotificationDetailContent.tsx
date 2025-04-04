@@ -1,10 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { NotificationItem } from '@/types/notification';
-import { RequestDetail } from './details/request/RequestDetail';
-import { ReservationDetail } from './details/reservation/ReservationDetail';
-import { SpaBookingDetail } from './details/spa/SpaBookingDetail';
 
 interface NotificationDetailContentProps {
   notification: NotificationItem;
@@ -13,27 +11,40 @@ interface NotificationDetailContentProps {
 export const NotificationDetailContent: React.FC<NotificationDetailContentProps> = React.memo(({
   notification
 }) => {
-  // Render different detail components based on notification type
-  const renderDetailComponent = () => {
-    switch (notification.type) {
-      case 'request':
-        return <RequestDetail notification={notification} />;
-      case 'reservation':
-        return <ReservationDetail notification={notification} />;
-      case 'spa_booking':
-        return <SpaBookingDetail notification={notification} />;
-      default:
-        return (
-          <Card className="p-6">
-            <p className="text-center text-muted-foreground">
-              Détails non disponibles pour ce type de notification.
-            </p>
-          </Card>
-        );
-    }
-  };
+  const navigate = useNavigate();
+  
+  // Redirect to the appropriate section based on notification type
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      switch (notification.type) {
+        case 'request':
+          navigate(`/requests/${notification.id}`);
+          break;
+        case 'reservation':
+          navigate(`/dining/reservations/${notification.id}`);
+          break;
+        case 'spa_booking':
+          navigate(`/spa/booking/${notification.id}`);
+          break;
+        default:
+          // Stay on the current page for other notification types
+          break;
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [notification.id, notification.type, navigate]);
 
-  return renderDetailComponent();
+  return (
+    <Card className="p-6">
+      <div className="flex justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary rounded-full border-t-transparent"></div>
+      </div>
+      <p className="text-center text-muted-foreground mt-4">
+        Redirection en cours...
+      </p>
+    </Card>
+  );
 });
 
 NotificationDetailContent.displayName = 'NotificationDetailContent';

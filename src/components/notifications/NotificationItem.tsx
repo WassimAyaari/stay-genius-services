@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -77,7 +76,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     return <span className="text-lg">{icon}</span>;
   }
 
-  // Format time safely
   function getSafeTimeAgo(date: Date) {
     try {
       return formatDistanceToNow(date, { addSuffix: true, locale: fr });
@@ -87,7 +85,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     }
   }
 
-  // Generate a summary based on notification type
   function getSummary() {
     if (type === 'spa_booking') {
       return `Réservation pour ${data?.date || ''} à ${data?.time || ''}`;
@@ -99,7 +96,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     return description;
   }
 
-  // Get actions based on status and type
   function getActions() {
     const canCancel = ['pending', 'confirmed', 'in_progress'].includes(status);
     const canEdit = ['pending'].includes(status);

@@ -1,8 +1,8 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { NotificationItem } from '@/types/notification';
 import { SpaBookingLoader } from './SpaBookingLoader';
+import { useNavigate } from 'react-router-dom';
 
 interface SpaBookingDetailProps {
   notification: NotificationItem;
@@ -11,15 +11,8 @@ interface SpaBookingDetailProps {
 export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = React.memo(({ notification }) => {
   const navigate = useNavigate();
   
-  // Redirection vers la page SpaBookingDetails
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Use the same format of URLs as used in the notification dropdown
-      navigate(`/spa/booking/${notification.id}`);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [notification.id, navigate]);
+  // Instead of using useEffect with a timeout, just trigger navigation immediately
+  navigate(`/spa/booking/${notification.id}`);
   
   return <SpaBookingLoader />;
 });

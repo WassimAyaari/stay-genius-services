@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { NotificationDetailHeader } from './components/NotificationDetailHeader';
@@ -17,17 +17,6 @@ const NotificationDetail: React.FC = () => {
   const handleBack = () => {
     navigate('/notifications');
   };
-
-  // Log des données de notification - utile pour le débogage
-  useEffect(() => {
-    if (notification) {
-      console.log('Notification détail rendu avec:', notification.id, notification.type);
-    }
-    
-    if (error) {
-      console.error('Erreur de chargement notification:', error);
-    }
-  }, [notification, error]);
 
   // Afficher l'état de chargement pendant la récupération des données
   if (isLoading) {
