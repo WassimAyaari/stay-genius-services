@@ -28,6 +28,20 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   link,
   data
 }) => {
+  // Get direct link based on notification type
+  function getDirectLink() {
+    switch (type) {
+      case 'spa_booking': 
+        return `/spa/booking/${id}`;
+      case 'reservation': 
+        return `/reservations/${id}`;
+      case 'request': 
+        return `/requests/${id}`;
+      default: 
+        return link || '/notifications';
+    }
+  }
+
   // Get color based on notification status
   function getStatusColor(status: string) {
     switch (status) {
@@ -101,7 +115,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   }
 
   return (
-    <Link to={link} key={id}>
+    <Link to={getDirectLink()} key={id}>
       <div className="flex items-start gap-3 p-3 cursor-pointer hover:bg-gray-200/70">
         <div className="flex-shrink-0 mt-1">
           <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200">
