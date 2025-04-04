@@ -6,10 +6,9 @@ import { format } from 'date-fns';
 
 export const useTodayHighlights = () => {
   const [todayEvents, setTodayEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const fetchTodayHighlights = async () => {
+  const fetchTodayEvents = async () => {
     try {
       setLoading(true);
       const today = format(new Date(), 'yyyy-MM-dd');
@@ -21,18 +20,22 @@ export const useTodayHighlights = () => {
         .order('time', { ascending: true });
 
       if (error) throw error;
-      setTodayEvents(data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch today\'s events'));
-      console.error('Error fetching today highlights:', err);
+      
+      setTodayEvents(data as Event[]);
+    } catch (error) {
+      console.error('Error fetching today events:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTodayHighlights();
+    fetchTodayEvents();
   }, []);
 
-  return { todayEvents, loading, error, fetchTodayHighlights };
+  return {
+    todayEvents,
+    loading,
+    fetchTodayEvents,
+  };
 };

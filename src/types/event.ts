@@ -5,12 +5,12 @@ export interface Event {
   description: string;
   image: string;
   category: 'event' | 'promo';
+  is_featured: boolean;
+  location?: string;
   date: string;
   time?: string;
-  location?: string;
   created_at: string;
   updated_at: string;
-  is_featured: boolean;
 }
 
 export interface Story {
@@ -19,8 +19,8 @@ export interface Story {
   description: string;
   image: string;
   category: 'event' | 'promo';
-  created_at: string;
-  updated_at: string;
   is_active: boolean;
   seen: boolean;
+  created_at: string;
+  updated_at: string;
 }

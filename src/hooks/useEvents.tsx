@@ -2,12 +2,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types/event';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from './use-toast';
 
 export const useEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchEvents = async () => {
@@ -16,16 +15,18 @@ export const useEvents = () => {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setEvents(data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch events'));
+      
+      // Properly cast the data to ensure it matches the Event type
+      setEvents(data as Event[]);
+    } catch (error) {
+      console.error('Error fetching events:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load events"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to fetch events',
       });
     } finally {
       setLoading(false);
@@ -37,49 +38,55 @@ export const useEvents = () => {
       const { data, error } = await supabase
         .from('events')
         .insert([event])
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
-      setEvents(prev => [...prev, data]);
+      
+      setEvents(prev => [...prev, ...(data as Event[])]);
+      
       toast({
-        title: "Success",
-        description: "Event created successfully"
+        title: 'Success',
+        description: 'Event created successfully',
       });
-      return data;
-    } catch (err) {
+      
+      return data[0];
+    } catch (error) {
+      console.error('Error creating event:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create event"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to create event',
       });
-      throw err;
+      throw error;
     }
   };
 
-  const updateEvent = async (id: string, updates: Partial<Event>) => {
+  const updateEvent = async (id: string, event: Partial<Event>) => {
     try {
       const { data, error } = await supabase
         .from('events')
-        .update(updates)
+        .update(event)
         .eq('id', id)
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
-      setEvents(prev => prev.map(event => event.id === id ? data : event));
+      
+      setEvents(prev => prev.map(e => e.id === id ? { ...e, ...data[0] } as Event : e));
+      
       toast({
-        title: "Success",
-        description: "Event updated successfully"
+        title: 'Success',
+        description: 'Event updated successfully',
       });
-      return data;
-    } catch (err) {
+      
+      return data[0];
+    } catch (error) {
+      console.error('Error updating event:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update event"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to update event',
       });
-      throw err;
+      throw error;
     }
   };
 
@@ -91,18 +98,21 @@ export const useEvents = () => {
         .eq('id', id);
 
       if (error) throw error;
-      setEvents(prev => prev.filter(event => event.id !== id));
+      
+      setEvents(prev => prev.filter(e => e.id !== id));
+      
       toast({
-        title: "Success",
-        description: "Event deleted successfully"
+        title: 'Success',
+        description: 'Event deleted successfully',
       });
-    } catch (err) {
+    } catch (error) {
+      console.error('Error deleting event:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete event"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete event',
       });
-      throw err;
+      throw error;
     }
   };
 
@@ -113,10 +123,9 @@ export const useEvents = () => {
   return {
     events,
     loading,
-    error,
     fetchEvents,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
   };
 };

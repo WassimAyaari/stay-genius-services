@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import StoryViewer from './StoryViewer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useStories } from '@/hooks/useStories';
+import { Story } from '@/types/event';
 import { 
   Carousel, 
   CarouselContent, 

@@ -2,12 +2,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Story } from '@/types/event';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from './use-toast';
 
 export const useStories = () => {
   const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchStories = async () => {
@@ -19,13 +18,15 @@ export const useStories = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setStories(data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch stories'));
+      
+      // Properly cast the data to ensure it matches the Story type
+      setStories(data as Story[]);
+    } catch (error) {
+      console.error('Error fetching stories:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load stories"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to fetch stories',
       });
     } finally {
       setLoading(false);
@@ -37,49 +38,55 @@ export const useStories = () => {
       const { data, error } = await supabase
         .from('stories')
         .insert([story])
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
-      setStories(prev => [data, ...prev]);
+      
+      setStories(prev => [...prev, ...(data as Story[])]);
+      
       toast({
-        title: "Success",
-        description: "Story created successfully"
+        title: 'Success',
+        description: 'Story created successfully',
       });
-      return data;
-    } catch (err) {
+      
+      return data[0];
+    } catch (error) {
+      console.error('Error creating story:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create story"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to create story',
       });
-      throw err;
+      throw error;
     }
   };
 
-  const updateStory = async (id: string, updates: Partial<Story>) => {
+  const updateStory = async (id: string, story: Partial<Story>) => {
     try {
       const { data, error } = await supabase
         .from('stories')
-        .update(updates)
+        .update(story)
         .eq('id', id)
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
-      setStories(prev => prev.map(story => story.id === id ? data : story));
+      
+      setStories(prev => prev.map(s => s.id === id ? { ...s, ...data[0] } as Story : s));
+      
       toast({
-        title: "Success",
-        description: "Story updated successfully"
+        title: 'Success',
+        description: 'Story updated successfully',
       });
-      return data;
-    } catch (err) {
+      
+      return data[0];
+    } catch (error) {
+      console.error('Error updating story:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update story"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to update story',
       });
-      throw err;
+      throw error;
     }
   };
 
@@ -91,23 +98,37 @@ export const useStories = () => {
         .eq('id', id);
 
       if (error) throw error;
-      setStories(prev => prev.filter(story => story.id !== id));
+      
+      setStories(prev => prev.filter(s => s.id !== id));
+      
       toast({
-        title: "Success",
-        description: "Story deleted successfully"
+        title: 'Success',
+        description: 'Story deleted successfully',
       });
-    } catch (err) {
+    } catch (error) {
+      console.error('Error deleting story:', error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete story"
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete story',
       });
-      throw err;
+      throw error;
     }
   };
 
   const markAsSeen = async (id: string) => {
-    await updateStory(id, { seen: true });
+    try {
+      const { error } = await supabase
+        .from('stories')
+        .update({ seen: true })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setStories(prev => prev.map(s => s.id === id ? { ...s, seen: true } as Story : s));
+    } catch (error) {
+      console.error('Error marking story as seen:', error);
+    }
   };
 
   useEffect(() => {
@@ -117,11 +138,10 @@ export const useStories = () => {
   return {
     stories,
     loading,
-    error,
     fetchStories,
     createStory,
     updateStory,
     deleteStory,
-    markAsSeen
+    markAsSeen,
   };
 };

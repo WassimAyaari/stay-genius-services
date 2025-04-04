@@ -1,18 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Story {
-  id: number;
-  title: string;
-  image: string;
-  category: string;
-  description?: string;
-  link?: string;
-}
+import { Story } from '@/types/event';
 
 interface StoryViewerProps {
   stories: Story[];
