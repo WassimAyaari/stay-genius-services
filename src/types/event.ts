@@ -11,6 +11,8 @@ export interface Event {
   time?: string;
   created_at: string;
   updated_at: string;
+  capacity?: number;
+  price?: number;
 }
 
 export interface Story {
@@ -23,4 +25,38 @@ export interface Story {
   seen: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface EventReservation {
+  id: string;
+  eventId: string;
+  userId?: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  roomNumber?: string;
+  date: string;
+  guests: number;
+  specialRequests?: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  createdAt: string;
+}
+
+// DTO for creating a new event reservation
+export interface CreateEventReservationDTO {
+  eventId: string;
+  userId?: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  roomNumber?: string;
+  date: string;
+  guests: number;
+  specialRequests?: string;
+  status?: 'pending' | 'confirmed' | 'cancelled';
+}
+
+export interface UpdateEventReservationStatusDTO {
+  id: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
 }

@@ -16,10 +16,15 @@ import SwipeIndicator from '@/components/ui/swipe-indicator';
 import EventsStories from '@/components/EventsStories';
 import { useEvents } from '@/hooks/useEvents';
 import { format } from 'date-fns';
+import EventBookingDialog from '@/components/events/EventBookingDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const Events = () => {
   const { events, loading } = useEvents();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const { toast } = useToast();
   
   React.useEffect(() => {
     if (!loading && events.length > 0) {
@@ -29,6 +34,19 @@ const Events = () => {
       return () => clearInterval(interval);
     }
   }, [loading, events.length]);
+
+  const handleBookEvent = (event: any) => {
+    setSelectedEvent(event);
+    setIsBookingOpen(true);
+  };
+
+  const handleReservationSuccess = () => {
+    setIsBookingOpen(false);
+    toast({
+      title: "Réservation confirmée",
+      description: "Votre réservation a été enregistrée avec succès.",
+    });
+  };
 
   return (
     <Layout>
@@ -86,7 +104,9 @@ const Events = () => {
                         </span>
                         <h1 className="text-2xl font-bold mb-1">{event.title}</h1>
                         <p className="mb-3">{event.description}</p>
-                        <Button size="sm">En savoir plus</Button>
+                        <Button size="sm" onClick={() => handleBookEvent(event)}>
+                          Réserver
+                        </Button>
                       </div>
                     </div>
                   </CarouselItem>
@@ -160,7 +180,7 @@ const Events = () => {
                         </div>
                         <p className="text-gray-600 mb-4">{event.description}</p>
                         <div className="flex gap-3">
-                          <Button>Réserver</Button>
+                          <Button onClick={() => handleBookEvent(event)}>Réserver</Button>
                           <Button variant="outline">Ajouter au calendrier</Button>
                         </div>
                       </div>
@@ -206,7 +226,7 @@ const Events = () => {
                         <span>Valable jusqu'au {format(new Date(promo.date), 'dd/MM/yyyy')}</span>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">{promo.description}</p>
-                      <Button className="w-full">Voir les détails</Button>
+                      <Button className="w-full" onClick={() => handleBookEvent(promo)}>Voir les détails</Button>
                     </div>
                   </Card>
                 ))
@@ -244,6 +264,19 @@ const Events = () => {
           </Card>
         </div>
       </div>
+
+      {/* Event Booking Dialog */}
+      {selectedEvent && (
+        <EventBookingDialog
+          isOpen={isBookingOpen}
+          onOpenChange={setIsBookingOpen}
+          eventId={selectedEvent.id}
+          eventTitle={selectedEvent.title}
+          eventDate={selectedEvent.date}
+          onSuccess={handleReservationSuccess}
+          maxGuests={selectedEvent.capacity || 10}
+        />
+      )}
     </Layout>
   );
 };
