@@ -12,6 +12,7 @@ import { useSpaBookingDetail } from './useSpaBookingDetail';
 import { SpaBookingLoader } from './SpaBookingLoader';
 import { SpaBookingNotFound } from './SpaBookingNotFound';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 interface SpaBookingDetailProps {
   notification: NotificationItem;
@@ -76,6 +77,26 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
   };
   
   const canCancel = booking.status === 'pending' || booking.status === 'confirmed';
+  
+  const handleCancellation = async () => {
+    try {
+      await handleCancelBooking(notification.id);
+      toast({
+        title: "Réservation annulée",
+        description: "Votre réservation a été annulée avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'annuler la réservation",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleModify = () => {
+    navigate(`/spa/booking/${notification.id}`);
+  };
   
   return (
     <div className="space-y-6">
@@ -144,6 +165,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
               <Button 
                 variant="outline" 
                 className="flex-1"
+                onClick={handleModify}
               >
                 Modifier
               </Button>
@@ -152,7 +174,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
                 <Button
                   variant="destructive"
                   className="flex-1"
-                  onClick={() => handleCancelBooking(notification.id)}
+                  onClick={handleCancellation}
                 >
                   Annuler
                 </Button>
