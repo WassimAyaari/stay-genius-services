@@ -27,6 +27,7 @@ export const SpaBookingActions: React.FC<SpaBookingActionsProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   const canCancel = status === 'pending' || status === 'confirmed';
   const canEdit = status === 'pending';
@@ -36,16 +37,30 @@ export const SpaBookingActions: React.FC<SpaBookingActionsProps> = ({
   };
   
   const handleCancelBooking = async () => {
-    await onCancelBooking(bookingId);
-    setIsCancelDialogOpen(false);
+    setIsUpdating(true);
+    try {
+      await onCancelBooking(bookingId);
+      setIsCancelDialogOpen(false);
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
   
   return (
     <>
-      <div className="flex flex-wrap gap-3 justify-start pt-4">
+      <div className="flex flex-wrap gap-3 justify-start">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/spa')}
+        >
+          Voir les services spa
+        </Button>
+        
         {canEdit && (
           <Button 
-            variant="secondary"
+            variant="outline"
             onClick={() => navigate(`/spa/booking/${bookingId}?edit=true`)}
             className="bg-blue-50 text-blue-600 hover:bg-blue-100"
           >
@@ -58,36 +73,29 @@ export const SpaBookingActions: React.FC<SpaBookingActionsProps> = ({
           <Button
             variant="destructive"
             onClick={() => setIsCancelDialogOpen(true)}
-            className="bg-red-50 text-red-600 hover:bg-red-100"
           >
             <XCircle className="mr-2 h-4 w-4" />
             Annuler
           </Button>
         )}
-        
-        <Button 
-          variant="outline" 
-          onClick={handleViewDetails}
-        >
-          Voir les détails complets
-        </Button>
       </div>
       
       <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Annuler la réservation</AlertDialogTitle>
+            <AlertDialogTitle>Annuler votre réservation</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
+              Êtes-vous sûr de vouloir annuler cette réservation de spa ? Cette action ne peut pas être annulée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Non, garder ma réservation</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancelBooking}
               className="bg-red-600 hover:bg-red-700"
+              disabled={isUpdating}
             >
-              Confirmer l'annulation
+              {isUpdating ? 'Annulation...' : 'Oui, annuler'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

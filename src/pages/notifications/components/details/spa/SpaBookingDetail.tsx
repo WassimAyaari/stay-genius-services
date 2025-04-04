@@ -4,16 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { NotificationItem } from '@/types/notification';
 import { SpaBookingDetailHeader } from './SpaBookingDetailHeader';
-import { SpaBookingServiceInfo } from './SpaBookingServiceInfo';
-import { SpaBookingFacilityInfo } from './SpaBookingFacilityInfo';
-import { SpaBookingDateInfo } from './SpaBookingDateInfo';
-import { SpaBookingContactInfo } from './SpaBookingContactInfo';
 import { SpaBookingActions } from './SpaBookingActions';
 import { SpaBookingLoader } from './SpaBookingLoader';
 import { SpaBookingNotFound } from './SpaBookingNotFound';
 import { useSpaBookingDetail } from './useSpaBookingDetail';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle, Clock } from 'lucide-react';
+import { CheckCircle, Clock, Calendar, User, Home } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -32,7 +28,7 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     handleViewDetails
   } = useSpaBookingDetail(notification);
 
-  // Ajouter des logs pour déboguer l'affichage des données
+  // Logs pour déboguer
   useEffect(() => {
     console.log('SpaBookingDetail rendering with booking data:', booking);
     console.log('SpaBookingDetail rendering with service data:', service);
@@ -52,16 +48,16 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
     />;
   }
 
-  // Format date for display
+  // Format date pour l'affichage
   let bookingDate;
   try {
-    bookingDate = format(parseISO(booking.date), 'dd MMMM yyyy', { locale: fr });
+    bookingDate = format(parseISO(booking.date), 'yyyy-MM-dd', { locale: fr });
   } catch (e) {
     console.error('Error formatting date:', e);
     bookingDate = booking.date;
   }
 
-  // Calculate time remaining if status is pending or confirmed
+  // Déterminer si on peut montrer le temps restant
   const canShowTimeRemaining = booking.status === 'pending' || booking.status === 'confirmed';
   
   return (
@@ -70,20 +66,29 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
       
       <CardContent>
         <div className="space-y-6">
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Réservation de spa</h2>
-            <p className="text-gray-500">{bookingDate} à {booking.time}</p>
+          <h2 className="text-xl font-semibold">Détails de la réservation</h2>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-gray-500" />
+              <span>Date: {bookingDate}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-gray-500" />
+              <span>Heure: {booking.time}</span>
+            </div>
             
             {booking.room_number && (
-              <p className="text-sm text-gray-600">Chambre: {booking.room_number}</p>
-            )}
-            
-            {canShowTimeRemaining && (
-              <div className="flex items-center text-gray-500 text-sm mt-2">
-                <Clock className="h-4 w-4 mr-1" />
-                <span>Il y a environ 1 heure</span>
+              <div className="flex items-center gap-2">
+                <Home className="h-5 w-5 text-gray-500" />
+                <span>Chambre: {booking.room_number}</span>
               </div>
             )}
+          </div>
+          
+          <div className="text-gray-500 text-sm">
+            Réservation créée il y a environ 2 heures
           </div>
           
           {booking.status === 'confirmed' && (
@@ -96,27 +101,21 @@ export const SpaBookingDetail: React.FC<SpaBookingDetailProps> = ({ notification
             </Alert>
           )}
           
-          <div className="pt-2">
-            <h3 className="font-medium mb-2">Résumé:</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Date: {bookingDate}</li>
-              <li>Heure: {booking.time}</li>
-              {booking.room_number && <li>Chambre: {booking.room_number}</li>}
-            </ul>
-          </div>
-          
           {service && (
-            <SpaBookingServiceInfo service={service} />
+            <div>
+              <h3 className="font-medium mb-2">Service sélectionné:</h3>
+              <div className="bg-gray-50 p-4 rounded-md">
+                <p className="font-medium">{service.name}</p>
+                <p className="text-sm text-gray-600">{service.description}</p>
+                <div className="mt-2 flex justify-between">
+                  <span className="text-sm text-gray-500">Durée: {service.duration}</span>
+                  <span className="text-sm font-medium">{service.price} €</span>
+                </div>
+              </div>
+            </div>
           )}
           
-          <div className="grid md:grid-cols-2 gap-6">
-            <SpaBookingFacilityInfo facility={facility} />
-            <SpaBookingDateInfo date={booking.date} time={booking.time} />
-          </div>
-          
           <Separator />
-          
-          <SpaBookingContactInfo booking={booking} />
           
           <SpaBookingActions 
             bookingId={notification.id} 
