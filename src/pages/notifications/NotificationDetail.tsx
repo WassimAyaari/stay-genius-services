@@ -54,7 +54,7 @@ const NotificationDetail = () => {
           <div className="bg-red-50 p-4 rounded-lg border border-red-200">
             <h2 className="text-lg font-medium text-red-800 mb-2">Notification introuvable</h2>
             <p className="text-red-700">
-              {error || "Nous n'avons pas pu trouver cette notification. Elle a peut-être été supprimée."}
+              {error instanceof Error ? error.message : error || "Nous n'avons pas pu trouver cette notification. Elle a peut-être été supprimée."}
             </p>
           </div>
         </div>
