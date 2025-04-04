@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,27 +25,30 @@ const eventSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
-interface EventFormProps {
-  event?: Event;
-  onSuccess?: () => void;
+export interface EventFormProps {
+  initialData?: Event | null;
+  onSubmit: (event: Partial<Event>) => Promise<void>;
   onCancel?: () => void;
 }
 
-const EventForm: React.FC<EventFormProps> = ({ event, onSuccess, onCancel }) => {
+const EventForm: React.FC<EventFormProps> = ({ 
+  initialData, 
+  onSubmit, 
+  onCancel 
+}) => {
   const { toast } = useToast();
-  const { createEvent, updateEvent } = useEvents();
   
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
-    defaultValues: event ? {
-      title: event.title,
-      description: event.description,
-      image: event.image,
-      category: event.category,
-      is_featured: event.is_featured || false,
-      location: event.location || '',
-      date: event.date,
-      time: event.time || '',
+    defaultValues: initialData ? {
+      title: initialData.title,
+      description: initialData.description,
+      image: initialData.image,
+      category: initialData.category,
+      is_featured: initialData.is_featured || false,
+      location: initialData.location || '',
+      date: initialData.date,
+      time: initialData.time || '',
     } : {
       title: '',
       description: '',
@@ -59,41 +61,22 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSuccess, onCancel }) => 
     },
   });
 
-  const onSubmit = async (values: EventFormValues) => {
+  const handleSubmit = async (values: EventFormValues) => {
     try {
-      if (event) {
-        await updateEvent(event.id, values);
-      } else {
-        await createEvent({
-          title: values.title,
-          description: values.description,
-          image: values.image,
-          category: values.category,
-          is_featured: values.is_featured,
-          location: values.location || '',
-          date: values.date,
-          time: values.time || '',
-        });
-      }
-      toast({
-        title: 'Success',
-        description: `Event ${event ? 'updated' : 'created'} successfully`,
-      });
-      
-      if (onSuccess) onSuccess();
+      await onSubmit(values);
     } catch (error) {
       console.error('Error submitting event:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Failed to ${event ? 'update' : 'create'} event`,
+        description: `Failed to ${initialData ? 'update' : 'create'} event`,
       });
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -226,7 +209,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSuccess, onCancel }) => 
             </Button>
           )}
           <Button type="submit">
-            {event ? 'Update' : 'Create'} Event
+            {initialData ? 'Update' : 'Create'} Event
           </Button>
         </div>
       </form>

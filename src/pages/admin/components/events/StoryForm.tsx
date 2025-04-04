@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { useStories } from '@/hooks/useStories';
 import { Story } from '@/types/event';
 import { Switch } from '@/components/ui/switch';
 
@@ -23,25 +21,28 @@ const storySchema = z.object({
 
 type StoryFormValues = z.infer<typeof storySchema>;
 
-interface StoryFormProps {
-  story?: Story;
-  onSuccess?: () => void;
+export interface StoryFormProps {
+  initialData?: Story | null;
+  onSubmit: (story: Partial<Story>) => Promise<void>;
   onCancel?: () => void;
 }
 
-const StoryForm: React.FC<StoryFormProps> = ({ story, onSuccess, onCancel }) => {
+const StoryForm: React.FC<StoryFormProps> = ({ 
+  initialData, 
+  onSubmit, 
+  onCancel 
+}) => {
   const { toast } = useToast();
-  const { createStory, updateStory } = useStories();
   
   const form = useForm<StoryFormValues>({
     resolver: zodResolver(storySchema),
-    defaultValues: story ? {
-      title: story.title,
-      description: story.description,
-      image: story.image,
-      category: story.category,
-      is_active: story.is_active || true,
-      seen: story.seen || false,
+    defaultValues: initialData ? {
+      title: initialData.title,
+      description: initialData.description,
+      image: initialData.image,
+      category: initialData.category,
+      is_active: initialData.is_active || true,
+      seen: initialData.seen || false,
     } : {
       title: '',
       description: '',
@@ -52,39 +53,22 @@ const StoryForm: React.FC<StoryFormProps> = ({ story, onSuccess, onCancel }) => 
     },
   });
 
-  const onSubmit = async (values: StoryFormValues) => {
+  const handleSubmit = async (values: StoryFormValues) => {
     try {
-      if (story) {
-        await updateStory(story.id, values);
-      } else {
-        await createStory({
-          title: values.title,
-          description: values.description,
-          image: values.image,
-          category: values.category,
-          is_active: values.is_active,
-          seen: values.seen,
-        });
-      }
-      toast({
-        title: 'Success',
-        description: `Story ${story ? 'updated' : 'created'} successfully`,
-      });
-      
-      if (onSuccess) onSuccess();
+      await onSubmit(values);
     } catch (error) {
       console.error('Error submitting story:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Failed to ${story ? 'update' : 'create'} story`,
+        description: `Failed to ${initialData ? 'update' : 'create'} story`,
       });
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -175,7 +159,7 @@ const StoryForm: React.FC<StoryFormProps> = ({ story, onSuccess, onCancel }) => 
             </Button>
           )}
           <Button type="submit">
-            {story ? 'Update' : 'Create'} Story
+            {initialData ? 'Update' : 'Create'} Story
           </Button>
         </div>
       </form>
