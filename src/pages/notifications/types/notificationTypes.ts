@@ -3,7 +3,7 @@
 
 export interface NotificationItem {
   id: string;
-  type: 'request' | 'reservation' | 'spa_booking' | 'general';
+  type: 'request' | 'reservation' | 'spa_booking' | 'event_reservation' | 'general';
   title: string;
   description: string;
   status: string;
@@ -55,4 +55,15 @@ export interface SpaBooking {
   status: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface EventReservation {
+  id: string;
+  eventId: string;
+  date: string;
+  guests: number;
+  status: string;
+  createdAt?: string;
+  roomNumber?: string;
+  specialRequests?: string;
 }
