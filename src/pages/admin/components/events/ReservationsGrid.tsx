@@ -4,6 +4,8 @@ import { EventReservation } from '@/types/event';
 import { ReservationCard } from './ReservationCard';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface ReservationsGridProps {
   reservations: EventReservation[];
@@ -19,14 +21,25 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
   isUpdating
 }) => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   
-  const filteredReservations = statusFilter === "all" 
-    ? reservations 
-    : reservations.filter(res => res.status === statusFilter);
+  // Filtering reservations based on status and search term
+  const filteredReservations = reservations
+    .filter(res => statusFilter === "all" ? true : res.status === statusFilter)
+    .filter(res => {
+      if (!searchTerm) return true;
+      const term = searchTerm.toLowerCase();
+      return (
+        res.guestName?.toLowerCase().includes(term) ||
+        res.guestEmail?.toLowerCase().includes(term) ||
+        res.guestPhone?.toLowerCase().includes(term) ||
+        res.roomNumber?.toLowerCase().includes(term)
+      );
+    });
 
   if (reservations.length === 0) {
     return (
-      <div className="text-center py-6">
+      <div className="text-center py-12 border rounded-md bg-gray-50">
         <p className="text-muted-foreground">Aucune réservation trouvée pour cet événement</p>
       </div>
     );
@@ -38,19 +51,32 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
         <h3 className="font-medium">
           {reservations.length} {reservations.length > 1 ? 'réservations' : 'réservation'}
         </h3>
-        <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
-          <TabsList>
-            <TabsTrigger value="all">Toutes</TabsTrigger>
-            <TabsTrigger value="pending">En attente</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmées</TabsTrigger>
-            <TabsTrigger value="cancelled">Annulées</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 w-64"
+            />
+          </div>
+          <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
+            <TabsList>
+              <TabsTrigger value="all">Toutes</TabsTrigger>
+              <TabsTrigger value="pending">En attente</TabsTrigger>
+              <TabsTrigger value="confirmed">Confirmées</TabsTrigger>
+              <TabsTrigger value="cancelled">Annulées</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {filteredReservations.length === 0 ? (
-        <div className="text-center py-6">
-          <p className="text-muted-foreground">Aucune réservation avec ce statut</p>
+        <div className="text-center py-12 border rounded-md bg-gray-50">
+          <p className="text-muted-foreground">
+            {searchTerm ? 'Aucune réservation ne correspond à votre recherche' : 'Aucune réservation avec ce statut'}
+          </p>
         </div>
       ) : (
         <ScrollArea className="h-[calc(100vh-280px)]">
