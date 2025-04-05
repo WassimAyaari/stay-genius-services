@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { User, Mail, Phone, Home, Calendar, Users } from 'lucide-react';
 
 interface EventReservationDetailProps {
   reservation: EventReservation;
@@ -41,19 +42,23 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ 
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Coordonnées</h4>
-            <div className="space-y-2">
-              <p className="text-sm">
-                <span className="font-medium">Nom :</span> {reservation.guestName}
+            <h4 className="text-sm font-medium text-gray-500 mb-3">Coordonnées</h4>
+            <div className="space-y-3">
+              <p className="text-sm flex items-center">
+                <User className="h-4 w-4 mr-2 opacity-70" />
+                <span className="font-medium">Nom :</span> <span className="ml-1">{reservation.guestName || '-'}</span>
               </p>
-              <p className="text-sm">
-                <span className="font-medium">Email :</span> {reservation.guestEmail || '-'}
+              <p className="text-sm flex items-center">
+                <Mail className="h-4 w-4 mr-2 opacity-70" />
+                <span className="font-medium">Email :</span> <span className="ml-1">{reservation.guestEmail || '-'}</span>
               </p>
-              <p className="text-sm">
-                <span className="font-medium">Téléphone :</span> {reservation.guestPhone || '-'}
+              <p className="text-sm flex items-center">
+                <Phone className="h-4 w-4 mr-2 opacity-70" />
+                <span className="font-medium">Téléphone :</span> <span className="ml-1">{reservation.guestPhone || '-'}</span>
               </p>
-              <p className="text-sm">
-                <span className="font-medium">Chambre :</span> {reservation.roomNumber}
+              <p className="text-sm flex items-center">
+                <Home className="h-4 w-4 mr-2 opacity-70" />
+                <span className="font-medium">Chambre :</span> <span className="ml-1">{reservation.roomNumber || '-'}</span>
               </p>
             </div>
           </CardContent>
@@ -61,16 +66,18 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ 
         
         <Card>
           <CardContent className="pt-6">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Détails de la réservation</h4>
-            <div className="space-y-2">
-              <p className="text-sm">
-                <span className="font-medium">Date :</span> {format(new Date(reservation.date), 'dd MMMM yyyy', { locale: fr })}
+            <h4 className="text-sm font-medium text-gray-500 mb-3">Détails de la réservation</h4>
+            <div className="space-y-3">
+              <p className="text-sm flex items-center">
+                <Calendar className="h-4 w-4 mr-2 opacity-70" />
+                <span className="font-medium">Date :</span> <span className="ml-1">{format(new Date(reservation.date), 'dd MMMM yyyy', { locale: fr })}</span>
+              </p>
+              <p className="text-sm flex items-center">
+                <Users className="h-4 w-4 mr-2 opacity-70" />
+                <span className="font-medium">Participants :</span> <span className="ml-1">{reservation.guests}</span>
               </p>
               <p className="text-sm">
-                <span className="font-medium">Nombre de participants :</span> {reservation.guests}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Date de création :</span> {format(new Date(reservation.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                <span className="font-medium">Date de création :</span> <span className="ml-1">{format(new Date(reservation.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}</span>
               </p>
             </div>
           </CardContent>

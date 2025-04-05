@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Check, X, Eye, Phone, Calendar } from 'lucide-react';
+import { Check, X, Eye, Phone, Calendar, User, Home, Mail } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface ReservationCardProps {
@@ -57,20 +57,29 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
             <span>{format(new Date(reservation.date), 'dd MMMM yyyy', { locale: fr })}</span>
           </div>
           
+          <div className="flex items-center text-sm">
+            <User className="h-4 w-4 mr-2 opacity-70" />
+            <span>{reservation.guests} {reservation.guests > 1 ? 'participants' : 'participant'}</span>
+          </div>
+          
+          <div className="flex items-center text-sm">
+            <Home className="h-4 w-4 mr-2 opacity-70" />
+            <span>Chambre: {reservation.roomNumber || '-'}</span>
+          </div>
+          
+          {reservation.guestEmail && (
+            <div className="flex items-center text-sm overflow-hidden">
+              <Mail className="h-4 w-4 mr-2 flex-shrink-0 opacity-70" />
+              <span className="truncate">{reservation.guestEmail}</span>
+            </div>
+          )}
+          
           {reservation.guestPhone && (
             <div className="flex items-center text-sm">
               <Phone className="h-4 w-4 mr-2 opacity-70" />
               <span>{reservation.guestPhone}</span>
             </div>
           )}
-          
-          <div className="text-sm flex items-center">
-            <span className="font-medium mr-2">Chambre:</span> {reservation.roomNumber}
-          </div>
-          
-          <div className="text-sm flex items-center">
-            <span className="font-medium mr-2">Participants:</span> {reservation.guests}
-          </div>
         </div>
 
         <div className="flex space-x-2 mt-4 pt-4 border-t">

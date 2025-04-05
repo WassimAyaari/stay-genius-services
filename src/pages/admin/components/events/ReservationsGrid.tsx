@@ -2,6 +2,7 @@
 import React from 'react';
 import { EventReservation } from '@/types/event';
 import { ReservationCard } from './ReservationCard';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ReservationsGridProps {
   reservations: EventReservation[];
@@ -25,7 +26,7 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
   }
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid md:grid-cols-2 gap-6">
       {reservations.map((reservation) => (
         <ReservationCard
           key={reservation.id}
