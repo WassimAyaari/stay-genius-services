@@ -1,4 +1,3 @@
-
 // Type définitions for notifications
 export interface NotificationItem {
   id: string;

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -6,7 +7,7 @@ import { ShowerHead, Calendar, Utensils, FileText, Clock, Bell } from 'lucide-re
 
 interface NotificationItemProps {
   id: string;
-  type: 'request' | 'reservation' | 'spa_booking' | 'general';
+  type: 'request' | 'reservation' | 'spa_booking' | 'general' | 'event_reservation';
   title: string;
   description: string;
   icon: string;
@@ -36,6 +37,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         return `/dining/reservations/${id}`;
       case 'request': 
         return `/requests/${id}`;
+      case 'event_reservation':
+        return `/events/reservations/${id}`;
       default: 
         return link || '/notifications';
     }
@@ -70,6 +73,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       return <Utensils className="h-4 w-4 text-orange-600" />;
     } else if (type === 'request') {
       return <FileText className="h-4 w-4 text-purple-600" />;
+    } else if (type === 'event_reservation') {
+      return <Calendar className="h-4 w-4 text-green-600" />;
     } else if (type === 'general') {
       return <Bell className="h-4 w-4 text-gray-600" />;
     }
@@ -92,6 +97,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       return `Réservation pour ${data?.guests || ''} personne(s) le ${data?.date || ''} à ${data?.time || ''}`;
     } else if (type === 'request') {
       return description || 'Demande de service';
+    } else if (type === 'event_reservation') {
+      return `Réservation pour ${data?.guests || ''} personne(s) le ${data?.date || ''}`;
     }
     return description;
   }

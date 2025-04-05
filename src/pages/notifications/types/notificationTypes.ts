@@ -1,4 +1,3 @@
-
 // Types pour les notifications
 
 export interface NotificationItem {
