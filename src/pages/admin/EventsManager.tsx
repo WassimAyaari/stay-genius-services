@@ -80,7 +80,7 @@ const EventsManager = () => {
         <Tabs defaultValue="events" className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="mb-6">
             <TabsTrigger value="events">Événements</TabsTrigger>
-            <TabsTrigger value="reservations">Réservations</TabsTrigger>
+            <TabsTrigger value="reservations" data-value="reservations">Réservations</TabsTrigger>
             <TabsTrigger value="stories">Stories</TabsTrigger>
           </TabsList>
           
@@ -108,22 +108,22 @@ const EventsManager = () => {
               </Dialog>
             </div>
             
-            <Card className="flex-1 overflow-hidden">
+            <Card className="flex-1 overflow-hidden flex flex-col">
               {eventsLoading ? (
                 <div className="p-6 text-center">Chargement des événements...</div>
               ) : (
-                <ScrollArea className="h-[calc(100vh-250px)]">
-                  <div className="min-w-full">
+                <div className="flex-1 overflow-hidden">
+                  <ScrollArea className="h-[calc(100vh-250px)] w-full">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Image</TableHead>
+                          <TableHead className="w-[80px]">Image</TableHead>
                           <TableHead>Titre</TableHead>
                           <TableHead>Catégorie</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Lieu</TableHead>
                           <TableHead>À la une</TableHead>
-                          <TableHead>Actions</TableHead>
+                          <TableHead className="w-[120px]">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -213,8 +213,8 @@ const EventsManager = () => {
                         )}
                       </TableBody>
                     </Table>
-                  </div>
-                </ScrollArea>
+                  </ScrollArea>
+                </div>
               )}
             </Card>
           </TabsContent>
@@ -247,21 +247,21 @@ const EventsManager = () => {
               </Dialog>
             </div>
 
-            <Card className="flex-1 overflow-hidden">
+            <Card className="flex-1 overflow-hidden flex flex-col">
               {storiesLoading ? (
                 <div className="p-6 text-center">Chargement des stories...</div>
               ) : (
-                <ScrollArea className="h-[calc(100vh-250px)]">
-                  <div className="min-w-full">
+                <div className="flex-1 overflow-hidden">
+                  <ScrollArea className="h-[calc(100vh-250px)] w-full">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Image</TableHead>
+                          <TableHead className="w-[80px]">Image</TableHead>
                           <TableHead>Titre</TableHead>
                           <TableHead>Catégorie</TableHead>
                           <TableHead>Créée le</TableHead>
                           <TableHead>Statut</TableHead>
-                          <TableHead>Actions</TableHead>
+                          <TableHead className="w-[100px]">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -332,8 +332,8 @@ const EventsManager = () => {
                         )}
                       </TableBody>
                     </Table>
-                  </div>
-                </ScrollArea>
+                  </ScrollArea>
+                </div>
               )}
             </Card>
           </TabsContent>
