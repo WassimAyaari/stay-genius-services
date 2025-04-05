@@ -2,6 +2,7 @@
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
+import { useEventReservations } from '@/hooks/useEventReservations';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { NotificationItem } from '@/types/notification';
 import { useNotificationsState } from './notifications/useNotificationsState';
@@ -15,10 +16,11 @@ export const useNotifications = () => {
   const userEmail = user?.email || localStorage.getItem('user_email');
   const userRoomNumber = userData?.room_number || localStorage.getItem('user_room_number');
   
-  // Get service requests, table reservations and spa bookings
+  // Get service requests, table reservations, spa bookings and event reservations
   const { data: serviceRequests = [], refetch: refetchServices } = useServiceRequests();
-  const { reservations = [], refetch: refetchReservations } = useTableReservations();
+  const { reservations: tableReservations = [], refetch: refetchTableReservations } = useTableReservations();
   const { bookings: spaBookings = [], refetch: refetchSpaBookings } = useSpaBookings();
+  const { reservations: eventReservations = [], refetch: refetchEventReservations } = useEventReservations();
   
   // Get notification state management
   const { hasNewNotifications, setHasNewNotifications } = useNotificationsState();
@@ -36,30 +38,33 @@ export const useNotifications = () => {
       // Use Promise.all to fetch all data in parallel
       await Promise.all([
         refetchServices(),
-        refetchReservations(),
-        refetchSpaBookings()
+        refetchTableReservations(),
+        refetchSpaBookings(),
+        refetchEventReservations()
       ]);
     };
     
     fetchInitialData();
-  }, [refetchServices, refetchReservations, refetchSpaBookings]);
+  }, [refetchServices, refetchTableReservations, refetchSpaBookings, refetchEventReservations]);
   
   // Set up real-time notification listeners
   useNotificationsRealtime(
     userId,
     userEmail,
     userRoomNumber,
-    refetchReservations,
+    refetchTableReservations,
     refetchServices,
     refetchSpaBookings,
+    refetchEventReservations,
     setHasNewNotifications
   );
 
   // Combine and sort notifications
   const notifications: NotificationItem[] = combineAndSortNotifications(
     serviceRequests,
-    reservations,
-    spaBookings
+    tableReservations,
+    spaBookings,
+    eventReservations
   );
 
   // Count unread notifications
@@ -76,7 +81,8 @@ export const useNotifications = () => {
     hasNewNotifications,
     setHasNewNotifications,
     refetchServices,
-    refetchReservations,
-    refetchSpaBookings
+    refetchTableReservations,
+    refetchSpaBookings,
+    refetchEventReservations
   };
 };

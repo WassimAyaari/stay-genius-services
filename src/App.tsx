@@ -1,165 +1,73 @@
-
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from '@/pages/Home';
+import Events from '@/pages/Events';
+import Dining from '@/pages/Dining';
+import Spa from '@/pages/Spa';
+import Concierge from '@/pages/Concierge';
+import Profile from '@/pages/Profile';
+import Admin from '@/pages/Admin';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import { AuthProvider } from '@/features/auth/hooks/useAuthContext';
-import { ThemeProvider } from "next-themes";
-import { Toaster } from 'sonner';
-import { Toaster as ShadcnToaster } from '@/components/ui/toaster';
-import Index from '@/pages/Index';
-import Login from '@/pages/auth/Login';
-import AuthGuard from '@/components/AuthGuard';
-import Rooms from '@/pages/rooms/Rooms';
-import RoomDetails from '@/pages/rooms/RoomDetails';
-import MyRoom from '@/pages/my-room/MyRoom';
-import Dining from '@/pages/dining/Dining';
-import RestaurantDetail from '@/pages/dining/RestaurantDetail';
-import Spa from '@/pages/spa/Spa';
-import Activities from '@/pages/activities/Activities';
-import Events from '@/pages/events/Events';
-import Services from '@/pages/services/Services';
-import Destination from '@/pages/destination/Destination';
-import HotelMap from '@/pages/map/HotelMap';
-import Profile from '@/pages/profile/Profile';
-import About from '@/pages/about/About';
-import ServiceRequestDetails from '@/pages/my-room/ServiceRequestDetails';
-import NotFound from '@/pages/NotFound';
-import Contact from '@/pages/Contact';
-import Messages from '@/pages/messages/Messages';
-import ReservationDetails from '@/pages/dining/ReservationDetails';
-import Notifications from '@/pages/notifications/Notifications';
-import NotificationDetail from '@/pages/notifications/NotificationDetail';
-import Feedback from '@/pages/feedback/Feedback';
-import Shops from '@/pages/shops/Shops';
-import AdminDashboard from '@/pages/admin/Dashboard';
-import RequestManager from '@/pages/admin/RequestManager';
-import ReservationManager from '@/pages/admin/ReservationManager';
-import RestaurantManager from '@/pages/admin/RestaurantManager';
+import { AdminRoute } from '@/components/routes/AdminRoute';
+import { UserRoute } from '@/components/routes/UserRoute';
+import RestaurantsManager from '@/pages/admin/RestaurantsManager';
 import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
-import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
-import SpaManager from '@/pages/admin/SpaManager';
-import SpaBookingDetails from '@/pages/spa/SpaBookingDetails';
-import ChatMessages from '@/pages/admin/ChatMessages';
-import AboutEditor from '@/pages/admin/AboutEditor';
 import EventsManager from '@/pages/admin/EventsManager';
-
-const queryClient = new QueryClient();
+import ServiceRequestsManager from '@/pages/admin/ServiceRequestsManager';
+import SpaServicesManager from '@/pages/admin/SpaServicesManager';
+import TableReservations from '@/pages/dining/TableReservations';
+import SpaBookings from '@/pages/spa/SpaBookings';
+import ServiceRequests from '@/pages/concierge/ServiceRequests';
+import Notifications from '@/pages/notifications/Notifications';
+import EventDetails from '@/pages/EventDetails';
+import { NotificationsProvider } from '@/hooks/notifications/useNotificationsState';
+import EventReservationsManager from '@/pages/admin/EventReservationsManager';
 
 function App() {
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ThemeProvider attribute="class">
-          <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/rooms" element={<Rooms />} />
-              <Route path="/rooms/:id" element={<RoomDetails />} />
-              <Route path="/requests/:id" element={
-                <AuthGuard>
-                  <ServiceRequestDetails />
-                </AuthGuard>
-              } />
-              <Route path="/dining/reservations/:id" element={
-                <AuthGuard>
-                  <ReservationDetails />
-                </AuthGuard>
-              } />
-              <Route path="/spa/booking/:id" element={
-                <AuthGuard>
-                  <SpaBookingDetails />
-                </AuthGuard>
-              } />
-              <Route path="/my-room" element={
-                <AuthGuard>
-                  <MyRoom />
-                </AuthGuard>
-              } />
-              <Route path="/dining" element={<Dining />} />
-              <Route path="/dining/:id" element={<RestaurantDetail />} />
-              <Route path="/spa" element={<Spa />} />
-              <Route path="/activities" element={<Activities />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/destination" element={<Destination />} />
-              <Route path="/map" element={<HotelMap />} />
-              <Route path="/profile" element={
-                <AuthGuard>
-                  <Profile />
-                </AuthGuard>
-              } />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/notifications/:type/:id" element={
-                <AuthGuard>
-                  <NotificationDetail />
-                </AuthGuard>
-              } />
-              <Route path="/feedback" element={<Feedback />} />
-              <Route path="/shops" element={<Shops />} />
-              
-              <Route path="/admin" element={
-                <AuthGuard adminRequired>
-                  <AdminDashboard />
-                </AuthGuard>
-              } />
-              <Route path="/admin/requests" element={
-                <AuthGuard adminRequired>
-                  <RequestManager />
-                </AuthGuard>
-              } />
-              <Route path="/admin/reservations" element={
-                <AuthGuard adminRequired>
-                  <ReservationManager />
-                </AuthGuard>
-              } />
-              <Route path="/admin/restaurants" element={
-                <AuthGuard adminRequired>
-                  <RestaurantManager />
-                </AuthGuard>
-              } />
-              <Route path="/admin/restaurants/:id/reservations" element={
-                <AuthGuard adminRequired>
-                  <RestaurantReservationsManager />
-                </AuthGuard>
-              } />
-              <Route path="/admin/restaurant-menus" element={
-                <AuthGuard adminRequired>
-                  <RestaurantMenuManager />
-                </AuthGuard>
-              } />
-              <Route path="/admin/spa" element={
-                <AuthGuard adminRequired>
-                  <SpaManager />
-                </AuthGuard>
-              } />
-              <Route path="/admin/events" element={
-                <AuthGuard adminRequired>
-                  <EventsManager />
-                </AuthGuard>
-              } />
-              <Route path="/admin/chat" element={
-                <AuthGuard adminRequired>
-                  <ChatMessages />
-                </AuthGuard>
-              } />
-              <Route path="/admin/about" element={
-                <AuthGuard adminRequired>
-                  <AboutEditor />
-                </AuthGuard>
-              } />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            
-            <Toaster richColors position="top-right" closeButton />
-            <ShadcnToaster />
-          </AuthProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/events" element={<Events />} />
+      <Route path="/events/:id" element={<EventDetails />} />
+      <Route path="/dining" element={<Dining />} />
+      <Route path="/spa" element={<Spa />} />
+      <Route path="/concierge" element={<Concierge />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      
+      {/* User Pages */}
+      <Route path="/profile" element={<UserRoute><Profile /></UserRoute>} />
+      <Route path="/dining/reservations" element={<UserRoute><TableReservations /></UserRoute>} />
+      <Route path="/spa/bookings" element={<UserRoute><SpaBookings /></UserRoute>} />
+      <Route path="/requests" element={<UserRoute><ServiceRequests /></UserRoute>} />
+      <Route path="/notifications" element={<UserRoute><Notifications /></UserRoute>} />
+      
+      {/* Admin Pages */}
+      <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+      <Route path="/admin/restaurants" element={<AdminRoute><RestaurantsManager /></AdminRoute>} />
+      <Route path="/admin/restaurant-menus" element={<AdminRoute><RestaurantMenuManager /></AdminRoute>} />
+      <Route path="/admin/events" element={<AdminRoute><EventsManager /></AdminRoute>} />
+      <Route path="/admin/service-requests" element={<AdminRoute><ServiceRequestsManager /></AdminRoute>} />
+      <Route path="/admin/spa-services" element={<AdminRoute><SpaServicesManager /></AdminRoute>} />
+      <Route path="/admin/events-reservations" element={<AdminRoute><EventReservationsManager /></AdminRoute>} />
+      
+      {/* Catch-all route for 404 */}
+      <Route path="*" element={<div>Page Not Found</div>} />
+    </Routes>
   );
 }
 
