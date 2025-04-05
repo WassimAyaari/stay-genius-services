@@ -39,6 +39,9 @@ const EventsManager = () => {
   const [isStoryDialogOpen, setIsStoryDialogOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined);
   
+  // Limiter aux 5 premiers stories
+  const limitedStories = stories.slice(0, 5);
+  
   const handleCreateEvent = async (event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) => {
     await createEvent(event);
     setIsEventDialogOpen(false);
@@ -87,7 +90,8 @@ const EventsManager = () => {
     });
   };
   
-  return <Layout>
+  return (
+    <Layout>
       <div className="container py-8 flex flex-col h-[calc(100vh-64px)] overflow-hidden">
         <h1 className="text-2xl font-bold mb-6">Gestion des Événements et Promotions</h1>
         
@@ -141,7 +145,7 @@ const EventsManager = () => {
                           </TableCell>
                         </TableRow> 
                       : 
-                        events.map(event => (
+                        events.slice(0, 5).map((event) => (
                           <TableRow key={event.id}>
                             <TableCell>
                               <div className="h-12 w-12 rounded-full overflow-hidden">
@@ -193,6 +197,11 @@ const EventsManager = () => {
                       }
                     </TableBody>
                   </Table>
+                  {events.length > 5 && (
+                    <div className="p-4 text-center">
+                      <Button variant="link">Voir tous les événements ({events.length})</Button>
+                    </div>
+                  )}
                 </ScrollArea>
               }
             </Card>
@@ -241,14 +250,14 @@ const EventsManager = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {stories.length === 0 ? 
+                      {limitedStories.length === 0 ? 
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-4">
                             Aucune story trouvée
                           </TableCell>
                         </TableRow> 
                       : 
-                        stories.map(story => (
+                        limitedStories.map(story => (
                           <TableRow key={story.id}>
                             <TableCell>
                               <div className="h-12 w-12 rounded-full overflow-hidden">
@@ -296,13 +305,19 @@ const EventsManager = () => {
                       }
                     </TableBody>
                   </Table>
+                  {stories.length > 5 && (
+                    <div className="p-4 text-center">
+                      <Button variant="link">Voir toutes les stories ({stories.length})</Button>
+                    </div>
+                  )}
                 </ScrollArea>
               }
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
 
 export default EventsManager;

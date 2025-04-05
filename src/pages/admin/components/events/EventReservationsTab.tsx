@@ -1,6 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEventReservations } from '@/hooks/useEventReservations';
+import { useEvents } from '@/hooks/useEvents';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
@@ -11,8 +11,8 @@ import { fr } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import EventReservationForm from '@/components/events/EventReservationForm';
-import { EventReservation } from '@/types/event';
-import { Check, X, Eye, Phone } from 'lucide-react';
+import { Event, EventReservation } from '@/types/event';
+import { Check, X, Eye, Phone, Calendar } from 'lucide-react';
 import { EventReservationDetail } from './EventReservationDetail';
 
 interface EventReservationsTabProps {
@@ -24,6 +24,7 @@ export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({
   selectedEventId, 
   setSelectedEventId 
 }) => {
+  const { events } = useEvents();
   const { 
     reservations, 
     isLoading, 
@@ -33,8 +34,9 @@ export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({
 
   const [selectedReservation, setSelectedReservation] = useState<EventReservation | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  
+  const limitedEvents = events.slice(0, 5);
 
-  // Fonction pour obtenir la classe de la badge en fonction du statut
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-green-500';
@@ -44,7 +46,6 @@ export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({
     }
   };
 
-  // Fonction pour obtenir le libellé en français du statut
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'confirmed': return 'Confirmée';
@@ -63,15 +64,69 @@ export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({
     updateReservationStatus({ id: reservationId, status: newStatus });
   };
 
+  const handleSelectEvent = (eventId: string) => {
+    setSelectedEventId(eventId);
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Réservations des événements</h2>
       
-      <Card className="mb-6 flex-1 overflow-hidden flex flex-col">
+      <Card className="mb-6 overflow-hidden">
+        <ScrollArea className="h-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Événement</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Catégorie</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {limitedEvents.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-4">
+                    Aucun événement disponible
+                  </TableCell>
+                </TableRow>
+              ) : (
+                limitedEvents.map((event: Event) => (
+                  <TableRow key={event.id} className={selectedEventId === event.id ? "bg-muted" : ""}>
+                    <TableCell>{event.title}</TableCell>
+                    <TableCell>{format(new Date(event.date), 'dd MMM yyyy', { locale: fr })}</TableCell>
+                    <TableCell>{event.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
+                    <TableCell>
+                      <Button 
+                        variant={selectedEventId === event.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleSelectEvent(event.id)}
+                        className="flex items-center gap-1"
+                      >
+                        <Calendar className="h-4 w-4" />
+                        {selectedEventId === event.id ? 'Sélectionné' : 'Voir réservations'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </Card>
+      
+      <Card className="flex-1 overflow-hidden flex flex-col">
+        <div className="p-4 border-b">
+          <h3 className="font-medium">
+            {selectedEventId ? `Réservations pour: ${events.find(e => e.id === selectedEventId)?.title || ""}` : "Sélectionnez un événement"}
+          </h3>
+        </div>
         {isLoading ? (
           <div className="p-6 text-center">Chargement des réservations...</div>
+        ) : !selectedEventId ? (
+          <div className="p-6 text-center">Veuillez sélectionner un événement pour voir ses réservations</div>
         ) : (
-          <ScrollArea className="h-[calc(100vh-300px)]">
+          <ScrollArea className="h-[calc(100vh-500px)]">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -190,7 +245,6 @@ export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({
         )}
       </Card>
       
-      {/* Dialogue pour afficher les détails d'une réservation */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
