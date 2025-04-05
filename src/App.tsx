@@ -1,51 +1,47 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from '@/features/auth/hooks/useAuthContext';
+import { Routes, Route } from 'react-router-dom';
+import Layout from '@/components/Layout';
 import Notifications from '@/pages/notifications/Notifications';
 import NotificationDetail from '@/pages/notifications/NotificationDetail';
+import NotFound from '@/pages/NotFound';
+import Index from '@/pages/Index';
 
 function App() {
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-  }, []);
-
   return (
     <Routes>
-      <Route path="/" element={<div>Home Page</div>} />
-      <Route path="/events" element={<div>Events Page</div>} />
-      <Route path="/events/:id" element={<div>Event Details</div>} />
-      <Route path="/dining" element={<div>Dining Page</div>} />
-      <Route path="/spa" element={<div>Spa Page</div>} />
-      <Route path="/concierge" element={<div>Concierge Page</div>} />
-      <Route path="/login" element={<div>Login Page</div>} />
-      <Route path="/register" element={<div>Register Page</div>} />
-      <Route path="/forgot-password" element={<div>Forgot Password Page</div>} />
-      <Route path="/reset-password" element={<div>Reset Password Page</div>} />
+      <Route path="/" element={<Layout><Index /></Layout>} />
       
-      {/* User Pages */}
-      <Route path="/profile" element={<div>Profile Page</div>} />
-      <Route path="/dining/reservations" element={<div>Table Reservations Page</div>} />
-      <Route path="/spa/bookings" element={<div>Spa Bookings Page</div>} />
-      <Route path="/requests" element={<div>Service Requests Page</div>} />
-      <Route path="/notifications" element={<Notifications />} />
-      <Route path="/notifications/:type/:id" element={<NotificationDetail />} />
+      {/* Pages principales */}
+      <Route path="/events" element={<Layout><div>Page des événements</div></Layout>} />
+      <Route path="/events/:id" element={<Layout><div>Détails de l'événement</div></Layout>} />
+      <Route path="/dining" element={<Layout><div>Page de restauration</div></Layout>} />
+      <Route path="/spa" element={<Layout><div>Page du spa</div></Layout>} />
+      <Route path="/concierge" element={<Layout><div>Page du concierge</div></Layout>} />
+      <Route path="/login" element={<div>Page de connexion</div>} />
+      <Route path="/register" element={<div>Page d'inscription</div>} />
+      <Route path="/forgot-password" element={<div>Page de mot de passe oublié</div>} />
+      <Route path="/reset-password" element={<div>Page de réinitialisation du mot de passe</div>} />
       
-      {/* Admin Pages */}
-      <Route path="/admin" element={<div>Admin Dashboard</div>} />
-      <Route path="/admin/restaurants" element={<div>Restaurants Manager</div>} />
-      <Route path="/admin/restaurant-menus" element={<div>Restaurant Menu Manager</div>} />
-      <Route path="/admin/events" element={<div>Events Manager</div>} />
-      <Route path="/admin/service-requests" element={<div>Service Requests Manager</div>} />
-      <Route path="/admin/spa-services" element={<div>Spa Services Manager</div>} />
-      <Route path="/admin/events-reservations" element={<div>Events Reservation Manager</div>} />
+      {/* Pages utilisateur */}
+      <Route path="/profile" element={<Layout><div>Page de profil</div></Layout>} />
+      <Route path="/dining/reservations" element={<Layout><div>Réservations de tables</div></Layout>} />
+      <Route path="/spa/bookings" element={<Layout><div>Réservations de spa</div></Layout>} />
+      <Route path="/requests" element={<Layout><div>Demandes de service</div></Layout>} />
+      <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
+      <Route path="/notifications/:type/:id" element={<Layout><NotificationDetail /></Layout>} />
       
-      {/* Catch-all route for 404 */}
-      <Route path="*" element={<div>Page Not Found</div>} />
+      {/* Pages admin */}
+      <Route path="/admin" element={<Layout><div>Tableau de bord admin</div></Layout>} />
+      <Route path="/admin/restaurants" element={<Layout><div>Gestionnaire de restaurants</div></Layout>} />
+      <Route path="/admin/restaurant-menus" element={<Layout><div>Gestionnaire de menus de restaurant</div></Layout>} />
+      <Route path="/admin/events" element={<Layout><div>Gestionnaire d'événements</div></Layout>} />
+      <Route path="/admin/service-requests" element={<Layout><div>Gestionnaire de demandes de service</div></Layout>} />
+      <Route path="/admin/spa-services" element={<Layout><div>Gestionnaire de services de spa</div></Layout>} />
+      <Route path="/admin/events-reservations" element={<Layout><div>Gestionnaire de réservations d'événements</div></Layout>} />
+      
+      {/* Route de secours pour 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
