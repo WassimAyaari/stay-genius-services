@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,33 +10,40 @@ import { useToast } from '@/hooks/use-toast';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
 import { Switch } from '@/components/ui/switch';
-
 const eventSchema = z.object({
-  title: z.string().min(3, { message: 'Title is required' }),
-  description: z.string().min(3, { message: 'Description is required' }),
-  image: z.string().min(3, { message: 'Image URL is required' }),
-  category: z.enum(['event', 'promo'], { message: 'Category is required' }),
+  title: z.string().min(3, {
+    message: 'Title is required'
+  }),
+  description: z.string().min(3, {
+    message: 'Description is required'
+  }),
+  image: z.string().min(3, {
+    message: 'Image URL is required'
+  }),
+  category: z.enum(['event', 'promo'], {
+    message: 'Category is required'
+  }),
   is_featured: z.boolean().default(false),
   location: z.string().optional(),
-  date: z.string().min(3, { message: 'Date is required' }),
-  time: z.string().optional(),
+  date: z.string().min(3, {
+    message: 'Date is required'
+  }),
+  time: z.string().optional()
 });
-
 type EventFormValues = z.infer<typeof eventSchema>;
-
 export interface EventFormProps {
   initialData?: Event | null;
   onSubmit: (event: Partial<Event>) => Promise<void>;
   onCancel?: () => void;
 }
-
-const EventForm: React.FC<EventFormProps> = ({ 
-  initialData, 
-  onSubmit, 
-  onCancel 
+const EventForm: React.FC<EventFormProps> = ({
+  initialData,
+  onSubmit,
+  onCancel
 }) => {
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: initialData ? {
@@ -48,7 +54,7 @@ const EventForm: React.FC<EventFormProps> = ({
       is_featured: initialData.is_featured || false,
       location: initialData.location || '',
       date: initialData.date,
-      time: initialData.time || '',
+      time: initialData.time || ''
     } : {
       title: '',
       description: '',
@@ -57,10 +63,9 @@ const EventForm: React.FC<EventFormProps> = ({
       is_featured: false,
       location: '',
       date: format(new Date(), 'yyyy-MM-dd'),
-      time: '',
-    },
+      time: ''
+    }
   });
-
   const handleSubmit = async (values: EventFormValues) => {
     try {
       await onSubmit(values);
@@ -69,123 +74,88 @@ const EventForm: React.FC<EventFormProps> = ({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Failed to ${initialData ? 'update' : 'create'} event`,
+        description: `Failed to ${initialData ? 'update' : 'create'} event`
       });
     }
   };
-
-  return (
-    <Form {...form}>
+  return <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="title" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
                 <Input placeholder="Event title" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="description" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea placeholder="Event description" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="image"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="image" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Image URL</FormLabel>
               <FormControl>
                 <Input placeholder="https://example.com/image.jpg" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="category" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Category</FormLabel>
               <FormControl>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  {...field}
-                >
+                <select className="w-full p-2 border border-gray-300 rounded-md bg-zinc-100">
                   <option value="event">Event</option>
                   <option value="promo">Promotion</option>
                 </select>
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="date" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Date</FormLabel>
               <FormControl>
                 <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="time"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="time" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Time (optional)</FormLabel>
               <FormControl>
                 <Input type="time" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="location" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Location (optional)</FormLabel>
               <FormControl>
                 <Input placeholder="Event location" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
-        <FormField
-          control={form.control}
-          name="is_featured"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+        <FormField control={form.control} name="is_featured" render={({
+        field
+      }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
               <div className="space-y-0.5">
                 <FormLabel>Featured</FormLabel>
                 <div className="text-sm text-muted-foreground">
@@ -193,28 +163,19 @@ const EventForm: React.FC<EventFormProps> = ({
                 </div>
               </div>
               <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
         
         <div className="flex justify-end space-x-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
+          {onCancel && <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
-            </Button>
-          )}
+            </Button>}
           <Button type="submit">
             {initialData ? 'Update' : 'Create'} Event
           </Button>
         </div>
       </form>
-    </Form>
-  );
+    </Form>;
 };
-
 export default EventForm;
