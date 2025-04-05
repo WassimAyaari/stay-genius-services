@@ -16,16 +16,20 @@ import { Check, X, Eye, Phone } from 'lucide-react';
 import { EventReservationDetail } from './EventReservationDetail';
 
 interface EventReservationsTabProps {
-  eventId?: string;
+  selectedEventId: string | undefined;
+  setSelectedEventId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
-export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({ eventId }) => {
+export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({ 
+  selectedEventId, 
+  setSelectedEventId 
+}) => {
   const { 
     reservations, 
     isLoading, 
     updateReservationStatus, 
     isUpdating
-  } = useEventReservations(eventId);
+  } = useEventReservations(selectedEventId);
 
   const [selectedReservation, setSelectedReservation] = useState<EventReservation | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
