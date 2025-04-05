@@ -165,7 +165,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Aucun événement</SelectItem>
+                    <SelectItem value="none">Aucun événement</SelectItem>
                     {events.map((event: Event) => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.title}
