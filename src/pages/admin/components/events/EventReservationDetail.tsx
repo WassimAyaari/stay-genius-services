@@ -5,15 +5,6 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EventReservationDetailProps {
   reservation: EventReservation;
@@ -37,23 +28,23 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ 
   const statusInfo = getStatusInfo(reservation.status);
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
       <div className="flex justify-between items-start">
         <h3 className="text-lg font-medium">
-          Réservation de {reservation.guestName || 'Client'}
+          Réservation de {reservation.guestName}
         </h3>
         <Badge className={statusInfo.className}>
           {statusInfo.label}
         </Badge>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-6">
             <h4 className="text-sm font-medium text-gray-500 mb-1">Coordonnées</h4>
             <div className="space-y-2">
               <p className="text-sm">
-                <span className="font-medium">Nom :</span> {reservation.guestName || '-'}
+                <span className="font-medium">Nom :</span> {reservation.guestName}
               </p>
               <p className="text-sm">
                 <span className="font-medium">Email :</span> {reservation.guestEmail || '-'}
@@ -62,7 +53,7 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ 
                 <span className="font-medium">Téléphone :</span> {reservation.guestPhone || '-'}
               </p>
               <p className="text-sm">
-                <span className="font-medium">Chambre :</span> {reservation.roomNumber || '-'}
+                <span className="font-medium">Chambre :</span> {reservation.roomNumber}
               </p>
             </div>
           </CardContent>
