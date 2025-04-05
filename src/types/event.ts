@@ -1,4 +1,3 @@
-
 export interface Event {
   id: string;
   title: string;
@@ -25,6 +24,7 @@ export interface Story {
   seen: boolean;
   created_at: string;
   updated_at: string;
+  eventId?: string;
 }
 
 export interface EventReservation {
@@ -42,7 +42,6 @@ export interface EventReservation {
   createdAt: string;
 }
 
-// DTO for creating a new event reservation
 export interface CreateEventReservationDTO {
   eventId: string;
   userId?: string;

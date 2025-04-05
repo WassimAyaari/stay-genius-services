@@ -6,20 +6,29 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Calendar, Users } from 'lucide-react';
+import { Calendar, Users, Star, ExternalLink } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 
 interface EventTableProps {
   events: Event[];
   selectedEventId: string | undefined;
   onSelectEvent: (eventId: string) => void;
+  stories: { id: string; title: string; eventId?: string }[];
 }
 
 export const EventTable: React.FC<EventTableProps> = ({ 
   events, 
   selectedEventId, 
-  onSelectEvent 
+  onSelectEvent,
+  stories = []
 }) => {
+  // Créer un Map des événements qui sont liés à des stories
+  const eventInStoryMap = new Map(
+    stories
+      .filter(story => story.eventId)
+      .map(story => [story.eventId, story.title])
+  );
+
   return (
     <>
       <div className="p-4 border-b">
@@ -31,7 +40,7 @@ export const EventTable: React.FC<EventTableProps> = ({
             <TableRow>
               <TableHead>Événement</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -50,10 +59,28 @@ export const EventTable: React.FC<EventTableProps> = ({
                         <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
                       </div>
                       <div>
-                        <div className="font-medium">{event.title}</div>
-                        <Badge variant="outline" className="mt-1">
-                          {event.category === 'event' ? 'Événement' : 'Promotion'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{event.title}</span>
+                          {event.is_featured && (
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {event.category === 'event' ? 'Événement' : 'Promotion'}
+                          </Badge>
+                          {eventInStoryMap.has(event.id) && (
+                            <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                              <ExternalLink className="h-3 w-3" />
+                              En story
+                            </Badge>
+                          )}
+                          {event.is_featured && (
+                            <Badge variant="default" className="text-xs">
+                              Mis en avant
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </TableCell>

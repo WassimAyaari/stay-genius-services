@@ -33,11 +33,14 @@ export const useStories = () => {
     }
   };
 
-  const createStory = async (story: Omit<Story, 'id' | 'created_at' | 'updated_at'>) => {
+  const createStory = async (story: Omit<Story, 'id' | 'created_at' | 'updated_at' | 'seen'>) => {
     try {
       const { data, error } = await supabase
         .from('stories')
-        .insert([story])
+        .insert([{
+          ...story,
+          seen: false
+        }])
         .select();
 
       if (error) throw error;

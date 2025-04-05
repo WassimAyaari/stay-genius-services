@@ -7,15 +7,19 @@ import StoryViewer from './StoryViewer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useStories } from '@/hooks/useStories';
 import { Story } from '@/types/event';
+import { Calendar } from 'lucide-react';
 import { 
   Carousel, 
   CarouselContent, 
   CarouselItem,
   type CarouselApi
 } from '@/components/ui/carousel';
+import { useEvents } from '@/hooks/useEvents';
+import { Badge } from '@/components/ui/badge';
 
 const EventsStories: React.FC = () => {
   const { stories, loading, markAsSeen } = useStories();
+  const { events } = useEvents();
   const [viewedStories, setViewedStories] = useState<string[]>([]);
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
@@ -45,6 +49,13 @@ const EventsStories: React.FC = () => {
       carouselApi.off("select", onSelect);
     };
   }, [carouselApi]);
+
+  // Fonction pour récupérer le titre de l'événement associé à une story
+  const getEventTitle = (story: Story) => {
+    if (!story.eventId) return null;
+    const linkedEvent = events.find(event => event.id === story.eventId);
+    return linkedEvent?.title || null;
+  };
 
   if (loading) {
     return (
@@ -112,6 +123,13 @@ const EventsStories: React.FC = () => {
                       </div>
                     </div>
                     <span className="text-xs text-center w-16 truncate">{story.title}</span>
+                    
+                    {story.eventId && (
+                      <Badge variant="outline" className="mt-1 text-[10px] px-1 py-0 flex items-center gap-0.5">
+                        <Calendar className="w-2 h-2" />
+                        <span className="truncate max-w-12">{getEventTitle(story)}</span>
+                      </Badge>
+                    )}
                   </button>
                 </CarouselItem>
               ))}
@@ -143,6 +161,13 @@ const EventsStories: React.FC = () => {
                   </div>
                 </div>
                 <span className="text-xs text-center w-16 truncate">{story.title}</span>
+                
+                {story.eventId && (
+                  <Badge variant="outline" className="mt-1 text-[10px] px-1 py-0 flex items-center gap-0.5">
+                    <Calendar className="w-2 h-2" />
+                    <span className="truncate max-w-12">{getEventTitle(story)}</span>
+                  </Badge>
+                )}
               </button>
             ))}
           </div>

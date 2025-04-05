@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Story } from '@/types/event';
+import { useEvents } from '@/hooks/useEvents';
 
 interface StoryViewerProps {
   stories: Story[];
@@ -19,9 +21,15 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   const [currentIndex, setCurrentIndex] = useState(initialStoryIndex);
   const [progress, setProgress] = useState(0);
   const navigate = useNavigate();
+  const { events } = useEvents();
   
   const currentStory = stories[currentIndex];
   const storyDuration = 5000; // 5 seconds per story
+  
+  // Trouver l'événement associé à la story courante, s'il existe
+  const linkedEvent = currentStory?.eventId 
+    ? events.find(event => event.id === currentStory.eventId)
+    : null;
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -70,6 +78,12 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   const navigateToEventPage = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate('/events');
+  };
+  
+  const navigateToEventBooking = (e: React.MouseEvent, eventId: string) => {
+    e.stopPropagation();
+    onClose();
+    navigate(`/events?book=${eventId}`);
   };
   
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -145,14 +159,25 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           <div className="absolute bottom-20 left-4 right-4 text-white p-4">
             <h2 className="text-2xl font-bold mb-2">{currentStory.title}</h2>
             <p className="mb-6">{currentStory.description}</p>
-            <div className="flex space-x-3">
+            <div className="flex flex-wrap space-x-3">
               <Button 
                 onClick={navigateToEventPage} 
-                className="flex gap-2 items-center"
+                className="flex gap-2 items-center mb-2"
               >
                 <ExternalLink className="w-4 h-4" />
-                View Details
+                Voir événements
               </Button>
+              
+              {linkedEvent && (
+                <Button 
+                  variant="secondary"
+                  onClick={(e) => navigateToEventBooking(e, linkedEvent.id)} 
+                  className="flex gap-2 items-center mb-2"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Réserver {linkedEvent.title}
+                </Button>
+              )}
             </div>
           </div>
         </motion.div>

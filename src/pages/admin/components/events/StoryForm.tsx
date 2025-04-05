@@ -1,170 +1,227 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { Story } from '@/types/event';
-import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Story, Event } from '@/types/event';
+import { supabase } from '@/integrations/supabase/client';
+import { useEvents } from '@/hooks/useEvents';
 
-const storySchema = z.object({
-  title: z.string().min(3, { message: 'Title is required' }),
-  description: z.string().min(3, { message: 'Description is required' }),
-  image: z.string().min(3, { message: 'Image URL is required' }),
-  category: z.enum(['event', 'promo'], { message: 'Category is required' }),
+const formSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  image: z.string().min(1, 'Image URL is required'),
+  category: z.enum(['event', 'promo']),
   is_active: z.boolean().default(true),
-  seen: z.boolean().default(false),
+  eventId: z.string().optional(),
 });
 
-type StoryFormValues = z.infer<typeof storySchema>;
-
-export interface StoryFormProps {
-  initialData?: Story | null;
-  onSubmit: (story: Partial<Story>) => Promise<void>;
-  onCancel?: () => void;
+interface StoryFormProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (storyData: any) => Promise<void>;
+  story?: Story;
 }
 
-const StoryForm: React.FC<StoryFormProps> = ({ 
-  initialData, 
-  onSubmit, 
-  onCancel 
+export const StoryForm: React.FC<StoryFormProps> = ({
+  open,
+  onOpenChange,
+  onSubmit,
+  story
 }) => {
-  const { toast } = useToast();
-  
-  const form = useForm<StoryFormValues>({
-    resolver: zodResolver(storySchema),
-    defaultValues: initialData ? {
-      title: initialData.title,
-      description: initialData.description,
-      image: initialData.image,
-      category: initialData.category,
-      is_active: initialData.is_active || true,
-      seen: initialData.seen || false,
-    } : {
-      title: '',
-      description: '',
-      image: '',
-      category: 'event',
-      is_active: true,
-      seen: false,
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: story?.title || '',
+      description: story?.description || '',
+      image: story?.image || '',
+      category: story?.category || 'event',
+      is_active: story?.is_active !== false,
+      eventId: story?.eventId || '',
     },
   });
+  const { events, loading: eventsLoading } = useEvents();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (values: StoryFormValues) => {
-    try {
-      await onSubmit(values);
-    } catch (error) {
-      console.error('Error submitting story:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: `Failed to ${initialData ? 'update' : 'create'} story`,
+  // Effet pour réinitialiser le formulaire quand une story est éditée
+  useEffect(() => {
+    if (story) {
+      form.reset({
+        title: story.title,
+        description: story.description,
+        image: story.image,
+        category: story.category,
+        is_active: story.is_active !== false,
+        eventId: story.eventId || '',
       });
+    } else {
+      form.reset({
+        title: '',
+        description: '',
+        image: '',
+        category: 'event',
+        is_active: true,
+        eventId: '',
+      });
+    }
+  }, [story, form]);
+
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsSubmitting(true);
+      await onSubmit(values);
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Story title" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Story description" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="image"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  {...field}
-                >
-                  <option value="event">Event</option>
-                  <option value="promo">Promotion</option>
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-              <div className="space-y-0.5">
-                <FormLabel>Active</FormLabel>
-                <div className="text-sm text-muted-foreground">
-                  Story will be visible to users
-                </div>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-end space-x-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-          )}
-          <Button type="submit">
-            {initialData ? 'Update' : 'Create'} Story
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>{story ? 'Edit Story' : 'Create New Story'}</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Titre</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Titre de la story" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Description de la story" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL de l'image</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Catégorie</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une catégorie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="event">Événement</SelectItem>
+                        <SelectItem value="promo">Promotion</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="eventId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Associer à un événement (optionnel)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choisir un événement" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Aucun événement</SelectItem>
+                        {events.map((event: Event) => (
+                          <SelectItem key={event.id} value={event.id}>
+                            {event.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Lier cette story à un événement permettra aux utilisateurs de réserver directement
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Actif</FormLabel>
+                    <FormDescription>
+                      Cette story sera visible par les utilisateurs
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch 
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Enregistrement...' : story ? 'Mettre à jour' : 'Créer'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
-
-export default StoryForm;
