@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Check, X, Eye, Phone, Calendar, User, Home, Mail } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { motion } from "framer-motion";
 
 interface ReservationCardProps {
   reservation: EventReservation;
@@ -42,126 +41,117 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -5 }}
-    >
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
-        <div className={`h-2 w-full ${getStatusBadgeClass(reservation.status)}`} />
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="font-semibold">{reservation.guestName || "Invité"}</h3>
-            <Badge className={getStatusBadgeClass(reservation.status)}>
-              {getStatusLabel(reservation.status)}
-            </Badge>
-          </div>
+    <Card className="overflow-hidden">
+      <div className={`h-2 w-full ${getStatusBadgeClass(reservation.status)}`} />
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="font-semibold">{reservation.guestName}</h3>
+          <Badge className={getStatusBadgeClass(reservation.status)}>
+            {getStatusLabel(reservation.status)}
+          </Badge>
+        </div>
 
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center text-sm">
-              <Calendar className="h-4 w-4 mr-2 opacity-70" />
-              <span>{format(new Date(reservation.date), 'dd MMMM yyyy', { locale: fr })}</span>
-            </div>
-            
-            <div className="flex items-center text-sm">
-              <User className="h-4 w-4 mr-2 opacity-70" />
-              <span>{reservation.guests} {reservation.guests > 1 ? 'participants' : 'participant'}</span>
-            </div>
-            
-            {reservation.roomNumber && (
-              <div className="flex items-center text-sm">
-                <Home className="h-4 w-4 mr-2 opacity-70" />
-                <span>Chambre: {reservation.roomNumber}</span>
-              </div>
-            )}
-            
-            {reservation.guestEmail && (
-              <div className="flex items-center text-sm overflow-hidden">
-                <Mail className="h-4 w-4 mr-2 flex-shrink-0 opacity-70" />
-                <span className="truncate">{reservation.guestEmail}</span>
-              </div>
-            )}
-            
-            {reservation.guestPhone && (
-              <div className="flex items-center text-sm">
-                <Phone className="h-4 w-4 mr-2 opacity-70" />
-                <span>{reservation.guestPhone}</span>
-              </div>
-            )}
+        <div className="space-y-3 mb-4">
+          <div className="flex items-center text-sm">
+            <Calendar className="h-4 w-4 mr-2 opacity-70" />
+            <span>{format(new Date(reservation.date), 'dd MMMM yyyy', { locale: fr })}</span>
           </div>
+          
+          <div className="flex items-center text-sm">
+            <User className="h-4 w-4 mr-2 opacity-70" />
+            <span>{reservation.guests} {reservation.guests > 1 ? 'participants' : 'participant'}</span>
+          </div>
+          
+          <div className="flex items-center text-sm">
+            <Home className="h-4 w-4 mr-2 opacity-70" />
+            <span>Chambre: {reservation.roomNumber || '-'}</span>
+          </div>
+          
+          {reservation.guestEmail && (
+            <div className="flex items-center text-sm overflow-hidden">
+              <Mail className="h-4 w-4 mr-2 flex-shrink-0 opacity-70" />
+              <span className="truncate">{reservation.guestEmail}</span>
+            </div>
+          )}
+          
+          {reservation.guestPhone && (
+            <div className="flex items-center text-sm">
+              <Phone className="h-4 w-4 mr-2 opacity-70" />
+              <span>{reservation.guestPhone}</span>
+            </div>
+          )}
+        </div>
 
-          <div className="flex space-x-2 mt-4 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1 hover:bg-slate-100"
-              onClick={() => onViewDetails(reservation)}
-            >
-              <Eye className="h-4 w-4 mr-1" />
-              Détails
-            </Button>
-            
-            {reservation.status === 'pending' && (
-              <>
+        <div className="flex space-x-2 mt-4 pt-4 border-t">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-1"
+            onClick={() => onViewDetails(reservation)}
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Détails
+          </Button>
+          
+          {reservation.status === 'pending' && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1 border-green-500 text-green-500 hover:bg-green-50"
+                onClick={() => onUpdateStatus(reservation.id, 'confirmed')}
+                disabled={isUpdating}
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Confirmer
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
+                onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
+                disabled={isUpdating}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Refuser
+              </Button>
+            </>
+          )}
+          
+          {reservation.status === 'confirmed' && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="flex-1 border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
-                  onClick={() => onUpdateStatus(reservation.id, 'confirmed')}
-                  disabled={isUpdating}
-                >
-                  <Check className="h-4 w-4 mr-1" />
-                  Confirmer
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="flex-1 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700"
-                  onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
-                  disabled={isUpdating}
+                  className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
                 >
                   <X className="h-4 w-4 mr-1" />
-                  Refuser
+                  Annuler
                 </Button>
-              </>
-            )}
-            
-            {reservation.status === 'confirmed' && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-1 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700"
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Annuler la réservation</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
+                    className="bg-red-500 hover:bg-red-600"
                   >
-                    <X className="h-4 w-4 mr-1" />
-                    Annuler
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Annuler la réservation</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      Confirmer l'annulation
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+                    Confirmer l'annulation
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
