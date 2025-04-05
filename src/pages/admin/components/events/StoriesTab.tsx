@@ -6,7 +6,7 @@ import { Plus, Edit, Trash } from 'lucide-react';
 import { useStories } from '@/hooks/useStories';
 import { Story } from '@/types/event';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import StoryForm from '@/pages/admin/components/events/StoryForm';
+import { StoryForm } from '@/pages/admin/components/events/StoryForm';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -60,7 +60,12 @@ export const StoriesTab = () => {
               <DialogTitle>{editingStory ? 'Modifier la story' : 'Ajouter une story'}</DialogTitle>
             </DialogHeader>
             <ScrollArea className="max-h-[70vh]">
-              <StoryForm onSubmit={editingStory ? handleUpdateStory : handleCreateStory} initialData={editingStory} />
+              <StoryForm 
+                onSubmit={editingStory ? handleUpdateStory : handleCreateStory} 
+                initialData={editingStory} 
+                open={isStoryDialogOpen}
+                onOpenChange={setIsStoryDialogOpen}
+              />
             </ScrollArea>
           </DialogContent>
         </Dialog>

@@ -1,166 +1,119 @@
 
 import React, { useState, useEffect } from 'react';
-import { useEventReservations } from '@/hooks/useEventReservations';
+import { Card } from "@/components/ui/card";
 import { useEvents } from '@/hooks/useEvents';
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { EventReservation } from '@/types/event';
+import { useEventReservations } from '@/hooks/useEventReservations';
 import { EventTable } from './EventTable';
 import { ReservationsGrid } from './ReservationsGrid';
 import { EventReservationDetail } from './EventReservationDetail';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { UpdateEventReservationStatusDTO, EventReservation } from '@/types/event';
+import { useStories } from '@/hooks/useStories';
 
-interface EventReservationsTabProps {
-  selectedEventId: string | undefined;
-  setSelectedEventId: React.Dispatch<React.SetStateAction<string | undefined>>;
-}
-
-export const EventReservationsTab: React.FC<EventReservationsTabProps> = ({ 
-  selectedEventId, 
-  setSelectedEventId 
-}) => {
-  const { events } = useEvents();
+export const EventReservationsTab: React.FC<{
+  selectedEventId?: string;
+  setSelectedEventId: (eventId: string | undefined) => void;
+}> = ({ selectedEventId, setSelectedEventId }) => {
+  const { events, loading: eventsLoading } = useEvents();
+  const { stories } = useStories();
+  const [selectedReservation, setSelectedReservation] = useState<EventReservation | undefined>(undefined);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
   const { 
     reservations, 
-    isLoading, 
-    updateReservationStatus, 
-    isUpdating,
-    refetch
+    isLoading: reservationsLoading, 
+    updateReservationStatus,
+    isUpdating
   } = useEventReservations(selectedEventId);
-
-  const [selectedReservation, setSelectedReservation] = useState<EventReservation | null>(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [reservationView, setReservationView] = useState<'all' | 'pending' | 'confirmed' | 'cancelled'>('all');
   
-  // Refetch when tab changes
+  // Reset selected reservation when event changes
   useEffect(() => {
-    if (selectedEventId) {
-      refetch();
-    }
-  }, [selectedEventId, refetch]);
+    setSelectedReservation(undefined);
+  }, [selectedEventId]);
   
-  const filteredReservations = reservations.filter(reservation => {
-    if (reservationView === 'all') return true;
-    return reservation.status === reservationView;
-  });
-  
-  const reservationStats = {
-    all: reservations.length,
-    pending: reservations.filter(r => r.status === 'pending').length,
-    confirmed: reservations.filter(r => r.status === 'confirmed').length,
-    cancelled: reservations.filter(r => r.status === 'cancelled').length
-  };
-
-  const handleViewDetails = (reservation: EventReservation) => {
-    setSelectedReservation(reservation);
-    setDetailDialogOpen(true);
-  };
-
-  const handleStatusUpdate = (reservationId: string, newStatus: 'pending' | 'confirmed' | 'cancelled') => {
-    updateReservationStatus({ id: reservationId, status: newStatus });
-  };
-
   const handleSelectEvent = (eventId: string) => {
     setSelectedEventId(eventId);
+    setSelectedReservation(undefined);
   };
-
-  const selectedEvent = events.find(e => e.id === selectedEventId);
-
-  return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Réservations des événements</h2>
-      
-      <div className="grid lg:grid-cols-5 gap-6">
-        {/* Left column: Events list */}
-        <div className="lg:col-span-2">
-          <Card className="overflow-hidden">
-            <EventTable 
-              events={events} 
-              selectedEventId={selectedEventId} 
-              onSelectEvent={handleSelectEvent} 
-            />
-          </Card>
-        </div>
-        
-        {/* Right column: Reservations */}
-        <div className="lg:col-span-3">
-          <Card className="flex-1 overflow-hidden flex flex-col">
-            <div className="p-4 border-b">
-              <div className="flex flex-col space-y-2">
-                <h3 className="font-medium">
-                  {selectedEventId 
-                    ? `Réservations pour: ${selectedEvent?.title || ""}` 
-                    : "Sélectionnez un événement"}
-                </h3>
-                
-                {selectedEvent && (
-                  <div className="text-sm text-muted-foreground">
-                    <span>Date: {format(new Date(selectedEvent.date), 'dd MMMM yyyy', { locale: fr })}</span>
-                    {selectedEvent.time && (
-                      <span> à {selectedEvent.time}</span>
-                    )}
-                    {selectedEvent.location && (
-                      <span> | Lieu: {selectedEvent.location}</span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {isLoading ? (
-              <div className="p-6 text-center">Chargement des réservations...</div>
-            ) : !selectedEventId ? (
-              <div className="p-6 text-center">Veuillez sélectionner un événement pour voir ses réservations</div>
-            ) : (
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <div className="border-b">
-                  <Tabs defaultValue="all" className="w-full">
-                    <div className="px-4">
-                      <TabsList className="grid grid-cols-4 mb-0">
-                        <TabsTrigger value="all" onClick={() => setReservationView('all')}>
-                          Toutes ({reservationStats.all})
-                        </TabsTrigger>
-                        <TabsTrigger value="pending" onClick={() => setReservationView('pending')}>
-                          En attente ({reservationStats.pending})
-                        </TabsTrigger>
-                        <TabsTrigger value="confirmed" onClick={() => setReservationView('confirmed')}>
-                          Confirmées ({reservationStats.confirmed})
-                        </TabsTrigger>
-                        <TabsTrigger value="cancelled" onClick={() => setReservationView('cancelled')}>
-                          Annulées ({reservationStats.cancelled})
-                        </TabsTrigger>
-                      </TabsList>
-                    </div>
-                  </Tabs>
-                </div>
-                
-                <ScrollArea className="flex-1 p-4">
-                  <ReservationsGrid 
-                    reservations={filteredReservations}
-                    onViewDetails={handleViewDetails}
-                    onUpdateStatus={handleStatusUpdate}
-                    isUpdating={isUpdating}
-                  />
-                </ScrollArea>
-              </div>
-            )}
-          </Card>
-        </div>
+  
+  const handleViewReservation = (reservation: EventReservation) => {
+    setSelectedReservation(reservation);
+    setIsDetailOpen(true);
+  };
+  
+  const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
+    const update: UpdateEventReservationStatusDTO = {
+      id: reservationId,
+      status
+    };
+    updateReservationStatus(update);
+  };
+  
+  if (eventsLoading) {
+    return (
+      <div className="p-8 text-center">
+        Chargement des événements...
       </div>
+    );
+  }
+  
+  if (events.length === 0) {
+    return (
+      <div className="p-8 text-center">
+        <h3 className="text-xl mb-2">Aucun événement trouvé</h3>
+        <p className="text-muted-foreground">
+          Créez d'abord des événements dans l'onglet "Événements"
+        </p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-5 gap-8 flex-1 h-full">
+      {/* Left column - Events list */}
+      <Card className="md:col-span-2 overflow-hidden flex flex-col h-full">
+        <EventTable 
+          events={events} 
+          selectedEventId={selectedEventId} 
+          onSelectEvent={handleSelectEvent} 
+          stories={stories}
+        />
+      </Card>
       
-      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle>Détails de la réservation</DialogTitle>
-          </DialogHeader>
-          {selectedReservation && (
-            <EventReservationDetail reservation={selectedReservation} />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Right column - Reservations for selected event */}
+      <Card className="md:col-span-3 p-6 overflow-hidden flex flex-col h-full">
+        {!selectedEventId ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <h3 className="text-xl mb-2">Sélectionnez un événement</h3>
+              <p className="text-muted-foreground">
+                Choisissez un événement dans la liste pour voir ses réservations
+              </p>
+            </div>
+          </div>
+        ) : reservationsLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p>Chargement des réservations...</p>
+          </div>
+        ) : (
+          <ReservationsGrid 
+            reservations={reservations} 
+            onViewDetails={handleViewReservation}
+            onUpdateStatus={handleUpdateStatus}
+            isUpdating={isUpdating}
+          />
+        )}
+      </Card>
+      
+      {/* Reservation Detail Dialog */}
+      {selectedReservation && (
+        <EventReservationDetail
+          reservation={selectedReservation}
+          onOpenChange={setIsDetailOpen}
+          open={isDetailOpen}
+          onUpdateStatus={handleUpdateStatus}
+          isUpdating={isUpdating}
+        />
+      )}
     </div>
   );
 };
