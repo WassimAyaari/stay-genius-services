@@ -6,12 +6,24 @@ import { fr } from 'date-fns/locale';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Mail, Phone, Home, Calendar, Users } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface EventReservationDetailProps {
   reservation: EventReservation;
+  onOpenChange?: (open: boolean) => void;
+  open?: boolean;
+  onUpdateStatus?: (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => void;
+  isUpdating?: boolean;
 }
 
-export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ reservation }) => {
+export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ 
+  reservation, 
+  onOpenChange, 
+  open = false,
+  onUpdateStatus,
+  isUpdating = false
+}) => {
   // Fonction pour obtenir le libellé et la couleur du statut
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -28,7 +40,7 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ 
   
   const statusInfo = getStatusInfo(reservation.status);
 
-  return (
+  const reservationContent = (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
         <h3 className="text-lg font-medium">
@@ -92,6 +104,57 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ 
           </CardContent>
         </Card>
       )}
+      
+      {onUpdateStatus && (
+        <div className="flex justify-end space-x-2 pt-4">
+          {reservation.status !== 'confirmed' && (
+            <Button 
+              variant="success" 
+              size="sm" 
+              onClick={() => onUpdateStatus(reservation.id, 'confirmed')}
+              disabled={isUpdating}
+            >
+              Confirmer
+            </Button>
+          )}
+          {reservation.status !== 'cancelled' && (
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
+              disabled={isUpdating}
+            >
+              Annuler
+            </Button>
+          )}
+          {reservation.status !== 'pending' && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onUpdateStatus(reservation.id, 'pending')}
+              disabled={isUpdating}
+            >
+              Marquer comme en attente
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
+  
+  if (!onOpenChange || open === undefined) {
+    return reservationContent;
+  }
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Détails de la réservation</DialogTitle>
+        </DialogHeader>
+        {reservationContent}
+      </DialogContent>
+    </Dialog>
+  );
 };
+
