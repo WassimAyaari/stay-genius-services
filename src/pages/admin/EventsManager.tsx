@@ -108,110 +108,112 @@ const EventsManager = () => {
               </Dialog>
             </div>
             
-            <Card className="mb-6 flex-1 overflow-hidden flex flex-col">
+            <Card className="flex-1 overflow-hidden">
               {eventsLoading ? (
                 <div className="p-6 text-center">Chargement des événements...</div>
               ) : (
-                <ScrollArea className="h-full">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Image</TableHead>
-                        <TableHead>Titre</TableHead>
-                        <TableHead>Catégorie</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Lieu</TableHead>
-                        <TableHead>À la une</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {events.length === 0 ? (
+                <ScrollArea className="h-[calc(100vh-250px)]">
+                  <div className="min-w-full">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-4">
-                            Aucun événement trouvé
-                          </TableCell>
+                          <TableHead>Image</TableHead>
+                          <TableHead>Titre</TableHead>
+                          <TableHead>Catégorie</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Lieu</TableHead>
+                          <TableHead>À la une</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
-                      ) : (
-                        events.map((event) => (
-                          <TableRow key={event.id}>
-                            <TableCell>
-                              <div className="h-12 w-12 rounded overflow-hidden">
-                                <img 
-                                  src={event.image} 
-                                  alt={event.title} 
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
+                      </TableHeader>
+                      <TableBody>
+                        {events.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-4">
+                              Aucun événement trouvé
                             </TableCell>
-                            <TableCell>{event.title}</TableCell>
-                            <TableCell>{event.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
-                            <TableCell>
-                              {format(new Date(event.date), 'dd/MM/yyyy')}
-                              {event.time && <div className="text-xs">{event.time}</div>}
-                            </TableCell>
-                            <TableCell>{event.location || '-'}</TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => handleToggleFeature(event)}
-                              >
-                                {event.is_featured ? (
-                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                                ) : (
-                                  <StarOff className="h-4 w-4 text-gray-500" />
-                                )}
-                              </Button>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex space-x-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
-                                  <Edit className="h-4 w-4" />
-                                </Button>
+                          </TableRow>
+                        ) : (
+                          events.map((event) => (
+                            <TableRow key={event.id}>
+                              <TableCell>
+                                <div className="h-12 w-12 rounded overflow-hidden">
+                                  <img 
+                                    src={event.image} 
+                                    alt={event.title} 
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              </TableCell>
+                              <TableCell>{event.title}</TableCell>
+                              <TableCell>{event.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
+                              <TableCell>
+                                {format(new Date(event.date), 'dd/MM/yyyy')}
+                                {event.time && <div className="text-xs">{event.time}</div>}
+                              </TableCell>
+                              <TableCell>{event.location || '-'}</TableCell>
+                              <TableCell>
                                 <Button 
                                   variant="ghost" 
                                   size="icon"
-                                  onClick={() => {
-                                    setSelectedEventId(event.id);
-                                    document.querySelector('[data-value="reservations"]')?.dispatchEvent(
-                                      new MouseEvent('click', { bubbles: true })
-                                    );
-                                  }}
+                                  onClick={() => handleToggleFeature(event)}
                                 >
-                                  <Calendar className="h-4 w-4" />
+                                  {event.is_featured ? (
+                                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                  ) : (
+                                    <StarOff className="h-4 w-4 text-gray-500" />
+                                  )}
                                 </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                      <Trash className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                      <AlertDialogAction 
-                                        onClick={() => deleteEvent(event.id)}
-                                        className="bg-red-500 hover:bg-red-600"
-                                      >
-                                        Supprimer
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex space-x-2">
+                                  <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => {
+                                      setSelectedEventId(event.id);
+                                      document.querySelector('[data-value="reservations"]')?.dispatchEvent(
+                                        new MouseEvent('click', { bubbles: true })
+                                      );
+                                    }}
+                                  >
+                                    <Calendar className="h-4 w-4" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <Trash className="h-4 w-4 text-red-500" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          onClick={() => deleteEvent(event.id)}
+                                          className="bg-red-500 hover:bg-red-600"
+                                        >
+                                          Supprimer
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </ScrollArea>
               )}
             </Card>
@@ -249,86 +251,88 @@ const EventsManager = () => {
               {storiesLoading ? (
                 <div className="p-6 text-center">Chargement des stories...</div>
               ) : (
-                <ScrollArea className="h-full">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Image</TableHead>
-                        <TableHead>Titre</TableHead>
-                        <TableHead>Catégorie</TableHead>
-                        <TableHead>Créée le</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stories.length === 0 ? (
+                <ScrollArea className="h-[calc(100vh-250px)]">
+                  <div className="min-w-full">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-4">
-                            Aucune story trouvée
-                          </TableCell>
+                          <TableHead>Image</TableHead>
+                          <TableHead>Titre</TableHead>
+                          <TableHead>Catégorie</TableHead>
+                          <TableHead>Créée le</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
-                      ) : (
-                        stories.map((story) => (
-                          <TableRow key={story.id}>
-                            <TableCell>
-                              <div className="h-12 w-12 rounded-full overflow-hidden">
-                                <img 
-                                  src={story.image} 
-                                  alt={story.title} 
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
-                            </TableCell>
-                            <TableCell>{story.title}</TableCell>
-                            <TableCell>{story.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
-                            <TableCell>{format(new Date(story.created_at), 'dd/MM/yyyy')}</TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleToggleActive(story)}
-                                className={story.is_active ? 'text-green-500' : 'text-gray-500'}
-                              >
-                                {story.is_active ? 'Active' : 'Inactive'}
-                              </Button>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex space-x-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleEditStory(story)}>
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                      <Trash className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Êtes-vous sûr de vouloir supprimer cette story ? Cette action est irréversible.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                      <AlertDialogAction 
-                                        onClick={() => deleteStory(story.id)}
-                                        className="bg-red-500 hover:bg-red-600"
-                                      >
-                                        Supprimer
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
+                      </TableHeader>
+                      <TableBody>
+                        {stories.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center py-4">
+                              Aucune story trouvée
                             </TableCell>
                           </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
+                        ) : (
+                          stories.map((story) => (
+                            <TableRow key={story.id}>
+                              <TableCell>
+                                <div className="h-12 w-12 rounded-full overflow-hidden">
+                                  <img 
+                                    src={story.image} 
+                                    alt={story.title} 
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              </TableCell>
+                              <TableCell>{story.title}</TableCell>
+                              <TableCell>{story.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
+                              <TableCell>{format(new Date(story.created_at), 'dd/MM/yyyy')}</TableCell>
+                              <TableCell>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleToggleActive(story)}
+                                  className={story.is_active ? 'text-green-500' : 'text-gray-500'}
+                                >
+                                  {story.is_active ? 'Active' : 'Inactive'}
+                                </Button>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex space-x-2">
+                                  <Button variant="ghost" size="icon" onClick={() => handleEditStory(story)}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <Trash className="h-4 w-4 text-red-500" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Êtes-vous sûr de vouloir supprimer cette story ? Cette action est irréversible.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          onClick={() => deleteStory(story.id)}
+                                          className="bg-red-500 hover:bg-red-600"
+                                        >
+                                          Supprimer
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </ScrollArea>
               )}
             </Card>
