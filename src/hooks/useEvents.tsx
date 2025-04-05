@@ -12,12 +12,19 @@ export const useEvents = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
+      console.log('Fetching events from Supabase...');
+      
       const { data, error } = await supabase
         .from('events')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in fetchEvents:', error);
+        throw error;
+      }
+      
+      console.log('Events fetched successfully:', data);
       
       // Properly cast the data to ensure it matches the Event type
       setEvents(data as Event[]);
@@ -25,8 +32,8 @@ export const useEvents = () => {
       console.error('Error fetching events:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to fetch events',
+        title: 'Erreur',
+        description: 'Impossible de récupérer les événements',
       });
     } finally {
       setLoading(false);
@@ -35,18 +42,25 @@ export const useEvents = () => {
 
   const createEvent = async (event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Creating new event:', event);
+      
       const { data, error } = await supabase
         .from('events')
         .insert([event])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in createEvent:', error);
+        throw error;
+      }
+      
+      console.log('Event created successfully:', data);
       
       setEvents(prev => [...prev, ...(data as Event[])]);
       
       toast({
-        title: 'Success',
-        description: 'Event created successfully',
+        title: 'Succès',
+        description: 'Événement créé avec succès',
       });
       
       return data[0];
@@ -54,8 +68,8 @@ export const useEvents = () => {
       console.error('Error creating event:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to create event',
+        title: 'Erreur',
+        description: 'Impossible de créer l\'événement',
       });
       throw error;
     }
@@ -63,19 +77,26 @@ export const useEvents = () => {
 
   const updateEvent = async (id: string, event: Partial<Event>) => {
     try {
+      console.log('Updating event:', id, event);
+      
       const { data, error } = await supabase
         .from('events')
         .update(event)
         .eq('id', id)
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in updateEvent:', error);
+        throw error;
+      }
+      
+      console.log('Event updated successfully:', data);
       
       setEvents(prev => prev.map(e => e.id === id ? { ...e, ...data[0] } as Event : e));
       
       toast({
-        title: 'Success',
-        description: 'Event updated successfully',
+        title: 'Succès',
+        description: 'Événement mis à jour avec succès',
       });
       
       return data[0];
@@ -83,8 +104,8 @@ export const useEvents = () => {
       console.error('Error updating event:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to update event',
+        title: 'Erreur',
+        description: 'Impossible de mettre à jour l\'événement',
       });
       throw error;
     }
@@ -92,25 +113,32 @@ export const useEvents = () => {
 
   const deleteEvent = async (id: string) => {
     try {
+      console.log('Deleting event:', id);
+      
       const { error } = await supabase
         .from('events')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in deleteEvent:', error);
+        throw error;
+      }
+      
+      console.log('Event deleted successfully');
       
       setEvents(prev => prev.filter(e => e.id !== id));
       
       toast({
-        title: 'Success',
-        description: 'Event deleted successfully',
+        title: 'Succès',
+        description: 'Événement supprimé avec succès',
       });
     } catch (error) {
       console.error('Error deleting event:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to delete event',
+        title: 'Erreur',
+        description: 'Impossible de supprimer l\'événement',
       });
       throw error;
     }
