@@ -2,45 +2,64 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { NotificationDetailHeader } from './components/NotificationDetailHeader';
 import { NotificationDetailContent } from './components/NotificationDetailContent';
-import { LoadingState } from './components/LoadingState';
-import { NotFoundState } from './components/NotFoundState';
-import { useNotificationDetail } from './hooks/useNotificationDetail';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const NotificationDetail: React.FC = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
-  const { notification, isLoading, error } = useNotificationDetail(type, id);
+  const { notifications } = useNotifications();
+  
+  // Find the specific notification
+  const notification = notifications.find(n => n.id === id && n.type === type);
 
   // Navigation handler
   const handleBack = () => {
     navigate('/notifications');
   };
 
-  // Afficher l'état de chargement pendant la récupération des données
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
-  // Afficher l'état "non trouvé" s'il y a une erreur ou pas de notification
-  if (error || !notification) {
+  if (!notification) {
     return (
-      <NotFoundState 
-        onBack={handleBack} 
-        errorMessage={error instanceof Error ? error.message : String(error)}
-      />
+      <Layout>
+        <div className="container py-8">
+          <div className="flex items-center mb-6">
+            <button 
+              onClick={handleBack}
+              className="mr-4 p-2 rounded-full hover:bg-gray-100"
+            >
+              ← Back
+            </button>
+            <h1 className="text-2xl font-bold">Notification not found</h1>
+          </div>
+          
+          <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-center">
+            <p className="text-red-700">
+              This notification could not be found or may have been deleted.
+            </p>
+            <button 
+              onClick={handleBack}
+              className="mt-4 px-4 py-2 bg-primary text-white rounded"
+            >
+              Return to Notifications
+            </button>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
     <Layout>
       <div className="container py-8">
-        <NotificationDetailHeader 
-          title={notification.title}
-          type={notification.type}
-          onBack={handleBack}
-        />
+        <div className="flex items-center mb-6">
+          <button 
+            onClick={handleBack}
+            className="mr-4 p-2 rounded-full hover:bg-gray-100"
+          >
+            ← Back
+          </button>
+          <h1 className="text-2xl font-bold">{notification.title}</h1>
+        </div>
         
         <NotificationDetailContent notification={notification} />
       </div>

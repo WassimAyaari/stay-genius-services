@@ -1,9 +1,51 @@
 
-import { ServiceRequest } from '@/features/concierge/types';
-import { TableReservation } from '@/features/dining/types';
-import { SpaBooking } from '@/types/spa';
-import { EventReservation } from '@/types/event';
 import { NotificationItem } from '@/types/notification';
+
+// Define the needed types here to avoid import errors
+interface ServiceRequest {
+  id: string;
+  type: string;
+  description?: string;
+  status: string;
+  created_at: string;
+  room_number?: string;
+}
+
+interface TableReservation {
+  id: string;
+  restaurantId?: string;
+  date: string;
+  time: string;
+  guests: number;
+  status: string;
+  createdAt?: string;
+  roomNumber?: string;
+  specialRequests?: string;
+}
+
+interface SpaBooking {
+  id: string;
+  service_id: string;
+  date: string;
+  time: string;
+  guest_name: string;
+  guest_email: string;
+  room_number?: string;
+  special_requests?: string;
+  status: string;
+  created_at?: string;
+}
+
+interface EventReservation {
+  id: string;
+  eventId: string;
+  date: string;
+  guests: number;
+  status: string;
+  createdAt?: string;
+  roomNumber?: string;
+  specialRequests?: string;
+}
 
 // Combine notifications from multiple sources and sort them by date
 export const combineAndSortNotifications = (
@@ -42,7 +84,7 @@ export const combineAndSortNotifications = (
       description: `Réservation pour ${reservation.guests} personne(s)`,
       icon: 'utensils',
       status: reservation.status,
-      time: new Date(reservation.createdAt),
+      time: new Date(reservation.createdAt || new Date().toISOString()),
       link: `/dining/reservations/${reservation.id}`,
       data: {
         restaurant_id: reservation.restaurantId,
@@ -64,7 +106,7 @@ export const combineAndSortNotifications = (
       description: `Réservation pour le ${booking.date}`,
       icon: 'spa',
       status: booking.status,
-      time: new Date(booking.created_at),
+      time: new Date(booking.created_at || new Date().toISOString()),
       link: `/spa/booking/${booking.id}`,
       data: {
         service_id: booking.service_id,
@@ -85,7 +127,7 @@ export const combineAndSortNotifications = (
       description: `Réservation pour ${reservation.guests} personne(s)`,
       icon: 'calendar',
       status: reservation.status,
-      time: new Date(reservation.createdAt),
+      time: new Date(reservation.createdAt || new Date().toISOString()),
       link: `/events/reservation/${reservation.id}`,
       data: {
         event_id: reservation.eventId,

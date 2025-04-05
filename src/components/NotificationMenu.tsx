@@ -22,8 +22,9 @@ const NotificationMenu = () => {
     hasNewNotifications, 
     setHasNewNotifications,
     refetchServices,
-    refetchReservations,
-    refetchSpaBookings
+    refetchTableReservations,
+    refetchSpaBookings,
+    refetchEventReservations
   } = useNotifications();
 
   // Reset the "new notifications" indicator when the menu is opened
@@ -35,13 +36,14 @@ const NotificationMenu = () => {
       // Refresh all notifications data when menu opens
       Promise.all([
         refetchServices(),
-        refetchReservations(),
-        refetchSpaBookings()
+        refetchTableReservations(),
+        refetchSpaBookings(),
+        refetchEventReservations()
       ]).catch(err => {
         console.error('Failed to refresh notifications:', err);
       });
     }
-  }, [setHasNewNotifications, refetchServices, refetchReservations, refetchSpaBookings]);
+  }, [setHasNewNotifications, refetchServices, refetchTableReservations, refetchSpaBookings, refetchEventReservations]);
 
   return (
     <DropdownMenu onOpenChange={handleOpenChange}>
