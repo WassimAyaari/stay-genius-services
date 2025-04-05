@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -113,6 +114,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       }
     }
   }, [userData, form, existingReservation]);
+  
   const onSubmit = async (values: ReservationFormValues) => {
     try {
       const reservationData: CreateEventReservationDTO = {
@@ -143,9 +145,11 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       });
     }
   };
+  
   const guestOptions = Array.from({
     length: maxGuests
   }, (_, i) => i + 1);
+  
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <GuestInfoFields form={form} />
@@ -155,14 +159,21 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Nombre de participants
           </label>
-          <select className="w-full p-2 border border-gray-300 rounded-md bg-zinc-100">
-            {guestOptions.map(num => <option key={num} value={num}>
+          <select 
+            className="w-full p-2 border border-gray-300 rounded-md bg-zinc-100"
+            {...form.register("guests", { valueAsNumber: true })}
+          >
+            {guestOptions.map(num => (
+              <option key={num} value={num}>
                 {num} {num === 1 ? 'personne' : 'personnes'}
-              </option>)}
+              </option>
+            ))}
           </select>
-          {form.formState.errors.guests && <p className="text-red-500 text-sm mt-1">
+          {form.formState.errors.guests && (
+            <p className="text-red-500 text-sm mt-1">
               {form.formState.errors.guests.message}
-            </p>}
+            </p>
+          )}
         </div>
         
         <SpecialRequests form={form} />
