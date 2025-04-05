@@ -109,10 +109,11 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({
         <div className="flex justify-end space-x-2 pt-4">
           {reservation.status !== 'confirmed' && (
             <Button 
-              variant="success" 
+              variant="default" 
               size="sm" 
               onClick={() => onUpdateStatus(reservation.id, 'confirmed')}
               disabled={isUpdating}
+              className="bg-green-500 hover:bg-green-600"
             >
               Confirmer
             </Button>
@@ -157,4 +158,3 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({
     </Dialog>
   );
 };
-
