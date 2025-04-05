@@ -1,7 +1,8 @@
+
 // Type définitions for notifications
 export interface NotificationItem {
   id: string;
-  type: 'request' | 'reservation' | 'spa_booking' | 'general';
+  type: 'request' | 'reservation' | 'spa_booking' | 'general' | 'event_reservation';
   title: string;
   description: string;
   icon: string;
@@ -17,6 +18,7 @@ export interface NotificationItem {
     guests?: number;
     restaurant_id?: string;
     service_id?: string;
+    event_id?: string;
     special_requests?: string;
     [key: string]: any;
   };
@@ -62,6 +64,21 @@ export interface ServiceRequest {
   type: string;
   description?: string;
   room_number?: string;
+  status: string;
+  created_at: string;
+}
+
+// Type definitions for event reservations in notifications
+export interface EventReservation {
+  id: string;
+  event_id: string;
+  date: string;
+  guests: number;
+  guest_name?: string;
+  guest_email?: string;
+  guest_phone?: string;
+  room_number?: string;
+  special_requests?: string;
   status: string;
   created_at: string;
 }

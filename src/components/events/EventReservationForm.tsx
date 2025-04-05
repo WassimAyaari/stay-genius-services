@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,6 +11,7 @@ import SpecialRequests from '@/components/reservation/SpecialRequests';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useEventReservations } from '@/hooks/useEventReservations';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 const reservationSchema = z.object({
   guestName: z.string().min(1, { message: 'Le nom est requis' }),
@@ -42,6 +43,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
 }) => {
   const { toast } = useToast();
   const { createReservation, isCreating } = useEventReservations();
+  const { userData } = useAuth();
   const isEditing = !!existingReservation;
   
   const form = useForm<ReservationFormValues>({
@@ -62,6 +64,50 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       specialRequests: ''
     }
   });
+
+  // Populate form with user data when available
+  useEffect(() => {
+    if (userData && !existingReservation) {
+      console.log("Populating form with user data:", userData);
+      
+      // Format full name from user data
+      const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+      
+      form.setValue('guestName', fullName || '');
+      form.setValue('guestEmail', userData.email || '');
+      form.setValue('guestPhone', userData.phone || '');
+      form.setValue('roomNumber', userData.room_number || '');
+      
+      console.log("Form values after update:", {
+        name: fullName,
+        email: userData.email,
+        phone: userData.phone,
+        roomNumber: userData.room_number
+      });
+    } else {
+      console.log("No user data available to populate form");
+      
+      // Get user details from localStorage if available and no existing reservation
+      if (!existingReservation) {
+        try {
+          const userDataStr = localStorage.getItem('user_data');
+          if (userDataStr) {
+            const parsedData = JSON.parse(userDataStr);
+            console.log("User data from localStorage:", parsedData);
+            
+            const fullName = `${parsedData.first_name || ''} ${parsedData.last_name || ''}`.trim();
+            
+            form.setValue('guestName', fullName || '');
+            form.setValue('guestEmail', parsedData.email || '');
+            form.setValue('guestPhone', parsedData.phone || '');
+            form.setValue('roomNumber', parsedData.room_number || '');
+          }
+        } catch (error) {
+          console.error("Error parsing user data from localStorage:", error);
+        }
+      }
+    }
+  }, [userData, form, existingReservation]);
 
   const onSubmit = async (values: ReservationFormValues) => {
     try {

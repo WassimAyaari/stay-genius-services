@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { EventReservationsTab } from './components/events/EventReservationsTab';
 
 const EventsManager = () => {
   const { events, loading: eventsLoading, createEvent, updateEvent, deleteEvent } = useEvents();
@@ -25,6 +26,7 @@ const EventsManager = () => {
   const [editingStory, setEditingStory] = useState<Story | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isStoryDialogOpen, setIsStoryDialogOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined);
 
   const handleCreateEvent = async (event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) => {
     await createEvent(event);
@@ -78,6 +80,7 @@ const EventsManager = () => {
         <Tabs defaultValue="events" className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="mb-6">
             <TabsTrigger value="events">Événements</TabsTrigger>
+            <TabsTrigger value="reservations">Réservations</TabsTrigger>
             <TabsTrigger value="stories">Stories</TabsTrigger>
           </TabsList>
           
@@ -166,6 +169,18 @@ const EventsManager = () => {
                                 <Button variant="ghost" size="icon" onClick={() => handleEditEvent(event)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => {
+                                    setSelectedEventId(event.id);
+                                    document.querySelector('[data-value="reservations"]')?.dispatchEvent(
+                                      new MouseEvent('click', { bubbles: true })
+                                    );
+                                  }}
+                                >
+                                  <Calendar className="h-4 w-4" />
+                                </Button>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
                                     <Button variant="ghost" size="icon">
@@ -200,6 +215,10 @@ const EventsManager = () => {
                 </ScrollArea>
               )}
             </Card>
+          </TabsContent>
+
+          <TabsContent value="reservations" className="flex-1 overflow-hidden flex flex-col">
+            <EventReservationsTab eventId={selectedEventId} />
           </TabsContent>
           
           <TabsContent value="stories" className="flex-1 overflow-hidden flex flex-col">
