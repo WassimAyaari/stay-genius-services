@@ -18,7 +18,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
       case 'request': return <FileText className="h-5 w-5" />;
       case 'reservation': return <Utensils className="h-5 w-5" />;
       case 'spa_booking': return <ShowerHead className="h-5 w-5" />;
-      case 'event_reservation': return <Calendar className="h-5 w-5" />;
       default: return <Bell className="h-5 w-5" />;
     }
   }
@@ -85,7 +84,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
       case 'request': return 'Demande';
       case 'reservation': return 'Restaurant';
       case 'spa_booking': return 'Spa';
-      case 'event_reservation': return 'Événement';
       default: return 'Notification';
     }
   }
@@ -152,19 +150,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
             <li>Type: {notification.data?.service_type || 'Service'}</li>
             {notification.data?.description && <li>Description: {notification.data.description}</li>}
             {notification.data?.room_number && <li>Chambre: {notification.data.room_number}</li>}
-          </ul>
-        </div>
-      );
-    } else if (notification.type === 'event_reservation') {
-      return (
-        <div className="mt-1.5">
-          <p className="text-sm text-gray-800">Résumé:</p>
-          <ul className="text-xs text-gray-600 list-disc pl-5 mt-1 space-y-1">
-            <li>Date: {notification.data?.date}</li>
-            <li>Personnes: {notification.data?.guests}</li>
-            {notification.data?.room_number && <li>Chambre: {notification.data.room_number}</li>}
-            {notification.data?.special_requests && <li>Demandes spéciales: {notification.data.special_requests}</li>}
-            {notification.data?.event_id && <li>Événement: ID {notification.data.event_id}</li>}
           </ul>
         </div>
       );

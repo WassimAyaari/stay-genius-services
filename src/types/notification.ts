@@ -1,12 +1,67 @@
-
+// Type définitions for notifications
 export interface NotificationItem {
   id: string;
-  type: 'request' | 'reservation' | 'spa_booking' | 'event_reservation' | 'general';
+  type: 'request' | 'reservation' | 'spa_booking' | 'general';
   title: string;
   description: string;
   icon: string;
   status: string;
   time: Date;
-  link?: string;
-  data?: any;
+  link: string;
+  data?: {
+    room_number?: string;
+    service_type?: string;
+    description?: string;
+    date?: string;
+    time?: string;
+    guests?: number;
+    restaurant_id?: string;
+    service_id?: string;
+    special_requests?: string;
+    [key: string]: any;
+  };
+}
+
+// Type définitions for spa bookings in notifications
+export interface SpaBooking {
+  id: string;
+  service_id: string;
+  facility_id: string;
+  user_id: string;
+  date: string;
+  time: string;
+  guest_name: string;
+  guest_email: string;
+  guest_phone?: string;
+  room_number?: string;
+  special_requests?: string;
+  status: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+// Type definitions for table reservations in notifications 
+export interface TableReservation {
+  id: string;
+  restaurant_id: string;
+  date: string;
+  time: string;
+  guests: number;
+  guest_name: string;
+  guest_email: string;
+  guest_phone?: string;
+  room_number?: string;
+  special_requests?: string;
+  status: string;
+  created_at: string;
+}
+
+// Type definitions for service requests in notifications
+export interface ServiceRequest {
+  id: string;
+  type: string;
+  description?: string;
+  room_number?: string;
+  status: string;
+  created_at: string;
 }

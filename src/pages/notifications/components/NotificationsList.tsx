@@ -18,7 +18,6 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
   const requestNotifications = notifications.filter(n => n.type === 'request');
   const reservationNotifications = notifications.filter(n => n.type === 'reservation');
   const spaNotifications = notifications.filter(n => n.type === 'spa_booking');
-  const eventNotifications = notifications.filter(n => n.type === 'event_reservation');
   
   return (
     <Tabs defaultValue="all" className="w-full">
@@ -34,9 +33,6 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
         </TabsTrigger>
         <TabsTrigger value="spa">
           Spa <span className="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full">{spaNotifications.length}</span>
-        </TabsTrigger>
-        <TabsTrigger value="events">
-          Événements <span className="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full">{eventNotifications.length}</span>
         </TabsTrigger>
       </TabsList>
       
@@ -85,19 +81,6 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
           ))
         ) : (
           <div className="text-center py-4 text-gray-500">Aucune réservation de spa</div>
-        )}
-      </TabsContent>
-      
-      <TabsContent value="events" className="space-y-4 mt-2">
-        {eventNotifications.length > 0 ? (
-          eventNotifications.map((notification) => (
-            <NotificationCard 
-              key={`${notification.type}-${notification.id}`}
-              notification={notification}
-            />
-          ))
-        ) : (
-          <div className="text-center py-4 text-gray-500">Aucune réservation d'événement</div>
         )}
       </TabsContent>
     </Tabs>

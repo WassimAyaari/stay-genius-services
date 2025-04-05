@@ -1,48 +1,165 @@
 
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Layout from '@/components/Layout';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/features/auth/hooks/useAuthContext';
+import { ThemeProvider } from "next-themes";
+import { Toaster } from 'sonner';
+import { Toaster as ShadcnToaster } from '@/components/ui/toaster';
+import Index from '@/pages/Index';
+import Login from '@/pages/auth/Login';
+import AuthGuard from '@/components/AuthGuard';
+import Rooms from '@/pages/rooms/Rooms';
+import RoomDetails from '@/pages/rooms/RoomDetails';
+import MyRoom from '@/pages/my-room/MyRoom';
+import Dining from '@/pages/dining/Dining';
+import RestaurantDetail from '@/pages/dining/RestaurantDetail';
+import Spa from '@/pages/spa/Spa';
+import Activities from '@/pages/activities/Activities';
+import Events from '@/pages/events/Events';
+import Services from '@/pages/services/Services';
+import Destination from '@/pages/destination/Destination';
+import HotelMap from '@/pages/map/HotelMap';
+import Profile from '@/pages/profile/Profile';
+import About from '@/pages/about/About';
+import ServiceRequestDetails from '@/pages/my-room/ServiceRequestDetails';
+import NotFound from '@/pages/NotFound';
+import Contact from '@/pages/Contact';
+import Messages from '@/pages/messages/Messages';
+import ReservationDetails from '@/pages/dining/ReservationDetails';
 import Notifications from '@/pages/notifications/Notifications';
 import NotificationDetail from '@/pages/notifications/NotificationDetail';
-import NotFound from '@/pages/NotFound';
-import Index from '@/pages/Index';
+import Feedback from '@/pages/feedback/Feedback';
+import Shops from '@/pages/shops/Shops';
+import AdminDashboard from '@/pages/admin/Dashboard';
+import RequestManager from '@/pages/admin/RequestManager';
+import ReservationManager from '@/pages/admin/ReservationManager';
+import RestaurantManager from '@/pages/admin/RestaurantManager';
+import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
+import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
+import SpaManager from '@/pages/admin/SpaManager';
+import SpaBookingDetails from '@/pages/spa/SpaBookingDetails';
+import ChatMessages from '@/pages/admin/ChatMessages';
+import AboutEditor from '@/pages/admin/AboutEditor';
+import EventsManager from '@/pages/admin/EventsManager';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Layout><Index /></Layout>} />
-      
-      {/* Pages principales */}
-      <Route path="/events" element={<Layout><div>Page des événements</div></Layout>} />
-      <Route path="/events/:id" element={<Layout><div>Détails de l'événement</div></Layout>} />
-      <Route path="/dining" element={<Layout><div>Page de restauration</div></Layout>} />
-      <Route path="/spa" element={<Layout><div>Page du spa</div></Layout>} />
-      <Route path="/concierge" element={<Layout><div>Page du concierge</div></Layout>} />
-      <Route path="/login" element={<div>Page de connexion</div>} />
-      <Route path="/register" element={<div>Page d'inscription</div>} />
-      <Route path="/forgot-password" element={<div>Page de mot de passe oublié</div>} />
-      <Route path="/reset-password" element={<div>Page de réinitialisation du mot de passe</div>} />
-      
-      {/* Pages utilisateur */}
-      <Route path="/profile" element={<Layout><div>Page de profil</div></Layout>} />
-      <Route path="/dining/reservations" element={<Layout><div>Réservations de tables</div></Layout>} />
-      <Route path="/spa/bookings" element={<Layout><div>Réservations de spa</div></Layout>} />
-      <Route path="/requests" element={<Layout><div>Demandes de service</div></Layout>} />
-      <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
-      <Route path="/notifications/:type/:id" element={<Layout><NotificationDetail /></Layout>} />
-      
-      {/* Pages admin */}
-      <Route path="/admin" element={<Layout><div>Tableau de bord admin</div></Layout>} />
-      <Route path="/admin/restaurants" element={<Layout><div>Gestionnaire de restaurants</div></Layout>} />
-      <Route path="/admin/restaurant-menus" element={<Layout><div>Gestionnaire de menus de restaurant</div></Layout>} />
-      <Route path="/admin/events" element={<Layout><div>Gestionnaire d'événements</div></Layout>} />
-      <Route path="/admin/service-requests" element={<Layout><div>Gestionnaire de demandes de service</div></Layout>} />
-      <Route path="/admin/spa-services" element={<Layout><div>Gestionnaire de services de spa</div></Layout>} />
-      <Route path="/admin/events-reservations" element={<Layout><div>Gestionnaire de réservations d'événements</div></Layout>} />
-      
-      {/* Route de secours pour 404 */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ThemeProvider attribute="class">
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/rooms" element={<Rooms />} />
+              <Route path="/rooms/:id" element={<RoomDetails />} />
+              <Route path="/requests/:id" element={
+                <AuthGuard>
+                  <ServiceRequestDetails />
+                </AuthGuard>
+              } />
+              <Route path="/dining/reservations/:id" element={
+                <AuthGuard>
+                  <ReservationDetails />
+                </AuthGuard>
+              } />
+              <Route path="/spa/booking/:id" element={
+                <AuthGuard>
+                  <SpaBookingDetails />
+                </AuthGuard>
+              } />
+              <Route path="/my-room" element={
+                <AuthGuard>
+                  <MyRoom />
+                </AuthGuard>
+              } />
+              <Route path="/dining" element={<Dining />} />
+              <Route path="/dining/:id" element={<RestaurantDetail />} />
+              <Route path="/spa" element={<Spa />} />
+              <Route path="/activities" element={<Activities />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/destination" element={<Destination />} />
+              <Route path="/map" element={<HotelMap />} />
+              <Route path="/profile" element={
+                <AuthGuard>
+                  <Profile />
+                </AuthGuard>
+              } />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/notifications/:type/:id" element={
+                <AuthGuard>
+                  <NotificationDetail />
+                </AuthGuard>
+              } />
+              <Route path="/feedback" element={<Feedback />} />
+              <Route path="/shops" element={<Shops />} />
+              
+              <Route path="/admin" element={
+                <AuthGuard adminRequired>
+                  <AdminDashboard />
+                </AuthGuard>
+              } />
+              <Route path="/admin/requests" element={
+                <AuthGuard adminRequired>
+                  <RequestManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/reservations" element={
+                <AuthGuard adminRequired>
+                  <ReservationManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/restaurants" element={
+                <AuthGuard adminRequired>
+                  <RestaurantManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/restaurants/:id/reservations" element={
+                <AuthGuard adminRequired>
+                  <RestaurantReservationsManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/restaurant-menus" element={
+                <AuthGuard adminRequired>
+                  <RestaurantMenuManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/spa" element={
+                <AuthGuard adminRequired>
+                  <SpaManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/events" element={
+                <AuthGuard adminRequired>
+                  <EventsManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/chat" element={
+                <AuthGuard adminRequired>
+                  <ChatMessages />
+                </AuthGuard>
+              } />
+              <Route path="/admin/about" element={
+                <AuthGuard adminRequired>
+                  <AboutEditor />
+                </AuthGuard>
+              } />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            
+            <Toaster richColors position="top-right" closeButton />
+            <ShadcnToaster />
+          </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
