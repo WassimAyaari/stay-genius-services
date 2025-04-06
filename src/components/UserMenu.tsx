@@ -10,11 +10,13 @@ import { logoutUser } from '@/features/auth/services/authService';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const UserMenu = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { userData, isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     try {
@@ -102,7 +104,12 @@ const UserMenu = () => {
   // Si l'utilisateur n'est pas authentifié, afficher un bouton de connexion
   if (!isAuthenticated || !userData) {
     return (
-      <Button variant="default" onClick={() => navigate('/auth/login')} className="rounded-md">
+      <Button 
+        variant="default" 
+        onClick={() => navigate('/auth/login')} 
+        className={isMobile ? "rounded-md text-xs h-8 px-2" : "rounded-md"}
+        size={isMobile ? "sm" : "default"}
+      >
         Se connecter
       </Button>
     );

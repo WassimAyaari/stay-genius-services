@@ -8,6 +8,7 @@ import BottomNav from './BottomNav';
 import { ChevronLeft, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ const Layout = ({
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isMessagePage = location.pathname === '/messages' || location.pathname.startsWith('/messages?');
+  const isMobile = useIsMobile();
   
   // Pour déboguer, affichons le chemin actuel
   console.log('Current path:', location.pathname);
@@ -32,7 +34,7 @@ const Layout = ({
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center h-16">
-              <div className="flex items-center gap-2 w-[100px]">
+              <div className={cn("flex items-center gap-2", isMobile ? "w-[80px]" : "w-[100px]")}>
                 {!isHomePage && (
                   <Link 
                     to={location.state?.from || "/"} 
@@ -45,12 +47,13 @@ const Layout = ({
               </div>
 
               <Link to="/" className="flex-1 flex justify-center items-center">
-                <span className="text-xl font-bold text-secondary hover:opacity-80 transition-opacity">
+                <span className={cn("font-bold text-secondary hover:opacity-80 transition-opacity", 
+                  isMobile ? "text-lg" : "text-xl")}>
                   Hotel Genius
                 </span>
               </Link>
               
-              <div className="flex items-center gap-3 w-[120px] justify-end">
+              <div className={cn("flex items-center gap-3 justify-end", isMobile ? "w-[110px]" : "w-[120px]")}>
                 <NotificationMenu />
                 <UserMenu />
                 <Link 
@@ -58,7 +61,7 @@ const Layout = ({
                   state={{ from: location.pathname }}
                   className="relative hover:bg-gray-100 p-2.5 rounded-full transition-colors"
                 >
-                  <MessageCircle className="h-5 w-5 text-secondary" />
+                  <MessageCircle className={isMobile ? "h-4 w-4" : "h-5 w-5"} className="text-secondary" />
                   <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
                     2
                   </span>
