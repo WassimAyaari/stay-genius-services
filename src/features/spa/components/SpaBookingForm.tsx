@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -60,7 +61,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
     try {
       const bookingData = {
         service_id: service.id,
-        facility_id: service.facilityId,
+        facility_id: service.facility_id, // Fixed property name
         user_id: userId,
         guest_name: data.guestName,
         guest_email: data.guestEmail,
@@ -69,7 +70,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
         date: format(selectedDate, 'yyyy-MM-dd'),
         time: selectedTime,
         special_requests: data.specialRequests,
-        status: 'pending'
+        status: 'pending' as 'pending' | 'confirmed' | 'cancelled' | 'completed' // Fixed typing
       };
 
       await createBooking(bookingData);
@@ -85,7 +86,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
   };
 
   return (
-    <Form>
+    <div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <Label htmlFor="guestName">Nom</Label>
@@ -176,6 +177,6 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
         </div>
         <Button type="submit">Envoyer la demande de réservation</Button>
       </form>
-    </Form>
+    </div>
   );
 }
