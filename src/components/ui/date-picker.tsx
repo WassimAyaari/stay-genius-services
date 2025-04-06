@@ -3,6 +3,7 @@ import * as React from "react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Calendar as CalendarIcon } from "lucide-react"
+import { type Locale } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -11,11 +12,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { DateRange } from "react-day-picker"
 
 export interface DatePickerProps {
   mode?: "single" | "range" | "multiple"
-  selected?: Date | Date[] | undefined
-  onSelect?: (date: Date | undefined) => void
+  selected?: Date | Date[] | DateRange | undefined
+  onSelect?: (date: Date | Date[] | DateRange | undefined) => void
   minDate?: Date
   maxDate?: Date
   required?: boolean
@@ -40,10 +42,10 @@ export function DatePicker({
   )
 
   React.useEffect(() => {
-    if (selected) {
+    if (selected && mode === "single") {
       setDate(selected as Date)
     }
-  }, [selected])
+  }, [selected, mode])
 
   const handleSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate)
@@ -74,20 +76,22 @@ export function DatePicker({
       return {
         ...baseProps,
         mode: "range" as const,
-        selected: selected as { from: Date; to: Date } | undefined,
-        onSelect: onSelect,
+        selected: selected as DateRange | undefined,
+        onSelect: onSelect as (range: DateRange | undefined) => void,
       }
     } else if (mode === "multiple") {
       return {
         ...baseProps,
         mode: "multiple" as const,
         selected: selected as Date[] | undefined,
-        onSelect: onSelect,
+        onSelect: onSelect as (dates: Date[] | undefined) => void,
       }
     }
 
     return baseProps
   }
+
+  const formattedDate = date ? format(date, "PPP", { locale }) : placeholder;
 
   return (
     <div className={className}>
@@ -101,7 +105,7 @@ export function DatePicker({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP", { locale }) : <span>{placeholder}</span>}
+            <span>{formattedDate}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

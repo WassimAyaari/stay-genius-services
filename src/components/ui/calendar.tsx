@@ -3,6 +3,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { fr } from "date-fns/locale";
+import { type Locale } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -17,14 +18,12 @@ function Calendar({
   locale = fr,
   ...props
 }: CalendarProps) {
-  // Liste des mois pour la sélection rapide
+  // Generate month names from locale
   const months = React.useMemo(() => {
-    return locale.localize?.months 
-      ? Array.from({ length: 12 }, (_, i) => locale.localize?.month(i) || '') 
-      : [
-          "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-          "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-        ];
+    return Array.from({ length: 12 }, (_, i) => {
+      // Use the proper locale.formatters method to get month names
+      return locale.localize ? locale.localize.month(i, { width: 'wide' }) : '';
+    });
   }, [locale]);
 
   // Composant personnalisé pour le caption du calendrier avec sélection rapide
