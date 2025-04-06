@@ -6,30 +6,17 @@ import { getCompanions } from '@/features/users/services/companionService';
 import { syncGuestData } from '@/features/users/services/guestService';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { calculateStayDuration } from '../utils/dateUtils';
-
-export interface Notification {
-  id: number;
-  message: string;
-  time: string;
-}
+import { useNotifications } from '@/hooks/useNotifications';
+import { NotificationItem } from '@/types/notification';
 
 export const useProfileData = () => {
   const { toast } = useToast();
   const { userData: authUserData, user, refreshUserData } = useAuth();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [companions, setCompanions] = useState<CompanionData[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      message: "Your room has been cleaned",
-      time: "2 minutes ago"
-    },
-    {
-      id: 2,
-      message: "Spa appointment confirmed",
-      time: "1 hour ago"
-    }
-  ]);
+  
+  // Get real notifications from the notification system
+  const { notifications: systemNotifications } = useNotifications();
 
   useEffect(() => {
     if (authUserData) {
@@ -51,8 +38,9 @@ export const useProfileData = () => {
     }
   };
 
-  const dismissNotification = (id: number) => {
-    setNotifications(notifications.filter(notif => notif.id !== id));
+  const dismissNotification = (id: string) => {
+    // We don't need to handle this locally anymore as the real 
+    // notifications system will handle this
     toast({
       title: "Notification dismissed",
       description: "The notification has been removed",
@@ -92,6 +80,22 @@ export const useProfileData = () => {
   const stayDuration = userData ? 
     calculateStayDuration(userData.check_in_date, userData.check_out_date) : 
     null;
+  
+  // Convert system notifications to the format expected by NotificationsList
+  const notifications = systemNotifications
+    .slice(0, 5)
+    .map(notification => ({
+      id: Number(notification.id),
+      message: notification.title,
+      time: typeof notification.time === 'string' 
+        ? notification.time 
+        : new Intl.DateTimeFormat('fr-FR', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            day: '2-digit', 
+            month: '2-digit' 
+          }).format(notification.time)
+    }));
 
   return {
     userData,
