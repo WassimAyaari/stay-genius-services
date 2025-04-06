@@ -75,7 +75,7 @@ const notifySpaBookingStatusChange = (status: string) => {
   
   const message = statusMessages[status] || 'a été mise à jour';
   
-  toast.info('Mise à jour de réservation spa', {
-    description: `Votre réservation de spa ${message}.`
+  toast.info('Mise à jour de demande de réservation spa', {
+    description: `Votre demande de réservation de spa ${message}.`
   });
 };

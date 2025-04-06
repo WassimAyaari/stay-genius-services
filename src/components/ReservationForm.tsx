@@ -128,13 +128,13 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
     createReservation(reservation, {
       onSuccess: () => {
         form.reset();
-        toast.success('Réservation créée avec succès');
+        toast.success('Demande de réservation envoyée avec succès');
         if (onSuccess) onSuccess();
       },
       onError: (error: any) => {
         console.error('Error creating reservation:', error);
         const errorMessage = error.message || 'Erreur lors de la création de la réservation';
-        toast.error(`Erreur lors de la création de la réservation: ${errorMessage}`);
+        toast.error(`Erreur lors de l'envoi de la demande de réservation: ${errorMessage}`);
       }
     });
   });

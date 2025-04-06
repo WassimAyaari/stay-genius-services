@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useChatMessages } from './chat/useChatMessages';
@@ -81,7 +82,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         
         // Show a toast notification for the reservation update
         const statusMap: Record<string, string> = {
-          'pending': 'est en attente',
+          'pending': 'est en attente de confirmation',
           'confirmed': 'a été confirmée',
           'cancelled': 'a été annulée'
         };
@@ -92,8 +93,8 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
         const time = payload.new.time;
         
-        toast.info(`Mise à jour de réservation`, {
-          description: `Votre réservation de table pour le ${date} à ${time} ${message}.`
+        toast.info(`Mise à jour de demande de réservation`, {
+          description: `Votre demande de réservation de table pour le ${date} à ${time} ${message}.`
         });
       })
       .subscribe();

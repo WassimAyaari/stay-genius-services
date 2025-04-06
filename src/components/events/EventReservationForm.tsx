@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useEventReservations } from '@/hooks/useEventReservations';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+
 const reservationSchema = z.object({
   guestName: z.string().min(1, {
     message: 'Le nom est requis'
@@ -28,7 +28,9 @@ const reservationSchema = z.object({
   }),
   specialRequests: z.string().optional().or(z.literal(''))
 });
+
 type ReservationFormValues = z.infer<typeof reservationSchema>;
+
 export interface EventReservationFormProps {
   eventId: string;
   eventDate: string;
@@ -37,6 +39,7 @@ export interface EventReservationFormProps {
   existingReservation?: EventReservation;
   maxGuests?: number;
 }
+
 const EventReservationForm: React.FC<EventReservationFormProps> = ({
   eventId,
   eventDate,
@@ -56,6 +59,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
     userData
   } = useAuth();
   const isEditing = !!existingReservation;
+
   const form = useForm<ReservationFormValues>({
     resolver: zodResolver(reservationSchema),
     defaultValues: existingReservation ? {
@@ -75,12 +79,10 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
     }
   });
 
-  // Populate form with user data when available
   useEffect(() => {
     if (userData && !existingReservation) {
       console.log("Populating form with user data:", userData);
 
-      // Format full name from user data
       const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
       form.setValue('guestName', fullName || '');
       form.setValue('guestEmail', userData.email || '');
@@ -95,7 +97,6 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
     } else {
       console.log("No user data available to populate form");
 
-      // Get user details from localStorage if available and no existing reservation
       if (!existingReservation) {
         try {
           const userDataStr = localStorage.getItem('user_data');
@@ -114,7 +115,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       }
     }
   }, [userData, form, existingReservation]);
-  
+
   const onSubmit = async (values: ReservationFormValues) => {
     try {
       const reservationData: CreateEventReservationDTO = {
@@ -129,8 +130,8 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       };
       await createReservation(reservationData);
       toast({
-        title: "Réservation confirmée",
-        description: "Votre réservation a été enregistrée avec succès."
+        title: "Demande de réservation envoyée",
+        description: "Votre demande de réservation a été enregistrée avec succès."
       });
       if (onSuccess) {
         onSuccess();
@@ -141,20 +142,19 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       toast({
         variant: 'destructive',
         title: "Erreur",
-        description: error.message || "Une erreur s'est produite lors de la réservation."
+        description: error.message || "Une erreur s'est produite lors de l'envoi de la demande de réservation."
       });
     }
   };
-  
+
   const guestOptions = Array.from({
     length: maxGuests
   }, (_, i) => i + 1);
-  
+
   return <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <GuestInfoFields form={form} />
         
-        {/* Number of Guests */}
         <div className="form-field">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Nombre de participants
@@ -184,4 +184,5 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       </form>
     </Form>;
 };
+
 export default EventReservationForm;
