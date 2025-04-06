@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card } from "@/components/ui/card";
 import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
 import { EventTable } from './EventTable';
-import { ReservationsGrid } from './ReservationsGrid';
 import { EventReservationDetail } from './EventReservationDetail';
 import { UpdateEventReservationStatusDTO, EventReservation } from '@/types/event';
 import { useStories } from '@/hooks/useStories';
+import { ReservationsGrid } from './ReservationsGrid';
+import { Card } from '@/components/ui/card';
 
 export const EventReservationsTab: React.FC<{
   selectedEventId?: string;
@@ -68,41 +68,31 @@ export const EventReservationsTab: React.FC<{
   }
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-8 flex-1 h-full">
-      {/* Left column - Events list */}
-      <Card className="md:col-span-2 overflow-hidden flex flex-col h-full">
-        <EventTable 
-          events={events} 
-          selectedEventId={selectedEventId} 
-          onSelectEvent={handleSelectEvent} 
-          stories={stories}
-        />
-      </Card>
+    <div className="space-y-6">
+      <EventTable 
+        events={events} 
+        selectedEventId={selectedEventId} 
+        onSelectEvent={handleSelectEvent} 
+        stories={stories}
+      />
       
-      {/* Right column - Reservations for selected event */}
-      <Card className="md:col-span-3 p-6 overflow-hidden flex flex-col h-full">
-        {!selectedEventId ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <h3 className="text-xl mb-2">Sélectionnez un événement</h3>
-              <p className="text-muted-foreground">
-                Choisissez un événement dans la liste pour voir ses réservations
-              </p>
+      {selectedEventId && (
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Réservations pour l'événement</h2>
+          {reservationsLoading ? (
+            <div className="text-center py-4">
+              <p>Chargement des réservations...</p>
             </div>
-          </div>
-        ) : reservationsLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <p>Chargement des réservations...</p>
-          </div>
-        ) : (
-          <ReservationsGrid 
-            reservations={reservations} 
-            onViewDetails={handleViewReservation}
-            onUpdateStatus={handleUpdateStatus}
-            isUpdating={isUpdating}
-          />
-        )}
-      </Card>
+          ) : (
+            <ReservationsGrid 
+              reservations={reservations} 
+              onViewDetails={handleViewReservation}
+              onUpdateStatus={handleUpdateStatus}
+              isUpdating={isUpdating}
+            />
+          )}
+        </Card>
+      )}
       
       {/* Reservation Detail Dialog */}
       {selectedReservation && (
