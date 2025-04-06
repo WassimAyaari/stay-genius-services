@@ -22,23 +22,32 @@ function Calendar({
   ];
 
   // Composant personnalisé pour le caption du calendrier avec sélection rapide
-  function CustomCaption({ displayMonth, onMonthChange }: { displayMonth: Date, onMonthChange: (date: Date) => void }) {
+  function CustomCaption({ 
+    displayMonth, 
+    onMonthChange 
+  }: { 
+    displayMonth: Date, 
+    onMonthChange: (date: Date) => void 
+  }) {
     const currentYear = displayMonth.getFullYear();
     const currentMonth = displayMonth.getMonth();
     
-    // Générer une liste d'années (5 ans avant et après l'année actuelle)
+    // Générer une liste d'années (100 ans dans le passé jusqu'à l'année actuelle)
     const currentYearDate = new Date();
     const currentYearNumber = currentYearDate.getFullYear();
-    const years = Array.from({ length: 11 }, (_, i) => currentYearNumber - 5 + i);
+    const startYear = currentYearNumber - 100;
+    const years = Array.from({ length: currentYearNumber - startYear + 1 }, (_, i) => startYear + i);
     
     return (
       <div className="flex justify-between items-center gap-1 px-2">
         {/* Navigation buttons and month/year selectors properly spaced */}
         <button
           onClick={() => {
-            const newDate = new Date(displayMonth);
-            newDate.setMonth(currentMonth - 1);
-            onMonthChange(newDate);
+            if (onMonthChange) {
+              const newDate = new Date(displayMonth);
+              newDate.setMonth(currentMonth - 1);
+              onMonthChange(newDate);
+            }
           }}
           className={cn(
             buttonVariants({ variant: "outline", size: "icon" }),
@@ -54,15 +63,17 @@ function Calendar({
           <Select
             value={currentMonth.toString()}
             onValueChange={(value) => {
-              const newDate = new Date(displayMonth);
-              newDate.setMonth(parseInt(value));
-              onMonthChange(newDate);
+              if (onMonthChange) {
+                const newDate = new Date(displayMonth);
+                newDate.setMonth(parseInt(value));
+                onMonthChange(newDate);
+              }
             }}
           >
             <SelectTrigger className="h-7 w-[100px] text-xs font-medium border-0 focus:ring-0">
               <SelectValue>{months[currentMonth]}</SelectValue>
             </SelectTrigger>
-            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100]">
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100] bg-white shadow-md">
               {months.map((month, index) => (
                 <SelectItem key={index} value={index.toString()}>
                   {month}
@@ -75,15 +86,17 @@ function Calendar({
           <Select
             value={currentYear.toString()}
             onValueChange={(value) => {
-              const newDate = new Date(displayMonth);
-              newDate.setFullYear(parseInt(value));
-              onMonthChange(newDate);
+              if (onMonthChange) {
+                const newDate = new Date(displayMonth);
+                newDate.setFullYear(parseInt(value));
+                onMonthChange(newDate);
+              }
             }}
           >
             <SelectTrigger className="h-7 w-[70px] text-xs font-medium border-0 focus:ring-0">
               <SelectValue>{currentYear}</SelectValue>
             </SelectTrigger>
-            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100]">
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100] bg-white shadow-md">
               {years.map((year) => (
                 <SelectItem key={year} value={year.toString()}>
                   {year}
@@ -95,9 +108,11 @@ function Calendar({
         
         <button
           onClick={() => {
-            const newDate = new Date(displayMonth);
-            newDate.setMonth(currentMonth + 1);
-            onMonthChange(newDate);
+            if (onMonthChange) {
+              const newDate = new Date(displayMonth);
+              newDate.setMonth(currentMonth + 1);
+              onMonthChange(newDate);
+            }
           }}
           className={cn(
             buttonVariants({ variant: "outline", size: "icon" }),

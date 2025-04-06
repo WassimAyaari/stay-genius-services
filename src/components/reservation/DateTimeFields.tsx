@@ -54,6 +54,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                     disabled={(date) => date < new Date()}
                     initialFocus
                     locale={fr}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -75,7 +76,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                     <SelectValue placeholder="Sélectionner une heure" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent position="popper" className="z-[100]">
+                <SelectContent position="popper" className="z-[200]">
                   {TIME_SLOTS.map((time) => (
                     <SelectItem key={time} value={time}>
                       {time}
@@ -105,14 +106,14 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                   <SelectValue placeholder="Sélectionner le nombre de personnes" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent position="popper" className="z-[100]">
+              <SelectContent position="popper" className="z-[200]">
                 {GUESTS_OPTIONS.map((num) => (
                   <SelectItem key={num} value={num.toString()}>
                     {num} {num === 1 ? 'personne' : 'personnes'}
                   </SelectItem>
                 ))}
               </SelectContent>
-              </Select>
+            </Select>
             <FormMessage />
           </FormItem>
         )}

@@ -25,6 +25,11 @@ interface DateFieldsProps {
   form: UseFormReturn<RegistrationFormValues>;
 }
 
+// Calculate reasonable range for birth dates (100 years ago to today)
+const today = new Date();
+const hundredYearsAgo = new Date();
+hundredYearsAgo.setFullYear(today.getFullYear() - 100);
+
 const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
   return (
     <>
@@ -58,8 +63,10 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                   mode="single"
                   selected={field.value}
                   onSelect={field.onChange}
+                  disabled={(date) => date > today || date < hundredYearsAgo}
                   initialFocus
                   locale={fr}
+                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
@@ -101,6 +108,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     onSelect={field.onChange}
                     initialFocus
                     locale={fr}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -141,6 +149,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     onSelect={field.onChange}
                     initialFocus
                     locale={fr}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>

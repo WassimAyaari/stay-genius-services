@@ -39,6 +39,11 @@ const relationOptions = [
   { value: "other", label: "Autre" },
 ];
 
+// Calculate reasonable range for birth dates (100 years ago to today)
+const today = new Date();
+const hundredYearsAgo = new Date();
+hundredYearsAgo.setFullYear(today.getFullYear() - 100);
+
 const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanions }) => {
   const addCompanion = () => {
     setCompanions([
@@ -116,7 +121,9 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
                         mode="single"
                         selected={companion.birthDate}
                         onSelect={(date) => updateCompanion(index, 'birthDate', date)}
+                        disabled={(date) => date > today || date < hundredYearsAgo}
                         initialFocus
+                        className="pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
