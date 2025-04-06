@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, type CaptionProps } from "react-day-picker";
+import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -32,48 +32,81 @@ function Calendar({
     const years = Array.from({ length: 11 }, (_, i) => currentYearNumber - 5 + i);
     
     return (
-      <div className="flex justify-center items-center gap-1">
-        {/* Sélecteur de mois */}
-        <Select
-          value={currentMonth.toString()}
-          onValueChange={(value) => {
+      <div className="flex justify-between items-center gap-1 px-2">
+        {/* Navigation buttons and month/year selectors properly spaced */}
+        <button
+          onClick={() => {
             const newDate = new Date(displayMonth);
-            newDate.setMonth(parseInt(value));
+            newDate.setMonth(currentMonth - 1);
             onMonthChange(newDate);
           }}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "icon" }),
+            "h-7 w-7 bg-transparent border-0 hover:bg-muted p-0"
+          )}
+          title="Mois précédent"
         >
-          <SelectTrigger className="h-7 w-[110px] text-xs font-medium bg-white">
-            <SelectValue>{months[currentMonth]}</SelectValue>
-          </SelectTrigger>
-          <SelectContent className="max-h-60 overflow-y-auto">
-            {months.map((month, index) => (
-              <SelectItem key={index} value={index.toString()}>
-                {month}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <ChevronLeft className="h-4 w-4" />
+        </button>
         
-        {/* Sélecteur d'année */}
-        <Select
-          value={currentYear.toString()}
-          onValueChange={(value) => {
+        <div className="flex gap-1">
+          {/* Sélecteur de mois */}
+          <Select
+            value={currentMonth.toString()}
+            onValueChange={(value) => {
+              const newDate = new Date(displayMonth);
+              newDate.setMonth(parseInt(value));
+              onMonthChange(newDate);
+            }}
+          >
+            <SelectTrigger className="h-7 w-[100px] text-xs font-medium border-0 focus:ring-0">
+              <SelectValue>{months[currentMonth]}</SelectValue>
+            </SelectTrigger>
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100]">
+              {months.map((month, index) => (
+                <SelectItem key={index} value={index.toString()}>
+                  {month}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {/* Sélecteur d'année */}
+          <Select
+            value={currentYear.toString()}
+            onValueChange={(value) => {
+              const newDate = new Date(displayMonth);
+              newDate.setFullYear(parseInt(value));
+              onMonthChange(newDate);
+            }}
+          >
+            <SelectTrigger className="h-7 w-[70px] text-xs font-medium border-0 focus:ring-0">
+              <SelectValue>{currentYear}</SelectValue>
+            </SelectTrigger>
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100]">
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <button
+          onClick={() => {
             const newDate = new Date(displayMonth);
-            newDate.setFullYear(parseInt(value));
+            newDate.setMonth(currentMonth + 1);
             onMonthChange(newDate);
           }}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "icon" }),
+            "h-7 w-7 bg-transparent border-0 hover:bg-muted p-0"
+          )}
+          title="Mois suivant"
         >
-          <SelectTrigger className="h-7 w-[80px] text-xs font-medium bg-white">
-            <SelectValue>{currentYear}</SelectValue>
-          </SelectTrigger>
-          <SelectContent className="max-h-60 overflow-y-auto">
-            {years.map((year) => (
-              <SelectItem key={year} value={year.toString()}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
     );
   }
@@ -90,7 +123,7 @@ function Calendar({
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-white p-0 opacity-50 hover:opacity-100"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 hidden" // Hide default nav buttons
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
@@ -117,8 +150,6 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
         Caption: CustomCaption
       }}
       {...props}

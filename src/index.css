@@ -54,6 +54,15 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-primary;
   }
+  
+  /* Ensure dropdowns and select menus are visible */
+  .radix-select-content,
+  [data-radix-popper-content-wrapper] {
+    z-index: 100 !important;
+    background-color: white !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 0.5rem !important;
+  }
 }
 
 .glass-card {

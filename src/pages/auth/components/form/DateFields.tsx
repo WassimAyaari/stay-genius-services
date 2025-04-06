@@ -53,7 +53,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-50" align="start">
+              <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
                 <Calendar
                   mode="single"
                   selected={field.value}
@@ -94,7 +94,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-50" align="start">
+                <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
                   <Calendar
                     mode="single"
                     selected={field.value}
@@ -134,7 +134,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-50" align="start">
+                <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
                   <Calendar
                     mode="single"
                     selected={field.value}
