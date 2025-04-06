@@ -11,28 +11,28 @@ const EventsManager = () => {
   
   return (
     <Layout>
-      <div className="container py-8 flex flex-col h-[calc(100vh-64px)] overflow-hidden">
+      <div className="container py-8">
         <h1 className="text-2xl font-bold mb-6">Gestion des Événements et Promotions</h1>
         
-        <Tabs defaultValue="events" className="flex-1 flex flex-col overflow-hidden">
+        <Tabs defaultValue="events" className="space-y-6">
           <TabsList className="w-full bg-muted">
             <TabsTrigger value="events" className="flex-1 py-3">Événements</TabsTrigger>
             <TabsTrigger value="reservations" className="flex-1 py-3">Réservations</TabsTrigger>
             <TabsTrigger value="stories" className="flex-1 py-3">Stories</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="events" className="flex-1 overflow-hidden flex flex-col mt-6">
+          <TabsContent value="events">
             <EventsTab />
           </TabsContent>
 
-          <TabsContent value="reservations" className="flex-1 overflow-hidden mt-6">
+          <TabsContent value="reservations">
             <EventReservationsTab 
               selectedEventId={selectedEventId}
               setSelectedEventId={setSelectedEventId}
             />
           </TabsContent>
           
-          <TabsContent value="stories" className="flex-1 overflow-hidden flex flex-col mt-6">
+          <TabsContent value="stories">
             <StoriesTab />
           </TabsContent>
         </Tabs>

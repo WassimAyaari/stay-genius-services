@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash, Star, StarOff, Calendar, Utensils } from 'lucide-react';
+import { Plus, Edit, Trash, Star, StarOff } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { Event } from '@/types/event';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -10,12 +9,9 @@ import EventForm from '@/pages/admin/components/events/EventForm';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Input } from "@/components/ui/input";
 import { fr } from 'date-fns/locale';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const EventsTab = () => {
   const { events, loading: eventsLoading, createEvent, updateEvent, deleteEvent } = useEvents();
@@ -55,8 +51,8 @@ export const EventsTab = () => {
   );
 
   return (
-    <>
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Événements</h2>
         <div className="flex items-center gap-4">
           <div className="relative">
@@ -69,174 +65,130 @@ export const EventsTab = () => {
           </div>
           <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setEditingEvent(null)}>
+              <Button onClick={() => setEditingEvent(null)} className="bg-[#00AEBB]">
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter un événement
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-auto">
+            <DialogContent className="sm:max-w-[550px]">
               <DialogHeader>
                 <DialogTitle>{editingEvent ? 'Modifier l\'événement' : 'Ajouter un événement'}</DialogTitle>
               </DialogHeader>
-              <ScrollArea className="max-h-[70vh]">
-                <EventForm onSubmit={editingEvent ? handleUpdateEvent : handleCreateEvent} initialData={editingEvent} />
-              </ScrollArea>
+              <EventForm onSubmit={editingEvent ? handleUpdateEvent : handleCreateEvent} initialData={editingEvent} />
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
-      <Card className="w-full">
-        {eventsLoading ? (
-          <div className="p-10 text-center">
-            <p className="text-lg text-muted-foreground">Chargement des événements...</p>
-          </div>
-        ) : filteredEvents.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="text-lg text-muted-foreground">
-              {searchTerm ? 'Aucun événement trouvé avec ces critères' : 'Aucun événement trouvé'}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">Nom</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Lieu</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Mise en avant</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredEvents.map((event) => (
-                  <TableRow key={event.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-md overflow-hidden">
-                          <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
-                        </div>
-                        <span className="font-medium">{event.title}</span>
+      {eventsLoading ? (
+        <div className="p-10 text-center">
+          <p className="text-lg text-muted-foreground">Chargement des événements...</p>
+        </div>
+      ) : filteredEvents.length === 0 ? (
+        <div className="p-10 text-center border rounded-md bg-gray-50">
+          <p className="text-lg text-muted-foreground">
+            {searchTerm ? 'Aucun événement trouvé avec ces critères' : 'Aucun événement trouvé'}
+          </p>
+        </div>
+      ) : (
+        <div className="border rounded-md overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nom</TableHead>
+                <TableHead>Catégorie</TableHead>
+                <TableHead>Lieu</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Mise en avant</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredEvents.map((event) => (
+                <TableRow key={event.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-md overflow-hidden">
+                        <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
-                        {event.category === 'event' ? 'Événement' : 'Promotion'}
+                      <span className="font-medium">{event.title}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {event.category === 'event' ? 'Événement' : 'Promotion'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{event.location || '-'}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span>{format(new Date(event.date), 'dd MMM yyyy', { locale: fr })}</span>
+                      {event.time && <span className="text-sm text-muted-foreground">{event.time}</span>}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {event.is_featured ? (
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+                        <Star className="h-3 w-3 mr-1 fill-amber-500" />
+                        Mis en avant
                       </Badge>
-                    </TableCell>
-                    <TableCell>{event.location || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span>{format(new Date(event.date), 'dd MMM yyyy', { locale: fr })}</span>
-                        {event.time && <span className="text-sm text-muted-foreground">{event.time}</span>}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {event.is_featured ? (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                          <Star className="h-3 w-3 mr-1 fill-amber-500" />
-                          Mis en avant
-                        </Badge>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="outline" size="icon" onClick={() => {}}>
-                                <Calendar className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Voir les réservations</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="icon"
-                                onClick={() => handleToggleFeature(event)}
-                              >
-                                {event.is_featured ? 
-                                  <StarOff className="h-4 w-4" /> : 
-                                  <Star className="h-4 w-4" />
-                                }
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{event.is_featured ? 'Retirer la mise en avant' : 'Mettre en avant'}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="icon"
-                                onClick={() => handleEditEvent(event)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Modifier</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        
-                        <AlertDialog>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="outline" size="icon">
-                                    <Trash className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Supprimer</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Annuler</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={() => deleteEvent(event.id)} 
-                                className="bg-red-500 hover:bg-red-600"
-                              >
-                                Supprimer
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </Card>
-    </>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => handleToggleFeature(event)}
+                      >
+                        {event.is_featured ? 
+                          <StarOff className="h-4 w-4" /> : 
+                          <Star className="h-4 w-4" />
+                        }
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => handleEditEvent(event)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="icon">
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => deleteEvent(event.id)} 
+                              className="bg-red-500 hover:bg-red-600"
+                            >
+                              Supprimer
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
   );
 };

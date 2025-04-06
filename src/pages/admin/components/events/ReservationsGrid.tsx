@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { EventReservation } from '@/types/event';
 import { ReservationCard } from './ReservationCard';
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -79,19 +78,17 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
           </p>
         </div>
       ) : (
-        <ScrollArea className="h-[calc(100vh-280px)]">
-          <div className="grid md:grid-cols-2 gap-6">
-            {filteredReservations.map((reservation) => (
-              <ReservationCard
-                key={reservation.id}
-                reservation={reservation}
-                onViewDetails={onViewDetails}
-                onUpdateStatus={onUpdateStatus}
-                isUpdating={isUpdating}
-              />
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="grid md:grid-cols-2 gap-6">
+          {filteredReservations.map((reservation) => (
+            <ReservationCard
+              key={reservation.id}
+              reservation={reservation}
+              onViewDetails={onViewDetails}
+              onUpdateStatus={onUpdateStatus}
+              isUpdating={isUpdating}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
