@@ -71,9 +71,9 @@ export const useEventReservations = (eventId?: string) => {
       queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
       toast.success('Statut de la réservation mis à jour');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating event reservation status:', error);
-      toast.error("Erreur lors de la mise à jour du statut de la réservation");
+      toast.error("Erreur lors de la mise à jour du statut: " + (error.message || "Erreur inconnue"));
     }
   });
 

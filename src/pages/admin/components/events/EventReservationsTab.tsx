@@ -8,6 +8,8 @@ import { UpdateEventReservationStatusDTO, EventReservation } from '@/types/event
 import { useStories } from '@/hooks/useStories';
 import { ReservationsGrid } from './ReservationsGrid';
 import { Card } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { AlertCircle } from 'lucide-react';
 
 export const EventReservationsTab: React.FC<{
   selectedEventId?: string;
@@ -22,7 +24,8 @@ export const EventReservationsTab: React.FC<{
     reservations, 
     isLoading: reservationsLoading, 
     updateReservationStatus,
-    isUpdating
+    isUpdating,
+    error: reservationsError
   } = useEventReservations(selectedEventId);
   
   // Reset selected reservation when event changes
@@ -41,11 +44,16 @@ export const EventReservationsTab: React.FC<{
   };
   
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
-    const update: UpdateEventReservationStatusDTO = {
-      id: reservationId,
-      status
-    };
-    updateReservationStatus(update);
+    try {
+      const update: UpdateEventReservationStatusDTO = {
+        id: reservationId,
+        status
+      };
+      updateReservationStatus(update);
+    } catch (error) {
+      console.error('Error in handleUpdateStatus:', error);
+      toast.error("Erreur lors de la mise à jour du statut de la réservation");
+    }
   };
   
   if (eventsLoading) {
@@ -82,6 +90,11 @@ export const EventReservationsTab: React.FC<{
           {reservationsLoading ? (
             <div className="text-center py-4">
               <p>Chargement des réservations...</p>
+            </div>
+          ) : reservationsError ? (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center text-red-700">
+              <AlertCircle className="h-5 w-5 mr-2" />
+              <p>Erreur lors du chargement des réservations</p>
             </div>
           ) : (
             <ReservationsGrid 
