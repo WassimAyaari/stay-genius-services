@@ -65,19 +65,39 @@
   }
 
   /* Calendar fixes */
-  .rdp-dropdown_month {
-    z-index: 9999 !important;
-    background-color: white !important;
-  }
-
+  .rdp-dropdown_month, 
   .rdp-dropdown_year {
     z-index: 9999 !important;
     background-color: white !important;
   }
-
-  /* Make sure popovers are above other content */
+  
+  /* Make popover content always visible */
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Fix for month and year selection dropdowns */
+  .rdp-dropdown_month > select,
+  .rdp-dropdown_year > select {
+    z-index: 9999 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Ensure calendar selection works properly */
+  .rdp {
+    position: relative !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Ensure select components always appear on top */
+  .SelectContent, 
+  .select-content {
+    z-index: 9999 !important;
+    background-color: white !important;
+    pointer-events: auto !important;
   }
 }
 

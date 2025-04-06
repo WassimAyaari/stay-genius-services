@@ -46,7 +46,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
+                <PopoverContent className="w-auto p-0 z-[9999]" align="start" sideOffset={4}>
                   <Calendar
                     mode="single"
                     selected={field.value}
@@ -54,7 +54,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                     disabled={(date) => date < new Date()}
                     initialFocus
                     locale={fr}
-                    className="pointer-events-auto"
+                    className="pointer-events-auto bg-white"
                   />
                 </PopoverContent>
               </Popover>
@@ -76,7 +76,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                     <SelectValue placeholder="Sélectionner une heure" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent position="popper" className="z-[200]">
+                <SelectContent position="popper" className="z-[9999]">
                   {TIME_SLOTS.map((time) => (
                     <SelectItem key={time} value={time}>
                       {time}
@@ -99,14 +99,14 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
             <FormLabel>Nombre de personnes</FormLabel>
             <Select 
               onValueChange={(value) => field.onChange(parseInt(value))} 
-              defaultValue={field.value.toString()}
+              defaultValue={field.value?.toString()}
             >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner le nombre de personnes" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent position="popper" className="z-[200]">
+              <SelectContent position="popper" className="z-[9999]">
                 {GUESTS_OPTIONS.map((num) => (
                   <SelectItem key={num} value={num.toString()}>
                     {num} {num === 1 ? 'personne' : 'personnes'}
