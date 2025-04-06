@@ -7,7 +7,6 @@ import { syncGuestData } from '@/features/users/services/guestService';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { calculateStayDuration } from '../utils/dateUtils';
 import { useNotifications } from '@/hooks/useNotifications';
-import { NotificationItem } from '@/types/notification';
 
 export const useProfileData = () => {
   const { toast } = useToast();
@@ -38,6 +37,7 @@ export const useProfileData = () => {
     }
   };
 
+  // Updated to handle string IDs
   const dismissNotification = (id: string) => {
     // We don't need to handle this locally anymore as the real 
     // notifications system will handle this
@@ -82,10 +82,11 @@ export const useProfileData = () => {
     null;
   
   // Convert system notifications to the format expected by NotificationsList
+  // Ensure ID is preserved as-is, without forcing number conversion
   const notifications = systemNotifications
     .slice(0, 5)
     .map(notification => ({
-      id: Number(notification.id),
+      id: notification.id, // Keep the original string ID
       message: notification.title,
       time: typeof notification.time === 'string' 
         ? notification.time 

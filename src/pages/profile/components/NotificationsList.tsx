@@ -7,14 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
 interface Notification {
-  id: number;
+  id: string | number;  // Updated to accept either string or number
   message: string;
   time: string;
 }
 
 interface NotificationsListProps {
   notifications: Notification[];
-  dismissNotification: (id: number) => void;
+  dismissNotification: (id: string | number) => void;  // Updated to accept either string or number
 }
 
 const NotificationsList = ({
@@ -23,7 +23,7 @@ const NotificationsList = ({
 }: NotificationsListProps) => {
   const { toast } = useToast();
 
-  const handleDismiss = (id: number) => {
+  const handleDismiss = (id: string | number) => {
     dismissNotification(id);
     toast({
       title: "Notification dismissed",
