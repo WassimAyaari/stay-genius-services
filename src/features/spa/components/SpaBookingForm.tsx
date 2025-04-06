@@ -6,12 +6,10 @@ import { SpaService } from '../types';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { toast } from 'sonner';
-import { Form } from '@/components/ui/form';
 import { format, addDays } from 'date-fns';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DatePicker } from '@/components/ui/date-picker';
 
@@ -61,7 +59,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
     try {
       const bookingData = {
         service_id: service.id,
-        facility_id: service.facility_id, // Fixed property name
+        facility_id: service.facility_id,
         user_id: userId,
         guest_name: data.guestName,
         guest_email: data.guestEmail,
@@ -70,7 +68,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
         date: format(selectedDate, 'yyyy-MM-dd'),
         time: selectedTime,
         special_requests: data.specialRequests,
-        status: 'pending' as 'pending' | 'confirmed' | 'cancelled' | 'completed' // Fixed typing
+        status: 'pending' as 'pending' | 'confirmed' | 'cancelled' | 'completed'
       };
 
       await createBooking(bookingData);

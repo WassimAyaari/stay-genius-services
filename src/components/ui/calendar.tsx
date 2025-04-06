@@ -2,6 +2,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
+import { fr } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -13,13 +14,18 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  locale = fr,
   ...props
 }: CalendarProps) {
   // Liste des mois pour la sélection rapide
-  const months = [
-    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-  ];
+  const months = React.useMemo(() => {
+    return locale.localize?.months 
+      ? Array.from({ length: 12 }, (_, i) => locale.localize?.month(i) || '') 
+      : [
+          "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+          "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+        ];
+  }, [locale]);
 
   // Composant personnalisé pour le caption du calendrier avec sélection rapide
   function CustomCaption({ 
@@ -32,22 +38,21 @@ function Calendar({
     const currentYear = displayMonth.getFullYear();
     const currentMonth = displayMonth.getMonth();
     
-    // Générer une liste d'années (100 ans dans le passé jusqu'à l'année actuelle)
+    // Générer une liste d'années (100 ans dans le passé jusqu'à 50 ans dans le futur)
     const currentYearDate = new Date();
     const currentYearNumber = currentYearDate.getFullYear();
     const startYear = currentYearNumber - 100;
-    const years = Array.from({ length: currentYearNumber - startYear + 1 }, (_, i) => startYear + i);
+    const endYear = currentYearNumber + 50;
+    const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
     
     return (
       <div className="flex justify-between items-center gap-1 px-2">
         {/* Navigation buttons and month/year selectors properly spaced */}
         <button
           onClick={() => {
-            if (onMonthChange) {
-              const newDate = new Date(displayMonth);
-              newDate.setMonth(currentMonth - 1);
-              onMonthChange(newDate);
-            }
+            const newDate = new Date(displayMonth);
+            newDate.setMonth(currentMonth - 1);
+            onMonthChange(newDate);
           }}
           className={cn(
             buttonVariants({ variant: "outline", size: "icon" }),
@@ -63,11 +68,9 @@ function Calendar({
           <Select
             value={currentMonth.toString()}
             onValueChange={(value) => {
-              if (onMonthChange) {
-                const newDate = new Date(displayMonth);
-                newDate.setMonth(parseInt(value));
-                onMonthChange(newDate);
-              }
+              const newDate = new Date(displayMonth);
+              newDate.setMonth(parseInt(value));
+              onMonthChange(newDate);
             }}
           >
             <SelectTrigger className="h-7 w-[100px] text-xs font-medium border-0 focus:ring-0">
@@ -86,11 +89,9 @@ function Calendar({
           <Select
             value={currentYear.toString()}
             onValueChange={(value) => {
-              if (onMonthChange) {
-                const newDate = new Date(displayMonth);
-                newDate.setFullYear(parseInt(value));
-                onMonthChange(newDate);
-              }
+              const newDate = new Date(displayMonth);
+              newDate.setFullYear(parseInt(value));
+              onMonthChange(newDate);
             }}
           >
             <SelectTrigger className="h-7 w-[70px] text-xs font-medium border-0 focus:ring-0">
@@ -108,11 +109,9 @@ function Calendar({
         
         <button
           onClick={() => {
-            if (onMonthChange) {
-              const newDate = new Date(displayMonth);
-              newDate.setMonth(currentMonth + 1);
-              onMonthChange(newDate);
-            }
+            const newDate = new Date(displayMonth);
+            newDate.setMonth(currentMonth + 1);
+            onMonthChange(newDate);
           }}
           className={cn(
             buttonVariants({ variant: "outline", size: "icon" }),
@@ -167,6 +166,7 @@ function Calendar({
       components={{
         Caption: CustomCaption
       }}
+      locale={locale}
       {...props}
     />
   );
