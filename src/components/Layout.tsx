@@ -61,7 +61,7 @@ const Layout = ({
                   state={{ from: location.pathname }}
                   className="relative hover:bg-gray-100 p-2.5 rounded-full transition-colors"
                 >
-                  <MessageCircle className={isMobile ? "h-4 w-4" : "h-5 w-5"} className="text-secondary" />
+                  <MessageCircle className={cn(isMobile ? "h-4 w-4" : "h-5 w-5", "text-secondary")} />
                   <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
                     2
                   </span>
