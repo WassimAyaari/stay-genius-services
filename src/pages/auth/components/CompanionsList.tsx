@@ -116,14 +116,14 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                       <Calendar
                         mode="single"
                         selected={companion.birthDate}
                         onSelect={(date) => updateCompanion(index, 'birthDate', date)}
                         disabled={(date) => date > today || date < hundredYearsAgo}
                         initialFocus
-                        className="pointer-events-auto"
+                        className="pointer-events-auto bg-white"
                       />
                     </PopoverContent>
                   </Popover>
@@ -137,7 +137,7 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[9999]">
                       {relationOptions.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}

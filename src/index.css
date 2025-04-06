@@ -62,6 +62,7 @@
     background-color: white !important;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1) !important;
     border-radius: 0.5rem !important;
+    pointer-events: auto !important;
   }
 
   /* Calendar fixes */
@@ -83,6 +84,7 @@
     z-index: 9999 !important;
     position: relative !important;
     pointer-events: auto !important;
+    opacity: 1 !important;
   }
   
   /* Ensure calendar selection works properly */
@@ -90,6 +92,12 @@
     position: relative !important;
     z-index: 9999 !important;
     pointer-events: auto !important;
+  }
+
+  /* Make calendar day buttons clickable */
+  .rdp-button {
+    pointer-events: auto !important;
+    cursor: pointer !important;
   }
   
   /* Ensure select components always appear on top */

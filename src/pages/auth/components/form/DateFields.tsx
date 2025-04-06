@@ -58,7 +58,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
+              <PopoverContent className="w-auto p-0 z-[9999]" align="start" sideOffset={4}>
                 <Calendar
                   mode="single"
                   selected={field.value}
@@ -66,7 +66,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                   disabled={(date) => date > today || date < hundredYearsAgo}
                   initialFocus
                   locale={fr}
-                  className="pointer-events-auto"
+                  className="pointer-events-auto bg-white"
                 />
               </PopoverContent>
             </Popover>
@@ -101,14 +101,14 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
+                <PopoverContent className="w-auto p-0 z-[9999]" align="start" sideOffset={4}>
                   <Calendar
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
                     locale={fr}
-                    className="pointer-events-auto"
+                    className="pointer-events-auto bg-white"
                   />
                 </PopoverContent>
               </Popover>
@@ -142,14 +142,14 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
+                <PopoverContent className="w-auto p-0 z-[9999]" align="start" sideOffset={4}>
                   <Calendar
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
                     locale={fr}
-                    className="pointer-events-auto"
+                    className="pointer-events-auto bg-white"
                   />
                 </PopoverContent>
               </Popover>
