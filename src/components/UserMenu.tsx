@@ -3,7 +3,7 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, UserRound } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
@@ -101,16 +101,16 @@ const UserMenu = () => {
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
   };
 
-  // Si l'utilisateur n'est pas authentifié, afficher un bouton de connexion
+  // Si l'utilisateur n'est pas authentifié, afficher une icône utilisateur au lieu d'un bouton
   if (!isAuthenticated || !userData) {
     return (
       <Button 
-        variant="default" 
+        variant="ghost" 
         onClick={() => navigate('/auth/login')} 
-        className={isMobile ? "rounded-md text-xs h-8 px-2" : "rounded-md"}
-        size={isMobile ? "sm" : "default"}
+        className="rounded-full p-2 h-9 w-9"
+        size="icon"
       >
-        Se connecter
+        <UserRound className="h-5 w-5 text-secondary" />
       </Button>
     );
   }
