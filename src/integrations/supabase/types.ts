@@ -955,6 +955,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      update_event_reservation_status: {
+        Args: { reservation_id: string; new_status: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
