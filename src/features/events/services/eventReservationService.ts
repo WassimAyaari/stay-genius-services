@@ -131,7 +131,7 @@ export const createEventReservation = async (reservation: CreateEventReservation
 // Update event reservation status
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
-    // We need to make sure we're only updating the status field to prevent the updated_at trigger issue
+    // Ne mettre à jour que le champ status
     const { error } = await supabase
       .from('event_reservations')
       .update({ status: data.status })
