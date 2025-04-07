@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreateEventReservationDTO, UpdateEventReservationStatusDTO } from '@/types/event';
 import { toast } from 'sonner';

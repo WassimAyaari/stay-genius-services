@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
@@ -54,6 +55,7 @@ export const EventReservationsTab: React.FC<{
       status 
     });
     
+    // Augmenter le délai à 5 secondes pour s'assurer que la base de données a le temps de terminer la mise à jour
     setTimeout(() => {
       if (refetch) {
         refetch()
