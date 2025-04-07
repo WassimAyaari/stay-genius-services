@@ -5,7 +5,6 @@ import { ReservationCard } from './ReservationCard';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { toast } from 'sonner';
 
 interface ReservationsGridProps {
   reservations: EventReservation[];
@@ -36,17 +35,6 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
         res.roomNumber?.toLowerCase().includes(term)
       );
     });
-
-  // Wrapper for onUpdateStatus that adds toast notifications
-  const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
-    try {
-      // Call the update function
-      onUpdateStatus(reservationId, status);
-    } catch (error) {
-      console.error('Error in handleUpdateStatus:', error);
-      toast.error('Erreur lors de la mise à jour du statut');
-    }
-  };
 
   if (reservations.length === 0) {
     return (
@@ -96,7 +84,7 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
               key={reservation.id}
               reservation={reservation}
               onViewDetails={onViewDetails}
-              onUpdateStatus={handleUpdateStatus}
+              onUpdateStatus={onUpdateStatus}
               isUpdating={isUpdating}
             />
           ))}

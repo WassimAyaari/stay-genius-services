@@ -54,7 +54,10 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
     },
     onSuccess: () => {
       console.log('Mutation successful, invalidating queries');
-      queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
+      // Allow a brief delay before invalidating the queries
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
+      }, 300);
     },
     onError: (error: any) => {
       console.error('Error updating event reservation status:', error);

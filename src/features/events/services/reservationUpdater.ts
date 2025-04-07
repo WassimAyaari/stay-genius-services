@@ -9,13 +9,11 @@ export const updateEventReservationStatus = async (data: UpdateEventReservationS
   try {
     console.log('Updating event reservation status:', data);
     
-    // Add a timestamp explicitly to avoid the error with updated_at
+    // Simple update with just the status field - no updated_at field
     const { error } = await supabase
       .from('event_reservations')
       .update({ 
-        status: data.status,
-        // We can't use NOW() here as it's not allowed in RPC calls
-        // Using new Date() instead which will be converted to ISO string by Supabase
+        status: data.status 
       })
       .eq('id', data.id);
     

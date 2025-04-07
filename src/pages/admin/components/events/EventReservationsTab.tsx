@@ -47,49 +47,41 @@ export const EventReservationsTab: React.FC<{
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
     console.log('Updating reservation status:', reservationId, status);
     
-    // Show loading toast with ID to be able to update it later
+    // Create a unique toast ID for this update operation
+    const toastId = `update-status-${reservationId}`;
+    
+    // Show loading toast
     toast.loading('Mise à jour du statut de la réservation...', {
-      id: `update-status-${reservationId}`
+      id: toastId
     });
     
-    try {
-      const update: UpdateEventReservationStatusDTO = {
-        id: reservationId,
-        status
-      };
-      
-      // Call the update function
-      updateReservationStatus(update);
-      
-      // Refresh data and show success message after a delay
-      setTimeout(() => {
-        console.log("Refetching data after status update");
-        if (refetch) {
-          refetch().then(() => {
-            console.log("Data refetched successfully");
-            // Update the toast with success message
+    // Create the update DTO
+    const update: UpdateEventReservationStatusDTO = {
+      id: reservationId,
+      status
+    };
+    
+    // Call the update function
+    updateReservationStatus(update);
+    
+    // Wait a moment then refetch to ensure we have the latest data
+    setTimeout(() => {
+      if (refetch) {
+        refetch()
+          .then(() => {
+            // Update toast to success
             toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente'} avec succès`, {
-              id: `update-status-${reservationId}`
+              id: toastId
             });
-          }).catch(error => {
-            console.error("Error refetching data:", error);
-            toast.error("Erreur lors du rafraîchissement des données", {
-              id: `update-status-${reservationId}`
+          })
+          .catch((error) => {
+            console.error('Error refetching after update:', error);
+            toast.error('Erreur lors du rafraîchissement des données', {
+              id: toastId
             });
           });
-        } else {
-          toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente'} avec succès`, {
-            id: `update-status-${reservationId}`
-          });
-        }
-      }, 1000); // Increased delay to ensure the database has time to process
-      
-    } catch (error) {
-      console.error('Error in handleUpdateStatus:', error);
-      toast.error("Erreur lors de la mise à jour du statut de la réservation", {
-        id: `update-status-${reservationId}`
-      });
-    }
+      }
+    }, 1500); // Longer delay to ensure database has processed the update
   };
   
   if (eventsLoading) {
