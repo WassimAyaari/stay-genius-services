@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
@@ -21,7 +22,6 @@ function Calendar({
     const monthsArray = [];
     for (let i = 0; i < 12; i++) {
       // Create a date for each month to use with date-fns format
-      // Use the month format function directly which accepts number as argument
       const monthName = locale.localize?.month(i, {
         width: 'wide',
       }) || '';
