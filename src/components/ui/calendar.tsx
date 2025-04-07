@@ -21,12 +21,12 @@ function Calendar({
   // Generate month names from locale
   const months = React.useMemo(() => {
     return Array.from({ length: 12 }, (_, i) => {
-      // Use the proper locale.formatters method to get month names
+      // Use the proper locale.localize method to get month names
       return locale.localize ? locale.localize.month(i, { width: 'wide' }) : '';
     });
   }, [locale]);
 
-  // Composant personnalisé pour le caption du calendrier avec sélection rapide
+  // Custom component for calendar caption with quick selection
   function CustomCaption({ 
     displayMonth, 
     onMonthChange 
@@ -37,7 +37,7 @@ function Calendar({
     const currentYear = displayMonth.getFullYear();
     const currentMonth = displayMonth.getMonth();
     
-    // Générer une liste d'années (100 ans dans le passé jusqu'à 50 ans dans le futur)
+    // Generate a list of years (100 years in the past until 50 years in the future)
     const currentYearDate = new Date();
     const currentYearNumber = currentYearDate.getFullYear();
     const startYear = currentYearNumber - 100;
@@ -132,7 +132,7 @@ function Calendar({
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center h-10",
-        caption_label: "text-sm font-medium hidden", // Cacher le label par défaut
+        caption_label: "text-sm font-medium hidden", // Hide default label
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),

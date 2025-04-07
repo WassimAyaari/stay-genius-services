@@ -77,14 +77,14 @@ export function DatePicker({
         ...baseProps,
         mode: "range" as const,
         selected: selected as DateRange | undefined,
-        onSelect: onSelect as (range: DateRange | undefined) => void,
+        onSelect: onSelect as ((range: DateRange | undefined) => void) | undefined,
       }
     } else if (mode === "multiple") {
       return {
         ...baseProps,
         mode: "multiple" as const,
         selected: selected as Date[] | undefined,
-        onSelect: onSelect as (dates: Date[] | undefined) => void,
+        onSelect: onSelect as ((dates: Date[] | undefined) => void) | undefined,
       }
     }
 

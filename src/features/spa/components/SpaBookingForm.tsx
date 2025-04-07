@@ -50,6 +50,11 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
     }
   }, [userData, setValue]);
 
+  // Handle date selection with proper typing
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+  };
+
   const onSubmit = async (data: SpaBookingFormValues) => {
     if (!selectedDate || !selectedTime) {
       toast.error("Veuillez sélectionner une date et une heure");
@@ -139,7 +144,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
           <DatePicker
             mode="single"
             selected={selectedDate}
-            onSelect={setSelectedDate}
+            onSelect={handleDateSelect}
             minDate={new Date()}
             maxDate={addDays(new Date(), 30)}
             required
