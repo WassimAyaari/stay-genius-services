@@ -11,7 +11,7 @@ interface EventReservationDetailProps {
 export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({ notification }) => {
   return (
     <div className="space-y-4">
-      <Alert variant="info" className="bg-blue-50 border-blue-200">
+      <Alert variant="default" className="bg-blue-50 border-blue-200">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-blue-500" />
           <AlertDescription>
