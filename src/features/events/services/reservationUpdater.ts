@@ -11,10 +11,14 @@ export const updateEventReservationStatus = async (data: UpdateEventReservationS
   try {
     console.log('Updating event reservation status:', data);
     
-    // Use direct table update instead of RPC
+    // Update only the status field and let database triggers handle updated_at
     const { error } = await supabase
       .from('event_reservations')
-      .update({ status: data.status })
+      .update({ 
+        status: data.status,
+        // Include updated_at explicitly since the trigger might be expecting it
+        updated_at: new Date().toISOString()
+      })
       .eq('id', data.id);
     
     if (error) {
