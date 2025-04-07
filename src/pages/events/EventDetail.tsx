@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -34,14 +34,23 @@ import { toast } from 'sonner';
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isCancelling, setIsCancelling] = useState(false);
   const { reservation, isLoading, error, cancelReservation } = useEventReservationDetail(id || '');
 
   const handleCancelReservation = async () => {
+    if (isCancelling) return;
+    
     try {
+      setIsCancelling(true);
+      console.log("Starting cancellation for reservation ID:", id);
       await cancelReservation();
+      console.log("Cancellation completed successfully");
+      // On n'a pas besoin de rafraîchir manuellement, c'est déjà fait dans useEventReservationDetail
     } catch (error) {
-      toast.error("Une erreur s'est produite lors de l'annulation de la réservation");
       console.error("Error during reservation cancellation:", error);
+      toast.error("Une erreur s'est produite lors de l'annulation de la réservation");
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -204,9 +213,10 @@ const EventDetail = () => {
                     <Button
                       variant="destructive"
                       className="w-full sm:w-auto"
+                      disabled={isCancelling}
                     >
                       <CalendarX className="mr-2 h-4 w-4" />
-                      Annuler la réservation
+                      {isCancelling ? "Annulation en cours..." : "Annuler la réservation"}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>

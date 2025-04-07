@@ -18,13 +18,18 @@ export const useEventReservationDetail = (reservationId: string) => {
   
   // Wrap cancelReservation to automatically refetch after cancellation
   const handleCancelReservation = async () => {
+    if (!reservationId) {
+      console.error('No reservation ID provided for cancellation');
+      throw new Error('ID de réservation manquant');
+    }
+    
     try {
       await cancelReservation(reservationId);
-      refetch();
+      await refetch(); // Attendre que la refetch soit terminée
+      return true;
     } catch (error) {
-      // Error is already handled in the cancelReservation function
-      // Just re-throw it here so the component can handle it if needed
-      throw error;
+      console.error('Error in handleCancelReservation:', error);
+      throw error; // Propager l'erreur pour gestion dans le composant
     }
   };
 
