@@ -13,6 +13,19 @@ export interface Event {
   updated_at: string;
 }
 
+export interface Story {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  category: 'event' | 'promo';
+  is_active?: boolean;
+  seen?: boolean;
+  created_at: string;
+  updated_at: string;
+  eventId?: string;
+}
+
 export type EventsResponse = Event[];
 
 export interface CreateEventDTO {
