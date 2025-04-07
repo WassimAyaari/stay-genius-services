@@ -24,10 +24,10 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       await updateEventReservationStatus({ id: reservationId, status: 'cancelled' });
     },
     onSuccess: () => {
-      // Invalidate related queries after a small delay to ensure DB has processed the change
+      // Invalidate related queries after a delay to ensure DB has processed the change
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      }, 1000);
+      }, 2000);
       toast.success('Réservation annulée avec succès');
     },
     onError: (error) => {
@@ -40,10 +40,10 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
   const createMutation = useMutation({
     mutationFn: (data: CreateEventReservationDTO) => createEventReservation(data),
     onSuccess: () => {
-      // Invalidate related queries after a small delay
+      // Invalidate related queries after a delay
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      }, 1000);
+      }, 2000);
       toast.success('Réservation créée avec succès');
     },
     onError: (error: any) => {
@@ -60,10 +60,10 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
     },
     onSuccess: () => {
       console.log('Status update successful');
-      // Invalidate queries after a longer delay to ensure DB has processed the change
+      // Invalidate queries after a delay to ensure DB has processed the change
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations'] });
-      }, 1500);
+      }, 2500);
       
       toast.success('Statut de la réservation mis à jour avec succès');
     },

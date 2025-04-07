@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
@@ -59,7 +58,7 @@ export const EventReservationsTab: React.FC<{
       status 
     });
     
-    // Wait a moment then refetch to ensure we have the latest data
+    // Wait a longer moment then refetch to ensure we have the latest data
     setTimeout(() => {
       if (refetch) {
         refetch()
@@ -72,7 +71,7 @@ export const EventReservationsTab: React.FC<{
             toast.error('Erreur lors du rafraîchissement des données', { id: toastId });
           });
       }
-    }, 2000);
+    }, 3000);
   };
   
   if (eventsLoading) {
