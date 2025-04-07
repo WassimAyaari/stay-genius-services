@@ -47,6 +47,7 @@ export const EventReservationsTab: React.FC<{
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
     console.log('Updating reservation status:', reservationId, status);
     
+    // Show loading toast with ID to be able to update it later
     toast.loading('Mise à jour du statut de la réservation...', {
       id: `update-status-${reservationId}`
     });
@@ -57,19 +58,31 @@ export const EventReservationsTab: React.FC<{
         status
       };
       
+      // Call the update function
       updateReservationStatus(update);
       
-      // Rafraîchir les données après la mise à jour
+      // Refresh data and show success message after a delay
       setTimeout(() => {
-        // Actualiser manuellement
+        console.log("Refetching data after status update");
         if (refetch) {
-          refetch();
+          refetch().then(() => {
+            console.log("Data refetched successfully");
+            // Update the toast with success message
+            toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente'} avec succès`, {
+              id: `update-status-${reservationId}`
+            });
+          }).catch(error => {
+            console.error("Error refetching data:", error);
+            toast.error("Erreur lors du rafraîchissement des données", {
+              id: `update-status-${reservationId}`
+            });
+          });
+        } else {
+          toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente'} avec succès`, {
+            id: `update-status-${reservationId}`
+          });
         }
-        
-        toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente'} avec succès`, {
-          id: `update-status-${reservationId}`
-        });
-      }, 500);
+      }, 1000); // Increased delay to ensure the database has time to process
       
     } catch (error) {
       console.error('Error in handleUpdateStatus:', error);
