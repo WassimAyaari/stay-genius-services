@@ -28,7 +28,6 @@ export const EventReservationsTab: React.FC<{
     refetch
   } = useEventReservations(selectedEventId);
   
-  // Reset selected reservation when event changes
   useEffect(() => {
     setSelectedReservation(undefined);
   }, [selectedEventId]);
@@ -46,24 +45,19 @@ export const EventReservationsTab: React.FC<{
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
     console.log('Handling update status:', reservationId, status);
     
-    // Create a unique toast ID for this update operation
     const toastId = `update-status-${reservationId}`;
     
-    // Show loading toast
     toast.loading('Mise à jour du statut...', { id: toastId });
     
-    // Call the update function
     updateReservationStatus({ 
       id: reservationId,
       status 
     });
     
-    // Wait a longer moment then refetch to ensure we have the latest data
     setTimeout(() => {
       if (refetch) {
         refetch()
           .then(() => {
-            // Update toast to success
             toast.success(`Statut mis à jour avec succès`, { id: toastId });
           })
           .catch((error) => {
@@ -71,7 +65,7 @@ export const EventReservationsTab: React.FC<{
             toast.error('Erreur lors du rafraîchissement des données', { id: toastId });
           });
       }
-    }, 3000);
+    }, 5000);
   };
   
   if (eventsLoading) {
@@ -125,7 +119,6 @@ export const EventReservationsTab: React.FC<{
         </Card>
       )}
       
-      {/* Reservation Detail Dialog */}
       {selectedReservation && (
         <EventReservationDetail
           reservation={selectedReservation}

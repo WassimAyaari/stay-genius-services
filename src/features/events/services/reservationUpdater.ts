@@ -10,14 +10,11 @@ export const updateEventReservationStatus = async (data: UpdateEventReservationS
   try {
     console.log('Updating event reservation status:', data);
     
-    // Add current timestamp for updated_at to address the trigger issue
-    const now = new Date().toISOString();
-    
     const { error } = await supabase
       .from('event_reservations')
       .update({ 
         status: data.status,
-        updated_at: now 
+        // Don't manually set updated_at as it should be handled by the database trigger
       })
       .eq('id', data.id);
     
