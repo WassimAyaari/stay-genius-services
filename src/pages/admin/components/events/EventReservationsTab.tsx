@@ -4,7 +4,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
 import { EventTable } from './EventTable';
 import { EventReservationDetail } from './EventReservationDetail';
-import { UpdateEventReservationStatusDTO, EventReservation } from '@/types/event';
+import { EventReservation } from '@/types/event';
 import { useStories } from '@/hooks/useStories';
 import { ReservationsGrid } from './ReservationsGrid';
 import { Card } from '@/components/ui/card';
@@ -45,24 +45,19 @@ export const EventReservationsTab: React.FC<{
   };
   
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
-    console.log('Updating reservation status:', reservationId, status);
+    console.log('Handling update status:', reservationId, status);
     
     // Create a unique toast ID for this update operation
     const toastId = `update-status-${reservationId}`;
     
     // Show loading toast
-    toast.loading('Mise à jour du statut de la réservation...', {
-      id: toastId
-    });
-    
-    // Create the update DTO
-    const update: UpdateEventReservationStatusDTO = {
-      id: reservationId,
-      status
-    };
+    toast.loading('Mise à jour du statut...', { id: toastId });
     
     // Call the update function
-    updateReservationStatus(update);
+    updateReservationStatus({ 
+      id: reservationId,
+      status 
+    });
     
     // Wait a moment then refetch to ensure we have the latest data
     setTimeout(() => {
@@ -70,18 +65,14 @@ export const EventReservationsTab: React.FC<{
         refetch()
           .then(() => {
             // Update toast to success
-            toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente'} avec succès`, {
-              id: toastId
-            });
+            toast.success(`Statut mis à jour avec succès`, { id: toastId });
           })
           .catch((error) => {
             console.error('Error refetching after update:', error);
-            toast.error('Erreur lors du rafraîchissement des données', {
-              id: toastId
-            });
+            toast.error('Erreur lors du rafraîchissement des données', { id: toastId });
           });
       }
-    }, 1500); // Longer delay to ensure database has processed the update
+    }, 1500);
   };
   
   if (eventsLoading) {

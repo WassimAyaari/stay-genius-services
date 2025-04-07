@@ -40,6 +40,11 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
     }
   };
 
+  const handleUpdateStatus = (status: 'pending' | 'confirmed' | 'cancelled') => {
+    console.log('ReservationCard: updating status to', status);
+    onUpdateStatus(reservation.id, status);
+  };
+
   return (
     <Card className="overflow-hidden">
       <div className={`h-2 w-full ${getStatusBadgeClass(reservation.status)}`} />
@@ -99,7 +104,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
                 variant="outline" 
                 size="sm"
                 className="flex-1 border-green-500 text-green-500 hover:bg-green-50"
-                onClick={() => onUpdateStatus(reservation.id, 'confirmed')}
+                onClick={() => handleUpdateStatus('confirmed')}
                 disabled={isUpdating}
               >
                 <Check className="h-4 w-4 mr-1" />
@@ -110,7 +115,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
                 variant="outline" 
                 size="sm"
                 className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
-                onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
+                onClick={() => handleUpdateStatus('cancelled')}
                 disabled={isUpdating}
               >
                 <X className="h-4 w-4 mr-1" />
@@ -126,6 +131,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
                   variant="outline" 
                   size="sm"
                   className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
+                  disabled={isUpdating}
                 >
                   <X className="h-4 w-4 mr-1" />
                   Annuler
@@ -141,7 +147,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction 
-                    onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
+                    onClick={() => handleUpdateStatus('cancelled')}
                     className="bg-red-500 hover:bg-red-600"
                   >
                     Confirmer l'annulation

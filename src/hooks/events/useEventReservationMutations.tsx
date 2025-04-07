@@ -24,7 +24,10 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       await updateEventReservationStatus({ id: reservationId, status: 'cancelled' });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
+      // Invalidate related queries after a small delay to ensure DB has processed the change
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
+      }, 500);
       toast.success('Réservation annulée avec succès');
     },
     onError: (error) => {
@@ -37,7 +40,10 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
   const createMutation = useMutation({
     mutationFn: (data: CreateEventReservationDTO) => createEventReservation(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
+      // Invalidate related queries after a small delay
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
+      }, 500);
       toast.success('Réservation créée avec succès');
     },
     onError: (error: any) => {
@@ -53,11 +59,13 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       return updateEventReservationStatus(data);
     },
     onSuccess: () => {
-      console.log('Mutation successful, invalidating queries');
-      // Allow a brief delay before invalidating the queries
+      console.log('Status update successful');
+      // Invalidate queries after a longer delay to ensure DB has processed the change
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      }, 300);
+        queryClient.invalidateQueries({ queryKey: ['eventReservations'] });
+      }, 1000);
+      
+      toast.success('Statut de la réservation mis à jour avec succès');
     },
     onError: (error: any) => {
       console.error('Error updating event reservation status:', error);
