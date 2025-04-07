@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -45,7 +44,7 @@ const EventDetail = () => {
       console.log("Starting cancellation for reservation ID:", id);
       await cancelReservation();
       console.log("Cancellation completed successfully");
-      // On n'a pas besoin de rafraîchir manuellement, c'est déjà fait dans useEventReservationDetail
+      toast.success("La réservation a été annulée avec succès");
     } catch (error) {
       console.error("Error during reservation cancellation:", error);
       toast.error("Une erreur s'est produite lors de l'annulation de la réservation");

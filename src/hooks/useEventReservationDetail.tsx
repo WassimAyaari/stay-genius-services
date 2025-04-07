@@ -25,7 +25,8 @@ export const useEventReservationDetail = (reservationId: string) => {
     
     try {
       await cancelReservation(reservationId);
-      await refetch(); // Attendre que la refetch soit terminée
+      // Refetch pour mettre à jour l'UI après annulation
+      await refetch();
       return true;
     } catch (error) {
       console.error('Error in handleCancelReservation:', error);
