@@ -58,7 +58,7 @@ export const transformTableReservations = (reservations: any[]): NotificationIte
     icon: '🍽️',
     status: reservation.status || 'pending',
     time: createSafeDate(reservation.createdAt || reservation.created_at) || new Date(),
-    link: `/reservations/${reservation.id}`,
+    link: `/dining/reservations/${reservation.id}`,
     data: {
       date: reservation.date,
       time: reservation.time,
@@ -105,7 +105,7 @@ export const transformEventReservations = (reservations: any[]): NotificationIte
     icon: '📅',
     status: reservation.status || 'pending',
     time: createSafeDate(reservation.createdAt || reservation.created_at) || new Date(),
-    link: `/events/reservations/${reservation.id}`,
+    link: `/events/${reservation.id}`,
     data: {
       date: reservation.date,
       guests: reservation.guests,

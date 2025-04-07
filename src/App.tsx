@@ -16,6 +16,7 @@ import RestaurantDetail from '@/pages/dining/RestaurantDetail';
 import Spa from '@/pages/spa/Spa';
 import Activities from '@/pages/activities/Activities';
 import Events from '@/pages/events/Events';
+import EventDetail from '@/pages/events/EventDetail';
 import Services from '@/pages/services/Services';
 import Destination from '@/pages/destination/Destination';
 import HotelMap from '@/pages/map/HotelMap';
@@ -68,6 +69,11 @@ function App() {
               <Route path="/spa/booking/:id" element={
                 <AuthGuard>
                   <SpaBookingDetails />
+                </AuthGuard>
+              } />
+              <Route path="/events/:id" element={
+                <AuthGuard>
+                  <EventDetail />
                 </AuthGuard>
               } />
               <Route path="/my-room" element={

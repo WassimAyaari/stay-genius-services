@@ -1,50 +1,69 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
 import { NotificationItem } from '@/types/notification';
+import RequestDetail from './details/request/RequestDetail';
+import SpaBookingDetail from './details/spa/SpaBookingDetail';
+import { Button } from '@/components/ui/button';
 
 interface NotificationDetailContentProps {
   notification: NotificationItem;
+  notificationType: string;
+  notificationId: string;
 }
 
-export const NotificationDetailContent: React.FC<NotificationDetailContentProps> = React.memo(({
-  notification
+const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({ 
+  notification, 
+  notificationType, 
+  notificationId 
 }) => {
   const navigate = useNavigate();
   
-  // Redirect to the appropriate section based on notification type
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      switch (notification.type) {
-        case 'request':
-          navigate(`/requests/${notification.id}`);
-          break;
-        case 'reservation':
-          navigate(`/dining/reservations/${notification.id}`);
-          break;
-        case 'spa_booking':
-          navigate(`/spa/booking/${notification.id}`);
-          break;
-        default:
-          // Stay on the current page for other notification types
-          break;
-      }
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [notification.id, notification.type, navigate]);
-
+  // For each type of notification, redirect to the appropriate dedicated page
+  React.useEffect(() => {
+    switch (notificationType) {
+      case 'request':
+        navigate(`/requests/${notificationId}`);
+        break;
+      case 'reservation':
+        navigate(`/dining/reservations/${notificationId}`);
+        break;
+      case 'spa_booking':
+        navigate(`/spa/booking/${notificationId}`);
+        break;
+      case 'event_reservation':
+        navigate(`/events/${notificationId}`);
+        break;
+      default:
+        // No redirect for unknown types
+        break;
+    }
+  }, [notificationType, notificationId, navigate]);
+  
+  // This will rarely render anything because of the redirects above,
+  // but it serves as a fallback
   return (
-    <Card className="p-6">
-      <div className="flex justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary rounded-full border-t-transparent"></div>
+    <div className="space-y-6">
+      {/* Header based on notification type */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">{notification.title}</h2>
+        <Button variant="outline" onClick={() => navigate('/notifications')}>
+          Retour aux notifications
+        </Button>
       </div>
-      <p className="text-center text-muted-foreground mt-4">
-        Redirection en cours...
-      </p>
-    </Card>
+      
+      {/* Content based on notification type */}
+      {notificationType === 'request' && <RequestDetail requestId={notificationId} />}
+      {notificationType === 'spa_booking' && <SpaBookingDetail bookingId={notificationId} />}
+      
+      {/* Fallback for types without dedicated components */}
+      {notificationType !== 'request' && notificationType !== 'spa_booking' && (
+        <div className="text-center py-8">
+          <p>Redirection vers la page de détails...</p>
+        </div>
+      )}
+    </div>
   );
-});
+};
 
-NotificationDetailContent.displayName = 'NotificationDetailContent';
+export default NotificationDetailContent;
