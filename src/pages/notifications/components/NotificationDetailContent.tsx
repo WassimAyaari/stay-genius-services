@@ -2,8 +2,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NotificationItem } from '@/types/notification';
-import RequestDetail from './details/request/RequestDetail';
-import SpaBookingDetail from './details/spa/SpaBookingDetail';
+import { RequestDetail } from './details/request/RequestDetail';
+import { SpaBookingDetail } from './details/spa/SpaBookingDetail';
 import { Button } from '@/components/ui/button';
 
 interface NotificationDetailContentProps {

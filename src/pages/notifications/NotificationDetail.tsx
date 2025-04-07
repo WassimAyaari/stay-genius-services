@@ -3,7 +3,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { NotificationDetailHeader } from './components/NotificationDetailHeader';
-import { NotificationDetailContent } from './components/NotificationDetailContent';
+import NotificationDetailContent from './components/NotificationDetailContent';
 import { LoadingState } from './components/LoadingState';
 import { NotFoundState } from './components/NotFoundState';
 import { useNotificationDetail } from './hooks/useNotificationDetail';
@@ -42,7 +42,7 @@ const NotificationDetail: React.FC = () => {
           onBack={handleBack}
         />
         
-        <NotificationDetailContent notification={notification} />
+        <NotificationDetailContent notification={notification} notificationType={notification.type} notificationId={notification.id} />
       </div>
     </Layout>
   );

@@ -61,9 +61,21 @@ export const useEventReservationDetail = (reservationId: string) => {
           // Continue even if event fetch fails
         }
         
+        // Cast the event category to the expected type to ensure it's valid
+        let eventWithCorrectType: Event | undefined;
+        
+        if (eventData) {
+          eventWithCorrectType = {
+            ...eventData,
+            category: (eventData.category === 'event' || eventData.category === 'promo') 
+              ? eventData.category 
+              : 'event' // Default to 'event' if the category is not valid
+          } as Event;
+        }
+        
         return {
           ...reservation,
-          event: eventData || undefined
+          event: eventWithCorrectType
         };
       } catch (error) {
         console.error('Error fetching event reservation:', error);

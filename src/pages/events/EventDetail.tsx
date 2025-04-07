@@ -194,7 +194,6 @@ const EventDetail = () => {
                     <Button
                       variant="destructive"
                       className="w-full sm:w-auto"
-                      disabled={reservation.status === 'cancelled'}
                     >
                       <CalendarX className="mr-2 h-4 w-4" />
                       Annuler la réservation
