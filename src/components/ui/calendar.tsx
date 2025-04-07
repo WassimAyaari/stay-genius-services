@@ -20,10 +20,16 @@ function Calendar({
 }: CalendarProps) {
   // Generate month names from locale
   const months = React.useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => {
-      // Use the proper locale.localize method to get month names
-      return locale.localize ? locale.localize.month(i, { width: 'wide' }) : '';
-    });
+    const monthsArray = [];
+    for (let i = 0; i < 12; i++) {
+      // Create a date for each month to use with date-fns format
+      const date = new Date(2000, i, 1);
+      const monthName = locale.localize?.month(date.getMonth(), {
+        width: 'wide',
+      }) || '';
+      monthsArray.push(monthName);
+    }
+    return monthsArray;
   }, [locale]);
 
   // Custom component for calendar caption with quick selection
