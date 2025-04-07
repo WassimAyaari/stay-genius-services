@@ -21,8 +21,9 @@ function Calendar({
   const months = React.useMemo(() => {
     const monthsArray = [];
     for (let i = 0; i < 12; i++) {
-      // Create a date for each month to use with date-fns format
-      const monthName = locale.localize?.month(i, {
+      // Create a date object for each month to get the name correctly
+      const date = new Date(2000, i, 1);
+      const monthName = locale.localize?.month(date, {
         width: 'wide',
       }) || '';
       monthsArray.push(monthName);
