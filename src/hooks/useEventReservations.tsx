@@ -12,6 +12,8 @@ export const useEventReservations = () => {
   
   return {
     reservations,
-    refetchEventReservations
+    refetchEventReservations,
+    // Add refetch as an alias for refetchEventReservations to match expected interface
+    refetch: refetchEventReservations
   };
 };
