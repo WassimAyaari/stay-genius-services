@@ -53,8 +53,8 @@ const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({
       </div>
       
       {/* Content based on notification type */}
-      {notificationType === 'request' && <RequestDetail id={notificationId} />}
-      {notificationType === 'spa_booking' && <SpaBookingDetail id={notificationId} />}
+      {notificationType === 'request' && <RequestDetail notification={notification} />}
+      {notificationType === 'spa_booking' && <SpaBookingDetail notification={notification} />}
       
       {/* Fallback for types without dedicated components */}
       {notificationType !== 'request' && notificationType !== 'spa_booking' && (
