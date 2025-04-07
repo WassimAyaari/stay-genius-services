@@ -93,19 +93,23 @@ export const useEventReservationDetail = (reservationId: string) => {
     try {
       if (!reservation) throw new Error('No reservation to cancel');
       
-      // Modifié pour ne pas utiliser de champ updated_at
+      // Correction : suppression de toute référence à updated_at qui n'existe pas dans la table
       const { error } = await supabase
         .from('event_reservations')
         .update({ status: 'cancelled' })
         .eq('id', reservationId);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error cancelling reservation:', error);
+        throw error;
+      }
       
       toast.success('Réservation annulée avec succès');
       refetch();
     } catch (error) {
       console.error('Error cancelling reservation:', error);
       toast.error('Erreur lors de l\'annulation de la réservation');
+      throw error; // Rethrow to handle in the component
     }
   };
 

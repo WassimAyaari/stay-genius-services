@@ -131,7 +131,7 @@ export const createEventReservation = async (reservation: CreateEventReservation
 // Update event reservation status
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
-    // Modifié pour ne pas utiliser de champ updated_at qui cause une erreur
+    // Correction : suppression de toute référence à updated_at qui cause l'erreur
     const { error } = await supabase
       .from('event_reservations')
       .update({ status: data.status })
