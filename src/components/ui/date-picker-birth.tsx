@@ -29,8 +29,14 @@ export function BirthDatePicker({
 }: BirthDatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(selected);
   
-  // Calculate reasonable date range for birth dates (100 years ago to today)
+  // Calculate reasonable date range for birth dates
   const today = new Date();
+  
+  // Calculate date for 18 years ago (minimum age requirement)
+  const eighteenYearsAgo = new Date();
+  eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
+  
+  // Calculate maximum date (100 years ago)
   const hundredYearsAgo = new Date();
   hundredYearsAgo.setFullYear(today.getFullYear() - 100);
 
@@ -75,7 +81,7 @@ export function BirthDatePicker({
             mode="single"
             selected={date}
             onSelect={handleSelect}
-            disabled={(date) => date > today || date < hundredYearsAgo}
+            disabled={(date) => date > eighteenYearsAgo || date < hundredYearsAgo}
             initialFocus
             className="pointer-events-auto"
           />

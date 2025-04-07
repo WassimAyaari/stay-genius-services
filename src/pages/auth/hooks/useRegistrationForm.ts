@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,21 +12,34 @@ import { registerUser } from '@/features/auth/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import { syncGuestData } from '@/features/users/services/guestService';
 
+// Calculate the date 18 years ago for minimum age validation
+const eighteenYearsAgo = new Date();
+eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+
 // Schema pour le formulaire d'inscription
 export const registerSchema = z.object({
   email: z.string().email({ message: "Adresse email invalide" }),
   firstName: z.string().min(2, { message: "Le prénom est requis" }),
   lastName: z.string().min(2, { message: "Le nom est requis" }),
-  birthDate: z.date({ required_error: "La date de naissance est requise" }),
+  birthDate: z.date({ required_error: "La date de naissance est requise" })
+    .refine((date) => date <= eighteenYearsAgo, {
+      message: "Vous devez avoir au moins 18 ans",
+    }),
   nationality: z.string().min(2, { message: "La nationalité est requise" }),
   roomNumber: z.string().min(1, { message: "Le numéro de chambre est requis" }),
-  checkInDate: z.date({ required_error: "La date d'arrivée est requise" }),
+  checkInDate: z.date({ required_error: "La date d'arrivée est requise" })
+    .refine((date) => date >= new Date(), {
+      message: "La date d'arrivée ne peut pas être dans le passé",
+    }),
   checkOutDate: z.date({ required_error: "La date de départ est requise" }),
   password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
   confirmPassword: z.string().min(6, { message: "La confirmation du mot de passe est requise" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"],
+}).refine((data) => data.checkOutDate > data.checkInDate, {
+  message: "La date de départ doit être après la date d'arrivée",
+  path: ["checkOutDate"],
 });
 
 export type RegistrationFormValues = z.infer<typeof registerSchema>;

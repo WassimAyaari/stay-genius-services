@@ -24,12 +24,11 @@ interface DateFieldsProps {
   form: UseFormReturn<RegistrationFormValues>;
 }
 
-// Calculate reasonable range for birth dates (100 years ago to today)
-const today = new Date();
-const hundredYearsAgo = new Date();
-hundredYearsAgo.setFullYear(today.getFullYear() - 100);
-
 const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
+  // Get today's date for validation
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   return (
     <>
       <FormField
@@ -83,7 +82,19 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                      
+                      // If checkOutDate is before the new checkInDate, update checkOutDate
+                      const checkOutDate = form.getValues('checkOutDate');
+                      if (date && checkOutDate && date > checkOutDate) {
+                        // Set checkOutDate to the day after checkInDate
+                        const nextDay = new Date(date);
+                        nextDay.setDate(date.getDate() + 1);
+                        form.setValue('checkOutDate', nextDay);
+                      }
+                    }}
+                    disabled={(date) => date < today}
                     initialFocus
                     className="pointer-events-auto bg-white"
                   />
@@ -128,6 +139,14 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
+                    disabled={(date) => {
+                      // Get checkInDate value
+                      const checkInDate = form.getValues('checkInDate');
+                      
+                      // Disable dates before checkInDate or today (whichever is later)
+                      const minDate = checkInDate || today;
+                      return date < minDate;
+                    }}
                     initialFocus
                     className="pointer-events-auto bg-white"
                   />
