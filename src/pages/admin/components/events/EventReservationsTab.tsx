@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
@@ -55,19 +54,22 @@ export const EventReservationsTab: React.FC<{
       status 
     });
     
-    // Augmenter le délai à 5 secondes pour s'assurer que la base de données a le temps de terminer la mise à jour
     setTimeout(() => {
       if (refetch) {
         refetch()
           .then(() => {
             toast.success(`Statut mis à jour avec succès`, { id: toastId });
+            
+            setTimeout(() => {
+              refetch();
+            }, 1000);
           })
           .catch((error) => {
             console.error('Error refetching after update:', error);
             toast.error('Erreur lors du rafraîchissement des données', { id: toastId });
           });
       }
-    }, 5000);
+    }, 7000);
   };
   
   if (eventsLoading) {

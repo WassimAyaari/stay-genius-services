@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreateEventReservationDTO, UpdateEventReservationStatusDTO } from '@/types/event';
 import { toast } from 'sonner';
@@ -26,7 +27,7 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       // Invalidate related queries after a delay to ensure DB has processed the change
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      }, 3000);
+      }, 5000);
       toast.success('Réservation annulée avec succès');
     },
     onError: (error) => {
@@ -42,7 +43,7 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       // Invalidate related queries after a delay
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      }, 3000);
+      }, 5000);
       toast.success('Réservation créée avec succès');
     },
     onError: (error: any) => {
@@ -59,13 +60,16 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
     },
     onSuccess: () => {
       console.log('Status update successful');
-      // Invalidate queries after a longer delay to ensure DB has processed the change
+      // Invalidate queries with a retry strategy pour s'assurer que les données sont à jour
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations'] });
-      }, 3500); // Increased delay
+        // Double invalidation pour assurer la cohérence des données
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['eventReservations'] });
+        }, 2000);
+      }, 5000);
       
-      // Don't show success toast here, it's handled in the component
-      // to avoid duplicate notifications
+      // Ne pas afficher de toast ici, c'est géré dans le composant parent
     },
     onError: (error: any) => {
       console.error('Error updating event reservation status:', error);
