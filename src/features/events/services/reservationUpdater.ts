@@ -4,21 +4,17 @@ import { UpdateEventReservationStatusDTO } from '@/types/event';
 
 /**
  * Update event reservation status
- * Inspired by the restaurant reservation update approach
+ * Using direct update to avoid updated_at trigger issues
  */
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
     console.log('Updating event reservation status:', data);
     
-    // Execute direct SQL update to avoid "updated_at" trigger issues
-    // This is similar to how restaurant reservations are updated
-    const { error } = await supabase.rpc(
-      'update_event_reservation_status',
-      { 
-        reservation_id: data.id,
-        new_status: data.status
-      }
-    );
+    // Using direct SQL update instead of RPC function to avoid issues
+    const { error } = await supabase
+      .from('event_reservations')
+      .update({ status: data.status })
+      .eq('id', data.id);
     
     if (error) {
       console.error('Error updating event reservation status:', error);

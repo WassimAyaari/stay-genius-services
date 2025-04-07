@@ -27,7 +27,7 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       // Invalidate related queries after a small delay to ensure DB has processed the change
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      }, 500);
+      }, 1000);
       toast.success('Réservation annulée avec succès');
     },
     onError: (error) => {
@@ -43,7 +43,7 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       // Invalidate related queries after a small delay
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      }, 500);
+      }, 1000);
       toast.success('Réservation créée avec succès');
     },
     onError: (error: any) => {
@@ -63,7 +63,7 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
       // Invalidate queries after a longer delay to ensure DB has processed the change
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['eventReservations'] });
-      }, 1000);
+      }, 1500);
       
       toast.success('Statut de la réservation mis à jour avec succès');
     },

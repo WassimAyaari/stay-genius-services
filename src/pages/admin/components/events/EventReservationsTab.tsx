@@ -72,7 +72,7 @@ export const EventReservationsTab: React.FC<{
             toast.error('Erreur lors du rafraîchissement des données', { id: toastId });
           });
       }
-    }, 1500);
+    }, 2000);
   };
   
   if (eventsLoading) {
