@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { NotificationItem } from '@/types/notification';
 import { RequestDetail } from './details/request/RequestDetail';
 import { SpaBookingDetail } from './details/spa/SpaBookingDetail';
+import { EventReservationDetail } from './details/event/EventReservationDetail';
 import { Button } from '@/components/ui/button';
 
 interface NotificationDetailContentProps {
@@ -32,7 +33,7 @@ const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({
         navigate(`/spa/booking/${notificationId}`);
         break;
       case 'event_reservation':
-        navigate(`/events/reservations/${notificationId}`);
+        navigate(`/events/${notificationId}`);
         break;
       default:
         // No redirect for unknown types
@@ -55,9 +56,12 @@ const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({
       {/* Content based on notification type */}
       {notificationType === 'request' && <RequestDetail notification={notification} />}
       {notificationType === 'spa_booking' && <SpaBookingDetail notification={notification} />}
+      {notificationType === 'event_reservation' && <EventReservationDetail notification={notification} />}
       
       {/* Fallback for types without dedicated components */}
-      {notificationType !== 'request' && notificationType !== 'spa_booking' && (
+      {notificationType !== 'request' && 
+       notificationType !== 'spa_booking' && 
+       notificationType !== 'event_reservation' && (
         <div className="text-center py-8">
           <p>Redirection vers la page de détails...</p>
         </div>

@@ -42,7 +42,11 @@ const NotificationDetail: React.FC = () => {
           onBack={handleBack}
         />
         
-        <NotificationDetailContent notification={notification} notificationType={notification.type} notificationId={notification.id} />
+        <NotificationDetailContent 
+          notification={notification} 
+          notificationType={notification.type} 
+          notificationId={notification.id} 
+        />
       </div>
     </Layout>
   );

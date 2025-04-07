@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -38,7 +37,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       case 'request': 
         return `/requests/${id}`;
       case 'event_reservation':
-        return `/events/reservations/${id}`;
+        return `/events/${id}`;
       default: 
         return link || '/notifications';
     }
