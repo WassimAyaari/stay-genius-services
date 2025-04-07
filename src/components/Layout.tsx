@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
@@ -8,6 +9,8 @@ import { ChevronLeft, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from './ui/scroll-area';
+
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -17,12 +20,15 @@ const Layout = ({
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isMessagePage = location.pathname === '/messages' || location.pathname.startsWith('/messages?');
+  const isSpaManagerPage = location.pathname === '/admin/spa';
   const isMobile = useIsMobile();
 
   // Pour déboguer, affichons le chemin actuel
   console.log('Current path:', location.pathname);
   console.log('isHomePage:', isHomePage);
   console.log('isMessagePage:', isMessagePage);
+  console.log('isSpaManagerPage:', isSpaManagerPage);
+  
   return <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header apparaît sur toutes les pages sauf la page des messages */}
       {!isMessagePage && <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
@@ -52,18 +58,29 @@ const Layout = ({
           </div>
         </header>}
 
-      <main className={cn("container mx-auto px-[9px]", !isMessagePage && "pt-16 pb-24")}>
-        <motion.div initial={{
-        opacity: 0
-      }} animate={{
-        opacity: 1
-      }} exit={{
-        opacity: 0
-      }} transition={{
-        duration: 0.15
-      }}>
-          {children}
-        </motion.div>
+      <main className={cn("container mx-auto px-[9px]", !isMessagePage && "pt-16 pb-24", isSpaManagerPage && "h-screen flex flex-col")}>
+        {isSpaManagerPage ? (
+          <ScrollArea className="flex-1 overflow-y-auto">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="py-4"
+            >
+              {children}
+            </motion.div>
+          </ScrollArea>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            {children}
+          </motion.div>
+        )}
       </main>
 
       {!isMessagePage && <BottomNav />}
