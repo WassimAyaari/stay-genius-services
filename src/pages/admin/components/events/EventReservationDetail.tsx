@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, Mail, Phone, Home, Calendar, Users } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface EventReservationDetailProps {
   reservation: EventReservation;
@@ -39,6 +40,12 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({
   };
   
   const statusInfo = getStatusInfo(reservation.status);
+
+  const handleUpdateStatus = (status: 'pending' | 'confirmed' | 'cancelled') => {
+    if (onUpdateStatus) {
+      onUpdateStatus(reservation.id, status);
+    }
+  };
 
   const reservationContent = (
     <div className="space-y-4">
@@ -111,28 +118,50 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({
             <Button 
               variant="default" 
               size="sm" 
-              onClick={() => onUpdateStatus(reservation.id, 'confirmed')}
+              onClick={() => handleUpdateStatus('confirmed')}
               disabled={isUpdating}
               className="bg-green-500 hover:bg-green-600"
             >
               Confirmer
             </Button>
           )}
+          
           {reservation.status !== 'cancelled' && (
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
-              disabled={isUpdating}
-            >
-              Annuler
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  disabled={isUpdating}
+                >
+                  Annuler
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Annuler la réservation</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => handleUpdateStatus('cancelled')}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    Confirmer l'annulation
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
+          
           {reservation.status !== 'pending' && (
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => onUpdateStatus(reservation.id, 'pending')}
+              onClick={() => handleUpdateStatus('pending')}
               disabled={isUpdating}
             >
               Marquer comme en attente

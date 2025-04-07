@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { EventReservation } from '@/types/event';
 import { ReservationCard } from './ReservationCard';
@@ -40,23 +39,14 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
   // Wrapper for onUpdateStatus that adds toast notifications
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
     try {
-      toast.promise(
-        new Promise((resolve, reject) => {
-          try {
-            onUpdateStatus(reservationId, status);
-            resolve(true);
-          } catch (err) {
-            reject(err);
-          }
-        }),
-        {
-          loading: 'Mise à jour du statut...',
-          success: 'Statut mis à jour avec succès',
-          error: 'Erreur lors de la mise à jour du statut'
-        }
-      );
+      // Show loading toast
+      toast.loading('Mise à jour du statut...');
+      
+      // Call the update function
+      onUpdateStatus(reservationId, status);
     } catch (error) {
       console.error('Error in handleUpdateStatus:', error);
+      toast.error('Erreur lors de la mise à jour du statut');
     }
   };
 

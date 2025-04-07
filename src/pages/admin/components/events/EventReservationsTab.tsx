@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
@@ -49,7 +48,15 @@ export const EventReservationsTab: React.FC<{
         id: reservationId,
         status
       };
+      
       updateReservationStatus(update);
+      
+      // Show success toast after a short delay to allow the update to complete
+      setTimeout(() => {
+        const statusLabel = status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente';
+        toast.success(`Réservation ${statusLabel} avec succès`);
+      }, 300);
+      
     } catch (error) {
       console.error('Error in handleUpdateStatus:', error);
       toast.error("Erreur lors de la mise à jour du statut de la réservation");
