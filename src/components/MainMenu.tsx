@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Menu, BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar } from 'lucide-react';
+import { Menu, BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MainMenuProps {
@@ -22,6 +22,7 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: 'Home', path: '/' },
+    { icon: <BellRing className="h-5 w-5" />, label: 'Notifications', path: '/notifications' },
     { icon: <Info className="h-5 w-5" />, label: 'About Us', path: '/about' },
     { icon: <UtensilsCrossed className="h-5 w-5" />, label: 'Gastronomy', path: '/dining' },
     { icon: <Heart className="h-5 w-5" />, label: 'Spa & Wellness', path: '/spa' },

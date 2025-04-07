@@ -52,9 +52,13 @@ const QuickActions = () => {
         </Card>
       </div>
 
-      {/* Notifications List Section */}
+      {/* Notifications List Section - Converting NotificationItem[] to the expected type */}
       <NotificationsList 
-        notifications={recentNotifications} 
+        notifications={recentNotifications.map(notification => ({
+          id: notification.id,
+          message: notification.title, // Use title as message
+          time: notification.time instanceof Date ? notification.time.toISOString() : String(notification.time)
+        }))}
         dismissNotification={() => {}} // We'll pass an empty function as we're just displaying notifications here
       />
     </div>
