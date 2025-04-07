@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
@@ -24,7 +25,8 @@ export const EventReservationsTab: React.FC<{
     isLoading: reservationsLoading, 
     updateReservationStatus,
     isUpdating,
-    error: reservationsError
+    error: reservationsError,
+    refetch
   } = useEventReservations(selectedEventId);
   
   // Reset selected reservation when event changes
@@ -55,6 +57,11 @@ export const EventReservationsTab: React.FC<{
       setTimeout(() => {
         const statusLabel = status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente';
         toast.success(`Réservation ${statusLabel} avec succès`);
+        
+        // Refresh the data
+        if (refetch) {
+          refetch();
+        }
       }, 300);
       
     } catch (error) {

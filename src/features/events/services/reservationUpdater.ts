@@ -7,12 +7,10 @@ import { UpdateEventReservationStatusDTO } from '@/types/event';
  */
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
-    // Remove any field that doesn't exist in the table
-    const updateData = { status: data.status };
-    
+    // Only update the status field, nothing else
     const { error } = await supabase
       .from('event_reservations')
-      .update(updateData)
+      .update({ status: data.status })
       .eq('id', data.id);
     
     if (error) {

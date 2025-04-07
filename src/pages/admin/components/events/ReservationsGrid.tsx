@@ -38,14 +38,17 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
 
   // Wrapper for onUpdateStatus that adds toast notifications
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
+    // Show loading toast
+    const loadingToast = toast.loading('Mise à jour du statut...');
+    
     try {
-      // Show loading toast
-      toast.loading('Mise à jour du statut...');
-      
       // Call the update function
       onUpdateStatus(reservationId, status);
+      
+      // Toast success message will be shown by the parent component
     } catch (error) {
       console.error('Error in handleUpdateStatus:', error);
+      // Only show error toast here, success toast is handled by parent
       toast.error('Erreur lors de la mise à jour du statut');
     }
   };
