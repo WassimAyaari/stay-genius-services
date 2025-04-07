@@ -3,7 +3,6 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { fr } from "date-fns/locale";
-import { type Locale } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -24,7 +23,8 @@ function Calendar({
     for (let i = 0; i < 12; i++) {
       // Create a date for each month to use with date-fns format
       const date = new Date(2000, i, 1);
-      const monthName = locale.localize?.month(date.getMonth(), {
+      // Use the month index directly which is compatible with the expected type
+      const monthName = locale.localize?.month(i, {
         width: 'wide',
       }) || '';
       monthsArray.push(monthName);

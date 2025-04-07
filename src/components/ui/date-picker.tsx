@@ -3,7 +3,6 @@ import * as React from "react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Calendar as CalendarIcon } from "lucide-react"
-import { type Locale } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -22,7 +21,7 @@ export interface DatePickerProps {
   maxDate?: Date
   required?: boolean
   className?: string
-  locale?: Locale
+  locale?: typeof fr
   placeholder?: string
 }
 
@@ -63,6 +62,7 @@ export function DatePicker({
         const isAfterMax = maxDate && dateToCheck > maxDate
         return Boolean(isBeforeMin || isAfterMax)
       },
+      locale,
     }
 
     if (mode === "single") {
@@ -111,7 +111,6 @@ export function DatePicker({
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar 
             {...getCalendarProps()}
-            locale={locale}
           />
         </PopoverContent>
       </Popover>

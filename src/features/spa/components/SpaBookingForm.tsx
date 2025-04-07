@@ -51,8 +51,11 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
   }, [userData, setValue]);
 
   // Handle date selection with proper typing
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
+  const handleDateSelect = (date: Date | Date[] | DateRange | undefined) => {
+    // Handle only single date selection for this form
+    if (date instanceof Date) {
+      setSelectedDate(date);
+    }
   };
 
   const onSubmit = async (data: SpaBookingFormValues) => {
