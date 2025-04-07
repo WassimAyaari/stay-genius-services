@@ -5,19 +5,17 @@ import { UpdateEventReservationStatusDTO } from '@/types/event';
 /**
  * Update event reservation status
  * Using the same approach as table reservations service
- * Let the database trigger handle updated_at
+ * Let the database handle timestamps via triggers
  */
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
     console.log('Updating event reservation status:', data);
     
-    // Update only the status field and let database triggers handle updated_at
+    // Update only the status field and let the database handle timestamps
     const { error } = await supabase
       .from('event_reservations')
       .update({ 
-        status: data.status,
-        // Include updated_at explicitly since the trigger might be expecting it
-        updated_at: new Date().toISOString()
+        status: data.status
       })
       .eq('id', data.id);
     
