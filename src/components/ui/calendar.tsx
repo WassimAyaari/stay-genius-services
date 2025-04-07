@@ -21,11 +21,10 @@ function Calendar({
   const months = React.useMemo(() => {
     const monthsArray = [];
     for (let i = 0; i < 12; i++) {
-      // Create a date object for each month to get the name correctly
+      // Récupérer le nom du mois en utilisant l'API de format
       const date = new Date(2000, i, 1);
-      const monthName = locale.localize?.month(date, {
-        width: 'wide',
-      }) || '';
+      // Utiliser une méthode sûre pour récupérer le nom du mois
+      const monthName = date.toLocaleString(locale.code, { month: 'long' });
       monthsArray.push(monthName);
     }
     return monthsArray;
