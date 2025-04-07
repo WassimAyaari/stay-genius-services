@@ -5,11 +5,14 @@ import { BedDouble, UtensilsCrossed, BellRing, Phone, Grid3X3 } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import MainMenu from './MainMenu';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Badge } from './ui/badge';
 
 const BottomNav = () => {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const { unreadCount } = useNotifications();
 
   // Handle scroll to hide/show navigation
   useEffect(() => {
@@ -36,7 +39,8 @@ const BottomNav = () => {
     {
       icon: <BellRing className="w-5 h-5" />,
       label: 'Notif',
-      path: '/notifications'
+      path: '/notifications',
+      badgeCount: unreadCount
     }, 
     {
       icon: <UtensilsCrossed className="w-5 h-5" />,
@@ -89,13 +93,22 @@ const BottomNav = () => {
                   key={`${item.path}-${item.label}`} 
                   to={item.path} 
                   className={cn(
-                    "flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors",
+                    "flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors relative",
                     location.pathname === item.path 
                       ? "text-primary" 
                       : "text-secondary hover:text-primary"
                   )}
                 >
-                  {item.icon}
+                  <div className="relative">
+                    {item.icon}
+                    {item.badgeCount && item.badgeCount > 0 && (
+                      <Badge 
+                        className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px] font-bold bg-teal-500"
+                      >
+                        {item.badgeCount > 9 ? '9+' : item.badgeCount}
+                      </Badge>
+                    )}
+                  </div>
                   <span className="text-xs font-medium">{item.label}</span>
                 </Link>
               )
