@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { BedDouble, UtensilsCrossed, Info, Phone, Grid3X3 } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, BellRing, Phone, Grid3X3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import MainMenu from './MainMenu';
@@ -34,9 +34,9 @@ const BottomNav = () => {
 
   const navItems = [
     {
-      icon: <Info className="w-5 h-5" />,
-      label: 'About Us',
-      path: '/about'
+      icon: <BellRing className="w-5 h-5" />,
+      label: 'Notif',
+      path: '/notifications'
     }, 
     {
       icon: <UtensilsCrossed className="w-5 h-5" />,
