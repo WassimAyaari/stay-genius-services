@@ -45,6 +45,12 @@ export const EventReservationsTab: React.FC<{
   };
   
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
+    console.log('Updating reservation status:', reservationId, status);
+    
+    toast.loading('Mise à jour du statut de la réservation...', {
+      id: `update-status-${reservationId}`
+    });
+    
     try {
       const update: UpdateEventReservationStatusDTO = {
         id: reservationId,
@@ -53,20 +59,23 @@ export const EventReservationsTab: React.FC<{
       
       updateReservationStatus(update);
       
-      // Show success toast after a short delay to allow the update to complete
+      // Rafraîchir les données après la mise à jour
       setTimeout(() => {
-        const statusLabel = status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente';
-        toast.success(`Réservation ${statusLabel} avec succès`);
-        
-        // Refresh the data
+        // Actualiser manuellement
         if (refetch) {
           refetch();
         }
-      }, 300);
+        
+        toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente'} avec succès`, {
+          id: `update-status-${reservationId}`
+        });
+      }, 500);
       
     } catch (error) {
       console.error('Error in handleUpdateStatus:', error);
-      toast.error("Erreur lors de la mise à jour du statut de la réservation");
+      toast.error("Erreur lors de la mise à jour du statut de la réservation", {
+        id: `update-status-${reservationId}`
+      });
     }
   };
   

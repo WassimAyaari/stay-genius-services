@@ -48,10 +48,13 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
 
   // Mutation for updating reservation status (admin use)
   const updateStatusMutation = useMutation({
-    mutationFn: (data: UpdateEventReservationStatusDTO) => updateEventReservationStatus(data),
+    mutationFn: (data: UpdateEventReservationStatusDTO) => {
+      console.log('Mutation function called with data:', data);
+      return updateEventReservationStatus(data);
+    },
     onSuccess: () => {
+      console.log('Mutation successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      toast.success('Statut de la réservation mis à jour');
     },
     onError: (error: any) => {
       console.error('Error updating event reservation status:', error);

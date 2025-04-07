@@ -7,7 +7,8 @@ import { UpdateEventReservationStatusDTO } from '@/types/event';
  */
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
-    // Only update the status field, nothing else
+    console.log('Updating event reservation status:', data);
+    
     const { error } = await supabase
       .from('event_reservations')
       .update({ status: data.status })
@@ -17,6 +18,8 @@ export const updateEventReservationStatus = async (data: UpdateEventReservationS
       console.error('Error updating event reservation status:', error);
       throw error;
     }
+    
+    console.log('Event reservation status updated successfully');
   } catch (error) {
     console.error('Error updating event reservation status:', error);
     throw error;
