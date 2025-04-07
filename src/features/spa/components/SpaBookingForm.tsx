@@ -6,7 +6,7 @@ import { SpaService } from '../types';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { toast } from 'sonner';
-import { format, addDays } from 'date-fns';
+import { addDays } from 'date-fns';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -74,7 +74,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
         guest_email: data.guestEmail,
         guest_phone: data.guestPhone,
         room_number: data.roomNumber,
-        date: format(selectedDate, 'yyyy-MM-dd'),
+        date: selectedDate.toISOString().split('T')[0],
         time: selectedTime,
         special_requests: data.specialRequests,
         status: 'pending' as 'pending' | 'confirmed' | 'cancelled' | 'completed'

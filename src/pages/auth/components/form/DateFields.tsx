@@ -2,11 +2,9 @@
 import React from 'react';
 import { UseFormReturn } from "react-hook-form";
 import { Button } from '@/components/ui/button';
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -69,7 +67,11 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "d MMMM yyyy", { locale: fr })
+                        field.value.toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })
                       ) : (
                         <span>Sélectionner</span>
                       )}
@@ -83,7 +85,6 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
-                    locale={fr}
                     className="pointer-events-auto bg-white"
                   />
                 </PopoverContent>
@@ -110,7 +111,11 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "d MMMM yyyy", { locale: fr })
+                        field.value.toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })
                       ) : (
                         <span>Sélectionner</span>
                       )}
@@ -124,7 +129,6 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                     selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
-                    locale={fr}
                     className="pointer-events-auto bg-white"
                   />
                 </PopoverContent>

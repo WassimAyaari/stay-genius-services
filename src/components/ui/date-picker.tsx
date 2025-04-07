@@ -1,7 +1,5 @@
 
 import * as React from "react"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -21,7 +19,6 @@ export interface DatePickerProps {
   maxDate?: Date
   required?: boolean
   className?: string
-  locale?: typeof fr
   placeholder?: string
 }
 
@@ -33,7 +30,6 @@ export function DatePicker({
   maxDate,
   required,
   className,
-  locale = fr,
   placeholder = "Sélectionner une date",
 }: DatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(
@@ -62,7 +58,6 @@ export function DatePicker({
         const isAfterMax = maxDate && dateToCheck > maxDate
         return Boolean(isBeforeMin || isAfterMax)
       },
-      locale,
     }
 
     if (mode === "single") {
@@ -91,7 +86,11 @@ export function DatePicker({
     return baseProps
   }
 
-  const formattedDate = date ? format(date, "PPP", { locale }) : placeholder;
+  const formattedDate = date ? date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }) : placeholder;
 
   return (
     <div className={className}>

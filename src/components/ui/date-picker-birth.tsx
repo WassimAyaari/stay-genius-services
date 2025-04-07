@@ -1,7 +1,5 @@
 
 import * as React from "react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,7 +47,11 @@ export function BirthDatePicker({
     }
   };
 
-  const formattedDate = date ? format(date, "d MMMM yyyy", { locale: fr }) : placeholder;
+  const formattedDate = date ? date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }) : placeholder;
 
   return (
     <div className={className}>
@@ -75,7 +77,6 @@ export function BirthDatePicker({
             onSelect={handleSelect}
             disabled={(date) => date > today || date < hundredYearsAgo}
             initialFocus
-            locale={fr}
             className="pointer-events-auto"
           />
         </PopoverContent>

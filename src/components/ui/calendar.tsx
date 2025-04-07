@@ -1,8 +1,7 @@
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
-import { fr } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,72 +13,93 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  locale = fr,
   ...props
 }: CalendarProps) {
-  // Generate month names from locale
+  const [currentYear, setCurrentYear] = React.useState(new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = React.useState(new Date().getMonth());
+  
+  // Generate month names
   const months = React.useMemo(() => {
-    const monthsArray = [];
-    for (let i = 0; i < 12; i++) {
-      // Récupérer le nom du mois en utilisant l'API de format
+    return Array.from({ length: 12 }).map((_, i) => {
       const date = new Date(2000, i, 1);
-      // Utiliser une méthode sûre pour récupérer le nom du mois
-      const monthName = date.toLocaleString(locale.code, { month: 'long' });
-      monthsArray.push(monthName);
+      return date.toLocaleString('default', { month: 'long' });
+    });
+  }, []);
+  
+  // Generate a range of years from 50 years ago to 50 years in the future
+  const years = React.useMemo(() => {
+    const currentYearNum = new Date().getFullYear();
+    return Array.from({ length: 101 }, (_, i) => currentYearNum - 50 + i);
+  }, []);
+  
+  // Compute current displayed date
+  const displayedDate = React.useMemo(() => {
+    return new Date(currentYear, currentMonth, 1);
+  }, [currentYear, currentMonth]);
+  
+  // Navigation handlers
+  const goToPreviousMonth = React.useCallback(() => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(prev => prev - 1);
+    } else {
+      setCurrentMonth(prev => prev - 1);
     }
-    return monthsArray;
-  }, [locale]);
+  }, [currentMonth]);
+  
+  const goToNextMonth = React.useCallback(() => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(prev => prev + 1);
+    } else {
+      setCurrentMonth(prev => prev + 1);
+    }
+  }, [currentMonth]);
+  
+  const goToPreviousYear = React.useCallback(() => {
+    setCurrentYear(prev => prev - 1);
+  }, []);
+  
+  const goToNextYear = React.useCallback(() => {
+    setCurrentYear(prev => prev + 1);
+  }, []);
 
-  // Custom component for calendar caption with quick selection
-  function CustomCaption({ 
-    displayMonth, 
-    onMonthChange 
-  }: { 
-    displayMonth: Date, 
-    onMonthChange: (date: Date) => void 
-  }) {
-    const currentYear = displayMonth.getFullYear();
-    const currentMonth = displayMonth.getMonth();
-    
-    // Generate a list of years (100 years in the past until 50 years in the future)
-    const currentYearDate = new Date();
-    const currentYearNumber = currentYearDate.getFullYear();
-    const startYear = currentYearNumber - 100;
-    const endYear = currentYearNumber + 50;
-    const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-    
+  // Custom header component
+  function CustomCaption() {
     return (
-      <div className="flex justify-between items-center gap-1 px-2">
-        {/* Navigation buttons and month/year selectors properly spaced */}
-        <button
-          onClick={() => {
-            const newDate = new Date(displayMonth);
-            newDate.setMonth(currentMonth - 1);
-            onMonthChange(newDate);
-          }}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "icon" }),
-            "h-7 w-7 bg-transparent border-0 hover:bg-muted p-0"
-          )}
-          title="Mois précédent"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
+      <div className="flex items-center justify-between px-2 py-1">
+        <div className="flex items-center">
+          <button
+            onClick={goToPreviousYear}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100"
+            )}
+          >
+            <ChevronsLeft className="h-4 w-4" />
+            <span className="sr-only">Année précédente</span>
+          </button>
+          <button
+            onClick={goToPreviousMonth}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100"
+            )}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Mois précédent</span>
+          </button>
+        </div>
         
-        <div className="flex gap-1">
-          {/* Sélecteur de mois */}
+        <div className="flex items-center gap-1">
           <Select
             value={currentMonth.toString()}
-            onValueChange={(value) => {
-              const newDate = new Date(displayMonth);
-              newDate.setMonth(parseInt(value));
-              onMonthChange(newDate);
-            }}
+            onValueChange={(value) => setCurrentMonth(parseInt(value))}
           >
-            <SelectTrigger className="h-7 w-[100px] text-xs font-medium border-0 focus:ring-0">
+            <SelectTrigger className="h-8 w-[110px] text-sm font-medium">
               <SelectValue>{months[currentMonth]}</SelectValue>
             </SelectTrigger>
-            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100] bg-white shadow-md">
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto">
               {months.map((month, index) => (
                 <SelectItem key={index} value={index.toString()}>
                   {month}
@@ -88,19 +108,14 @@ function Calendar({
             </SelectContent>
           </Select>
           
-          {/* Sélecteur d'année */}
           <Select
             value={currentYear.toString()}
-            onValueChange={(value) => {
-              const newDate = new Date(displayMonth);
-              newDate.setFullYear(parseInt(value));
-              onMonthChange(newDate);
-            }}
+            onValueChange={(value) => setCurrentYear(parseInt(value))}
           >
-            <SelectTrigger className="h-7 w-[70px] text-xs font-medium border-0 focus:ring-0">
+            <SelectTrigger className="h-8 w-[80px] text-sm font-medium">
               <SelectValue>{currentYear}</SelectValue>
             </SelectTrigger>
-            <SelectContent position="popper" className="max-h-60 overflow-y-auto z-[100] bg-white shadow-md">
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto">
               {years.map((year) => (
                 <SelectItem key={year} value={year.toString()}>
                   {year}
@@ -110,70 +125,75 @@ function Calendar({
           </Select>
         </div>
         
-        <button
-          onClick={() => {
-            const newDate = new Date(displayMonth);
-            newDate.setMonth(currentMonth + 1);
-            onMonthChange(newDate);
-          }}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "icon" }),
-            "h-7 w-7 bg-transparent border-0 hover:bg-muted p-0"
-          )}
-          title="Mois suivant"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={goToNextMonth}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100"
+            )}
+          >
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Mois suivant</span>
+          </button>
+          <button
+            onClick={goToNextYear}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100"
+            )}
+          >
+            <ChevronsRight className="h-4 w-4" />
+            <span className="sr-only">Année suivante</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <DayPicker
+      month={displayedDate}
+      onMonthChange={(month) => {
+        setCurrentMonth(month.getMonth());
+        setCurrentYear(month.getFullYear());
+      }}
       showOutsideDays={showOutsideDays}
-      className={cn("p-3 pointer-events-auto bg-white rounded-md shadow-md border", className)}
+      className={cn("p-3 pointer-events-auto bg-white rounded-xl shadow-lg", className)}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center h-10",
-        caption_label: "text-sm font-medium hidden",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 hidden"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        months: "flex flex-col space-y-4",
+        month: "space-y-2",
+        caption: "flex justify-center relative items-center h-10 hidden",
+        caption_label: "hidden",
+        nav: "hidden",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        head_cell: "text-muted-foreground rounded-md w-10 font-normal text-[0.8rem]",
+        row: "flex w-full mt-1",
+        cell: "h-10 w-10 text-center text-sm relative p-0 focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-10 w-10 p-0 font-medium rounded-full aria-selected:opacity-100 hover:bg-primary/15"
         ),
-        day_range_end: "day-range-end",
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-full",
+        day_today: "border border-primary text-primary-dark rounded-full",
         day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+          "day-outside text-muted-foreground opacity-50",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+          "aria-selected:bg-accent aria-selected:text-accent-foreground rounded-full",
         day_hidden: "invisible",
         ...classNames,
       }}
       components={{
         Caption: CustomCaption
       }}
-      locale={locale}
       {...props}
     />
   );
 }
+
 Calendar.displayName = "Calendar";
 
 export { Calendar };
