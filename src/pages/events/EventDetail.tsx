@@ -29,11 +29,21 @@ import {
 import Layout from '@/components/Layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEventReservationDetail } from '@/hooks/useEventReservationDetail';
+import { toast } from 'sonner';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { reservation, isLoading, error, cancelReservation } = useEventReservationDetail(id || '');
+
+  const handleCancelReservation = async () => {
+    try {
+      await cancelReservation();
+    } catch (error) {
+      toast.error("Une erreur s'est produite lors de l'annulation de la réservation");
+      console.error("Error during reservation cancellation:", error);
+    }
+  };
 
   if (isLoading) {
     return <EventDetailSkeleton />;
@@ -211,7 +221,7 @@ const EventDetail = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction onClick={cancelReservation}>
+                      <AlertDialogAction onClick={handleCancelReservation}>
                         Oui, annuler la réservation
                       </AlertDialogAction>
                     </AlertDialogFooter>

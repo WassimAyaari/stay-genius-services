@@ -93,6 +93,7 @@ export const useEventReservationDetail = (reservationId: string) => {
     try {
       if (!reservation) throw new Error('No reservation to cancel');
       
+      // Modifié pour ne pas utiliser de champ updated_at
       const { error } = await supabase
         .from('event_reservations')
         .update({ status: 'cancelled' })
