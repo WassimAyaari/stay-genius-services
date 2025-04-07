@@ -24,10 +24,10 @@ export const useEventReservationDetail = (reservationId: string) => {
     }
     
     try {
-      await cancelReservation(reservationId);
+      const result = await cancelReservation(reservationId);
       // Refetch pour mettre à jour l'UI après annulation
       await refetch();
-      return true;
+      return result;
     } catch (error) {
       console.error('Error in handleCancelReservation:', error);
       throw error; // Propager l'erreur pour gestion dans le composant

@@ -1,6 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { updateEventReservationStatus } from '@/features/events/services/reservationUpdater';
+import { UpdateEventReservationStatusDTO } from '@/types/event';
 
 /**
  * Hook for cancelling event reservations
@@ -20,26 +22,20 @@ export const useEventReservationCancellation = () => {
       
       console.log(`Attempting to cancel reservation with ID: ${reservationId}`);
       
-      // Update the reservation status to 'cancelled'
-      const { data, error } = await supabase
-        .from('event_reservations')
-        .update({ status: 'cancelled' })
-        .eq('id', reservationId)
-        .select();
-        
-      if (error) {
-        console.error('Error cancelling reservation:', error);
-        toast.error('Erreur lors de l\'annulation de la réservation');
-        throw error;
-      }
+      // Use the dedicated service to update the status
+      const updateDTO: UpdateEventReservationStatusDTO = {
+        id: reservationId,
+        status: 'cancelled'
+      };
       
-      console.log('Cancellation successful, response data:', data);
+      await updateEventReservationStatus(updateDTO);
+      
       toast.success('Réservation annulée avec succès');
       return true;
     } catch (error) {
       console.error('Error cancelling reservation:', error);
       toast.error('Erreur lors de l\'annulation de la réservation');
-      throw error; // Rethrow to handle in the component
+      throw error;
     }
   };
 
