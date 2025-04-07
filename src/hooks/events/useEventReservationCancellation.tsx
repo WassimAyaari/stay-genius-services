@@ -21,7 +21,6 @@ export const useEventReservationCancellation = () => {
       console.log(`Attempting to cancel reservation with ID: ${reservationId}`);
       
       // Update the reservation status to 'cancelled'
-      // Suppression de la référence à updated_at qui cause l'erreur
       const { data, error } = await supabase
         .from('event_reservations')
         .update({ status: 'cancelled' })

@@ -7,7 +7,6 @@ import { UpdateEventReservationStatusDTO } from '@/types/event';
  */
 export const updateEventReservationStatus = async (data: UpdateEventReservationStatusDTO): Promise<void> => {
   try {
-    // Correction : suppression de toute référence à updated_at qui cause l'erreur
     const { error } = await supabase
       .from('event_reservations')
       .update({ status: data.status })
