@@ -99,6 +99,37 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
       })
       .subscribe();
       
+    // Channel for event reservation updates
+    const eventReservationChannel = supabase
+      .channel('event_reservation_updates_chat')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'event_reservations',
+        filter: `user_id=eq.${userId}`,
+      }, (payload) => {
+        console.log('Event reservation updated:', payload);
+        
+        if (payload.old.status === payload.new.status) return;
+        
+        // Show a toast notification for the event reservation update
+        const statusMap: Record<string, string> = {
+          'pending': 'est en attente de confirmation',
+          'confirmed': 'a été confirmée',
+          'cancelled': 'a été annulée'
+        };
+        
+        const status = payload.new.status;
+        const message = statusMap[status] || 'a été mise à jour';
+        
+        const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
+        
+        toast.info(`Mise à jour de réservation d'événement`, {
+          description: `Votre réservation d'événement pour le ${date} ${message}.`
+        });
+      })
+      .subscribe();
+      
     // Channel for reservation updates by email
     let emailReservationChannel;
     const userEmail = localStorage.getItem('user_email');
@@ -138,6 +169,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
     return () => {
       supabase.removeChannel(serviceChannel);
       supabase.removeChannel(reservationChannel);
+      supabase.removeChannel(eventReservationChannel);
       if (emailReservationChannel) {
         supabase.removeChannel(emailReservationChannel);
       }

@@ -2,6 +2,7 @@
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useTableReservations } from '@/hooks/useTableReservations';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
+import { useEventReservations } from '@/hooks/useEventReservations';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { NotificationItem } from '@/types/notification';
 import { useNotificationsState } from './notifications/useNotificationsState';
@@ -19,6 +20,7 @@ export const useNotifications = () => {
   const { data: serviceRequests = [], refetch: refetchServices } = useServiceRequests();
   const { reservations = [], refetch: refetchReservations } = useTableReservations();
   const { bookings: spaBookings = [], refetch: refetchSpaBookings } = useSpaBookings();
+  const { reservations: eventReservations = [], refetch: refetchEventReservations } = useEventReservations();
   
   // Get notification state management
   const { hasNewNotifications, setHasNewNotifications } = useNotificationsState();
@@ -37,12 +39,13 @@ export const useNotifications = () => {
       await Promise.all([
         refetchServices(),
         refetchReservations(),
-        refetchSpaBookings()
+        refetchSpaBookings(),
+        refetchEventReservations()
       ]);
     };
     
     fetchInitialData();
-  }, [refetchServices, refetchReservations, refetchSpaBookings]);
+  }, [refetchServices, refetchReservations, refetchSpaBookings, refetchEventReservations]);
   
   // Set up real-time notification listeners
   useNotificationsRealtime(
@@ -52,6 +55,7 @@ export const useNotifications = () => {
     refetchReservations,
     refetchServices,
     refetchSpaBookings,
+    refetchEventReservations,
     setHasNewNotifications
   );
 
@@ -59,7 +63,8 @@ export const useNotifications = () => {
   const notifications: NotificationItem[] = combineAndSortNotifications(
     serviceRequests,
     reservations,
-    spaBookings
+    spaBookings,
+    eventReservations
   );
 
   // Count unread notifications
@@ -77,6 +82,7 @@ export const useNotifications = () => {
     setHasNewNotifications,
     refetchServices,
     refetchReservations,
-    refetchSpaBookings
+    refetchSpaBookings,
+    refetchEventReservations
   };
 };

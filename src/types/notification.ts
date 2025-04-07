@@ -23,7 +23,7 @@ export interface NotificationItem {
   };
 }
 
-// Type définitions for spa bookings in notifications
+// Type definitions for spa bookings in notifications
 export interface SpaBooking {
   id: string;
   service_id: string;

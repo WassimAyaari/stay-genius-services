@@ -93,6 +93,29 @@ export const transformSpaBookings = (bookings: any[]): NotificationItem[] => {
   }));
 };
 
+// Transform event reservations to notifications
+export const transformEventReservations = (reservations: any[]): NotificationItem[] => {
+  if (!Array.isArray(reservations)) return [];
+  
+  return reservations.map(reservation => ({
+    id: reservation.id || `event-${Math.random().toString(36).substr(2, 9)}`,
+    type: 'event_reservation',
+    title: 'Réservation d\'événement',
+    description: `${reservation.date} - ${reservation.guests} personne(s)`,
+    icon: '📅',
+    status: reservation.status || 'pending',
+    time: createSafeDate(reservation.createdAt || reservation.created_at) || new Date(),
+    link: `/events/reservations/${reservation.id}`,
+    data: {
+      date: reservation.date,
+      guests: reservation.guests,
+      event_id: reservation.eventId || reservation.event_id,
+      room_number: reservation.roomNumber || reservation.room_number,
+      special_requests: reservation.specialRequests || reservation.special_requests
+    }
+  }));
+};
+
 // Helper function to get an icon based on service type
 function getServiceIcon(type: string): string {
   switch (type) {
@@ -108,18 +131,21 @@ function getServiceIcon(type: string): string {
 export const combineAndSortNotifications = (
   serviceRequests: any[] = [],
   reservations: any[] = [],
-  spaBookings: any[] = []
+  spaBookings: any[] = [],
+  eventReservations: any[] = []
 ): NotificationItem[] => {
   // Transform the different types of notifications
   const requestNotifications = transformServiceRequests(serviceRequests);
   const reservationNotifications = transformTableReservations(reservations);
   const spaNotifications = transformSpaBookings(spaBookings);
+  const eventNotifications = transformEventReservations(eventReservations);
   
   // Combine all notifications
   const allNotifications = [
     ...requestNotifications,
     ...reservationNotifications,
-    ...spaNotifications
+    ...spaNotifications,
+    ...eventNotifications
   ];
   
   // Sort by date, newest first

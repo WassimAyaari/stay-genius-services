@@ -13,6 +13,7 @@ export const useNotificationsRealtime = (
   refetchReservations: () => void,
   refetchServices: () => void,
   refetchSpaBookings: () => void,
+  refetchEventReservations: () => void,
   setHasNewNotifications: (value: boolean) => void
 ) => {
   // Set up real-time listeners for notifications
@@ -53,12 +54,23 @@ export const useNotificationsRealtime = (
       const spaRoomChannel = setupSpaBookingListenerByRoom(userRoomNumber, refetchSpaBookings, setHasNewNotifications);
       channels.push(spaRoomChannel);
     }
+
+    // Listen for event reservation updates by user ID or email
+    if (userId) {
+      const eventUserChannel = setupEventReservationListenerById(userId, refetchEventReservations, setHasNewNotifications);
+      channels.push(eventUserChannel);
+    }
+    
+    if (userEmail) {
+      const eventEmailChannel = setupEventReservationListenerByEmail(userEmail, refetchEventReservations, setHasNewNotifications);
+      channels.push(eventEmailChannel);
+    }
     
     return () => {
       console.log("Cleaning up real-time listeners for notifications");
       channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [userId, userEmail, userRoomNumber, refetchReservations, refetchServices, refetchSpaBookings, setHasNewNotifications]);
+  }, [userId, userEmail, userRoomNumber, refetchReservations, refetchServices, refetchSpaBookings, refetchEventReservations, setHasNewNotifications]);
 };
 
 /**
@@ -192,6 +204,58 @@ const setupSpaBookingListenerByRoom = (
 };
 
 /**
+ * Set up listener for event reservation updates by user ID
+ */
+const setupEventReservationListenerById = (
+  userId: string,
+  refetchEventReservations: () => void,
+  setHasNewNotifications: (value: boolean) => void
+) => {
+  return supabase
+    .channel('notification_event_user_updates')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'event_reservations',
+      filter: `user_id=eq.${userId}`,
+    }, (payload) => {
+      console.log('Notification event reservation update received by user ID:', payload);
+      setHasNewNotifications(true);
+      refetchEventReservations();
+      
+      // Show toast for status updates
+      handleEventReservationStatusChange(payload);
+    })
+    .subscribe();
+};
+
+/**
+ * Set up listener for event reservation updates by email
+ */
+const setupEventReservationListenerByEmail = (
+  userEmail: string,
+  refetchEventReservations: () => void,
+  setHasNewNotifications: (value: boolean) => void
+) => {
+  return supabase
+    .channel('notification_event_email_updates')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'event_reservations',
+      filter: `guest_email=eq.${userEmail}`,
+    }, (payload) => {
+      console.log('Notification event reservation email update received:', payload);
+      setHasNewNotifications(true);
+      refetchEventReservations();
+      
+      // Show toast for status updates
+      handleEventReservationStatusChange(payload);
+    })
+    .subscribe();
+};
+
+/**
  * Handle reservation status change toasts
  */
 const handleReservationStatusChange = (payload: any) => {
@@ -249,6 +313,26 @@ const handleSpaBookingStatusChange = (payload: any) => {
     
     toast.info(`Mise à jour de réservation spa`, {
       description: `Votre réservation de spa ${message}.`
+    });
+  }
+};
+
+/**
+ * Handle event reservation status change toasts
+ */
+const handleEventReservationStatusChange = (payload: any) => {
+  if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
+    const statusMap: Record<string, string> = {
+      'pending': 'est en attente',
+      'confirmed': 'a été confirmée',
+      'cancelled': 'a été annulée'
+    };
+    
+    const status = payload.new.status;
+    const message = statusMap[status] || 'a été mise à jour';
+    
+    toast.info(`Mise à jour de réservation d'événement`, {
+      description: `Votre réservation d'événement ${message}.`
     });
   }
 };
