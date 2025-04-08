@@ -99,7 +99,7 @@ export const transformEventReservations = (reservations: any[]): NotificationIte
   
   return reservations.map(reservation => ({
     id: reservation.id || `event-${Math.random().toString(36).substr(2, 9)}`,
-    type: 'event_reservation', // S'assurer que le type est 'event_reservation' et non 'notification'
+    type: 'event_reservation',
     title: 'Réservation d\'événement',
     description: `${reservation.date} - ${reservation.guests} personne(s)`,
     icon: '📅',

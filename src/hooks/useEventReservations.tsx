@@ -1,14 +1,28 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { getUserEventReservations } from '@/features/events/services/eventReservationService';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 export const useEventReservations = () => {
   const [reservations, setReservations] = useState([]);
+  const { user } = useAuth();
   
-  const refetchEventReservations = async () => {
-    // Cette fonction ne fait plus rien car les réservations d'événements ont été supprimées
-    console.log('Reservation system has been removed');
-    return [];
-  };
+  const refetchEventReservations = useCallback(async () => {
+    try {
+      const userId = user?.id;
+      const userEmail = user?.email;
+      
+      if (userId || userEmail) {
+        const data = await getUserEventReservations(userId, userEmail);
+        setReservations(data);
+        return data;
+      }
+      return [];
+    } catch (error) {
+      console.error("Erreur lors de la récupération des réservations d'événements:", error);
+      return [];
+    }
+  }, [user]);
   
   return {
     reservations,
