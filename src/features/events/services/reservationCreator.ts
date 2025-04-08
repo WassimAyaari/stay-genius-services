@@ -32,6 +32,7 @@ export const createEventReservation = async (reservation: CreateEventReservation
   const reservationData = mapDtoToRow(reservation, userId);
   
   try {
+    // Use the full row data object instead of a partial one
     const { data, error } = await supabase
       .from('event_reservations')
       .insert(reservationData)
@@ -47,7 +48,7 @@ export const createEventReservation = async (reservation: CreateEventReservation
       throw new Error('Aucune donnée retournée lors de la création de la réservation');
     }
 
-    // Properly cast the returned data to our expected structure
+    // Map the returned data to our expected structure
     const result = data as unknown as EventReservationRow;
     
     return mapRowToEventReservation(result);

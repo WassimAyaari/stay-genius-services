@@ -10,11 +10,12 @@ export interface EventReservationRow {
   guest_email: string | null;
   guest_phone: string | null;
   room_number: string | null;
-  date: string;
+  date: string;  // This is a required field
   guests: number;
   special_requests: string | null;
   status: string;
   created_at: string;
+  updated_at: string;
 }
 
 // Re-export the types from the main types file for ease of import

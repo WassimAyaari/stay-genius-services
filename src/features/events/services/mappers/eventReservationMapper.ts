@@ -5,7 +5,8 @@ import { EventReservationRow } from '../../types/eventReservation';
 /**
  * Map a DTO to a row structure for database insertion
  */
-export const mapDtoToRow = (dto: CreateEventReservationDTO, userId: string | null): Partial<EventReservationRow> => {
+export const mapDtoToRow = (dto: CreateEventReservationDTO, userId: string | null): EventReservationRow => {
+  // Return a complete EventReservationRow with all required fields
   return {
     event_id: dto.eventId,
     user_id: userId || null,
@@ -13,10 +14,13 @@ export const mapDtoToRow = (dto: CreateEventReservationDTO, userId: string | nul
     guest_email: dto.guestEmail || null,
     guest_phone: dto.guestPhone || null,
     room_number: dto.roomNumber || null,
-    date: dto.date,
+    date: dto.date, // Ensure date is always provided
     guests: dto.guests,
     special_requests: dto.specialRequests || null,
-    status: dto.status || 'pending'
+    status: dto.status || 'pending',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    id: crypto.randomUUID() // Generate a UUID for new records
   };
 };
 
