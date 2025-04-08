@@ -196,7 +196,7 @@ const EventReservationDetail = () => {
               <Button 
                 variant="destructive" 
                 onClick={handleCancelReservation} 
-                disabled={loadingReservation || reservation.status === 'cancelled'}
+                disabled={loadingReservation}
               >
                 Annuler la réservation
               </Button>
