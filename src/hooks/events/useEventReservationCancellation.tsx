@@ -1,45 +1,31 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { updateEventReservationStatus } from '@/features/events/services/reservationUpdater';
-import { UpdateEventReservationStatusDTO } from '@/types/event';
+import { updateEventReservationStatus } from '@/features/events/services/eventReservationService';
 
 /**
  * Hook for cancelling event reservations
  */
 export const useEventReservationCancellation = () => {
-  /**
-   * Cancels an event reservation by setting its status to 'cancelled'
-   * @param reservationId The ID of the reservation to cancel
-   */
-  const cancelReservation = async (reservationId: string) => {
-    try {
-      if (!reservationId) {
-        const error = new Error('No reservation to cancel');
-        toast.error('Erreur: ID de réservation manquant');
-        throw error;
-      }
-      
-      console.log(`Attempting to cancel reservation with ID: ${reservationId}`);
-      
-      // Use the dedicated service to update the status
-      const updateDTO: UpdateEventReservationStatusDTO = {
-        id: reservationId,
-        status: 'cancelled'
-      };
-      
-      await updateEventReservationStatus(updateDTO);
-      
+  const queryClient = useQueryClient();
+  
+  const mutation = useMutation({
+    mutationFn: async (reservationId: string): Promise<void> => {
+      await updateEventReservationStatus({ id: reservationId, status: 'cancelled' });
+    },
+    onSuccess: () => {
+      // Invalidate all event reservations queries
+      queryClient.invalidateQueries({ queryKey: ['eventReservations'] });
       toast.success('Réservation annulée avec succès');
-      return true;
-    } catch (error) {
-      console.error('Error cancelling reservation:', error);
-      toast.error('Erreur lors de l\'annulation de la réservation');
-      throw error;
+    },
+    onError: (error: any) => {
+      console.error('Error cancelling event reservation:', error);
+      toast.error(error.message || "Erreur lors de l'annulation de la réservation");
     }
-  };
+  });
 
   return {
-    cancelReservation
+    cancelReservation: mutation.mutate,
+    isCancelling: mutation.isPending
   };
 };

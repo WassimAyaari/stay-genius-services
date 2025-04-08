@@ -19,7 +19,8 @@ export const eventSchema = z.object({
   date: z.string().min(3, {
     message: 'Date is required'
   }),
-  time: z.string().optional()
+  time: z.string().optional(),
+  capacity: z.number().optional().default(10)
 });
 
 export type EventFormValues = z.infer<typeof eventSchema>;
