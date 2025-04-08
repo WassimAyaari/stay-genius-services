@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
@@ -43,8 +42,8 @@ const Events = () => {
   const handleReservationSuccess = () => {
     setIsBookingOpen(false);
     toast({
-      title: "Réservation confirmée",
-      description: "Votre réservation a été enregistrée avec succès.",
+      title: "Reservation confirmed",
+      description: "Your reservation has been saved successfully.",
     });
   };
 
@@ -60,11 +59,11 @@ const Events = () => {
         <div className="mb-6">
           {loading ? (
             <div className="h-[70vh] rounded-3xl bg-gray-100 animate-pulse flex items-center justify-center">
-              <p className="text-gray-500">Chargement des événements...</p>
+              <p className="text-gray-500">Loading events...</p>
             </div>
           ) : events.length === 0 ? (
             <div className="h-[50vh] rounded-3xl bg-gray-100 flex items-center justify-center">
-              <p className="text-gray-500">Aucun événement disponible</p>
+              <p className="text-gray-500">No events available</p>
             </div>
           ) : (
             <Carousel
@@ -100,12 +99,12 @@ const Events = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                       <div className="absolute bottom-0 left-0 p-6 text-white">
                         <span className="text-sm font-medium bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full mb-2 inline-block">
-                          {event.category === 'event' ? 'Événement' : 'Promotion'}
+                          {event.category === 'event' ? 'Event' : 'Promotion'}
                         </span>
                         <h1 className="text-2xl font-bold mb-1">{event.title}</h1>
                         <p className="mb-3">{event.description}</p>
                         <Button size="sm" onClick={() => handleBookEvent(event)}>
-                          Réserver
+                          Book
                         </Button>
                       </div>
                     </div>
@@ -125,13 +124,13 @@ const Events = () => {
 
         {/* Upcoming Events */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">Événements à venir</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-6">Upcoming Events</h2>
           <div className="space-y-6">
             {loading ? (
               <div className="h-48 rounded-lg bg-gray-100 animate-pulse"></div>
             ) : events.filter(event => event.category === 'event').length === 0 ? (
               <Card className="p-4 text-center">
-                <p className="text-gray-500">Aucun événement à venir</p>
+                <p className="text-gray-500">No upcoming events</p>
               </Card>
             ) : (
               events
@@ -175,13 +174,13 @@ const Events = () => {
                           )}
                           <div className="flex items-center text-sm text-gray-600">
                             <Users className="h-4 w-4 mr-2 text-primary" />
-                            <span>Places limitées</span>
+                            <span>Limited spots</span>
                           </div>
                         </div>
                         <p className="text-gray-600 mb-4">{event.description}</p>
                         <div className="flex gap-3">
-                          <Button onClick={() => handleBookEvent(event)}>Réserver</Button>
-                          <Button variant="outline">Ajouter au calendrier</Button>
+                          <Button onClick={() => handleBookEvent(event)}>Book</Button>
+                          <Button variant="outline">Add to Calendar</Button>
                         </div>
                       </div>
                     </div>
@@ -193,7 +192,7 @@ const Events = () => {
 
         {/* Special Promotions */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">Promotions spéciales</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-6">Special Promotions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {loading ? (
               Array.from({ length: 2 }).map((_, i) => (
@@ -201,7 +200,7 @@ const Events = () => {
               ))
             ) : events.filter(event => event.category === 'promo').length === 0 ? (
               <Card className="p-4 text-center col-span-2">
-                <p className="text-gray-500">Aucune promotion en cours</p>
+                <p className="text-gray-500">No active promotions</p>
               </Card>
             ) : (
               events
@@ -216,17 +215,17 @@ const Events = () => {
                       />
                       <div className="absolute top-0 left-0 bg-primary text-white text-xs font-bold px-3 py-1 m-3 rounded-full">
                         <Percent className="h-3 w-3 inline mr-1" />
-                        Offre spéciale
+                        Special Offer
                       </div>
                     </div>
                     <div className="p-4">
                       <h3 className="text-lg font-semibold mb-2">{promo.title}</h3>
                       <div className="flex items-center text-sm text-gray-600 mb-3">
                         <Calendar className="h-4 w-4 mr-2 text-primary" />
-                        <span>Valable jusqu'au {format(new Date(promo.date), 'dd/MM/yyyy')}</span>
+                        <span>Valid until {format(new Date(promo.date), 'dd/MM/yyyy')}</span>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">{promo.description}</p>
-                      <Button className="w-full" onClick={() => handleBookEvent(promo)}>Voir les détails</Button>
+                      <Button className="w-full" onClick={() => handleBookEvent(promo)}>View Details</Button>
                     </div>
                   </Card>
                 ))
@@ -236,15 +235,15 @@ const Events = () => {
 
         {/* Event Calendar */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">Calendrier des événements</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-6">Event Calendar</h2>
           <Card className="p-6 rounded-xl">
             <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold mb-1">Voir tous les événements à venir</h3>
-              <p className="text-gray-600">Planifiez votre séjour avec notre calendrier d'événements</p>
+              <h3 className="text-lg font-semibold mb-1">View all upcoming events</h3>
+              <p className="text-gray-600">Plan your stay with our event calendar</p>
             </div>
             <Button className="w-full gap-2">
               <Calendar className="h-4 w-4" />
-              Ouvrir le calendrier
+              Open Calendar
             </Button>
           </Card>
         </div>
@@ -252,13 +251,13 @@ const Events = () => {
         {/* Subscribe Section */}
         <div className="mb-8">
           <Card className="p-6 rounded-xl bg-primary/5">
-            <h3 className="text-xl font-semibold mb-2 text-center">Restez informé</h3>
-            <p className="text-center text-gray-600 mb-4">Abonnez-vous pour recevoir des alertes sur les nouveaux événements et promotions</p>
+            <h3 className="text-xl font-semibold mb-2 text-center">Stay Informed</h3>
+            <p className="text-center text-gray-600 mb-4">Subscribe to receive alerts about new events and promotions</p>
             <div className="flex gap-2">
-              <Input placeholder="Entrez votre email" className="flex-1" />
+              <Input placeholder="Enter your email" className="flex-1" />
               <Button className="gap-2">
                 <Ticket className="h-4 w-4" />
-                S'abonner
+                Subscribe
               </Button>
             </div>
           </Card>

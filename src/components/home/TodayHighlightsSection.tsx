@@ -13,7 +13,7 @@ const TodayHighlightsSection = () => {
   if (loading) {
     return (
       <section className="px-6 mb-10">
-        <h2 className="text-2xl font-bold text-secondary mb-4">Les Événements du Jour</h2>
+        <h2 className="text-2xl font-bold text-secondary mb-4">Today's Events</h2>
         <div className="grid grid-cols-1 gap-4">
           <Card className="p-4 h-32 animate-pulse bg-gray-100" />
           <Card className="p-4 h-32 animate-pulse bg-gray-100" />
@@ -25,12 +25,12 @@ const TodayHighlightsSection = () => {
   if (todayEvents.length === 0) {
     return (
       <section className="px-6 mb-10">
-        <h2 className="text-2xl font-bold text-secondary mb-4">Les Événements du Jour</h2>
+        <h2 className="text-2xl font-bold text-secondary mb-4">Today's Events</h2>
         <Card className="p-6 text-center">
-          <p className="text-gray-500">Aucun événement prévu aujourd'hui</p>
+          <p className="text-gray-500">No events scheduled today</p>
           <Link to="/events">
             <Button variant="link" className="mt-2">
-              Voir tous les événements à venir
+              View all upcoming events
             </Button>
           </Link>
         </Card>
@@ -40,7 +40,7 @@ const TodayHighlightsSection = () => {
 
   return (
     <section className="px-6 mb-10">
-      <h2 className="text-2xl font-bold text-secondary mb-4">Les Événements du Jour</h2>
+      <h2 className="text-2xl font-bold text-secondary mb-4">Today's Events</h2>
       <div className="grid grid-cols-1 gap-4">
         {todayEvents.map((event) => (
           <Card key={event.id} className="overflow-hidden">
@@ -62,14 +62,14 @@ const TodayHighlightsSection = () => {
                     )}
                     <h3 className="text-lg font-semibold text-secondary">{event.title}</h3>
                   </div>
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Aujourd'hui</span>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Today</span>
                 </div>
                 <p className="text-gray-600 text-sm mb-2">
                   {event.time} {event.location && `- ${event.location}`}
                 </p>
                 <Link to="/events">
                   <Button size="sm" className="w-full sm:w-auto">
-                    {event.category === 'event' ? 'Réserver' : 'En profiter'}
+                    {event.category === 'event' ? 'Book' : 'View Offer'}
                   </Button>
                 </Link>
               </div>

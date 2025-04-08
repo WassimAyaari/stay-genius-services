@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from "@/components/ui/input";
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 export const EventsTab = () => {
   const { events, loading: eventsLoading, createEvent, updateEvent, deleteEvent } = useEvents();
@@ -53,11 +53,11 @@ export const EventsTab = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Événements</h2>
+        <h2 className="text-2xl font-semibold">Events</h2>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Input
-              placeholder="Rechercher..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-64"
@@ -67,12 +67,12 @@ export const EventsTab = () => {
             <DialogTrigger asChild>
               <Button onClick={() => setEditingEvent(null)} className="bg-[#00AEBB]">
                 <Plus className="h-4 w-4 mr-2" />
-                Ajouter un événement
+                Add Event
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[550px]">
               <DialogHeader>
-                <DialogTitle>{editingEvent ? 'Modifier l\'événement' : 'Ajouter un événement'}</DialogTitle>
+                <DialogTitle>{editingEvent ? 'Edit Event' : 'Add Event'}</DialogTitle>
               </DialogHeader>
               <EventForm onSubmit={editingEvent ? handleUpdateEvent : handleCreateEvent} initialData={editingEvent} />
             </DialogContent>
@@ -82,12 +82,12 @@ export const EventsTab = () => {
 
       {eventsLoading ? (
         <div className="p-10 text-center">
-          <p className="text-lg text-muted-foreground">Chargement des événements...</p>
+          <p className="text-lg text-muted-foreground">Loading events...</p>
         </div>
       ) : filteredEvents.length === 0 ? (
         <div className="p-10 text-center border rounded-md bg-gray-50">
           <p className="text-lg text-muted-foreground">
-            {searchTerm ? 'Aucun événement trouvé avec ces critères' : 'Aucun événement trouvé'}
+            {searchTerm ? 'No events found with these criteria' : 'No events found'}
           </p>
         </div>
       ) : (
@@ -95,11 +95,11 @@ export const EventsTab = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Lieu</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Location</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Mise en avant</TableHead>
+                <TableHead>Featured</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -116,13 +116,13 @@ export const EventsTab = () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">
-                      {event.category === 'event' ? 'Événement' : 'Promotion'}
+                      {event.category === 'event' ? 'Event' : 'Promotion'}
                     </Badge>
                   </TableCell>
                   <TableCell>{event.location || '-'}</TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span>{format(new Date(event.date), 'dd MMM yyyy', { locale: fr })}</span>
+                      <span>{format(new Date(event.date), 'dd MMM yyyy', { locale: enUS })}</span>
                       {event.time && <span className="text-sm text-muted-foreground">{event.time}</span>}
                     </div>
                   </TableCell>
@@ -130,7 +130,7 @@ export const EventsTab = () => {
                     {event.is_featured ? (
                       <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
                         <Star className="h-3 w-3 mr-1 fill-amber-500" />
-                        Mis en avant
+                        Featured
                       </Badge>
                     ) : (
                       '-'
@@ -165,18 +165,18 @@ export const EventsTab = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+                            <AlertDialogTitle>Delete Confirmation</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
+                              Are you sure you want to delete this event? This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => deleteEvent(event.id)} 
                               className="bg-red-500 hover:bg-red-600"
                             >
-                              Supprimer
+                              Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

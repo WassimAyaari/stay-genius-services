@@ -10,6 +10,7 @@ import { Calendar } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
 import { useEvents } from '@/hooks/useEvents';
 import { Badge } from '@/components/ui/badge';
+
 const EventsStories: React.FC = () => {
   const {
     stories,
@@ -25,6 +26,7 @@ const EventsStories: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const isMobile = useIsMobile();
+
   const handleMarkAsSeen = async (id: string, index: number) => {
     if (!viewedStories.includes(id)) {
       setViewedStories([...viewedStories, id]);
@@ -33,6 +35,7 @@ const EventsStories: React.FC = () => {
     setSelectedStoryIndex(index);
     setStoryViewerOpen(true);
   };
+
   React.useEffect(() => {
     if (!carouselApi) return;
     const onSelect = () => {
@@ -44,17 +47,17 @@ const EventsStories: React.FC = () => {
     };
   }, [carouselApi]);
 
-  // Fonction pour récupérer le titre de l'événement associé à une story
   const getEventTitle = (story: Story) => {
     if (!story.eventId) return null;
     const linkedEvent = events.find(event => event.id === story.eventId);
     return linkedEvent?.title || null;
   };
+
   if (loading) {
     return <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-secondary">Événements & Promos</h2>
-          <Link to="/events" className="text-primary text-sm font-medium">Voir tout</Link>
+          <h2 className="text-2xl font-bold text-secondary">Events & Promos</h2>
+          <Link to="/events" className="text-primary text-sm font-medium">See all</Link>
         </div>
         
         <div className="overflow-x-auto pb-4">
@@ -69,13 +72,15 @@ const EventsStories: React.FC = () => {
         </div>
       </div>;
   }
+
   if (stories.length === 0) {
     return null;
   }
+
   return <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-secondary">Events &amp; Promo</h2>
-        <Link to="/events" className="text-primary text-sm font-medium">Voir tout</Link>
+        <h2 className="text-2xl font-bold text-secondary">Events & Promos</h2>
+        <Link to="/events" className="text-primary text-sm font-medium">See all</Link>
       </div>
       
       {isMobile ? <div className="relative">
@@ -132,4 +137,5 @@ const EventsStories: React.FC = () => {
       {storyViewerOpen && <StoryViewer stories={stories.filter(story => story.is_active)} initialStoryIndex={selectedStoryIndex} onClose={() => setStoryViewerOpen(false)} />}
     </div>;
 };
+
 export default EventsStories;
