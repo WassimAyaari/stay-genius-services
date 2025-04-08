@@ -5,6 +5,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { EventFormValues } from './EventFormSchema';
+import EventImageUploader from './EventImageUploader';
 
 interface BasicInfoFieldsProps {
   form: UseFormReturn<EventFormValues>;
@@ -46,9 +47,9 @@ export const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
         name="image" 
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Image URL</FormLabel>
+            <FormLabel>Image</FormLabel>
             <FormControl>
-              <Input placeholder="https://example.com/image.jpg" {...field} />
+              <EventImageUploader value={field.value} onChange={field.onChange} />
             </FormControl>
             <FormMessage />
           </FormItem>
