@@ -17,7 +17,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
   if (!isAuthenticated) {
     return (
       <div className="py-4 text-center text-sm text-gray-500">
-        Connectez-vous pour voir vos notifications
+        Sign in to view your notifications
       </div>
     );
   }
@@ -25,7 +25,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
   if (notifications.length === 0) {
     return (
       <div className="py-4 text-center text-sm text-gray-500">
-        Aucune notification
+        No notifications
       </div>
     );
   }

@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { ShowerHead, Calendar, Utensils, FileText, Clock, Bell } from 'lucide-react';
 
 interface NotificationItemProps {
@@ -56,12 +57,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   function getStatusText(status: string) {
     switch (status) {
-      case 'pending': return 'En attente';
-      case 'in_progress': return 'En cours';
-      case 'completed': return 'Complétée';
-      case 'cancelled': return 'Annulée';
-      case 'confirmed': return 'Confirmée';
-      default: return 'Inconnu';
+      case 'pending': return 'Pending';
+      case 'in_progress': return 'In progress';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      case 'confirmed': return 'Confirmed';
+      default: return 'Unknown';
     }
   }
 
@@ -82,22 +83,22 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   function getSafeTimeAgo(date: Date) {
     try {
-      return formatDistanceToNow(date, { addSuffix: true, locale: fr });
+      return formatDistanceToNow(date, { addSuffix: true, locale: enUS });
     } catch (error) {
       console.error('Error formatting date:', error);
-      return 'récemment';
+      return 'recently';
     }
   }
 
   function getSummary() {
     if (type === 'spa_booking') {
-      return `Réservation pour ${data?.date || ''} à ${data?.time || ''}`;
+      return `Booking for ${data?.date || ''} at ${data?.time || ''}`;
     } else if (type === 'reservation') {
-      return `Réservation pour ${data?.guests || ''} personne(s) le ${data?.date || ''} à ${data?.time || ''}`;
+      return `Reservation for ${data?.guests || ''} person(s) on ${data?.date || ''} at ${data?.time || ''}`;
     } else if (type === 'request') {
-      return description || 'Demande de service';
+      return description || 'Service request';
     } else if (type === 'event_reservation') {
-      return `Réservation pour ${data?.guests || ''} personne(s) le ${data?.date || ''}`;
+      return `Reservation for ${data?.guests || ''} person(s) on ${data?.date || ''}`;
     }
     return description;
   }
@@ -110,8 +111,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     
     return (
       <div className="mt-1 text-xs">
-        {canCancel && <span className="text-red-600 mr-2">Annuler</span>}
-        {canEdit && <span className="text-blue-600">Modifier</span>}
+        {canCancel && <span className="text-red-600 mr-2">Cancel</span>}
+        {canEdit && <span className="text-blue-600">Edit</span>}
       </div>
     );
   }

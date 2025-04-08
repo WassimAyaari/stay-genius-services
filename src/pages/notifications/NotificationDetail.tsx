@@ -18,12 +18,12 @@ const NotificationDetail: React.FC = () => {
     navigate('/notifications');
   };
 
-  // Afficher l'état de chargement pendant la récupération des données
+  // Show loading state while fetching data
   if (isLoading) {
     return <LoadingState />;
   }
 
-  // Afficher l'état "non trouvé" s'il y a une erreur ou pas de notification
+  // Show "not found" state if there's an error or no notification
   if (error || !notification) {
     return (
       <NotFoundState 

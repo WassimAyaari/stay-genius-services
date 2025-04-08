@@ -10,7 +10,7 @@ import { NotificationItem as NotificationItemType } from './types/notificationTy
 
 const Notifications: React.FC = () => {
   const { notifications, isAuthenticated, hasNewNotifications } = useNotifications();
-  const isLoading = false; // On suppose que isLoading est toujours false car il a été retiré de l'interface
+  const isLoading = false; // Assuming isLoading is always false as it's been removed from the interface
 
   // Transform notifications to match the expected type if needed
   const typedNotifications: NotificationItemType[] = notifications.map(notification => ({

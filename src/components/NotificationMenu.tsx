@@ -72,7 +72,7 @@ const NotificationMenu = () => {
         <Link to="/notifications">
           <DropdownMenuItem className="text-center cursor-pointer hover:bg-gray-200/70">
             <span className="w-full text-center text-primary font-medium">
-              Voir toutes les notifications
+              View all notifications
             </span>
           </DropdownMenuItem>
         </Link>

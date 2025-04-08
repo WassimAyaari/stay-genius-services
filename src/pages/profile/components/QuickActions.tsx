@@ -46,7 +46,7 @@ const QuickActions = () => {
           <CardContent className="p-4">
             <Link to="/notifications" className="flex flex-col items-center justify-center">
               <BellRing className="h-8 w-8 text-primary mb-2" />
-              <span className="text-sm font-medium">Notif</span>
+              <span className="text-sm font-medium">Notifications</span>
             </Link>
           </CardContent>
         </Card>

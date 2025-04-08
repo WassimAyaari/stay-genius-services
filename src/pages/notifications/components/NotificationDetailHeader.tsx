@@ -16,9 +16,9 @@ export const NotificationDetailHeader: React.FC<NotificationDetailHeaderProps> =
 }) => {
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'request': return 'Demande de service';
-      case 'reservation': return 'Réservation restaurant';
-      case 'spa_booking': return 'Réservation spa';
+      case 'request': return 'Service Request';
+      case 'reservation': return 'Restaurant Reservation';
+      case 'spa_booking': return 'Spa Reservation';
       default: return 'Notification';
     }
   };
@@ -32,7 +32,7 @@ export const NotificationDetailHeader: React.FC<NotificationDetailHeaderProps> =
         className="mb-2 -ml-2"
       >
         <ArrowLeft className="mr-1 h-4 w-4" />
-        Retour aux notifications
+        Back to notifications
       </Button>
       
       <h1 className="text-2xl font-bold">{title}</h1>

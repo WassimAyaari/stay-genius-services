@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import type { NotificationItem } from '../types/notificationTypes';
 import { Bell, Calendar, CheckCircle, XCircle, Clock, ShowerHead, Utensils, FileText, Edit, Trash2 } from 'lucide-react';
 
@@ -35,12 +35,12 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
 
   function getStatusText(status: string) {
     switch (status) {
-      case 'pending': return 'En attente';
-      case 'in_progress': return 'En cours';
-      case 'completed': return 'Complétée';
-      case 'cancelled': return 'Annulée';
-      case 'confirmed': return 'Confirmée';
-      default: return 'En attente';
+      case 'pending': return 'Pending';
+      case 'in_progress': return 'In progress';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      case 'confirmed': return 'Confirmed';
+      default: return 'Pending';
     }
   }
   
@@ -56,14 +56,14 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
   // Format time safely - handle invalid dates
   function formatTimeAgo(date: Date | null) {
     if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-      return 'récemment';
+      return 'recently';
     }
     
     try {
-      return formatDistanceToNow(date, { addSuffix: true, locale: fr });
+      return formatDistanceToNow(date, { addSuffix: true, locale: enUS });
     } catch (error) {
       console.error('Error formatting date:', error, date);
-      return 'récemment';
+      return 'recently';
     }
   }
 
@@ -81,7 +81,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
   // Get type label based on notification type
   function getTypeLabel(type: string) {
     switch (type) {
-      case 'request': return 'Demande';
+      case 'request': return 'Request';
       case 'reservation': return 'Restaurant';
       case 'spa_booking': return 'Spa';
       default: return 'Notification';
@@ -100,13 +100,13 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
         {canEdit && (
           <Link to={`${notification.link}/edit`} className="p-1.5 rounded bg-blue-100 text-blue-600 text-xs flex items-center">
             <Edit className="h-3 w-3 mr-1" />
-            Modifier
+            Edit
           </Link>
         )}
         {canCancel && (
           <Link to={notification.link} className="p-1.5 rounded bg-red-100 text-red-600 text-xs flex items-center">
             <Trash2 className="h-3 w-3 mr-1" />
-            Annuler
+            Cancel
           </Link>
         )}
       </div>
@@ -120,36 +120,36 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
     if (notification.type === 'spa_booking') {
       return (
         <div className="mt-1.5">
-          <p className="text-sm text-gray-800">Résumé:</p>
+          <p className="text-sm text-gray-800">Summary:</p>
           <ul className="text-xs text-gray-600 list-disc pl-5 mt-1 space-y-1">
             <li>Date: {notification.data?.date}</li>
-            <li>Heure: {notification.data?.time}</li>
-            {notification.data?.room_number && <li>Chambre: {notification.data.room_number}</li>}
-            {notification.data?.special_requests && <li>Demandes spéciales: {notification.data.special_requests}</li>}
+            <li>Time: {notification.data?.time}</li>
+            {notification.data?.room_number && <li>Room: {notification.data.room_number}</li>}
+            {notification.data?.special_requests && <li>Special requests: {notification.data.special_requests}</li>}
           </ul>
         </div>
       );
     } else if (notification.type === 'reservation') {
       return (
         <div className="mt-1.5">
-          <p className="text-sm text-gray-800">Résumé:</p>
+          <p className="text-sm text-gray-800">Summary:</p>
           <ul className="text-xs text-gray-600 list-disc pl-5 mt-1 space-y-1">
             <li>Date: {notification.data?.date}</li>
-            <li>Heure: {notification.data?.time}</li>
-            <li>Personnes: {notification.data?.guests}</li>
-            {notification.data?.room_number && <li>Chambre: {notification.data.room_number}</li>}
-            {notification.data?.special_requests && <li>Demandes spéciales: {notification.data.special_requests}</li>}
+            <li>Time: {notification.data?.time}</li>
+            <li>People: {notification.data?.guests}</li>
+            {notification.data?.room_number && <li>Room: {notification.data.room_number}</li>}
+            {notification.data?.special_requests && <li>Special requests: {notification.data.special_requests}</li>}
           </ul>
         </div>
       );
     } else if (notification.type === 'request') {
       return (
         <div className="mt-1.5">
-          <p className="text-sm text-gray-800">Résumé:</p>
+          <p className="text-sm text-gray-800">Summary:</p>
           <ul className="text-xs text-gray-600 list-disc pl-5 mt-1 space-y-1">
             <li>Type: {notification.data?.service_type || 'Service'}</li>
             {notification.data?.description && <li>Description: {notification.data.description}</li>}
-            {notification.data?.room_number && <li>Chambre: {notification.data.room_number}</li>}
+            {notification.data?.room_number && <li>Room: {notification.data.room_number}</li>}
           </ul>
         </div>
       );
@@ -190,7 +190,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
                 
                 {notification.data?.room_number && !getSummary() && (
                   <div className="mt-1.5 text-xs bg-gray-100 text-gray-700 inline-block px-2 py-0.5 rounded-full">
-                    Chambre: {notification.data.room_number}
+                    Room: {notification.data.room_number}
                   </div>
                 )}
                 

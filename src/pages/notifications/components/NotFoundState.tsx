@@ -20,7 +20,7 @@ export const NotFoundState: React.FC<NotFoundStateProps> = React.memo(({
         onClick={onBack} 
         className="mb-4"
       >
-        &larr; Retour
+        &larr; Back
       </Button>
       
       <Card className="max-w-md mx-auto">
@@ -29,14 +29,14 @@ export const NotFoundState: React.FC<NotFoundStateProps> = React.memo(({
             <AlertCircle className="h-6 w-6 text-red-600" />
           </div>
           
-          <h2 className="text-xl font-semibold mb-2">Notification introuvable</h2>
+          <h2 className="text-xl font-semibold mb-2">Notification not found</h2>
           
           <p className="text-muted-foreground mb-6">
-            {errorMessage || "Nous n'avons pas pu trouver la notification demandée."}
+            {errorMessage || "We couldn't find the requested notification."}
           </p>
           
           <Button onClick={onBack}>
-            Retour aux notifications
+            Back to notifications
           </Button>
         </CardContent>
       </Card>

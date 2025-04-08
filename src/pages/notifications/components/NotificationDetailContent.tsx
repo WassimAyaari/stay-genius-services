@@ -20,7 +20,7 @@ const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({
 }) => {
   const navigate = useNavigate();
   
-  // Pour chaque type de notification, rediriger vers la page dédiée appropriée
+  // Redirect to the appropriate dedicated page for each notification type
   React.useEffect(() => {
     switch (notificationType) {
       case 'request':
@@ -41,15 +41,15 @@ const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({
     }
   }, [notificationType, notificationId, navigate]);
   
-  // Cela sera rarement rendu à cause des redirections ci-dessus,
-  // mais cela sert de fallback
+  // This will rarely be rendered due to the redirects above,
+  // but serves as a fallback
   return (
     <div className="space-y-6">
       {/* Header based on notification type */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">{notification.title}</h2>
         <Button variant="outline" onClick={() => navigate('/notifications')}>
-          Retour aux notifications
+          Back to notifications
         </Button>
       </div>
       
@@ -63,7 +63,7 @@ const NotificationDetailContent: React.FC<NotificationDetailContentProps> = ({
        notificationType !== 'spa_booking' && 
        notificationType !== 'event_reservation' && (
         <div className="text-center py-8">
-          <p>Redirection vers la page de détails...</p>
+          <p>Redirecting to details page...</p>
         </div>
       )}
     </div>
