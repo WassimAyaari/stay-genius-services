@@ -15,6 +15,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const eventSchema = z.object({
   title: z.string().min(3, {
@@ -90,162 +91,166 @@ const EventForm: React.FC<EventFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField 
-          control={form.control} 
-          name="title" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Event title" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-        
-        <FormField 
-          control={form.control} 
-          name="description" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Event description" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-        
-        <FormField 
-          control={form.control} 
-          name="image" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-        
-        <FormField 
-          control={form.control} 
-          name="category" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <select 
-                  className="w-full p-2 border border-gray-300 rounded-md bg-zinc-100"
-                  {...field}
-                >
-                  <option value="event">Event</option>
-                  <option value="promo">Promotion</option>
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-        
-        <FormField 
-          control={form.control} 
-          name="date" 
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+      <ScrollArea className="h-[70vh] pr-4">
+        <div className="px-1">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField 
+              control={form.control} 
+              name="title" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full pl-3 text-left font-normal flex justify-between items-center",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? format(new Date(field.value), 'dd MMMM yyyy') : <span>Select a date</span>}
-                      <CalendarIcon className="ml-auto h-4 w-4" />
-                    </Button>
+                    <Input placeholder="Event title" {...field} />
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-        
-        <FormField 
-          control={form.control} 
-          name="time" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Time (optional)</FormLabel>
-              <FormControl>
-                <Input type="time" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-        
-        <FormField 
-          control={form.control} 
-          name="location" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location (optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="Event location" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-        
-        <FormField 
-          control={form.control} 
-          name="is_featured" 
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-              <div className="space-y-0.5">
-                <FormLabel>Featured</FormLabel>
-                <div className="text-sm text-muted-foreground">
-                  Display this event prominently on the home page
-                </div>
-              </div>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-            </FormItem>
-          )} 
-        />
-        
-        <div className="flex justify-end space-x-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-          )}
-          <Button type="submit">
-            {initialData ? 'Update' : 'Create'} Event
-          </Button>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="description" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Event description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="image" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="category" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <select 
+                      className="w-full p-2 border border-gray-300 rounded-md bg-zinc-100"
+                      {...field}
+                    >
+                      <option value="event">Event</option>
+                      <option value="promo">Promotion</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="date" 
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal flex justify-between items-center",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? format(new Date(field.value), 'dd MMMM yyyy') : <span>Select a date</span>}
+                          <CalendarIcon className="ml-auto h-4 w-4" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value ? new Date(field.value) : undefined}
+                        onSelect={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="time" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Time (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="location" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location (optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Event location" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="is_featured" 
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Featured</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      Display this event prominently on the home page
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )} 
+            />
+            
+            <div className="flex justify-end space-x-2 py-2">
+              {onCancel && (
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  Cancel
+                </Button>
+              )}
+              <Button type="submit">
+                {initialData ? 'Update' : 'Create'} Event
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </ScrollArea>
     </Form>
   );
 };
