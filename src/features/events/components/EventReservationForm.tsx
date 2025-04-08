@@ -2,65 +2,44 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Event } from '@/types/event';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { useEventReservations } from '@/hooks/useEventReservations';
+import { Event } from '@/types/event';
 import { CreateEventReservationDTO } from '../types';
 
-const eventReservationSchema = z.object({
-  eventId: z.string(),
-  date: z.date(),
-  guests: z.coerce.number().int().min(1).max(20),
-  guestName: z.string().min(2, { message: 'Le nom est requis' }),
-  guestEmail: z.string().email({ message: 'Email invalide' }),
+const formSchema = z.object({
+  guests: z.coerce.number().min(1, 'Au moins 1 participant est requis'),
+  guestName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
+  guestEmail: z.string().email('Adresse email invalide'),
   guestPhone: z.string().optional(),
   roomNumber: z.string().optional(),
   specialRequests: z.string().optional(),
 });
 
-type FormValues = z.infer<typeof eventReservationSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
 interface EventReservationFormProps {
   event: Event;
-  onSuccess: () => void;
+  onSuccess?: () => void;
   buttonText?: string;
 }
 
-const EventReservationForm: React.FC<EventReservationFormProps> = ({ 
-  event, 
+const EventReservationForm: React.FC<EventReservationFormProps> = ({
+  event,
   onSuccess,
-  buttonText = "Réserver"
+  buttonText = 'Réserver'
 }) => {
   const { user, userData } = useAuth();
   const { makeEventReservation, loading } = useEventReservations();
-  
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(eventReservationSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      eventId: event.id,
-      date: event.date ? new Date(event.date) : new Date(),
       guests: 1,
       guestName: userData?.first_name && userData?.last_name 
         ? `${userData.first_name} ${userData.last_name}` 
@@ -71,20 +50,31 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       specialRequests: '',
     },
   });
-  
+
   const onSubmit = async (values: FormValues) => {
     try {
-      const formattedDate = format(values.date, 'yyyy-MM-dd');
-      
       const reservationData: CreateEventReservationDTO = {
-        ...values,
-        date: formattedDate,
+        eventId: event.id,
+        date: event.date,
+        guests: values.guests,
+        guestName: values.guestName,
+        guestEmail: values.guestEmail,
+        guestPhone: values.guestPhone,
+        roomNumber: values.roomNumber,
+        specialRequests: values.specialRequests,
       };
       
+      if (user?.id) {
+        reservationData.userId = user.id;
+      }
+
       await makeEventReservation(reservationData);
-      onSuccess();
+      
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
-      console.error('Erreur lors de la soumission du formulaire:', error);
+      console.error('Erreur lors de la réservation:', error);
     }
   };
 
@@ -93,53 +83,12 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "d MMMM yyyy", { locale: fr })
-                      ) : (
-                        <span>Choisir une date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                    locale={fr}
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
           name="guests"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nombre de participants</FormLabel>
               <FormControl>
-                <Input type="number" min={1} max={20} {...field} />
+                <Input type="number" min={1} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -181,7 +130,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
             <FormItem>
               <FormLabel>Téléphone (optionnel)</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -195,7 +144,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
             <FormItem>
               <FormLabel>Numéro de chambre (optionnel)</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -209,7 +158,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
             <FormItem>
               <FormLabel>Demandes spéciales (optionnel)</FormLabel>
               <FormControl>
-                <Textarea {...field} value={field.value || ''} />
+                <Textarea {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -217,7 +166,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
         />
         
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Réservation en cours...' : buttonText}
+          {loading ? 'Traitement en cours...' : buttonText}
         </Button>
       </form>
     </Form>

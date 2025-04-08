@@ -11,21 +11,19 @@ export const createEventReservation = async (data: CreateEventReservationDTO): P
     
     const { data: reservation, error } = await supabase
       .from('event_reservations')
-      .insert([
-        { 
-          event_id: eventId, 
-          user_id: userId, 
-          date, 
-          guests, 
-          guest_name: guestName,
-          guest_email: guestEmail,
-          guest_phone: guestPhone,
-          room_number: roomNumber,
-          special_requests: specialRequests,
-          status: 'pending'
-        }
-      ])
-      .select('*')
+      .insert({
+        event_id: eventId, 
+        user_id: userId, 
+        date, 
+        guests, 
+        guest_name: guestName,
+        guest_email: guestEmail,
+        guest_phone: guestPhone,
+        room_number: roomNumber,
+        special_requests: specialRequests,
+        status: 'pending'
+      })
+      .select('*, events:event_id(*)')
       .single();
 
     if (error) throw error;
@@ -44,7 +42,13 @@ export const createEventReservation = async (data: CreateEventReservationDTO): P
       specialRequests: reservation.special_requests,
       status: reservation.status,
       createdAt: reservation.created_at,
-      updatedAt: reservation.updated_at
+      updatedAt: reservation.updated_at,
+      event: reservation.events ? {
+        title: reservation.events.title,
+        description: reservation.events.description,
+        image: reservation.events.image,
+        location: reservation.events.location
+      } : undefined
     };
   } catch (error) {
     console.error('Erreur lors de la création de la réservation d\'événement:', error);
@@ -74,7 +78,7 @@ export const updateEventReservation = async (data: UpdateEventReservationDTO): P
       .from('event_reservations')
       .update(updatePayload)
       .eq('id', id)
-      .select('*')
+      .select('*, events:event_id(*)')
       .single();
 
     if (error) throw error;
@@ -93,7 +97,13 @@ export const updateEventReservation = async (data: UpdateEventReservationDTO): P
       specialRequests: reservation.special_requests,
       status: reservation.status,
       createdAt: reservation.created_at,
-      updatedAt: reservation.updated_at
+      updatedAt: reservation.updated_at,
+      event: reservation.events ? {
+        title: reservation.events.title,
+        description: reservation.events.description,
+        image: reservation.events.image,
+        location: reservation.events.location
+      } : undefined
     };
   } catch (error) {
     console.error('Erreur lors de la mise à jour de la réservation d\'événement:', error);
@@ -125,7 +135,7 @@ export const getEventReservationById = async (id: string): Promise<EventReservat
   try {
     const { data: reservation, error } = await supabase
       .from('event_reservations')
-      .select('*, events(title, description, image, location)')
+      .select('*, events:event_id(*)')
       .eq('id', id)
       .single();
 
@@ -146,7 +156,6 @@ export const getEventReservationById = async (id: string): Promise<EventReservat
       status: reservation.status,
       createdAt: reservation.created_at,
       updatedAt: reservation.updated_at,
-      // Ajouter les données de l'événement associé
       event: reservation.events ? {
         title: reservation.events.title,
         description: reservation.events.description,
@@ -167,14 +176,15 @@ export const getUserEventReservations = async (userId?: string, userEmail?: stri
   try {
     let query = supabase
       .from('event_reservations')
-      .select('*, events(title, description, image, location)')
-      .order('date', { ascending: false });
+      .select('*, events:event_id(*)');
     
     if (userId) {
       query = query.eq('user_id', userId);
     } else if (userEmail) {
       query = query.eq('guest_email', userEmail);
     }
+    
+    query = query.order('date', { ascending: false });
     
     const { data: reservations, error } = await query;
 
@@ -195,7 +205,6 @@ export const getUserEventReservations = async (userId?: string, userEmail?: stri
       status: reservation.status,
       createdAt: reservation.created_at,
       updatedAt: reservation.updated_at,
-      // Ajouter les données de l'événement associé
       event: reservation.events ? {
         title: reservation.events.title,
         description: reservation.events.description,
