@@ -13,7 +13,7 @@ export const fetchShops = async (): Promise<Shop[]> => {
     throw new Error('Failed to fetch shops');
   }
   
-  return data || [];
+  return data as Shop[];
 };
 
 export const fetchShopById = async (id: string): Promise<Shop | null> => {
@@ -28,7 +28,7 @@ export const fetchShopById = async (id: string): Promise<Shop | null> => {
     throw new Error('Failed to fetch shop');
   }
   
-  return data;
+  return data as Shop;
 };
 
 export const createShop = async (shop: ShopFormData): Promise<Shop> => {
@@ -43,7 +43,7 @@ export const createShop = async (shop: ShopFormData): Promise<Shop> => {
     throw new Error('Failed to create shop');
   }
   
-  return data;
+  return data as Shop;
 };
 
 export const updateShop = async (id: string, shop: ShopFormData): Promise<Shop> => {
@@ -59,7 +59,7 @@ export const updateShop = async (id: string, shop: ShopFormData): Promise<Shop> 
     throw new Error('Failed to update shop');
   }
   
-  return data;
+  return data as Shop;
 };
 
 export const deleteShop = async (id: string): Promise<void> => {

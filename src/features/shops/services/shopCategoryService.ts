@@ -13,7 +13,7 @@ export const fetchShopCategories = async (): Promise<ShopCategory[]> => {
     throw new Error('Failed to fetch shop categories');
   }
   
-  return data || [];
+  return data as ShopCategory[];
 };
 
 export const fetchShopCategoryById = async (id: string): Promise<ShopCategory | null> => {
@@ -28,7 +28,7 @@ export const fetchShopCategoryById = async (id: string): Promise<ShopCategory | 
     throw new Error('Failed to fetch shop category');
   }
   
-  return data;
+  return data as ShopCategory;
 };
 
 export const createShopCategory = async (category: ShopCategoryFormData): Promise<ShopCategory> => {
@@ -43,7 +43,7 @@ export const createShopCategory = async (category: ShopCategoryFormData): Promis
     throw new Error('Failed to create shop category');
   }
   
-  return data;
+  return data as ShopCategory;
 };
 
 export const updateShopCategory = async (id: string, category: ShopCategoryFormData): Promise<ShopCategory> => {
@@ -59,7 +59,7 @@ export const updateShopCategory = async (id: string, category: ShopCategoryFormD
     throw new Error('Failed to update shop category');
   }
   
-  return data;
+  return data as ShopCategory;
 };
 
 export const deleteShopCategory = async (id: string): Promise<void> => {
