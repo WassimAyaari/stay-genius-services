@@ -4,16 +4,12 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Activity, 
-  Users, 
   Utensils, 
-  Calendar, 
-  Inbox, 
   ShowerHead, 
   Store, 
   PartyPopper, 
   FileText,
-  MessageCircle,
-  Settings
+  MessageCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -25,20 +21,6 @@ const AdminDashboard = () => {
       count: 24, 
       trend: "+5 depuis hier", 
       path: "/admin/requests" 
-    },
-    { 
-      title: "Réservations", 
-      icon: <Calendar className="h-5 w-5 text-primary" />, 
-      count: 12, 
-      trend: "+2 depuis hier", 
-      path: "/admin/reservations" 
-    },
-    { 
-      title: "Utilisateurs", 
-      icon: <Users className="h-5 w-5 text-primary" />, 
-      count: 48, 
-      trend: "+8 ce mois", 
-      path: "#" 
     },
     { 
       title: "Restaurants", 
