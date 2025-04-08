@@ -94,7 +94,6 @@ export type Database = {
           room_number: string | null
           special_requests: string | null
           status: string
-          updated_at: string
           user_id: string | null
         }
         Insert: {
@@ -109,7 +108,6 @@ export type Database = {
           room_number?: string | null
           special_requests?: string | null
           status?: string
-          updated_at?: string
           user_id?: string | null
         }
         Update: {
@@ -124,7 +122,6 @@ export type Database = {
           room_number?: string | null
           special_requests?: string | null
           status?: string
-          updated_at?: string
           user_id?: string | null
         }
         Relationships: [

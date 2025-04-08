@@ -39,13 +39,13 @@ export const useNotifications = () => {
       await Promise.all([
         refetchServices(),
         refetchReservations(),
-        refetchSpaBookings()
-        // Nous ne rechargeons plus les réservations d'événements car elles ont été supprimées
+        refetchSpaBookings(),
+        refetchEventReservations()
       ]);
     };
     
     fetchInitialData();
-  }, [refetchServices, refetchReservations, refetchSpaBookings]);
+  }, [refetchServices, refetchReservations, refetchSpaBookings, refetchEventReservations]);
   
   // Set up real-time notification listeners
   useNotificationsRealtime(
@@ -64,7 +64,7 @@ export const useNotifications = () => {
     serviceRequests,
     reservations,
     spaBookings,
-    [] // eventReservations est maintenant un tableau vide
+    eventReservations
   );
 
   // Count unread notifications

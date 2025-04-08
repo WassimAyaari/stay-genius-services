@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, MapPin, Users, Heart, Share } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Percent, Ticket, Heart, Share } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import {
   Carousel,
   CarouselContent,
@@ -15,10 +16,15 @@ import SwipeIndicator from '@/components/ui/swipe-indicator';
 import EventsStories from '@/components/EventsStories';
 import { useEvents } from '@/hooks/useEvents';
 import { format } from 'date-fns';
+import EventBookingDialog from '@/components/events/EventBookingDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const Events = () => {
   const { events, loading } = useEvents();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const { toast } = useToast();
   
   React.useEffect(() => {
     if (!loading && events.length > 0) {
@@ -28,6 +34,19 @@ const Events = () => {
       return () => clearInterval(interval);
     }
   }, [loading, events.length]);
+
+  const handleBookEvent = (event: any) => {
+    setSelectedEvent(event);
+    setIsBookingOpen(true);
+  };
+
+  const handleReservationSuccess = () => {
+    setIsBookingOpen(false);
+    toast({
+      title: "Réservation confirmée",
+      description: "Votre réservation a été enregistrée avec succès.",
+    });
+  };
 
   return (
     <Layout>
@@ -85,6 +104,9 @@ const Events = () => {
                         </span>
                         <h1 className="text-2xl font-bold mb-1">{event.title}</h1>
                         <p className="mb-3">{event.description}</p>
+                        <Button size="sm" onClick={() => handleBookEvent(event)}>
+                          Réserver
+                        </Button>
                       </div>
                     </div>
                   </CarouselItem>
@@ -158,6 +180,7 @@ const Events = () => {
                         </div>
                         <p className="text-gray-600 mb-4">{event.description}</p>
                         <div className="flex gap-3">
+                          <Button onClick={() => handleBookEvent(event)}>Réserver</Button>
                           <Button variant="outline">Ajouter au calendrier</Button>
                         </div>
                       </div>
@@ -185,32 +208,75 @@ const Events = () => {
                 .filter(event => event.category === 'promo')
                 .map(promo => (
                   <Card key={promo.id} className="overflow-hidden">
-                    <div className="relative h-48">
+                    <div className="relative h-40">
                       <img 
                         src={promo.image} 
                         alt={promo.title} 
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-0 left-0 p-4 text-white">
-                        <span className="text-xs font-medium bg-primary/50 backdrop-blur-sm px-2 py-1 rounded-full mb-1 inline-block">
-                          Promotion
-                        </span>
-                        <h3 className="text-lg font-semibold mb-1">{promo.title}</h3>
+                      <div className="absolute top-0 left-0 bg-primary text-white text-xs font-bold px-3 py-1 m-3 rounded-full">
+                        <Percent className="h-3 w-3 inline mr-1" />
+                        Offre spéciale
                       </div>
                     </div>
                     <div className="p-4">
-                      <p className="text-sm text-gray-600 mb-3">{promo.description}</p>
-                      <p className="text-xs text-gray-500">
-                        Valable jusqu'au {format(new Date(promo.date), 'dd/MM/yyyy')}
-                      </p>
+                      <h3 className="text-lg font-semibold mb-2">{promo.title}</h3>
+                      <div className="flex items-center text-sm text-gray-600 mb-3">
+                        <Calendar className="h-4 w-4 mr-2 text-primary" />
+                        <span>Valable jusqu'au {format(new Date(promo.date), 'dd/MM/yyyy')}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4">{promo.description}</p>
+                      <Button className="w-full" onClick={() => handleBookEvent(promo)}>Voir les détails</Button>
                     </div>
                   </Card>
                 ))
             )}
           </div>
         </div>
+
+        {/* Event Calendar */}
+        <div className="mb-10">
+          <h2 className="text-2xl font-bold text-secondary mb-6">Calendrier des événements</h2>
+          <Card className="p-6 rounded-xl">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold mb-1">Voir tous les événements à venir</h3>
+              <p className="text-gray-600">Planifiez votre séjour avec notre calendrier d'événements</p>
+            </div>
+            <Button className="w-full gap-2">
+              <Calendar className="h-4 w-4" />
+              Ouvrir le calendrier
+            </Button>
+          </Card>
+        </div>
+
+        {/* Subscribe Section */}
+        <div className="mb-8">
+          <Card className="p-6 rounded-xl bg-primary/5">
+            <h3 className="text-xl font-semibold mb-2 text-center">Restez informé</h3>
+            <p className="text-center text-gray-600 mb-4">Abonnez-vous pour recevoir des alertes sur les nouveaux événements et promotions</p>
+            <div className="flex gap-2">
+              <Input placeholder="Entrez votre email" className="flex-1" />
+              <Button className="gap-2">
+                <Ticket className="h-4 w-4" />
+                S'abonner
+              </Button>
+            </div>
+          </Card>
+        </div>
       </div>
+
+      {/* Event Booking Dialog */}
+      {selectedEvent && (
+        <EventBookingDialog
+          isOpen={isBookingOpen}
+          onOpenChange={setIsBookingOpen}
+          eventId={selectedEvent.id}
+          eventTitle={selectedEvent.title}
+          eventDate={selectedEvent.date}
+          onSuccess={handleReservationSuccess}
+          maxGuests={selectedEvent.capacity || 10}
+        />
+      )}
     </Layout>
   );
 };
