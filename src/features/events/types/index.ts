@@ -1,3 +1,4 @@
+export type EventReservationStatus = 'pending' | 'confirmed' | 'cancelled';
 
 export interface EventReservation {
   id: string;
@@ -5,14 +6,21 @@ export interface EventReservation {
   userId?: string;
   date: string;
   guests: number;
-  guestName?: string;
-  guestEmail?: string;
+  guestName: string;
+  guestEmail: string;
   guestPhone?: string;
   roomNumber?: string;
   specialRequests?: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  status: EventReservationStatus;
   createdAt: string;
-  updatedAt?: string;
+  updatedAt: string;
+  event?: {
+    title: string;
+    description: string;
+    image?: string;
+    location?: string;
+    time?: string;
+  };
 }
 
 export interface CreateEventReservationDTO {
@@ -29,7 +37,7 @@ export interface CreateEventReservationDTO {
 
 export interface UpdateEventReservationDTO {
   id: string;
-  status?: 'pending' | 'confirmed' | 'cancelled';
+  status?: EventReservationStatus;
   guests?: number;
   guestName?: string;
   guestEmail?: string;

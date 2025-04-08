@@ -106,6 +106,10 @@ const EventReservationDetail = () => {
   }
 
   const formattedDate = reservation.date && format(new Date(reservation.date), 'EEEE d MMMM yyyy', { locale: fr });
+  const eventTitle = reservation.event?.title || 'Événement';
+  const eventDescription = reservation.event?.description || '';
+  const eventImage = reservation.event?.image || '';
+  const eventLocation = reservation.event?.location || 'Lieu non spécifié';
 
   return (
     <Layout>
@@ -121,7 +125,7 @@ const EventReservationDetail = () => {
           <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="text-xl">{reservation.event?.title || 'Événement'}</CardTitle>
+                <CardTitle className="text-xl">{eventTitle}</CardTitle>
                 <CardDescription>
                   Réservation #{reservation.id.substring(0, 8)}
                 </CardDescription>
@@ -137,17 +141,17 @@ const EventReservationDetail = () => {
               <div className="flex items-start mb-4">
                 <div className="w-24 h-24 rounded-md overflow-hidden mr-4 flex-shrink-0">
                   <img 
-                    src={reservation.event.image} 
-                    alt={reservation.event.title} 
+                    src={eventImage} 
+                    alt={eventTitle} 
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">{reservation.event.description}</p>
+                  <p className="text-sm text-gray-600 mb-2">{eventDescription}</p>
                   
                   <div className="flex items-center text-sm text-gray-600 mt-2">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span>{reservation.event.location || 'Lieu non spécifié'}</span>
+                    <span>{eventLocation}</span>
                   </div>
                 </div>
               </div>

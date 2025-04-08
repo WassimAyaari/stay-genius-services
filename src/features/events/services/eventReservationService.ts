@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { EventReservation, CreateEventReservationDTO, UpdateEventReservationDTO } from '../types';
+import { EventReservation, CreateEventReservationDTO, UpdateEventReservationDTO, EventReservationStatus } from '../types';
 
 /**
  * Créer une nouvelle réservation d'événement
@@ -21,7 +21,7 @@ export const createEventReservation = async (data: CreateEventReservationDTO): P
         guest_phone: guestPhone,
         room_number: roomNumber,
         special_requests: specialRequests,
-        status: 'pending'
+        status: 'pending' as EventReservationStatus
       })
       .select('*, events:event_id(*)')
       .single();
@@ -40,7 +40,7 @@ export const createEventReservation = async (data: CreateEventReservationDTO): P
       guestPhone: reservation.guest_phone,
       roomNumber: reservation.room_number,
       specialRequests: reservation.special_requests,
-      status: reservation.status,
+      status: reservation.status as EventReservationStatus,
       createdAt: reservation.created_at,
       updatedAt: reservation.updated_at,
       event: reservation.events ? {
@@ -95,7 +95,7 @@ export const updateEventReservation = async (data: UpdateEventReservationDTO): P
       guestPhone: reservation.guest_phone,
       roomNumber: reservation.room_number,
       specialRequests: reservation.special_requests,
-      status: reservation.status,
+      status: reservation.status as EventReservationStatus,
       createdAt: reservation.created_at,
       updatedAt: reservation.updated_at,
       event: reservation.events ? {
@@ -118,7 +118,7 @@ export const cancelEventReservation = async (id: string): Promise<void> => {
   try {
     const { error } = await supabase
       .from('event_reservations')
-      .update({ status: 'cancelled' })
+      .update({ status: 'cancelled' as EventReservationStatus })
       .eq('id', id);
 
     if (error) throw error;
@@ -153,7 +153,7 @@ export const getEventReservationById = async (id: string): Promise<EventReservat
       guestPhone: reservation.guest_phone,
       roomNumber: reservation.room_number,
       specialRequests: reservation.special_requests,
-      status: reservation.status,
+      status: reservation.status as EventReservationStatus,
       createdAt: reservation.created_at,
       updatedAt: reservation.updated_at,
       event: reservation.events ? {
@@ -202,7 +202,7 @@ export const getUserEventReservations = async (userId?: string, userEmail?: stri
       guestPhone: reservation.guest_phone,
       roomNumber: reservation.room_number,
       specialRequests: reservation.special_requests,
-      status: reservation.status,
+      status: reservation.status as EventReservationStatus,
       createdAt: reservation.created_at,
       updatedAt: reservation.updated_at,
       event: reservation.events ? {
