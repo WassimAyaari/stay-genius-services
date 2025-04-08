@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -27,7 +26,6 @@ const Services = () => {
   const { toast } = useToast();
   const { userData } = useAuth();
   
-  // Pass room number to useRoom hook to fetch room data
   const { data: room } = useRoom(userInfo.roomNumber);
 
   useEffect(() => {
@@ -51,7 +49,6 @@ const Services = () => {
   }, []);
 
   const handleStartChat = () => {
-    // Ensure user ID exists
     let userId = localStorage.getItem('user_id');
     if (!userId) {
       userId = uuidv4();
@@ -77,7 +74,7 @@ const Services = () => {
       title: "WhatsApp Service",
       description: "Opening WhatsApp to connect with our concierge team."
     });
-    window.open('https://wa.me/28784080', '_blank');
+    window.open('https://wa.me/+21628784080', '_blank');
   };
 
   return (
