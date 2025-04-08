@@ -628,6 +628,148 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shop_products: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image: string | null
+          is_featured: boolean | null
+          name: string
+          price: number | null
+          shop_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          name: string
+          price?: number | null
+          shop_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number | null
+          shop_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_products_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shops: {
+        Row: {
+          category_id: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string
+          hours: string | null
+          icon: string | null
+          id: string
+          image: string | null
+          is_featured: boolean | null
+          is_hotel_shop: boolean | null
+          location: string | null
+          name: string
+          short_description: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description: string
+          hours?: string | null
+          icon?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          is_hotel_shop?: boolean | null
+          location?: string | null
+          name: string
+          short_description?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string
+          hours?: string | null
+          icon?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          is_hotel_shop?: boolean | null
+          location?: string | null
+          name?: string
+          short_description?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shops_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "shop_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spa_bookings: {
         Row: {
           created_at: string | null

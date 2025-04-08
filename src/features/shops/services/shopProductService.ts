@@ -1,0 +1,80 @@
+
+import { supabase } from '@/integrations/supabase/client';
+import { ShopProduct, ShopProductFormData } from '@/types/shop';
+
+export const fetchShopProducts = async (shopId?: string): Promise<ShopProduct[]> => {
+  let query = supabase
+    .from('shop_products')
+    .select('*');
+    
+  if (shopId) {
+    query = query.eq('shop_id', shopId);
+  }
+  
+  const { data, error } = await query.order('name');
+  
+  if (error) {
+    console.error('Error fetching shop products:', error);
+    throw new Error('Failed to fetch shop products');
+  }
+  
+  return data || [];
+};
+
+export const fetchShopProductById = async (id: string): Promise<ShopProduct | null> => {
+  const { data, error } = await supabase
+    .from('shop_products')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching shop product:', error);
+    throw new Error('Failed to fetch shop product');
+  }
+  
+  return data;
+};
+
+export const createShopProduct = async (product: ShopProductFormData): Promise<ShopProduct> => {
+  const { data, error } = await supabase
+    .from('shop_products')
+    .insert(product)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating shop product:', error);
+    throw new Error('Failed to create shop product');
+  }
+  
+  return data;
+};
+
+export const updateShopProduct = async (id: string, product: ShopProductFormData): Promise<ShopProduct> => {
+  const { data, error } = await supabase
+    .from('shop_products')
+    .update(product)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating shop product:', error);
+    throw new Error('Failed to update shop product');
+  }
+  
+  return data;
+};
+
+export const deleteShopProduct = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('shop_products')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting shop product:', error);
+    throw new Error('Failed to delete shop product');
+  }
+};

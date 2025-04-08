@@ -42,6 +42,7 @@ import SpaBookingDetails from '@/pages/spa/SpaBookingDetails';
 import ChatMessages from '@/pages/admin/ChatMessages';
 import AboutEditor from '@/pages/admin/AboutEditor';
 import EventsManager from '@/pages/admin/EventsManager';
+import ShopsManager from '@/pages/admin/ShopsManager';
 
 const queryClient = new QueryClient();
 
@@ -144,6 +145,11 @@ function App() {
               <Route path="/admin/events" element={
                 <AuthGuard adminRequired>
                   <EventsManager />
+                </AuthGuard>
+              } />
+              <Route path="/admin/shops" element={
+                <AuthGuard adminRequired>
+                  <ShopsManager />
                 </AuthGuard>
               } />
               <Route path="/admin/chat" element={
