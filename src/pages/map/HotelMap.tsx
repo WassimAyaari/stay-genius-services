@@ -63,104 +63,63 @@ const HotelMap = () => {
                 </div>
                 <div>
                   <h3 className="font-medium">Restaurants</h3>
-                  <p className="text-xs text-gray-500">Ground & 5th Floor</p>
+                  <p className="text-sm text-gray-500">Level 1 & Rooftop</p>
                 </div>
               </div>
             </Card>
-            
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Coffee className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Cafés & Bars</h3>
-                  <p className="text-xs text-gray-500">Ground & 1st Floor</p>
+                  <h3 className="font-medium">Cafe</h3>
+                  <p className="text-sm text-gray-500">Lobby & Level 2</p>
                 </div>
               </div>
             </Card>
-            
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <LifeBuoy className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Swimming Pools</h3>
-                  <p className="text-xs text-gray-500">3rd Floor</p>
+                  <h3 className="font-medium">Pool</h3>
+                  <p className="text-sm text-gray-500">Level 3</p>
                 </div>
               </div>
             </Card>
-            
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Dumbbell className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Gym & Wellness</h3>
-                  <p className="text-xs text-gray-500">2nd Floor</p>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Building className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-medium">Elevators</h3>
-                  <p className="text-xs text-gray-500">All Floors</p>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <DoorClosed className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-medium">Room Access</h3>
-                  <p className="text-xs text-gray-500">Floors 1-5</p>
+                  <h3 className="font-medium">Fitness Center</h3>
+                  <p className="text-sm text-gray-500">Basement Level</p>
                 </div>
               </div>
             </Card>
           </div>
         </div>
         
-        {/* Quick Info */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Hotel Information</h2>
-          <Card className="p-6 rounded-xl mb-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Wifi className="h-5 w-5 text-primary" />
+        {/* Emergency Info */}
+        <div>
+          <h2 className="text-2xl font-bold text-secondary mb-4">Emergency Information</h2>
+          <Card className="p-6">
+            <div className="flex items-center gap-4 mb-4 text-red-600">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <DoorClosed className="h-5 w-5" />
               </div>
-              <div>
-                <h3 className="font-semibold mb-1">Wi-Fi Access</h3>
-                <p className="text-sm text-gray-600 mb-2">Free high-speed Wi-Fi available throughout the hotel. Connect to "HotelGenius_Guest" network.</p>
-                <Button size="sm" variant="outline">Connect to Wi-Fi</Button>
-              </div>
+              <h3 className="font-medium">Emergency Exits</h3>
             </div>
-          </Card>
-          
-          <Card className="p-6 rounded-xl">
-            <h3 className="font-semibold mb-2">Emergency Information</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm">Emergency Exit</span>
-                <span className="text-sm font-medium">End of each hallway</span>
+            <p className="text-sm text-gray-600 mb-4">Emergency exits are located at the end of each corridor on all floors. Follow the illuminated signs in case of evacuation.</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Emergency Contact</p>
+                <p className="text-sm text-gray-600">Dial 9 from your room phone</p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Medical Assistance</span>
-                <span className="text-sm font-medium">Dial 9 from room</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Fire Alarms</span>
-                <span className="text-sm font-medium">Throughout the hotel</span>
-              </div>
+              <Button variant="outline" size="sm">View Emergency Map</Button>
             </div>
           </Card>
         </div>

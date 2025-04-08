@@ -48,7 +48,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
   const { events, loading: eventsLoading } = useEvents();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Effet pour réinitialiser le formulaire quand une story est éditée
+  // Effect to reset form when a story is being edited
   useEffect(() => {
     if (initialData) {
       form.reset({
@@ -92,9 +92,9 @@ export const StoryForm: React.FC<StoryFormProps> = ({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Titre</FormLabel>
+              <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="Titre de la story" {...field} />
+                <Input placeholder="Story title" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -108,7 +108,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Description de la story" {...field} />
+                <Textarea placeholder="Story description" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -120,7 +120,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL de l'image</FormLabel>
+              <FormLabel>Image URL</FormLabel>
               <FormControl>
                 <Input placeholder="https://example.com/image.jpg" {...field} />
               </FormControl>
@@ -135,15 +135,15 @@ export const StoryForm: React.FC<StoryFormProps> = ({
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Catégorie</FormLabel>
+                <FormLabel>Category</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner une catégorie" />
+                      <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="event">Événement</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
                     <SelectItem value="promo">Promotion</SelectItem>
                   </SelectContent>
                 </Select>
@@ -157,15 +157,15 @@ export const StoryForm: React.FC<StoryFormProps> = ({
             name="eventId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Associer à un événement (optionnel)</FormLabel>
+                <FormLabel>Associate with an event (optional)</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choisir un événement" />
+                      <SelectValue placeholder="Choose an event" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">Aucun événement</SelectItem>
+                    <SelectItem value="none">No event</SelectItem>
                     {events.map((event: Event) => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.title}
@@ -174,7 +174,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Lier cette story à un événement permettra aux utilisateurs de réserver directement
+                  Linking this story to an event will allow users to book directly
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -188,9 +188,9 @@ export const StoryForm: React.FC<StoryFormProps> = ({
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
               <div className="space-y-0.5">
-                <FormLabel>Actif</FormLabel>
+                <FormLabel>Active</FormLabel>
                 <FormDescription>
-                  Cette story sera visible par les utilisateurs
+                  This story will be visible to users
                 </FormDescription>
               </div>
               <FormControl>
@@ -207,11 +207,11 @@ export const StoryForm: React.FC<StoryFormProps> = ({
         <div className="flex justify-end space-x-2">
           {onOpenChange && (
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Annuler
+              Cancel
             </Button>
           )}
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Enregistrement...' : initialData ? 'Mettre à jour' : 'Créer'}
+            {isSubmitting ? 'Saving...' : initialData ? 'Update' : 'Create'}
           </Button>
         </div>
       </form>

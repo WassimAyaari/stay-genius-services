@@ -19,11 +19,11 @@ const BookingStatusBadge: React.FC<BookingStatusBadgeProps> = ({ status }) => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Confirmée';
-      case 'completed': return 'Complétée';
-      case 'cancelled': return 'Annulée';
-      case 'in_progress': return 'En cours';
-      default: return 'En attente';
+      case 'confirmed': return 'Confirmed';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      case 'in_progress': return 'In Progress';
+      default: return 'Pending';
     }
   };
   

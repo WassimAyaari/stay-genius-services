@@ -16,10 +16,10 @@ import { Link } from 'react-router-dom';
 const AdminDashboard = () => {
   const adminSections = [
     { 
-      title: "Demandes de service", 
+      title: "Service Requests", 
       icon: <ShowerHead className="h-5 w-5 text-primary" />, 
       count: 24, 
-      trend: "+5 depuis hier", 
+      trend: "+5 since yesterday", 
       path: "/admin/requests" 
     },
     { 
@@ -33,11 +33,11 @@ const AdminDashboard = () => {
       title: "Menus", 
       icon: <FileText className="h-5 w-5 text-primary" />, 
       count: 15, 
-      trend: "+3 cette semaine", 
+      trend: "+3 this week", 
       path: "/admin/restaurant-menus" 
     },
     { 
-      title: "Boutiques", 
+      title: "Shops", 
       icon: <Store className="h-5 w-5 text-primary" />, 
       count: 6, 
       trend: "", 
@@ -51,31 +51,31 @@ const AdminDashboard = () => {
       path: "/admin/spa" 
     },
     { 
-      title: "Événements", 
+      title: "Events", 
       icon: <PartyPopper className="h-5 w-5 text-primary" />, 
       count: 9, 
-      trend: "+2 ce mois", 
+      trend: "+2 this month", 
       path: "/admin/events" 
     },
     { 
       title: "Messages", 
       icon: <MessageCircle className="h-5 w-5 text-primary" />, 
       count: 36, 
-      trend: "+3 aujourd'hui", 
+      trend: "+3 today", 
       path: "/admin/chat" 
     },
     { 
-      title: "À propos", 
+      title: "About", 
       icon: <FileText className="h-5 w-5 text-primary" />, 
       count: null, 
       trend: "", 
       path: "/admin/about" 
     },
     { 
-      title: "Activité", 
+      title: "Activity", 
       icon: <Activity className="h-5 w-5 text-primary" />, 
       count: 132, 
-      trend: "+28 cette semaine", 
+      trend: "+28 this week", 
       path: "#" 
     }
   ];
@@ -83,8 +83,8 @@ const AdminDashboard = () => {
   return (
     <Layout>
       <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-2">Tableau de bord administrateur</h1>
-        <p className="text-muted-foreground mb-6">Gérez toutes les sections de votre établissement</p>
+        <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
+        <p className="text-muted-foreground mb-6">Manage all sections of your establishment</p>
         
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {adminSections.map((section, index) => (
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
                     <p className="text-xs text-muted-foreground">{section.trend}</p>
                   )}
                   {!section.count && !section.trend && (
-                    <div className="text-sm text-muted-foreground">Gérer</div>
+                    <div className="text-sm text-muted-foreground">Manage</div>
                   )}
                 </CardContent>
               </Card>

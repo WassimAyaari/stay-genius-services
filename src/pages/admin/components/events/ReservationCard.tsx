@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Check, X, Eye, Phone, Calendar, User, Home, Mail } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -33,9 +33,9 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Confirmée';
-      case 'cancelled': return 'Annulée';
-      case 'pending': return 'En attente';
+      case 'confirmed': return 'Confirmed';
+      case 'cancelled': return 'Cancelled';
+      case 'pending': return 'Pending';
       default: return status;
     }
   };
@@ -54,7 +54,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
         <div className="space-y-3 mb-4">
           <div className="flex items-center text-sm">
             <Calendar className="h-4 w-4 mr-2 opacity-70" />
-            <span>{format(new Date(reservation.date), 'dd MMMM yyyy', { locale: fr })}</span>
+            <span>{format(new Date(reservation.date), 'dd MMMM yyyy', { locale: enUS })}</span>
           </div>
           
           <div className="flex items-center text-sm">
@@ -64,7 +64,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
           
           <div className="flex items-center text-sm">
             <Home className="h-4 w-4 mr-2 opacity-70" />
-            <span>Chambre: {reservation.roomNumber || '-'}</span>
+            <span>Room: {reservation.roomNumber || '-'}</span>
           </div>
           
           {reservation.guestEmail && (
@@ -90,7 +90,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
             onClick={() => onViewDetails(reservation)}
           >
             <Eye className="h-4 w-4 mr-1" />
-            Détails
+            Details
           </Button>
           
           {reservation.status === 'pending' && (
@@ -103,7 +103,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
                 disabled={isUpdating}
               >
                 <Check className="h-4 w-4 mr-1" />
-                Confirmer
+                Confirm
               </Button>
               
               <Button 
@@ -114,7 +114,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
                 disabled={isUpdating}
               >
                 <X className="h-4 w-4 mr-1" />
-                Refuser
+                Decline
               </Button>
             </>
           )}
@@ -128,23 +128,23 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({
                   className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
                 >
                   <X className="h-4 w-4 mr-1" />
-                  Annuler
+                  Cancel
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Annuler la réservation</AlertDialogTitle>
+                  <AlertDialogTitle>Cancel Reservation</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.
+                    Are you sure you want to cancel this reservation? This action is irreversible.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={() => onUpdateStatus(reservation.id, 'cancelled')}
                     className="bg-red-500 hover:bg-red-600"
                   >
-                    Confirmer l'annulation
+                    Confirm Cancellation
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

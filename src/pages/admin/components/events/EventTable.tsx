@@ -4,7 +4,7 @@ import { Event } from '@/types/event';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Calendar, Users, Star, ExternalLink } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 
@@ -21,7 +21,7 @@ export const EventTable: React.FC<EventTableProps> = ({
   onSelectEvent,
   stories = []
 }) => {
-  // Créer un Map des événements qui sont liés à des stories
+  // Create a Map of events linked to stories
   const eventInStoryMap = new Map(
     stories
       .filter(story => story.eventId)
@@ -31,17 +31,17 @@ export const EventTable: React.FC<EventTableProps> = ({
   return (
     <div className="border rounded-md">
       <div className="p-4 border-b">
-        <h3 className="font-medium">Événements</h3>
+        <h3 className="font-medium">Events</h3>
       </div>
       
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nom</TableHead>
-            <TableHead>Catégorie</TableHead>
-            <TableHead>Lieu</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Location</TableHead>
             <TableHead>Date</TableHead>
-            <TableHead>Mise en avant</TableHead>
+            <TableHead>Featured</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -49,7 +49,7 @@ export const EventTable: React.FC<EventTableProps> = ({
           {events.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-4">
-                Aucun événement disponible
+                No events available
               </TableCell>
             </TableRow>
           ) : (
@@ -65,7 +65,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="capitalize">
-                    {event.category === 'event' ? 'Événement' : 'Promotion'}
+                    {event.category === 'event' ? 'Event' : 'Promotion'}
                   </Badge>
                 </TableCell>
                 <TableCell>{event.location || '-'}</TableCell>
@@ -73,7 +73,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                   <div className="flex flex-col">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-2 opacity-70" />
-                      {format(new Date(event.date), 'dd MMM yyyy', { locale: fr })}
+                      {format(new Date(event.date), 'dd MMM yyyy', { locale: enUS })}
                     </div>
                     {event.time && (
                       <div className="text-xs text-muted-foreground mt-1">{event.time}</div>
@@ -84,7 +84,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                   {event.is_featured ? (
                     <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
                       <Star className="h-3 w-3 mr-1 fill-amber-500" />
-                      Mis en avant
+                      Featured
                     </Badge>
                   ) : (
                     '-'
@@ -99,7 +99,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                       className="flex items-center gap-1"
                     >
                       <Users className="h-4 w-4" />
-                      {selectedEventId === event.id ? 'Sélectionné' : 'Réservations'}
+                      {selectedEventId === event.id ? 'Selected' : 'Reservations'}
                     </Button>
                   </div>
                 </TableCell>

@@ -48,7 +48,7 @@ const SpaServiceCard = ({ service, onBook }: SpaServiceCardProps) => {
           variant="default"
           size="sm"
         >
-          Réserver
+          Book
         </Button>
       </CardContent>
     </Card>

@@ -11,15 +11,15 @@ const BookingFacilityInfo: React.FC<BookingFacilityInfoProps> = ({ facility }) =
   if (!facility) {
     return (
       <div className="space-y-3">
-        <h3 className="font-medium">Détails de l'installation</h3>
-        <p className="text-sm text-gray-500">Informations sur l'installation non disponibles</p>
+        <h3 className="font-medium">Facility Details</h3>
+        <p className="text-sm text-gray-500">Facility information not available</p>
       </div>
     );
   }
   
   return (
     <div className="space-y-3">
-      <h3 className="font-medium">Détails de l'installation</h3>
+      <h3 className="font-medium">Facility Details</h3>
       <div className="flex items-start gap-2 text-sm">
         <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
         <div>
@@ -31,7 +31,7 @@ const BookingFacilityInfo: React.FC<BookingFacilityInfoProps> = ({ facility }) =
         <div className="flex items-start gap-2 text-sm">
           <Clock className="h-4 w-4 text-gray-500 mt-0.5" />
           <div>
-            <p className="font-medium">Heures d'ouverture</p>
+            <p className="font-medium">Opening Hours</p>
             <p className="text-gray-600">{facility.opening_hours}</p>
           </div>
         </div>

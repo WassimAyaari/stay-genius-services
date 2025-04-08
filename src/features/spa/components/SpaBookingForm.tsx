@@ -61,7 +61,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
 
   const onSubmit = async (data: SpaBookingFormValues) => {
     if (!selectedDate || !selectedTime) {
-      toast.error("Veuillez sélectionner une date et une heure");
+      toast.error("Please select a date and time");
       return;
     }
 
@@ -81,14 +81,14 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
       };
 
       await createBooking(bookingData);
-      toast.success("Demande de réservation spa envoyée avec succès");
+      toast.success("Spa booking request sent successfully");
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
       console.error("Error creating spa booking:", error);
-      toast.error("Erreur lors de l'envoi de la demande de réservation spa");
+      toast.error("Error sending spa booking request");
     }
   };
 
@@ -96,7 +96,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
     <div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <Label htmlFor="guestName">Nom</Label>
+          <Label htmlFor="guestName">Name</Label>
           <Input
             id="guestName"
             type="text"
@@ -104,7 +104,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
             className={cn({ "focus-visible:ring-red-500": errors.guestName })}
           />
           {errors.guestName && (
-            <p className="text-red-500 text-sm mt-1">Champ obligatoire</p>
+            <p className="text-red-500 text-sm mt-1">Required field</p>
           )}
         </div>
         <div>
@@ -116,11 +116,11 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
             className={cn({ "focus-visible:ring-red-500": errors.guestEmail })}
           />
           {errors.guestEmail && (
-            <p className="text-red-500 text-sm mt-1">Email invalide</p>
+            <p className="text-red-500 text-sm mt-1">Invalid email</p>
           )}
         </div>
         <div>
-          <Label htmlFor="guestPhone">Téléphone</Label>
+          <Label htmlFor="guestPhone">Phone</Label>
           <Input
             id="guestPhone"
             type="tel"
@@ -128,11 +128,11 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
             className={cn({ "focus-visible:ring-red-500": errors.guestPhone })}
           />
           {errors.guestPhone && (
-            <p className="text-red-500 text-sm mt-1">Numéro de téléphone invalide</p>
+            <p className="text-red-500 text-sm mt-1">Invalid phone number</p>
           )}
         </div>
         <div>
-          <Label htmlFor="roomNumber">Numéro de chambre</Label>
+          <Label htmlFor="roomNumber">Room Number</Label>
           <Input
             id="roomNumber"
             type="text"
@@ -140,11 +140,11 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
             className={cn({ "focus-visible:ring-red-500": errors.roomNumber })}
           />
           {errors.roomNumber && (
-            <p className="text-red-500 text-sm mt-1">Champ obligatoire</p>
+            <p className="text-red-500 text-sm mt-1">Required field</p>
           )}
         </div>
         <div>
-          <Label>Date de réservation</Label>
+          <Label>Booking Date</Label>
           <DatePicker
             mode="single"
             selected={selectedDate}
@@ -155,7 +155,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
           />
         </div>
         <div>
-          <Label htmlFor="time">Heure</Label>
+          <Label htmlFor="time">Time</Label>
           <select
             id="time"
             className="w-full p-2 border rounded"
@@ -163,7 +163,7 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
             onChange={(e) => setSelectedTime(e.target.value)}
             required
           >
-            <option value="">Sélectionner une heure</option>
+            <option value="">Select a time</option>
             {[...Array(24)].map((_, i) => {
               const hour = i.toString().padStart(2, '0');
               return (
@@ -175,14 +175,14 @@ export default function SpaBookingForm({ service, onSuccess, existingBooking }: 
           </select>
         </div>
         <div>
-          <Label htmlFor="specialRequests">Demandes spéciales</Label>
+          <Label htmlFor="specialRequests">Special Requests</Label>
           <Textarea
             id="specialRequests"
             {...register("specialRequests")}
             className="w-full border rounded"
           />
         </div>
-        <Button type="submit">Envoyer la demande de réservation</Button>
+        <Button type="submit">Submit Booking Request</Button>
       </form>
     </div>
   );

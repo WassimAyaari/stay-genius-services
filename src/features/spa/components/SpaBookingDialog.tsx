@@ -47,13 +47,13 @@ const SpaBookingDialog = ({
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>
             {isEditing 
-              ? `Modifier votre réservation - ${service?.name}` 
-              : `Réserver un traitement - ${service?.name}`}
+              ? `Edit Your Booking - ${service?.name}` 
+              : `Book a Treatment - ${service?.name}`}
           </DialogTitle>
           <DialogDescription>
             {isEditing 
-              ? "Modifiez les détails de votre réservation ci-dessous."
-              : "Remplissez le formulaire ci-dessous pour réserver un traitement."}
+              ? "Modify your booking details below."
+              : "Fill out the form below to book a treatment."}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[80vh]">

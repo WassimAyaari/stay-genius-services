@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Room } from '@/hooks/useRoom';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 interface WelcomeBannerProps {
   room: Room | null;
@@ -16,7 +16,7 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
   const [checkOutDate, setCheckOutDate] = useState<string>('');
   
   useEffect(() => {
-    // Récupérer les données utilisateur du localStorage pour obtenir le numéro de chambre
+    // Get user data from localStorage to get room number
     const userDataString = localStorage.getItem('user_data');
     if (userDataString) {
       try {
@@ -25,21 +25,21 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           setRoomNumber(userData.room_number);
         }
         
-        // Récupérer le nom de l'utilisateur
+        // Get user's name
         const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
         if (fullName) {
           setUserName(fullName);
         }
         
-        // Récupérer les dates de séjour
+        // Get stay dates
         if (userData.check_in_date) {
           const checkIn = new Date(userData.check_in_date);
-          setCheckInDate(format(checkIn, 'dd MMMM yyyy', { locale: fr }));
+          setCheckInDate(format(checkIn, 'dd MMMM yyyy', { locale: enUS }));
         }
         
         if (userData.check_out_date) {
           const checkOut = new Date(userData.check_out_date);
-          setCheckOutDate(format(checkOut, 'dd MMMM yyyy', { locale: fr }));
+          setCheckOutDate(format(checkOut, 'dd MMMM yyyy', { locale: enUS }));
         }
       } catch (error) {
         console.error("Error parsing user data from localStorage:", error);
@@ -47,7 +47,7 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
     }
   }, []);
 
-  // Utiliser le numéro de chambre du localStorage s'il existe, sinon utiliser celui du room object
+  // Use room number from localStorage if it exists, otherwise use the one from room object
   const displayRoomNumber = roomNumber || (room?.room_number || 'Suite 401');
 
   return (
@@ -57,11 +57,11 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           <div>
             <h1 className="text-3xl font-bold text-secondary mb-2">{displayRoomNumber}</h1>
             <p className="text-gray-600 text-lg">{room?.type}</p>
-            {userName && <p className="text-gray-700 mt-1">Bienvenue, {userName}</p>}
+            {userName && <p className="text-gray-700 mt-1">Welcome, {userName}</p>}
           </div>
           <div className="text-right">
             <p className="text-sm font-medium text-gray-600">Check-out</p>
-            <p className="text-lg font-semibold text-secondary">{checkOutDate || 'Non défini'}</p>
+            <p className="text-lg font-semibold text-secondary">{checkOutDate || 'Not set'}</p>
           </div>
         </div>
         
@@ -69,13 +69,13 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           <div className="mt-2 p-3 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-sm font-medium text-gray-600">Arrivée</p>
-                <p className="text-md font-medium">{checkInDate || 'Non défini'}</p>
+                <p className="text-sm font-medium text-gray-600">Arrival</p>
+                <p className="text-md font-medium">{checkInDate || 'Not set'}</p>
               </div>
               <div className="h-8 border-l border-gray-300"></div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Départ</p>
-                <p className="text-md font-medium">{checkOutDate || 'Non défini'}</p>
+                <p className="text-sm font-medium text-gray-600">Departure</p>
+                <p className="text-md font-medium">{checkOutDate || 'Not set'}</p>
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { EventReservation } from '@/types/event';
 import { ReservationCard } from './ReservationCard';
@@ -40,20 +41,20 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
   const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
     try {
       // Show loading toast
-      toast.loading('Mise à jour du statut...');
+      toast.loading('Updating status...');
       
       // Call the update function
       onUpdateStatus(reservationId, status);
     } catch (error) {
       console.error('Error in handleUpdateStatus:', error);
-      toast.error('Erreur lors de la mise à jour du statut');
+      toast.error('Error updating status');
     }
   };
 
   if (reservations.length === 0) {
     return (
       <div className="text-center py-12 border rounded-md bg-gray-50">
-        <p className="text-muted-foreground">Aucune réservation trouvée pour cet événement</p>
+        <p className="text-muted-foreground">No reservations found for this event</p>
       </div>
     );
   }
@@ -62,13 +63,13 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-medium">
-          {reservations.length} {reservations.length > 1 ? 'réservations' : 'réservation'}
+          {reservations.length} {reservations.length > 1 ? 'reservations' : 'reservation'}
         </h3>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8 w-64"
@@ -76,10 +77,10 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
           </div>
           <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
             <TabsList>
-              <TabsTrigger value="all">Toutes</TabsTrigger>
-              <TabsTrigger value="pending">En attente</TabsTrigger>
-              <TabsTrigger value="confirmed">Confirmées</TabsTrigger>
-              <TabsTrigger value="cancelled">Annulées</TabsTrigger>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+              <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -88,7 +89,7 @@ export const ReservationsGrid: React.FC<ReservationsGridProps> = ({
       {filteredReservations.length === 0 ? (
         <div className="text-center py-12 border rounded-md bg-gray-50">
           <p className="text-muted-foreground">
-            {searchTerm ? 'Aucune réservation ne correspond à votre recherche' : 'Aucune réservation avec ce statut'}
+            {searchTerm ? 'No reservations match your search' : 'No reservations with this status'}
           </p>
         </div>
       ) : (

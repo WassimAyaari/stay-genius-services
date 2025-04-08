@@ -42,17 +42,17 @@ export const StoriesTab = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Liste des stories</h2>
+        <h2 className="text-xl font-semibold">Stories List</h2>
         <Dialog open={isStoryDialogOpen} onOpenChange={setIsStoryDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingStory(null)} className="bg-[#00AEBB]">
               <Plus className="h-4 w-4 mr-2" />
-              Ajouter une story
+              Add a Story
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[550px]">
             <DialogHeader>
-              <DialogTitle>{editingStory ? 'Modifier la story' : 'Ajouter une story'}</DialogTitle>
+              <DialogTitle>{editingStory ? 'Edit Story' : 'Add a Story'}</DialogTitle>
             </DialogHeader>
             <StoryForm 
               onSubmit={editingStory ? handleUpdateStory : handleCreateStory} 
@@ -65,17 +65,17 @@ export const StoriesTab = () => {
       </div>
 
       {storiesLoading ? (
-        <div className="p-6 text-center">Chargement des stories...</div>
+        <div className="p-6 text-center">Loading stories...</div>
       ) : (
         <div className="border rounded-md overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Image</TableHead>
-                <TableHead>Titre</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Créée le</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Created on</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -83,7 +83,7 @@ export const StoriesTab = () => {
               {stories.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-4">
-                    Aucune story trouvée
+                    No stories found
                   </TableCell>
                 </TableRow> 
               ) : (
@@ -95,7 +95,7 @@ export const StoriesTab = () => {
                       </div>
                     </TableCell>
                     <TableCell>{story.title}</TableCell>
-                    <TableCell>{story.category === 'event' ? 'Événement' : 'Promotion'}</TableCell>
+                    <TableCell>{story.category === 'event' ? 'Event' : 'Promotion'}</TableCell>
                     <TableCell>{format(new Date(story.created_at), 'dd/MM/yyyy')}</TableCell>
                     <TableCell>
                       <Button 
@@ -120,15 +120,15 @@ export const StoriesTab = () => {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+                              <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer cette story ? Cette action est irréversible.
+                                Are you sure you want to delete this story? This action is irreversible.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction onClick={() => deleteStory(story.id)} className="bg-red-500 hover:bg-red-600">
-                                Supprimer
+                                Delete
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

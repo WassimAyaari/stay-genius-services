@@ -25,14 +25,14 @@ const SpaSection = ({ onBookService }: SpaSectionProps) => {
   }, [emblaApi]);
 
   if (isLoading) {
-    return <div className="text-center py-8">Chargement des services...</div>;
+    return <div className="text-center py-8">Loading services...</div>;
   }
 
   const displayServices = services?.slice(0, 6) || [];
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Nos Services</h2>
+      <h2 className="text-2xl font-semibold mb-4">Our Services</h2>
       <Carousel
         opts={{
           align: "start",

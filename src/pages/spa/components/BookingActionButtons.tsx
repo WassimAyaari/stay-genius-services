@@ -34,7 +34,7 @@ const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
       <div className="flex justify-end gap-4 pt-4">
         {canEdit && (
           <Button variant="outline" onClick={onEdit}>
-            Modifier
+            Edit
           </Button>
         )}
         
@@ -43,7 +43,7 @@ const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
             variant="destructive"
             onClick={() => setIsCancelDialogOpen(true)}
           >
-            Annuler
+            Cancel
           </Button>
         )}
       </div>
@@ -51,13 +51,13 @@ const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
       <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Annuler la réservation</AlertDialogTitle>
+            <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
+              Are you sure you want to cancel this booking? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onCancel();
@@ -65,7 +65,7 @@ const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
               }}
               className="bg-red-600 hover:bg-red-700"
             >
-              Confirmer l'annulation
+              Confirm Cancellation
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventReservations } from '@/hooks/useEventReservations';
@@ -53,20 +54,20 @@ export const EventReservationsTab: React.FC<{
       
       // Show success toast after a short delay to allow the update to complete
       setTimeout(() => {
-        const statusLabel = status === 'confirmed' ? 'confirmée' : status === 'cancelled' ? 'annulée' : 'en attente';
-        toast.success(`Réservation ${statusLabel} avec succès`);
+        const statusLabel = status === 'confirmed' ? 'confirmed' : status === 'cancelled' ? 'cancelled' : 'pending';
+        toast.success(`Reservation ${statusLabel} successfully`);
       }, 300);
       
     } catch (error) {
       console.error('Error in handleUpdateStatus:', error);
-      toast.error("Erreur lors de la mise à jour du statut de la réservation");
+      toast.error("Error updating reservation status");
     }
   };
   
   if (eventsLoading) {
     return (
       <div className="p-8 text-center">
-        Chargement des événements...
+        Loading events...
       </div>
     );
   }
@@ -74,9 +75,9 @@ export const EventReservationsTab: React.FC<{
   if (events.length === 0) {
     return (
       <div className="p-8 text-center">
-        <h3 className="text-xl mb-2">Aucun événement trouvé</h3>
+        <h3 className="text-xl mb-2">No events found</h3>
         <p className="text-muted-foreground">
-          Créez d'abord des événements dans l'onglet "Événements"
+          Create events first in the "Events" tab
         </p>
       </div>
     );
@@ -93,15 +94,15 @@ export const EventReservationsTab: React.FC<{
       
       {selectedEventId && (
         <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Réservations pour l'événement</h2>
+          <h2 className="text-xl font-semibold mb-4">Reservations for the event</h2>
           {reservationsLoading ? (
             <div className="text-center py-4">
-              <p>Chargement des réservations...</p>
+              <p>Loading reservations...</p>
             </div>
           ) : reservationsError ? (
             <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center text-red-700">
               <AlertCircle className="h-5 w-5 mr-2" />
-              <p>Erreur lors du chargement des réservations</p>
+              <p>Error loading reservations</p>
             </div>
           ) : (
             <ReservationsGrid 
