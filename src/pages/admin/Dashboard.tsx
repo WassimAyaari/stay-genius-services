@@ -9,17 +9,40 @@ import {
   Store, 
   PartyPopper, 
   FileText,
-  MessageCircle
+  MessageCircle,
+  Bell,
+  Wrench
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const adminSections = [
     { 
-      title: "Service Requests", 
+      title: "Housekeeping", 
       icon: <ShowerHead className="h-5 w-5 text-primary" />, 
       count: 24, 
       trend: "+5 since yesterday", 
+      path: "/admin/housekeeping" 
+    },
+    { 
+      title: "Maintenance", 
+      icon: <Wrench className="h-5 w-5 text-primary" />, 
+      count: 18, 
+      trend: "+2 since yesterday", 
+      path: "/admin/maintenance" 
+    },
+    { 
+      title: "Reception", 
+      icon: <Bell className="h-5 w-5 text-primary" />, 
+      count: 15, 
+      trend: "+3 this week", 
+      path: "/admin/reception" 
+    },
+    { 
+      title: "All Requests", 
+      icon: <FileText className="h-5 w-5 text-primary" />, 
+      count: 57, 
+      trend: "+10 this week", 
       path: "/admin/requests" 
     },
     { 
@@ -28,13 +51,6 @@ const AdminDashboard = () => {
       count: 4, 
       trend: "", 
       path: "/admin/restaurants" 
-    },
-    { 
-      title: "Menus", 
-      icon: <FileText className="h-5 w-5 text-primary" />, 
-      count: 15, 
-      trend: "+3 this week", 
-      path: "/admin/restaurant-menus" 
     },
     { 
       title: "Shops", 
@@ -63,13 +79,6 @@ const AdminDashboard = () => {
       count: 36, 
       trend: "+3 today", 
       path: "/admin/chat" 
-    },
-    { 
-      title: "About", 
-      icon: <FileText className="h-5 w-5 text-primary" />, 
-      count: null, 
-      trend: "", 
-      path: "/admin/about" 
     },
     { 
       title: "Activity", 

@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, FileText, Clock, Headphones as HeadphonesIcon } from 'lucide-react';
+import { MessageCircle, FileText, Clock, Headphones as HeadphonesIcon, ShowerHead, Wrench, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,6 +20,7 @@ const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: 'Guest',
     roomNumber: ''
@@ -57,12 +59,9 @@ const Services = () => {
     setIsChatOpen(true);
   };
 
-  const handleOpenRequestDialog = () => {
+  const handleOpenRequestDialog = (category?: string) => {
+    setSelectedCategory(category || null);
     setIsRequestDialogOpen(true);
-  };
-
-  const handleNavigateToRequests = () => {
-    handleOpenRequestDialog();
   };
 
   const handleNavigateToSupport = () => {
@@ -85,38 +84,72 @@ const Services = () => {
           <p className="text-gray-600">24/7 dedicated concierge support</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <ServiceCard
-            title="Live Chat"
-            description="Instant messaging with our concierge team"
-            icon={MessageCircle}
-            actionText="Start Chat"
-            onAction={handleStartChat}
-          />
+        {/* Service Request Categories */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-secondary mb-6">Service Requests</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <ServiceCard
+              title="Housekeeping"
+              description="Room cleaning, fresh towels, and other room services"
+              icon={<ShowerHead className="h-6 w-6" />}
+              actionText="Request Service"
+              onAction={() => handleOpenRequestDialog('housekeeping')}
+            />
 
-          <ServiceCard
-            title="Inquiries & Requests"
-            description="Submit and track your requests"
-            icon={FileText}
-            actionText="New Request"
-            onAction={handleNavigateToRequests}
-          />
+            <ServiceCard
+              title="Maintenance"
+              description="Technical issues, repairs, and facility maintenance"
+              icon={<Wrench className="h-6 w-6" />}
+              actionText="Request Service"
+              onAction={() => handleOpenRequestDialog('maintenance')}
+            />
 
-          <ServiceCard
-            title="24/7 Support"
-            description="Round-the-clock assistance for all your needs"
-            icon={Clock}
-            actionText="Contact Support"
-            onAction={handleNavigateToSupport}
-          />
+            <ServiceCard
+              title="Reception"
+              description="Check-in/out, information, and general assistance"
+              icon={<Bell className="h-6 w-6" />}
+              actionText="Request Service"
+              onAction={() => handleOpenRequestDialog('reception')}
+            />
+          </div>
+        </div>
 
-          <ServiceCard
-            title="WhatsApp Service"
-            description="Direct messaging via WhatsApp"
-            icon={HeadphonesIcon}
-            actionText="Message Us"
-            onAction={handleWhatsAppService}
-          />
+        {/* Communication Methods */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-secondary mb-6">Contact Methods</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <ServiceCard
+              title="Live Chat"
+              description="Instant messaging with our concierge team"
+              icon={<MessageCircle className="h-6 w-6" />}
+              actionText="Start Chat"
+              onAction={handleStartChat}
+            />
+
+            <ServiceCard
+              title="WhatsApp Service"
+              description="Direct messaging via WhatsApp"
+              icon={<HeadphonesIcon className="h-6 w-6" />}
+              actionText="Message Us"
+              onAction={handleWhatsAppService}
+            />
+
+            <ServiceCard
+              title="24/7 Support"
+              description="Round-the-clock assistance for all your needs"
+              icon={<Clock className="h-6 w-6" />}
+              actionText="Contact Support"
+              onAction={handleNavigateToSupport}
+            />
+
+            <ServiceCard
+              title="All Requests"
+              description="View and track all your service requests"
+              icon={<FileText className="h-6 w-6" />}
+              actionText="View Requests"
+              onAction={() => navigate('/requests')}
+            />
+          </div>
         </div>
       </div>
 
@@ -130,6 +163,7 @@ const Services = () => {
         isOpen={isRequestDialogOpen}
         onOpenChange={setIsRequestDialogOpen}
         room={room || null}
+        initialCategory={selectedCategory}
       />
     </Layout>
   );

@@ -1,191 +1,70 @@
 
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { UserInfo } from './useUserInfo';
-import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { supabase } from '@/integrations/supabase/client';
-import { syncGuestData } from '@/features/users/services/guestService';
+import { useToast } from '@/hooks/use-toast';
 
-/**
- * Creates a user profile in the database if it doesn't exist
- */
-const createUserProfile = async (userId: string, userInfo: UserInfo) => {
-  console.log('Creating user profile in useMultiItemRequestHandler:', userId, userInfo);
-  try {
-    // Instead of using the database function with parameter ambiguity,
-    // we'll use the syncGuestData function which is more reliable
-    return await syncGuestData(userId, {
-      id: userId,
-      email: userInfo.email || '',
-      first_name: userInfo.name.split(' ')[0] || '',
-      last_name: userInfo.name.split(' ').slice(1).join(' ') || '',
-      room_number: userInfo.roomNumber || '',
-      phone: userInfo.phone || ''
-    });
-  } catch (error) {
-    console.error("Error in createUserProfile:", error);
-    return false;
-  }
-};
+interface RoomInfo {
+  roomId: string;
+  roomNumber: string;
+  guestId: string;
+  guestName: string;
+}
 
 export function useMultiItemRequestHandler() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
+  
   const handleSubmitRequests = async (
+    categoryId: string,
     selectedItems: string[],
-    categoryItems: RequestItem[] | undefined,
-    userInfo: UserInfo,
-    selectedCategory: RequestCategory | null,
-    onClose: () => void
+    roomInfo: RoomInfo
   ) => {
-    if (!selectedItems.length || !categoryItems) {
+    if (selectedItems.length === 0) {
       toast({
         title: "No items selected",
-        description: "Please select at least one item to request.",
+        description: "Please select at least one item to request",
         variant: "destructive"
       });
       return;
     }
-
+    
     setIsSubmitting(true);
-    const userId = localStorage.getItem('user_id');
-
-    if (!userId) {
-      toast({
-        title: "User ID missing",
-        description: "Unable to submit request without user identification.",
-        variant: "destructive"
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
+    
     try {
-      // Step 1: Create a chat message that summarizes all requests (doesn't require a profile)
-      const selectedItemData = categoryItems.filter(item => selectedItems.includes(item.id));
-      const itemNames = selectedItemData.map(item => item.name).join(', ');
-      const categoryName = selectedCategory?.name || 'items';
-      const chatMessage = `Requesting ${categoryName}: ${itemNames}`;
-      
-      console.log('Creating chat message for multiple items:', chatMessage);
-      
-      const { error: chatError } = await supabase
-        .from('chat_messages')
-        .insert([{
-          user_id: userId,
-          recipient_id: null,
-          user_name: userInfo.name || 'Guest',
-          room_number: userInfo.roomNumber,
-          text: chatMessage,
-          sender: 'user',
-          status: 'sent',
-          created_at: new Date().toISOString()
-        }]);
-      
-      if (chatError) {
-        console.error("Error creating chat message:", chatError);
-        throw chatError;
-      }
-      
-      // Step 2: Try to create user profile if it doesn't exist
-      console.log('Attempting to create/update user profile');
-      const profileCreated = await createUserProfile(userId, userInfo);
-      console.log('Profile creation result:', profileCreated);
-
-      // Step 3: Check if room exists and get room_id
-      const { data: roomData } = await supabase
-        .from('rooms')
-        .select('id')
-        .eq('room_number', userInfo.roomNumber)
-        .maybeSingle();
-      
-      // Define a valid room_id to use - either from database or use userId as a fallback
-      const roomId = roomData?.id || userId;
-      
-      // Step 4: Try to create service requests for each item
-      let successful = 0;
-      let failed = 0;
-      
-      for (const item of selectedItemData) {
-        try {
-          // Set request type based on category name if available
-          const requestType = selectedCategory?.name?.toLowerCase() || 'custom';
+      // Create service requests for each selected item
+      const requestPromises = selectedItems.map(async (itemId) => {
+        let itemDescription = itemId; // Default to the ID if we can't find an item name
+        
+        // For fixed categories, we can use the item ID directly as the description
+        // since they're not coming from the database
+        
+        const { error } = await supabase
+          .from('service_requests')
+          .insert({
+            guest_id: roomInfo.guestId,
+            room_id: roomInfo.roomId,
+            guest_name: roomInfo.guestName,
+            room_number: roomInfo.roomNumber,
+            type: categoryId, // Use the category ID (housekeeping, maintenance, etc.)
+            description: itemDescription,
+            status: 'pending'
+          });
           
-          // Fix: Define the requestData with the correct interface that includes all fields
-          const requestData: {
-            guest_id: string;
-            room_id: string;
-            type: string;
-            description: string;
-            status: string;
-            created_at: string;
-            room_number: string;
-            guest_name: string;
-            category_id?: string;
-            request_item_id?: string;
-          } = {
-            guest_id: userId,
-            room_id: roomId,
-            type: requestType,
-            description: item.name,
-            status: 'pending',
-            created_at: new Date().toISOString(),
-            room_number: userInfo.roomNumber,
-            guest_name: userInfo.name || 'Guest'
-          };
-          
-          // Add category if available
-          if (selectedCategory?.id) {
-            requestData.category_id = selectedCategory.id;
-          }
-          
-          // Add request item ID
-          if (item.id) {
-            requestData.request_item_id = item.id;
-          }
-          
-          console.log('Creating service request for item:', item.name, requestData);
-          
-          const { error } = await supabase
-            .from('service_requests')
-            .insert([requestData]);
-            
-          if (error) {
-            console.error(`Error submitting request for item ${item.name}:`, error);
-            failed++;
-          } else {
-            successful++;
-          }
-        } catch (itemError) {
-          console.error(`Error processing item ${item.name}:`, itemError);
-          failed++;
+        if (error) {
+          console.error('Error creating service request:', error);
+          throw error;
         }
-      }
+      });
       
-      // Show appropriate toast based on results
-      if (successful > 0 && failed === 0) {
-        toast({
-          title: "Requests Submitted",
-          description: `${successful} requests have been sent successfully.`
-        });
-        onClose();
-      } else if (successful > 0 && failed > 0) {
-        toast({
-          title: "Partial Success",
-          description: `${successful} requests sent, but ${failed} failed. Your message was delivered.`
-        });
-        onClose();
-      } else {
-        toast({
-          title: "Message Sent",
-          description: "Your message was delivered, but we couldn't register your requests. Our staff will assist you.",
-          variant: "destructive"
-        });
-        onClose();
-      }
+      await Promise.all(requestPromises);
+      
+      toast({
+        title: "Requests submitted",
+        description: `${selectedItems.length} ${selectedItems.length === 1 ? 'request' : 'requests'} successfully submitted`,
+      });
+      
     } catch (error) {
-      console.error("Error submitting multiple requests:", error);
+      console.error('Error submitting requests:', error);
       toast({
         title: "Error",
         description: "Failed to submit requests. Please try again.",
@@ -195,7 +74,7 @@ export function useMultiItemRequestHandler() {
       setIsSubmitting(false);
     }
   };
-
+  
   return {
     isSubmitting,
     handleSubmitRequests

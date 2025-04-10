@@ -1,132 +1,115 @@
 
-import { useState } from 'react';
-import { RequestCategory, RequestItem } from '@/features/rooms/types';
+import { useState, useCallback } from 'react';
 import { Room } from '@/hooks/useRoom';
-import { useRequestItems } from '@/hooks/useRequestCategories';
-import { useUserInfo } from './useUserInfo';
 import { useRequestSubmission } from './useRequestSubmission';
-import { toast } from 'sonner';
+import { useUserInfo } from './useUserInfo';
 
 export function useRequestDialog(room: Room | null, onClose: () => void) {
   const [view, setView] = useState<'categories' | 'items'>('categories');
-  const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  
-  // Get user info management with enhanced features
-  const { 
-    userInfo, 
-    getLocalUserInfo,
-    ensureValidUserInfo
-  } = useUserInfo(room);
-  
-  // Get request submission functionality
-  const {
-    isSubmitting,
-    handleSubmitRequests: submitRequests
-  } = useRequestSubmission();
-  
-  // Fetch items for the selected category
-  const { data: categoryItems = [] } = useRequestItems(selectedCategory?.id);
+  const { isSubmitting, handleSubmitRequests } = useRequestSubmission();
+  const { getRoomInfo } = useUserInfo(room);
 
-  const handleSelectCategory = (category: RequestCategory) => {
+  // Set the dialog title and description based on the current view
+  const dialogTitle = view === 'categories' 
+    ? 'Choose Request Category' 
+    : selectedCategory?.name || 'Select Items';
+    
+  const dialogDescription = view === 'categories'
+    ? 'Select the type of service you need'
+    : 'Choose items to request';
+
+  // Handle selecting a category
+  const handleSelectCategory = useCallback((category: any) => {
     setSelectedCategory(category);
     setSelectedItems([]);
     setView('items');
-  };
+  }, []);
 
-  const handleGoBackToCategories = () => {
+  // Set initial category from URL or other sources
+  const setInitialCategory = useCallback((categoryId: string) => {
+    // Find the category by ID or create a simple one if needed
+    const categoryMap: Record<string, any> = {
+      'housekeeping': {
+        id: 'housekeeping',
+        name: 'Housekeeping',
+        description: 'Room cleaning, fresh towels, and other room services'
+      },
+      'maintenance': {
+        id: 'maintenance',
+        name: 'Maintenance',
+        description: 'Technical issues, repairs, and facility maintenance'
+      },
+      'reception': {
+        id: 'reception',
+        name: 'Reception',
+        description: 'Check-in/out, information, and general assistance'
+      }
+    };
+    
+    const category = categoryMap[categoryId];
+    if (category) {
+      handleSelectCategory(category);
+    }
+  }, [handleSelectCategory]);
+
+  // Go back to the categories view
+  const handleGoBackToCategories = useCallback(() => {
+    setView('categories');
     setSelectedCategory(null);
     setSelectedItems([]);
-    setView('categories');
-  };
+  }, []);
 
-  const handleToggleRequestItem = (itemId: string) => {
-    setSelectedItems(prevItems => {
-      const isAlreadySelected = prevItems.includes(itemId);
-      if (isAlreadySelected) {
-        return prevItems.filter(id => id !== itemId);
+  // Toggle an item selection
+  const handleToggleRequestItem = useCallback((itemId: string) => {
+    setSelectedItems(prev => {
+      if (prev.includes(itemId)) {
+        return prev.filter(id => id !== itemId);
       } else {
-        return [...prevItems, itemId];
+        return [...prev, itemId];
       }
     });
-  };
+  }, []);
 
-  // Update the handle submit requests to properly handle the Promise
-  const handleSubmitRequests = async () => {
+  // Submit the request
+  const handleSubmitRequest = useCallback(async () => {
+    if (!selectedCategory) return;
+    
+    const roomInfo = getRoomInfo();
+    
     try {
-      // First ensure we have valid user info and update localStorage if needed
-      // Use await to wait for the Promise to resolve
-      const validUserInfo = await ensureValidUserInfo();
-      
-      // Double-check that we actually have the required fields with valid values
-      if (!validUserInfo.name || !validUserInfo.roomNumber) {
-        toast.error("Error", {
-          description: "Your profile information is incomplete. Please contact reception.",
-        });
-        return;
-      }
-      
-      // Call the submission function with the validated user info
-      await submitRequests(selectedItems, categoryItems, validUserInfo, selectedCategory, onClose);
-      
-      // Show a success toast with tracking information
-      toast.success("Request Submitted", {
-        description: `Your request has been sent. You can track its status in the notifications panel.`,
-      });
-      
-      // Generate mock IDs for tracking
-      const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-      
-      // Add a mock ID for each selected item
-      selectedItems.forEach(itemId => {
-        const mockRequestId = `mock-${itemId}-${Date.now()}`;
-        requestIds.push(mockRequestId);
-      });
-      
-      localStorage.setItem('pending_requests', JSON.stringify(requestIds));
-      
-      // Close the dialog after successful submission
+      await handleSubmitRequests(
+        selectedCategory.id,
+        selectedItems,
+        roomInfo
+      );
       onClose();
     } catch (error) {
-      console.error("Error submitting requests:", error);
-      toast.error("Error", {
-        description: "Failed to submit your request. Please try again.",
-      });
+      console.error('Error submitting requests:', error);
     }
-  };
+  }, [selectedCategory, selectedItems, handleSubmitRequests, getRoomInfo, onClose]);
 
-  const getDialogTitle = () => {
-    if (view === 'categories') return "Select Request Category";
-    if (selectedCategory) return `Select ${selectedCategory.name} Requests`;
-    return "Select Request";
-  };
-
-  const getDialogDescription = () => {
-    if (view === 'categories') return "Choose a category to see available requests";
-    if (selectedCategory) return "Select the items you'd like to request";
-    return "";
-  };
-
-  // Reset state when dialog closes
-  const handleDialogClose = () => {
+  // Close the dialog and reset the state
+  const handleDialogClose = useCallback(() => {
     setView('categories');
     setSelectedCategory(null);
     setSelectedItems([]);
     onClose();
-  };
+  }, [onClose]);
 
   return {
     view,
     selectedCategory,
     selectedItems,
     isSubmitting,
-    userInfo,
-    dialogTitle: getDialogTitle(),
-    dialogDescription: getDialogDescription(),
+    dialogTitle,
+    dialogDescription,
     handleSelectCategory,
     handleGoBackToCategories,
     handleToggleRequestItem,
-    handleSubmitRequests,
-    handleDialogClose
+    handleSubmitRequests: handleSubmitRequest,
+    handleDialogClose,
+    setInitialCategory
   };
 }
