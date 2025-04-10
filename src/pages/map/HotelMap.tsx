@@ -1,23 +1,41 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search, Building, Utensils, Coffee, LifeBuoy, Dumbbell, Wifi, DoorClosed } from 'lucide-react';
+import { Search, Building, Utensils, Coffee, LifeBuoy, Dumbbell, Wifi, DoorClosed, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const HotelMap = () => {
+  const [searchValue, setSearchValue] = useState('');
+  
+  const handleClearSearch = () => {
+    setSearchValue('');
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Search Bar */}
         <div className="relative mb-8">
-          <Input
-            type="search"
-            placeholder="Search for locations, rooms, or facilities..."
-            className="w-full pl-12 pr-4 py-4 rounded-xl text-base bg-white shadow-lg"
-          />
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <div className="relative">
+            <Input
+              type="search"
+              placeholder="Search for locations, rooms, or facilities..."
+              className="w-full pl-12 pr-10 py-4 rounded-xl text-base bg-white shadow-lg"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            {searchValue && (
+              <button 
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
+                onClick={handleClearSearch}
+              >
+                <X className="h-4 w-4 text-gray-400" />
+              </button>
+            )}
+          </div>
         </div>
         
         {/* Interactive Map */}
