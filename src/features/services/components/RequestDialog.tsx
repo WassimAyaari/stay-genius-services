@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { useRequestDialog } from '@/features/services/hooks/useRequestDialog';
 import { Room } from '@/hooks/useRoom';

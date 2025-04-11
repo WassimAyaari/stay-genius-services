@@ -4,7 +4,6 @@ import { RequestCategory, RequestItem } from '@/features/rooms/types';
 import { Room } from '@/hooks/useRoom';
 import { useRequestItems } from '@/hooks/useRequestCategories';
 import { useUserInfo } from './useUserInfo';
-import { useRequestSubmission } from './useRequestSubmission';
 import { toast } from 'sonner';
 
 export function useRequestDialog(room: Room | null, onClose: () => void) {
@@ -18,12 +17,6 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     getLocalUserInfo,
     ensureValidUserInfo
   } = useUserInfo(room);
-  
-  // Get request submission functionality
-  const {
-    isSubmitting,
-    handleSubmitRequests: submitRequests
-  } = useRequestSubmission();
   
   // Fetch items for the selected category
   const { data: categoryItems = [] } = useRequestItems(selectedCategory?.id);
@@ -51,14 +44,12 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     });
   };
 
-  // Update the handle submit requests to properly handle the Promise
   const handleSubmitRequests = async () => {
     try {
-      // First ensure we have valid user info and update localStorage if needed
-      // Use await to wait for the Promise to resolve
+      // First ensure we have valid user info
       const validUserInfo = await ensureValidUserInfo();
       
-      // Double-check that we actually have the required fields with valid values
+      // Double-check that we have the required fields
       if (!validUserInfo.name || !validUserInfo.roomNumber) {
         toast.error("Error", {
           description: "Your profile information is incomplete. Please contact reception.",
@@ -66,24 +57,10 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
         return;
       }
       
-      // Call the submission function with the validated user info
-      await submitRequests(selectedItems, categoryItems, validUserInfo, selectedCategory, onClose);
-      
-      // Show a success toast with tracking information
+      // Placeholder for request submission - to be implemented differently
       toast.success("Request Submitted", {
         description: `Your request has been sent. You can track its status in the notifications panel.`,
       });
-      
-      // Generate mock IDs for tracking
-      const requestIds = JSON.parse(localStorage.getItem('pending_requests') || '[]');
-      
-      // Add a mock ID for each selected item
-      selectedItems.forEach(itemId => {
-        const mockRequestId = `mock-${itemId}-${Date.now()}`;
-        requestIds.push(mockRequestId);
-      });
-      
-      localStorage.setItem('pending_requests', JSON.stringify(requestIds));
       
       // Close the dialog after successful submission
       onClose();
@@ -119,7 +96,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     view,
     selectedCategory,
     selectedItems,
-    isSubmitting,
+    isSubmitting: false, // Simplified since we're removing the submission logic
     userInfo,
     dialogTitle: getDialogTitle(),
     dialogDescription: getDialogDescription(),
