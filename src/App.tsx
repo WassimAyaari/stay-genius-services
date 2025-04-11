@@ -39,7 +39,6 @@ import ShopsManager from '@/pages/admin/ShopsManager';
 import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
 import AboutEditor from '@/pages/admin/AboutEditor';
 import NotFound from '@/pages/NotFound';
-import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
 import { HotelConfigContext } from './contexts/HotelConfigContext';
 import HousekeepingRequests from './pages/admin/housekeeping/HousekeepingRequests';
@@ -47,15 +46,14 @@ import MaintenanceRequests from './pages/admin/maintenance/MaintenanceRequests';
 import ReceptionRequests from './pages/admin/reception/ReceptionRequests';
 
 function App() {
-  const { userData, isLoading, isInitializing } = useAuth();
   const { isLoading: configIsLoading, config: hotelConfig } = useHotelConfig();
   const [isConfigReady, setIsConfigReady] = useState(false);
 
   useEffect(() => {
-    if (!configIsLoading && !isInitializing) {
+    if (!configIsLoading) {
       setIsConfigReady(true);
     }
-  }, [configIsLoading, isInitializing]);
+  }, [configIsLoading]);
 
   if (!isConfigReady) {
     return <div>Loading...</div>;
