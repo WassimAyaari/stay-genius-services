@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, FileText, Clock, Headphones, ShowerHead, Wrench, Bell } from 'lucide-react';
+import { MessageCircle, FileText, Clock, Headphones } from 'lucide-react';
+import { ShowerHead, Wrench, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';

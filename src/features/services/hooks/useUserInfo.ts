@@ -7,6 +7,8 @@ export interface UserInfo {
   roomNumber: string;
   roomId?: string;
   guestId?: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface RoomInfo {
@@ -34,6 +36,8 @@ export function useUserInfo(room: Room | null) {
           name: fullName || 'Guest',
           roomNumber: roomNumber,
           guestId: parsedData.id || localStorage.getItem('user_id') || undefined,
+          email: parsedData.email || '',
+          phone: parsedData.phone || ''
         };
       }
     } catch (error) {

@@ -10,6 +10,10 @@ export interface RequestCategory {
   name: string;
   description?: string;
   icon?: React.ReactNode;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  parent_id?: string;
 }
 
 interface RequestDialogContentProps {

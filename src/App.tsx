@@ -47,7 +47,7 @@ import MaintenanceRequests from './pages/admin/maintenance/MaintenanceRequests';
 import ReceptionRequests from './pages/admin/reception/ReceptionRequests';
 
 function App() {
-  const { userData, isInitializing } = useAuth();
+  const { userData, isLoading, isInitializing } = useAuth();
   const { isLoading: configIsLoading, config: hotelConfig } = useHotelConfig();
   const [isConfigReady, setIsConfigReady] = useState(false);
 
