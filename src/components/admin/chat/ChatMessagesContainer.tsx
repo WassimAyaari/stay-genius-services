@@ -102,21 +102,21 @@ const ChatMessagesContainer = ({
       
       {!activeChat ? (
         <ChatList
-          chats={getFilteredChats(currentTab)}
+          chats={chats}
           loading={loading}
           onSelectChat={handleSelectChat}
-          onDeleteClick={handleDeleteChat}
-          activeTab={currentTab}
-          onTabChange={handleTabChange}
+          onDeleteChat={handleDeleteChat}
+          activeChat={activeChat}
+          refreshChats={handleRefresh}
+          currentTab={currentTab}
+          onChangeTab={handleTabChange}
+          filterChats={getFilteredChats}
         />
       ) : (
         <ChatDetail
-          activeChat={activeChat}
-          replyMessage={replyMessage}
-          setReplyMessage={setReplyMessage}
+          chat={activeChat}
+          onBack={handleBackToList}
           onSendReply={handleSendReply}
-          onBackToList={handleBackToList}
-          onDeleteClick={handleDeleteChat}
         />
       )}
 

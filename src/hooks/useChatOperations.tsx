@@ -27,7 +27,8 @@ export function useChatOperations({ chats, setChats }: UseChatOperationsProps) {
     
     if (unreadMessages.length > 0) {
       try {
-        const messageIds = unreadMessages.map(msg => msg.id);
+        // Convert message IDs to strings to ensure compatibility
+        const messageIds = unreadMessages.map(msg => String(msg.id));
         
         const { error } = await supabase
           .from('chat_messages')
@@ -89,14 +90,14 @@ export function useChatOperations({ chats, setChats }: UseChatOperationsProps) {
       setChats(prevChats => prevChats.filter(chat => chat.id !== chatToDelete.id));
 
       toast({
-        title: "Conversation supprimée",
-        description: `La conversation avec ${chatToDelete.userInfo?.firstName || chatToDelete.userName} a été supprimée.`,
+        title: "Conversation deleted",
+        description: `The conversation with ${chatToDelete.userInfo?.firstName || chatToDelete.userName} has been deleted.`,
       });
     } catch (error) {
       console.error('Error deleting conversation:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer la conversation.",
+        title: "Error",
+        description: "Unable to delete the conversation.",
         variant: "destructive"
       });
     } finally {

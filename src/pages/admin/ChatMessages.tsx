@@ -2,7 +2,7 @@
 import React from 'react';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import ChatMessagesContainer from '@/components/admin/chat/ChatMessagesContainer';
-import DeleteChatDialog from '@/components/admin/chat/DeleteChatDialog';
+import Layout from '@/components/Layout';
 
 const ChatMessages = () => {
   const {
@@ -23,22 +23,24 @@ const ChatMessages = () => {
   } = useChatMessages();
 
   return (
-    <ChatMessagesContainer
-      chats={chats}
-      activeChat={activeChat}
-      loading={loading}
-      getFilteredChats={getFilteredChats}
-      fetchChats={fetchChats}
-      currentTab={currentTab}
-      setCurrentTab={setCurrentTab}
-      handleSelectChat={handleSelectChat}
-      handleDeleteChat={handleDeleteChat}
-      sendReply={sendReply}
-      isDeleteDialogOpen={isDeleteDialogOpen}
-      setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-      chatToDelete={chatToDelete}
-      confirmDelete={confirmDelete}
-    />
+    <Layout>
+      <ChatMessagesContainer
+        chats={chats}
+        activeChat={activeChat}
+        loading={loading}
+        getFilteredChats={getFilteredChats}
+        fetchChats={fetchChats}
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        handleSelectChat={handleSelectChat}
+        handleDeleteChat={handleDeleteChat}
+        sendReply={sendReply}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        chatToDelete={chatToDelete}
+        confirmDelete={confirmDelete}
+      />
+    </Layout>
   );
 };
 
