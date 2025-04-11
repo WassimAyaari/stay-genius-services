@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -5,7 +6,9 @@ export interface AuthContextType {
   user: any | null;
   userData: any | null;
   isLoading: boolean;
-  isInitializing: boolean; // Added property
+  isInitializing: boolean;
+  isAuthenticated: boolean; // Added property
+  refreshUserData: () => Promise<void>; // Added property
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (email: string, password: string, userData: any) => Promise<any>;
   signOut: () => Promise<void>;
@@ -18,32 +21,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Added state
+
+  const refreshUserData = async () => {
+    if (!user) return;
+    
+    try {
+      // Use 'guests' table instead of 'profiles' which doesn't exist in the schema
+      const { data: profile } = await supabase
+        .from('guests')
+        .select(`
+          first_name,
+          last_name,
+          phone
+        `)
+        .eq('user_id', user.id)
+        .single();
+      
+      setUserData(profile);
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+    }
+  };
 
   useEffect(() => {
     const session = supabase.auth.getSession()
     
     supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setIsAuthenticated(!!currentUser);
+      
+      if (currentUser) {
+        // Use 'guests' table instead of 'profiles'
         const { data: profile } = await supabase
-          .from('profiles')
-          .select(
-            `
-              first_name,
-              last_name,
-              phone
-            `
-          )
-          .eq('id', session.user.id)
-          .single()
+          .from('guests')
+          .select(`
+            first_name,
+            last_name,
+            phone
+          `)
+          .eq('user_id', currentUser.id)
+          .single();
         
-        setUserData(profile)
+        setUserData(profile);
+      } else {
+        setUserData(null);
       }
-      setIsInitializing(false)
-    })
+      setIsInitializing(false);
+    });
 
-    setIsLoading(false)
-  }, [])
+    setIsLoading(false);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
@@ -123,6 +152,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userData,
     isLoading,
     isInitializing,
+    isAuthenticated: !!user,
+    refreshUserData,
     signIn,
     signUp,
     signOut,

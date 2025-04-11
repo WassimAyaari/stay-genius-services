@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { MessageCircle, FileText, Clock, Headphones } from 'lucide-react';
-import { ShowerHead, Wrench, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,9 +11,64 @@ import ServiceChat from '@/features/services/components/ServiceChat';
 import RequestDialog from '@/features/services/components/RequestDialog';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
+// Create custom icon components
+const ShowerHead = () => (
+  <svg
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="6" r="3" />
+    <path d="M9 9v1.5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V9" />
+    <path d="M6 12h12" />
+    <path d="M10 16l.5-1" />
+    <path d="M12 16v-1" />
+    <path d="M14 16l-.5-1" />
+  </svg>
+);
+
+const Wrench = () => (
+  <svg
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  </svg>
+);
+
+const Bell = () => (
+  <svg
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
+
 interface UserInfo {
   name: string;
   roomNumber: string;
+  email?: string;
+  phone?: string;
+  guestId?: string;
 }
 
 const Services = () => {
@@ -92,7 +146,7 @@ const Services = () => {
             <ServiceCard
               title="Housekeeping"
               description="Room cleaning, fresh towels, and other room services"
-              icon={<ShowerHead size={24} />}
+              icon={<ShowerHead />}
               actionText="Request Service"
               onAction={() => handleOpenRequestDialog('housekeeping')}
             />
@@ -100,7 +154,7 @@ const Services = () => {
             <ServiceCard
               title="Maintenance"
               description="Technical issues, repairs, and facility maintenance"
-              icon={<Wrench size={24} />}
+              icon={<Wrench />}
               actionText="Request Service"
               onAction={() => handleOpenRequestDialog('maintenance')}
             />
@@ -108,7 +162,7 @@ const Services = () => {
             <ServiceCard
               title="Reception"
               description="Check-in/out, information, and general assistance"
-              icon={<Bell size={24} />}
+              icon={<Bell />}
               actionText="Request Service"
               onAction={() => handleOpenRequestDialog('reception')}
             />
@@ -122,7 +176,7 @@ const Services = () => {
             <ServiceCard
               title="Live Chat"
               description="Instant messaging with our concierge team"
-              icon={<MessageCircle size={24} />}
+              icon={<MessageCircle />}
               actionText="Start Chat"
               onAction={handleStartChat}
             />
@@ -130,7 +184,7 @@ const Services = () => {
             <ServiceCard
               title="WhatsApp Service"
               description="Direct messaging via WhatsApp"
-              icon={<Headphones size={24} />}
+              icon={<Headphones />}
               actionText="Message Us"
               onAction={handleWhatsAppService}
             />
@@ -138,7 +192,7 @@ const Services = () => {
             <ServiceCard
               title="24/7 Support"
               description="Round-the-clock assistance for all your needs"
-              icon={<Clock size={24} />}
+              icon={<Clock />}
               actionText="Contact Support"
               onAction={handleNavigateToSupport}
             />
@@ -146,7 +200,7 @@ const Services = () => {
             <ServiceCard
               title="All Requests"
               description="View and track all your service requests"
-              icon={<FileText size={24} />}
+              icon={<FileText />}
               actionText="View Requests"
               onAction={() => navigate('/requests')}
             />

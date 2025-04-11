@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,8 +14,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const UserMenu = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { userData, isAuthenticated } = useAuth();
+  const { userData, user } = useAuth();
   const isMobile = useIsMobile();
+
+  // Determine authentication status from user object
+  const isAuthenticated = !!user;
 
   const handleLogout = async () => {
     try {
@@ -27,7 +29,7 @@ const UserMenu = () => {
       if (!logoutResult.success) {
         throw new Error(logoutResult.error || "Erreur pendant la déconnexion");
       }
-      console.log("Service de déconnexion terminé avec succès");
+      console.log("Service de déconnexion terminée avec succès");
 
       // 2. Double vérification: Appeler directement l'API Supabase
       const { error: supabaseError } = await supabase.auth.signOut();

@@ -12,7 +12,7 @@ export interface Room {
   capacity: number;
   amenities: string[];
   images: string[];
-  guest_id?: string;
+  guest_id?: string;  // Added missing property
 }
 
 export const useRoom = (roomNumber?: string) => {

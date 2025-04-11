@@ -64,8 +64,11 @@ const SectionWrapper = ({ children, id }: { children: React.ReactNode; id: strin
 
 const Index = () => {
   console.log("Index page rendering started");
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // Determine authentication status from user object
+  const isAuthenticated = !!user;
   
   return (
     <Layout>
