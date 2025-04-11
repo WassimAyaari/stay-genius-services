@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { UserInfo } from './useUserInfo';
+import { UserInfo } from '../types/userInfo';
 import { RequestCategory } from '@/features/rooms/types';
 import { submitRequestViaChatMessage } from '../utils/requestSubmissionUtils';
 import { supabase } from '@/integrations/supabase/client';

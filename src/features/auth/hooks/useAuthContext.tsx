@@ -7,8 +7,8 @@ export interface AuthContextType {
   userData: any | null;
   isLoading: boolean;
   isInitializing: boolean;
-  isAuthenticated: boolean; // Added property
-  refreshUserData: () => Promise<void>; // Added property
+  isAuthenticated: boolean;
+  refreshUserData: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (email: string, password: string, userData: any) => Promise<any>;
   signOut: () => Promise<void>;
@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Added state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const refreshUserData = async () => {
     if (!user) return;
@@ -107,12 +107,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (error) throw error;
 
-      // Create a user profile in the "profiles" table
+      // Create a guest record in the "guests" table instead of "profiles"
       const { error: profileError } = await supabase
-        .from('profiles')
+        .from('guests')
         .insert([
           {
-            id: data.user?.id,
+            user_id: data.user?.id,
             first_name: profileData.firstName,
             last_name: profileData.lastName,
             phone: profileData.phone,
