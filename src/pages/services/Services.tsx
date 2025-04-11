@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, FileText, Clock, Headphones } from 'lucide-react';
+import { MessageCircle, FileText, Clock, Headphones, Shower, Wrench, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,78 +11,18 @@ import ServiceChat from '@/features/services/components/ServiceChat';
 import RequestDialog from '@/features/services/components/RequestDialog';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
-// Create custom icon components with appropriate type
-const ShowerHead = () => (
-  <div className="w-6 h-6">
-    <svg
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="6" r="3" />
-      <path d="M9 9v1.5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V9" />
-      <path d="M6 12h12" />
-      <path d="M10 16l.5-1" />
-      <path d="M12 16v-1" />
-      <path d="M14 16l-.5-1" />
-    </svg>
-  </div>
-);
-
-const Wrench = () => (
-  <div className="w-6 h-6">
-    <svg
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-    </svg>
-  </div>
-);
-
-const Bell = () => (
-  <div className="w-6 h-6">
-    <svg
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
-  </div>
-);
-
-interface UserInfo {
-  name: string;
-  roomNumber: string;
-  email?: string;
-  phone?: string;
-  guestId?: string;
-}
-
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo>({
+  const [userInfo, setUserInfo] = useState<{
+    name: string;
+    roomNumber: string;
+    email?: string;
+    phone?: string;
+    guestId?: string;
+  }>({
     name: 'Guest',
     roomNumber: ''
   });
@@ -152,7 +92,7 @@ const Services = () => {
             <ServiceCard
               title="Housekeeping"
               description="Room cleaning, fresh towels, and other room services"
-              icon={<ShowerHead />}
+              icon={<Shower />}
               actionText="Request Service"
               onAction={() => handleOpenRequestDialog('housekeeping')}
             />
