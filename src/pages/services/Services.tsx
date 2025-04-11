@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, FileText, Clock, Headphones, Shower, Wrench, Bell } from 'lucide-react';
+import { MessageCircle, FileText, Clock, Headphones, ShowerHead, Wrench, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,19 +10,14 @@ import ServiceCard from '@/features/services/components/ServiceCard';
 import ServiceChat from '@/features/services/components/ServiceChat';
 import RequestDialog from '@/features/services/components/RequestDialog';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { UserInfo } from '@/features/services/types/userInfo';
 
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<{
-    name: string;
-    roomNumber: string;
-    email?: string;
-    phone?: string;
-    guestId?: string;
-  }>({
+  const [userInfo, setUserInfo] = useState<UserInfo>({
     name: 'Guest',
     roomNumber: ''
   });
@@ -92,7 +87,7 @@ const Services = () => {
             <ServiceCard
               title="Housekeeping"
               description="Room cleaning, fresh towels, and other room services"
-              icon={<Shower />}
+              icon={ShowerHead}
               actionText="Request Service"
               onAction={() => handleOpenRequestDialog('housekeeping')}
             />
@@ -100,7 +95,7 @@ const Services = () => {
             <ServiceCard
               title="Maintenance"
               description="Technical issues, repairs, and facility maintenance"
-              icon={<Wrench />}
+              icon={Wrench}
               actionText="Request Service"
               onAction={() => handleOpenRequestDialog('maintenance')}
             />
@@ -108,7 +103,7 @@ const Services = () => {
             <ServiceCard
               title="Reception"
               description="Check-in/out, information, and general assistance"
-              icon={<Bell />}
+              icon={Bell}
               actionText="Request Service"
               onAction={() => handleOpenRequestDialog('reception')}
             />
@@ -122,7 +117,7 @@ const Services = () => {
             <ServiceCard
               title="Live Chat"
               description="Instant messaging with our concierge team"
-              icon={<MessageCircle />}
+              icon={MessageCircle}
               actionText="Start Chat"
               onAction={handleStartChat}
             />
@@ -130,7 +125,7 @@ const Services = () => {
             <ServiceCard
               title="WhatsApp Service"
               description="Direct messaging via WhatsApp"
-              icon={<Headphones />}
+              icon={Headphones}
               actionText="Message Us"
               onAction={handleWhatsAppService}
             />
@@ -138,7 +133,7 @@ const Services = () => {
             <ServiceCard
               title="24/7 Support"
               description="Round-the-clock assistance for all your needs"
-              icon={<Clock />}
+              icon={Clock}
               actionText="Contact Support"
               onAction={handleNavigateToSupport}
             />
@@ -146,7 +141,7 @@ const Services = () => {
             <ServiceCard
               title="All Requests"
               description="View and track all your service requests"
-              icon={<FileText />}
+              icon={FileText}
               actionText="View Requests"
               onAction={() => navigate('/requests')}
             />
