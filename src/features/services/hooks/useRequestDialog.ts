@@ -3,10 +3,11 @@ import { useState, useCallback } from 'react';
 import { Room } from '@/hooks/useRoom';
 import { useRequestSubmission } from './useRequestSubmission';
 import { useUserInfo } from './useUserInfo';
+import { RequestCategory } from '../components/dialog/DialogContent';
 
 export function useRequestDialog(room: Room | null, onClose: () => void) {
   const [view, setView] = useState<'categories' | 'items'>('categories');
-  const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<RequestCategory | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const { isSubmitting, handleSubmitRequests } = useRequestSubmission();
   const { getRoomInfo } = useUserInfo(room);
@@ -21,7 +22,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
     : 'Choose items to request';
 
   // Handle selecting a category
-  const handleSelectCategory = useCallback((category: any) => {
+  const handleSelectCategory = useCallback((category: RequestCategory) => {
     setSelectedCategory(category);
     setSelectedItems([]);
     setView('items');
@@ -30,7 +31,7 @@ export function useRequestDialog(room: Room | null, onClose: () => void) {
   // Set initial category from URL or other sources
   const setInitialCategory = useCallback((categoryId: string) => {
     // Find the category by ID or create a simple one if needed
-    const categoryMap: Record<string, any> = {
+    const categoryMap: Record<string, RequestCategory> = {
       'housekeeping': {
         id: 'housekeeping',
         name: 'Housekeeping',

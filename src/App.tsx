@@ -1,15 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import Index from '@/pages/Index';
-import About from '@/pages/About';
+import About from './pages/About';
 import Services from '@/pages/services/Services';
 import HotelMap from '@/pages/map/HotelMap';
 import Contact from '@/pages/Contact';
-import Messages from '@/pages/Messages';
+import Messages from './pages/Messages';
 import MyRoom from '@/pages/my-room/MyRoom';
-import ServiceRequestDetails from '@/pages/service-request/ServiceRequestDetails';
+import ServiceRequestDetails from './pages/service-request/ServiceRequestDetails';
 import Rooms from '@/pages/rooms/Rooms';
 import RoomDetails from '@/pages/rooms/RoomDetails';
 import Dining from '@/pages/dining/Dining';
@@ -23,8 +24,8 @@ import Shops from '@/pages/shops/Shops';
 import Activities from '@/pages/activities/Activities';
 import Destination from '@/pages/destination/Destination';
 import Login from '@/pages/auth/Login';
-import Profile from '@/pages/auth/Profile';
-import Feedback from '@/pages/Feedback';
+import Profile from './pages/auth/Profile';
+import Feedback from './pages/Feedback';
 import Notifications from '@/pages/notifications/Notifications';
 import NotificationDetail from '@/pages/notifications/NotificationDetail';
 import AdminDashboard from '@/pages/admin/Dashboard';
@@ -40,21 +41,21 @@ import AboutEditor from '@/pages/admin/AboutEditor';
 import NotFound from '@/pages/NotFound';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
-import { HotelConfigContext } from '@/contexts/HotelConfigContext';
-import { HousekeepingRequests } from './pages/admin/housekeeping/HousekeepingRequests';
-import { MaintenanceRequests } from './pages/admin/maintenance/MaintenanceRequests';
-import { ReceptionRequests } from './pages/admin/reception/ReceptionRequests';
+import { HotelConfigContext } from './contexts/HotelConfigContext';
+import HousekeepingRequests from './pages/admin/housekeeping/HousekeepingRequests';
+import MaintenanceRequests from './pages/admin/maintenance/MaintenanceRequests';
+import ReceptionRequests from './pages/admin/reception/ReceptionRequests';
 
 function App() {
-  const { isLoading: authIsLoading } = useAuth();
-  const { isLoading: configIsLoading, hotelConfig } = useHotelConfig();
+  const { userData, isInitializing } = useAuth();
+  const { isLoading: configIsLoading, config: hotelConfig } = useHotelConfig();
   const [isConfigReady, setIsConfigReady] = useState(false);
 
   useEffect(() => {
-    if (!configIsLoading && !authIsLoading) {
+    if (!configIsLoading && !isInitializing) {
       setIsConfigReady(true);
     }
-  }, [configIsLoading, authIsLoading]);
+  }, [configIsLoading, isInitializing]);
 
   if (!isConfigReady) {
     return <div>Loading...</div>;

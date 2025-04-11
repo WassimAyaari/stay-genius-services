@@ -3,8 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader, ChevronLeft } from 'lucide-react';
-import { useRequestItems } from '@/hooks/useRequestCategories';
-import { RequestCategory, RequestItem } from '@/features/rooms/types';
+import { RequestCategory } from '../components/dialog/DialogContent';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface RequestItemListProps {
@@ -20,19 +19,42 @@ const RequestItemList = ({
   selectedItems,
   onToggleItem
 }: RequestItemListProps) => {
-  const { data: items, isLoading, error } = useRequestItems(category.id);
+  // Define static items based on category
+  const getCategoryItems = (categoryId: string) => {
+    switch (categoryId) {
+      case 'housekeeping':
+        return [
+          { id: 'fresh-towels', name: 'Fresh Towels', description: 'Request clean towels for your room' },
+          { id: 'room-cleaning', name: 'Room Cleaning', description: 'Request a full room cleaning service' },
+          { id: 'bed-making', name: 'Bed Making', description: 'Request your bed to be made' },
+          { id: 'toiletries', name: 'Toiletries', description: 'Request additional toiletries' },
+        ];
+      case 'maintenance':
+        return [
+          { id: 'ac-issue', name: 'AC Issue', description: 'Problems with air conditioning' },
+          { id: 'tv-issue', name: 'TV Issue', description: 'Problems with television' },
+          { id: 'plumbing', name: 'Plumbing Issue', description: 'Issues with plumbing or water' },
+          { id: 'electrical', name: 'Electrical Issue', description: 'Problems with electrical outlets or lighting' },
+          { id: 'furniture', name: 'Furniture Issue', description: 'Problems with room furniture' },
+        ];
+      case 'reception':
+        return [
+          { id: 'check-out', name: 'Check-out Assistance', description: 'Help with checking out' },
+          { id: 'luggage', name: 'Luggage Assistance', description: 'Help with luggage storage or transport' },
+          { id: 'information', name: 'Information', description: 'General hotel information' },
+          { id: 'key-card', name: 'Key Card Issue', description: 'Problems with your room key card' },
+        ];
+      default:
+        return [];
+    }
+  };
 
-  // Filter only active items
-  const activeItems = items?.filter(item => item.is_active) || [];
+  const items = getCategoryItems(category.id);
 
   // Helper function to check if an item is selected
   const isItemSelected = (itemId: string) => {
     return selectedItems.includes(itemId);
   };
-
-  if (error) {
-    console.error("Error loading request items:", error);
-  }
 
   return (
     <div>
@@ -49,17 +71,13 @@ const RequestItemList = ({
         <h3 className="text-lg font-medium">{category.name}</h3>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <Loader className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : !activeItems || activeItems.length === 0 ? (
+      {items.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">No items available in this category</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {activeItems.map((item) => {
+          {items.map((item) => {
             const checked = isItemSelected(item.id);
             
             return (
