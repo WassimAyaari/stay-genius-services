@@ -1,164 +1,158 @@
 
-import React from 'react';
-import { 
-  Card, 
-  CardContent
-} from '@/components/ui/card';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
-import { Chat } from './types';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { formatTimeAgo } from '@/utils/dateUtils';
+import React, { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import { RequestStatusBadge } from '../requests/RequestStatusBadge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Trash2, Search, RotateCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Chat } from './types';
 
 interface ChatListProps {
   chats: Chat[];
-  loading: boolean;
   onSelectChat: (chat: Chat) => void;
-  onDeleteClick: (chat: Chat, e: React.MouseEvent) => void;
-  activeTab: string;
-  onTabChange: (value: string) => void;
+  onDeleteChat: (chat: Chat, e: React.MouseEvent) => void;
+  activeChat: Chat | null;
+  loading: boolean;
+  refreshChats: () => void;
+  currentTab: string;
+  onChangeTab: (tab: string) => void;
+  filterChats: (tab: string) => Chat[];
 }
 
 const ChatList: React.FC<ChatListProps> = ({
   chats,
-  loading,
   onSelectChat,
-  onDeleteClick,
-  activeTab,
-  onTabChange
+  onDeleteChat,
+  activeChat,
+  loading,
+  refreshChats,
+  currentTab,
+  onChangeTab,
+  filterChats
 }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  const filteredBySearchChats = chats.filter(chat => {
+    const name = chat.userInfo?.firstName
+      ? `${chat.userInfo.firstName} ${chat.userInfo.lastName || ''}`
+      : chat.userName;
+    return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (chat.roomNumber && chat.roomNumber.toLowerCase().includes(searchQuery.toLowerCase()));
+  });
+  
+  const displayChats = searchQuery 
+    ? filteredBySearchChats 
+    : filterChats(currentTab);
+  
   return (
-    <Card>
-      <Tabs 
-        defaultValue={activeTab} 
-        onValueChange={onTabChange}
-        className="w-full"
-      >
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="unread">
-            Unread
-            {chats.filter(chat => chat.unread > 0).length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {chats.filter(chat => chat.unread > 0).length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="requests">
-            Requests
-            {chats.filter(chat => chat.type === 'request').length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {chats.filter(chat => chat.type === 'request').length}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
-        
-        <CardContent className="p-0 pt-4">
-          {loading ? (
-            <div className="flex justify-center p-8">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : chats.length === 0 ? (
-            <div className="text-center py-8 px-4">
-              <p className="text-muted-foreground">No messages found</p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {chats.map((chat) => {
-                // Get full guest name if available, with proper fallback
-                const guestName = chat.userInfo && 
-                  (chat.userInfo.firstName || chat.userInfo.lastName) ? 
-                  `${chat.userInfo.firstName || ''} ${chat.userInfo.lastName || ''}`.trim() : 
-                  null;
-
-                return (
-                  <div 
-                    key={chat.id} 
-                    className="hover:bg-muted/50 transition-colors cursor-pointer group"
-                    onClick={() => onSelectChat(chat)}
-                  >
-                    <div className="flex items-start p-4 gap-3 relative">
-                      <Avatar className="h-10 w-10 flex-shrink-0">
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {guestName ? guestName.charAt(0) : chat.userName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b">
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search conversations..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+        </div>
+        <div className="flex justify-between">
+          <Tabs value={currentTab} onValueChange={onChangeTab} className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
+              <TabsTrigger value="unread" className="flex-1">Unread</TabsTrigger>
+              <TabsTrigger value="requests" className="flex-1">Requests</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button variant="ghost" size="icon" onClick={refreshChats} disabled={loading}>
+            <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          </Button>
+        </div>
+      </div>
+      
+      <ScrollArea className="flex-1">
+        {displayChats.length === 0 ? (
+          <div className="flex items-center justify-center h-40">
+            <p className="text-gray-500 text-sm">No conversations found</p>
+          </div>
+        ) : (
+          <div className="divide-y">
+            {displayChats.map((chat) => {
+              const userInitials = chat.userInfo?.firstName 
+                ? `${chat.userInfo.firstName.charAt(0)}${chat.userInfo.lastName ? chat.userInfo.lastName.charAt(0) : ''}`
+                : chat.userName.slice(0, 2).toUpperCase();
+              
+              const displayName = chat.userInfo?.firstName
+                ? `${chat.userInfo.firstName} ${chat.userInfo.lastName || ''}`
+                : chat.userName;
+              
+              return (
+                <div
+                  key={chat.id}
+                  className={cn(
+                    "flex items-center p-3 gap-3 hover:bg-gray-100 cursor-pointer transition-colors",
+                    activeChat?.id === chat.id && "bg-gray-100"
+                  )}
+                  onClick={() => onSelectChat(chat)}
+                >
+                  <div className="relative">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={chat.userInfo?.avatar} />
+                      <AvatarFallback className="bg-primary text-white text-xs">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    {chat.unread > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-white w-5 h-5 flex items-center justify-center rounded-full text-xs">
+                        {chat.unread}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between">
+                      <span className="font-medium truncate">{displayName}</span>
+                      <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {chat.lastActivity}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center mt-1">
+                      {chat.roomNumber && (
+                        <span className="text-xs bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-md mr-2">
+                          Room {chat.roomNumber}
+                        </span>
+                      )}
                       
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-medium">
-                            {guestName || chat.userName}
-                            {chat.unread > 0 && (
-                              <Badge variant="default" className="ml-2">
-                                {chat.unread} new
-                              </Badge>
-                            )}
-                          </h3>
-                          <span className="text-xs text-muted-foreground">
-                            {formatTimeAgo(new Date(chat.lastActivity))}
-                          </span>
-                        </div>
-                        
-                        <div className="flex flex-col mt-1">
-                          {chat.roomNumber && (
-                            <p className="text-xs text-muted-foreground">
-                              Room: {chat.roomNumber}
-                            </p>
-                          )}
-                          
-                          {/* Display Guest name prominently */}
-                          {guestName && (
-                            <p className="text-xs font-medium text-primary">
-                              Guest: {guestName}
-                            </p>
-                          )}
-                          
-                          {/* Only display username if different from the guest name */}
-                          {guestName && chat.userName !== guestName && (
-                            <p className="text-xs text-muted-foreground">
-                              Username: {chat.userName}
-                            </p>
-                          )}
-                        </div>
-                        
-                        {chat.type === 'request' && chat.messages[0]?.requestStatus && (
-                          <div className="mt-1">
-                            <RequestStatusBadge status={chat.messages[0].requestStatus} />
-                          </div>
-                        )}
-                        
-                        <p className="text-sm text-muted-foreground truncate mt-1">
-                          {chat.messages.length > 0 ? chat.messages[0].text : 'No messages'}
-                        </p>
-                      </div>
-                      
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 absolute top-2 right-2 opacity-0 group-hover:opacity-100 hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => onDeleteClick(chat, e)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {chat.type === 'request' && (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md">
+                          Request
+                        </span>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Tabs>
-    </Card>
+                  
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100"
+                    onClick={(e) => onDeleteChat(chat, e)}
+                  >
+                    <Trash2 className="h-4 w-4 text-gray-500" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </ScrollArea>
+    </div>
   );
 };
 

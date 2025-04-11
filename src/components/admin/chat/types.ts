@@ -1,6 +1,14 @@
 
+export interface UserInfo {
+  firstName?: string;
+  lastName?: string;
+  roomNumber?: string;
+  avatar?: string;
+  [key: string]: any;
+}
+
 export interface Message {
-  id: string;
+  id: string | number;
   text: string;
   time: string;
   sender: 'user' | 'staff';
@@ -10,18 +18,10 @@ export interface Message {
   requestStatus?: string;
 }
 
-export interface UserInfo {
-  firstName?: string;
-  lastName?: string;
-  roomNumber?: string;
-  email?: string;
-}
-
 export interface Chat {
   id: string;
   userId: string;
   userName: string;
-  userAvatar?: string;
   roomNumber?: string;
   lastActivity: string;
   messages: Message[];

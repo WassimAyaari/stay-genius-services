@@ -16,13 +16,6 @@ import { Link } from 'react-router-dom';
 const AdminDashboard = () => {
   const adminSections = [
     { 
-      title: "Service Requests", 
-      icon: <ShowerHead className="h-5 w-5 text-primary" />, 
-      count: 24, 
-      trend: "+5 since yesterday", 
-      path: "/admin/requests" 
-    },
-    { 
       title: "Restaurants", 
       icon: <Utensils className="h-5 w-5 text-primary" />, 
       count: 4, 

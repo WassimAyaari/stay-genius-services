@@ -32,7 +32,6 @@ import NotificationDetail from '@/pages/notifications/NotificationDetail';
 import Feedback from '@/pages/feedback/Feedback';
 import Shops from '@/pages/shops/Shops';
 import AdminDashboard from '@/pages/admin/Dashboard';
-import RequestManager from '@/pages/admin/RequestManager';
 import ReservationManager from '@/pages/admin/ReservationManager';
 import RestaurantManager from '@/pages/admin/RestaurantManager';
 import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
@@ -110,11 +109,6 @@ function App() {
               <Route path="/admin" element={
                 <AuthGuard adminRequired>
                   <AdminDashboard />
-                </AuthGuard>
-              } />
-              <Route path="/admin/requests" element={
-                <AuthGuard adminRequired>
-                  <RequestManager />
                 </AuthGuard>
               } />
               <Route path="/admin/reservations" element={
