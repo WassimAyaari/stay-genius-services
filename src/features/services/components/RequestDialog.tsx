@@ -1,9 +1,7 @@
 
 import React from 'react';
 import { Dialog } from '@/components/ui/dialog';
-import { useRequestDialog } from '@/features/services/hooks/useRequestDialog';
 import { Room } from '@/hooks/useRoom';
-import RequestDialogContent from '@/features/services/components/dialog/DialogContent';
 
 interface RequestDialogProps {
   isOpen: boolean;
@@ -11,43 +9,10 @@ interface RequestDialogProps {
   room: Room | null;
 }
 
-const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
-  const {
-    view,
-    selectedCategory,
-    selectedItems,
-    isSubmitting,
-    dialogTitle,
-    dialogDescription,
-    handleSelectCategory,
-    handleGoBackToCategories,
-    handleToggleRequestItem,
-    handleSubmitRequests,
-    handleDialogClose
-  } = useRequestDialog(room, () => onOpenChange(false));
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        handleDialogClose();
-      }
-      onOpenChange(open);
-    }}>
-      <RequestDialogContent
-        view={view}
-        selectedCategory={selectedCategory}
-        selectedItems={selectedItems}
-        isSubmitting={isSubmitting}
-        dialogTitle={dialogTitle}
-        dialogDescription={dialogDescription}
-        onSelectCategory={handleSelectCategory}
-        onGoBackToCategories={handleGoBackToCategories}
-        onToggleRequestItem={handleToggleRequestItem}
-        onSubmitRequests={handleSubmitRequests}
-        onDialogClose={handleDialogClose}
-      />
-    </Dialog>
-  );
+// This component is now disabled - it will render nothing
+const RequestDialog = ({ isOpen, onOpenChange }: RequestDialogProps) => {
+  // Return null to prevent rendering
+  return null;
 };
 
 export default RequestDialog;
