@@ -44,10 +44,12 @@ const ChatMessagesContainer = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
-  const handleSendReply = async () => {
-    if (!replyMessage.trim() || !activeChat) return;
-
-    const result = await sendReply(activeChat, replyMessage);
+  const handleSendReply = async (chat: Chat, message: string) => {
+    if (!message.trim() || !chat) {
+      return { success: false };
+    }
+    
+    const result = await sendReply(chat, message);
     
     if (result.success) {
       setReplyMessage('');
@@ -62,6 +64,8 @@ const ChatMessagesContainer = ({
         variant: "destructive"
       });
     }
+    
+    return result;
   };
 
   const handleBackToList = () => {

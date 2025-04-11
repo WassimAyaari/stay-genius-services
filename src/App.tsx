@@ -1,10 +1,12 @@
 
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/features/auth/hooks/useAuthContext';
 import { ThemeProvider } from "next-themes";
 import { Toaster } from 'sonner';
 import { Toaster as ShadcnToaster } from '@/components/ui/toaster';
+
 import Index from '@/pages/Index';
 import Login from '@/pages/auth/Login';
 import AuthGuard from '@/components/AuthGuard';
@@ -32,6 +34,7 @@ import NotificationDetail from '@/pages/notifications/NotificationDetail';
 import Feedback from '@/pages/feedback/Feedback';
 import Shops from '@/pages/shops/Shops';
 import AdminDashboard from '@/pages/admin/Dashboard';
+// Import for RequestManager removed
 import ReservationManager from '@/pages/admin/ReservationManager';
 import RestaurantManager from '@/pages/admin/RestaurantManager';
 import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
@@ -61,26 +64,31 @@ function App() {
                   <ServiceRequestDetails />
                 </AuthGuard>
               } />
+              
               <Route path="/dining/reservations/:id" element={
                 <AuthGuard>
                   <ReservationDetails />
                 </AuthGuard>
               } />
+              
               <Route path="/spa/booking/:id" element={
                 <AuthGuard>
                   <SpaBookingDetails />
                 </AuthGuard>
               } />
+              
               <Route path="/events/:id" element={
                 <AuthGuard>
                   <EventDetail />
                 </AuthGuard>
               } />
+              
               <Route path="/my-room" element={
                 <AuthGuard>
                   <MyRoom />
                 </AuthGuard>
               } />
+              
               <Route path="/dining" element={<Dining />} />
               <Route path="/dining/:id" element={<RestaurantDetail />} />
               <Route path="/spa" element={<Spa />} />
@@ -94,6 +102,7 @@ function App() {
                   <Profile />
                 </AuthGuard>
               } />
+              
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/messages" element={<Messages />} />
@@ -103,63 +112,74 @@ function App() {
                   <NotificationDetail />
                 </AuthGuard>
               } />
+              
               <Route path="/feedback" element={<Feedback />} />
               <Route path="/shops" element={<Shops />} />
               
               <Route path="/admin" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <AdminDashboard />
                 </AuthGuard>
               } />
+              
+              {/* Route for RequestManager removed */}
+              
               <Route path="/admin/reservations" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <ReservationManager />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/restaurants" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <RestaurantManager />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/restaurants/:id/reservations" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <RestaurantReservationsManager />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/restaurant-menus" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <RestaurantMenuManager />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/spa" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <SpaManager />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/events" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <EventsManager />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/shops" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <ShopsManager />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/chat" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <ChatMessages />
                 </AuthGuard>
               } />
+              
               <Route path="/admin/about" element={
-                <AuthGuard adminRequired>
+                <AuthGuard adminRequired={true}>
                   <AboutEditor />
                 </AuthGuard>
               } />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
-            
             <Toaster richColors position="top-right" closeButton />
             <ShadcnToaster />
           </AuthProvider>
