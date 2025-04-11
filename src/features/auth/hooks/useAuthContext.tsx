@@ -1,171 +1,193 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
+import { UserData } from '@/features/users/types/userTypes';
+import { getCurrentSession, isAuthenticated } from '../services/authService';
+import { getGuestData, syncGuestData } from '@/features/users/services/guestService';
+import { useToast } from '@/hooks/use-toast';
 
-export interface AuthContextType {
-  user: any | null;
-  userData: any | null;
-  isLoading: boolean;
-  isInitializing: boolean;
+interface AuthContextType {
+  session: Session | null;
+  user: User | null;
+  userData: UserData | null;
+  loading: boolean;
   isAuthenticated: boolean;
   refreshUserData: () => Promise<void>;
-  signIn: (email: string, password: string) => Promise<any>;
-  signUp: (email: string, password: string, userData: any) => Promise<any>;
-  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  session: null,
+  user: null,
+  userData: null,
+  loading: true,
+  isAuthenticated: false,
+  refreshUserData: async () => {}
+});
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export const useAuth = () => useContext(AuthContext);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const { toast } = useToast();
+
+  const fetchUserData = async (userId: string) => {
+    try {
+      console.log('Récupération des données utilisateur depuis Supabase pour:', userId);
+      
+      const guestData = await getGuestData(userId);
+      
+      if (guestData) {
+        console.log('Données récupérées depuis Supabase:', guestData);
+        setUserData(guestData);
+        localStorage.setItem('user_data', JSON.stringify(guestData));
+        
+        // Stocker le numéro de chambre séparément uniquement s'il existe
+        if (guestData.room_number) {
+          console.log('Stockage du numéro de chambre dans localStorage:', guestData.room_number);
+          localStorage.setItem('user_room_number', guestData.room_number);
+        }
+        
+        return guestData;
+      }
+      
+      // Check for data in localStorage
+      const userDataString = localStorage.getItem('user_data');
+      if (userDataString) {
+        try {
+          const localUserData = JSON.parse(userDataString) as UserData;
+          setUserData(localUserData);
+          console.log('Données récupérées depuis localStorage:', localUserData);
+          
+          // Stocker le numéro de chambre uniquement s'il existe
+          if (localUserData.room_number) {
+            console.log('Stockage du numéro de chambre depuis localStorage:', localUserData.room_number);
+            localStorage.setItem('user_room_number', localUserData.room_number);
+          }
+          
+          await syncGuestData(userId, localUserData);
+          
+          return localUserData;
+        } catch (error) {
+          console.error('Error parsing user data from localStorage:', error);
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
 
   const refreshUserData = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('Aucun utilisateur, impossible de rafraîchir les données');
+      return;
+    }
     
-    try {
-      // Use 'guests' table instead of 'profiles' which doesn't exist in the schema
-      const { data: profile } = await supabase
-        .from('guests')
-        .select(`
-          first_name,
-          last_name,
-          phone
-        `)
-        .eq('user_id', user.id)
-        .single();
-      
-      setUserData(profile);
-    } catch (error) {
-      console.error("Error refreshing user data:", error);
+    const userId = user.id;
+    if (userId) {
+      await fetchUserData(userId);
     }
   };
 
   useEffect(() => {
-    const session = supabase.auth.getSession()
-    
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setIsAuthenticated(!!currentUser);
+    const initializeAuth = async () => {
+      setLoading(true);
       
-      if (currentUser) {
-        // Use 'guests' table instead of 'profiles'
-        const { data: profile } = await supabase
-          .from('guests')
-          .select(`
-            first_name,
-            last_name,
-            phone
-          `)
-          .eq('user_id', currentUser.id)
-          .single();
+      try {
+        // Configurer d'abord l'écouteur d'état d'authentification
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+          async (event, newSession) => {
+            console.log('Auth state changed:', event);
+            setSession(newSession);
+            setUser(newSession?.user || null);
+            
+            // Ne pas faire d'autres appels Supabase ici directement
+            // pour éviter un blocage potentiel
+            if (newSession?.user) {
+              setIsUserAuthenticated(true);
+              
+              // Utiliser setTimeout pour éviter les blocages
+              setTimeout(async () => {
+                await fetchUserData(newSession.user!.id);
+              }, 0);
+            } else {
+              setIsUserAuthenticated(false);
+              setUserData(null);
+              localStorage.removeItem('user_data');
+              localStorage.removeItem('user_id');
+            }
+          }
+        );
         
-        setUserData(profile);
-      } else {
+        // Ensuite, vérifier la session existante
+        const { data } = await supabase.auth.getSession();
+        console.log('Session initiale:', data.session);
+        
+        setSession(data.session);
+        setUser(data.session?.user || null);
+        
+        if (data.session?.user) {
+          setIsUserAuthenticated(true);
+          const userId = data.session.user.id;
+          localStorage.setItem('user_id', userId);
+          await fetchUserData(userId);
+        } else {
+          const authStatus = await isAuthenticated();
+          setIsUserAuthenticated(authStatus);
+          
+          // Essayer de récupérer l'ID utilisateur du localStorage si pas de session
+          const userId = localStorage.getItem('user_id');
+          if (userId && authStatus) {
+            await fetchUserData(userId);
+          } else {
+            setUserData(null);
+            localStorage.removeItem('user_data');
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
         setUserData(null);
+        toast({
+          variant: "destructive",
+          title: "Erreur d'authentification",
+          description: "Un problème est survenu lors de l'initialisation de l'authentification"
+        });
+      } finally {
+        setLoading(false);
       }
-      setIsInitializing(false);
-    });
+    };
 
-    setIsLoading(false);
+    initializeAuth();
+
+    // Nettoyer l'abonnement à la déconnexion
+    return () => {
+      supabase.auth.onAuthStateChange(() => {});
+    };
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-      setUser(data.user);
-      return data;
-    } catch (error: any) {
-      console.error("Error signing in:", error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signUp = async (email: string, password: string, profileData: any) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: profileData.firstName,
-            last_name: profileData.lastName,
-          },
-        },
-      });
-      if (error) throw error;
-
-      // Create a guest record in the "guests" table instead of "profiles"
-      const { error: profileError } = await supabase
-        .from('guests')
-        .insert([
-          {
-            user_id: data.user?.id,
-            first_name: profileData.firstName,
-            last_name: profileData.lastName,
-            phone: profileData.phone,
-          },
-        ]);
-
-      if (profileError) {
-        console.error("Error creating profile:", profileError.message);
-        throw profileError;
-      }
-
-      setUser(data.user);
-      return data;
-    } catch (error: any) {
-      console.error("Error signing up:", error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signOut = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setUser(null);
-    } catch (error: any) {
-      console.error("Error signing out:", error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const value: AuthContextType = {
-    user,
-    userData,
-    isLoading,
-    isInitializing,
-    isAuthenticated: !!user,
-    refreshUserData,
-    signIn,
-    signUp,
-    signOut,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  return (
+    <AuthContext.Provider 
+      value={{ 
+        session, 
+        user, 
+        userData, 
+        loading, 
+        isAuthenticated: isUserAuthenticated,
+        refreshUserData
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { UserInfo } from '../types/userInfo';
+import { UserInfo } from '../hooks/useUserInfo';
 import { RequestCategory } from '@/features/rooms/types';
 import { toast } from '@/hooks/use-toast';
 import { syncGuestData } from '@/features/users/services/guestService';

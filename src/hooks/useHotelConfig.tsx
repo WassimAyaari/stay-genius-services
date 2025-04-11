@@ -21,37 +21,14 @@ export function useHotelConfig() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['hotelConfig'],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('hotel_config')
-          .select('*')
-          .maybeSingle();
-          
-        if (error) throw error;
+      const { data, error } = await supabase
+        .from('hotel_config')
+        .select('*')
+        .single();
         
-        if (!data) {
-          // Return default config if no data exists
-          return {
-            id: 'default',
-            name: 'Hotel Genius',
-            primary_color: '#00AFB9',
-            secondary_color: '#0F4C5C',
-            enabled_features: ['rooms', 'dining', 'spa', 'events']
-          } as HotelConfig;
-        }
-        
-        return data as HotelConfig;
-      } catch (error) {
-        console.error('Error fetching hotel config:', error);
-        // Return fallback config in case of error
-        return {
-          id: 'default',
-          name: 'Hotel Genius',
-          primary_color: '#00AFB9',
-          secondary_color: '#0F4C5C',
-          enabled_features: ['rooms', 'dining', 'spa', 'events']
-        } as HotelConfig;
-      }
+      if (error) throw error;
+      
+      return data as HotelConfig;
     }
   });
   
@@ -79,8 +56,8 @@ export function useHotelConfig() {
         // Create new config - ensure required fields are present
         const configToInsert = {
           name: newConfig.name || 'Hotel Genius',
-          primary_color: newConfig.primary_color || '#00AFB9',
-          secondary_color: newConfig.secondary_color || '#0F4C5C',
+          primary_color: newConfig.primary_color || '#1e40af',
+          secondary_color: newConfig.secondary_color || '#4f46e5',
           ...newConfig
         };
         
@@ -102,13 +79,7 @@ export function useHotelConfig() {
   });
   
   return {
-    config: data || {
-      id: 'default',
-      name: 'Hotel Genius',
-      primary_color: '#00AFB9',
-      secondary_color: '#0F4C5C',
-      enabled_features: ['rooms', 'dining', 'spa', 'events']
-    },
+    config: data,
     isLoading,
     error,
     updateConfig: updateConfig.mutate

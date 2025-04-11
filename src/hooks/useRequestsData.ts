@@ -3,29 +3,25 @@ import { useState, useEffect } from 'react';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ServiceRequestType } from '@/features/types/supabaseTypes';
+import { ServiceRequest } from '@/features/rooms/types';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { ServiceRequestType } from '@/features/types/supabaseTypes';
 
-export function useRequestsData(categoryFilter?: string) {
+export function useRequestsData() {
   const { toast } = useToast();
   const { user, userData } = useAuth();
-  
+  // Directement utiliser les valeurs retournées par useServiceRequests
   const { 
-    data: allRequests = [], 
+    data: requests = [], 
     isLoading, 
     isError, 
     error,
     refetch 
   } = useServiceRequests();
   
-  // Filter requests by category if a category filter is provided
-  const requests = categoryFilter 
-    ? allRequests.filter(req => req.type === categoryFilter)
-    : allRequests;
-    
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Configure real-time updates for service requests
+  // Configuration des mises à jour en temps réel pour toutes les demandes de service
   useEffect(() => {
     try {
       const channel = supabase
@@ -37,12 +33,13 @@ export function useRequestsData(categoryFilter?: string) {
         }, (payload) => {
           console.log('Service request change detected:', payload);
           
-          // For non-admin users, check if the request belongs to them
+          // Pour les utilisateurs non-admin, vérifier si la requête leur appartient
           if (!window.location.pathname.includes('/admin')) {
             const userId = user?.id || localStorage.getItem('user_id');
             const roomNumber = userData?.room_number || localStorage.getItem('user_room_number');
             
-            // Check if the request belongs to this user (by guest_id or room_number)
+            // Vérifier si la requête appartient à cet utilisateur (par guest_id ou room_number)
+            // Type guard to ensure payload.new exists and has the expected properties
             const payloadNew = payload.new as ServiceRequestType | null;
             
             if (!payloadNew) {
@@ -60,18 +57,9 @@ export function useRequestsData(categoryFilter?: string) {
             }
           }
           
-          // If a category filter is active, only refresh for matching category updates
-          if (categoryFilter) {
-            const payloadNew = payload.new as ServiceRequestType | null;
-            if (payloadNew && payloadNew.type !== categoryFilter) {
-              console.log(`Ignoring update for non-matching category: ${payloadNew.type}, filter: ${categoryFilter}`);
-              return;
-            }
-          }
-          
           refetch();
           
-          // Show notification for status updates
+          // Afficher une notification pour les mises à jour de statut
           if (payload.eventType === 'UPDATE') {
             const payloadNew = payload.new as ServiceRequestType | null;
             const payloadOld = payload.old as ServiceRequestType | null;
@@ -102,7 +90,7 @@ export function useRequestsData(categoryFilter?: string) {
     } catch (error) {
       console.error("Error setting up realtime updates:", error);
     }
-  }, [refetch, toast, user?.id, userData?.room_number, categoryFilter]);
+  }, [refetch, toast, user?.id, userData?.room_number]);
   
   const handleRefresh = async () => {
     setIsRefreshing(true);

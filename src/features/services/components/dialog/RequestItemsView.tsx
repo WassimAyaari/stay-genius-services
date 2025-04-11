@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader, Check } from 'lucide-react';
 import RequestItemList from '@/features/services/components/RequestItemList';
-import { RequestCategory } from './DialogContent';
+import { RequestCategory } from '@/features/rooms/types';
 
 interface RequestItemsViewProps {
   category: RequestCategory;

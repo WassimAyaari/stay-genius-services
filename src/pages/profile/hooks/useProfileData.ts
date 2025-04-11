@@ -61,9 +61,7 @@ export const useProfileData = () => {
     if (userId) {
       try {
         await syncGuestData(userId, updatedUserData);
-        if (refreshUserData) {
-          await refreshUserData();
-        }
+        await refreshUserData();
         toast({
           title: "Profil mis à jour",
           description: "Votre photo de profil a été mise à jour avec succès."

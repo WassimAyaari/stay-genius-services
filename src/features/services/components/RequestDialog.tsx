@@ -9,15 +9,9 @@ interface RequestDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   room: Room | null;
-  initialCategory?: string | null;
 }
 
-const RequestDialog = ({ 
-  isOpen, 
-  onOpenChange, 
-  room, 
-  initialCategory 
-}: RequestDialogProps) => {
+const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
   const {
     view,
     selectedCategory,
@@ -29,16 +23,8 @@ const RequestDialog = ({
     handleGoBackToCategories,
     handleToggleRequestItem,
     handleSubmitRequests,
-    handleDialogClose,
-    setInitialCategory
+    handleDialogClose
   } = useRequestDialog(room, () => onOpenChange(false));
-
-  // Set initial category if provided
-  useEffect(() => {
-    if (initialCategory && isOpen) {
-      setInitialCategory(initialCategory);
-    }
-  }, [initialCategory, isOpen, setInitialCategory]);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {

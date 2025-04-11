@@ -3,18 +3,7 @@ import React from 'react';
 import { DialogContent as BaseDialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import RequestCategoriesView from '@/features/services/components/dialog/RequestCategoriesView';
 import RequestItemsView from '@/features/services/components/dialog/RequestItemsView';
-
-// Define the RequestCategory type in this file to ensure compatibility
-export interface RequestCategory {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: React.ReactNode;
-  is_active?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  parent_id?: string;
-}
+import { RequestCategory } from '@/features/rooms/types';
 
 interface RequestDialogContentProps {
   view: 'categories' | 'items';
