@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import ChatList from '@/components/admin/chat/ChatList';
@@ -69,7 +68,6 @@ const ChatMessagesContainer = ({
   };
 
   const handleBackToList = () => {
-    // Here we reset activeChat by triggering the selection with null
     handleSelectChat(null as unknown as Chat);
   };
 

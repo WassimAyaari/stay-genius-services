@@ -34,7 +34,7 @@ import NotificationDetail from '@/pages/notifications/NotificationDetail';
 import Feedback from '@/pages/feedback/Feedback';
 import Shops from '@/pages/shops/Shops';
 import AdminDashboard from '@/pages/admin/Dashboard';
-// Import for RequestManager removed
+// RequestManager import removed
 import ReservationManager from '@/pages/admin/ReservationManager';
 import RestaurantManager from '@/pages/admin/RestaurantManager';
 import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
