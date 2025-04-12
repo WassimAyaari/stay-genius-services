@@ -9,9 +9,9 @@ interface RequestDialogProps {
   room: Room | null;
 }
 
-// This component is now disabled - it will render nothing
-const RequestDialog = ({ isOpen, onOpenChange }: RequestDialogProps) => {
-  // Return null to prevent rendering
+// This component will be disabled
+const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
+  // Return null to disable the component completely
   return null;
 };
 
