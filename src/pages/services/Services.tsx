@@ -8,7 +8,6 @@ import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
 import ServiceCard from '@/features/services/components/ServiceCard';
 import ServiceChat from '@/features/services/components/ServiceChat';
-import RequestDialog from '@/features/services/components/RequestDialog';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 interface UserInfo {
@@ -19,7 +18,6 @@ interface UserInfo {
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: 'Guest',
     roomNumber: ''
@@ -58,14 +56,6 @@ const Services = () => {
     setIsChatOpen(true);
   };
 
-  const handleOpenRequestDialog = () => {
-    setIsRequestDialogOpen(true);
-  };
-
-  const handleNavigateToRequests = () => {
-    handleOpenRequestDialog();
-  };
-
   const handleNavigateToSupport = () => {
     navigate('/messages?contact=1');
   };
@@ -96,14 +86,6 @@ const Services = () => {
           />
 
           <ServiceCard
-            title="Inquiries & Requests"
-            description="Submit and track your requests"
-            icon={FileText}
-            actionText="New Request"
-            onAction={handleNavigateToRequests}
-          />
-
-          <ServiceCard
             title="24/7 Support"
             description="Round-the-clock assistance for all your needs"
             icon={Clock}
@@ -125,12 +107,6 @@ const Services = () => {
         isChatOpen={isChatOpen}
         setIsChatOpen={setIsChatOpen}
         userInfo={userInfo}
-      />
-
-      <RequestDialog
-        isOpen={isRequestDialogOpen}
-        onOpenChange={setIsRequestDialogOpen}
-        room={room || null}
       />
     </Layout>
   );
