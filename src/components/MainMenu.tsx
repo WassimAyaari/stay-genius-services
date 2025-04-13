@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -40,6 +40,7 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
 
   const handleNavigate = (path: string) => {
     console.log(`Navigating to: ${path}`);
+    // Utiliser le hook navigate directement au lieu de window.location
     navigate(path);
   };
 
