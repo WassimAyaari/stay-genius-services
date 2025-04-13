@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import ServiceCard from '@/features/services/components/ServiceCard';
 import ServiceChat from '@/features/services/components/ServiceChat';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import RequestDialog from '@/features/services/components/RequestDialog';
 
 interface UserInfo {
   name: string;
@@ -18,6 +19,7 @@ interface UserInfo {
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: 'Guest',
     roomNumber: ''
@@ -67,6 +69,10 @@ const Services = () => {
     });
     window.open('https://wa.me/+21628784080', '_blank');
   };
+  
+  const handleOpenRequestDialog = () => {
+    setIsRequestDialogOpen(true);
+  };
 
   return (
     <Layout>
@@ -83,6 +89,14 @@ const Services = () => {
             icon={MessageCircle}
             actionText="Start Chat"
             onAction={handleStartChat}
+          />
+
+          <ServiceCard
+            title="Request Service"
+            description="Submit a specific request for assistance"
+            icon={FileText}
+            actionText="Make Request"
+            onAction={handleOpenRequestDialog}
           />
 
           <ServiceCard
@@ -107,6 +121,12 @@ const Services = () => {
         isChatOpen={isChatOpen}
         setIsChatOpen={setIsChatOpen}
         userInfo={userInfo}
+      />
+      
+      <RequestDialog
+        isOpen={isRequestDialogOpen}
+        onOpenChange={setIsRequestDialogOpen}
+        room={room}
       />
     </Layout>
   );
