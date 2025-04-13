@@ -31,13 +31,18 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
-  // Mock data - in a real implementation, this would come from an API request
+  // Mock data - in a real implementation, this would come from an API request using requestCategories and requestItems
   const items: SearchItem[] = [
     { id: '1', name: 'Extra Towels', category: 'Housekeeping', description: 'Request additional towels for your room' },
     { id: '2', name: 'Room Cleaning', category: 'Housekeeping', description: 'Schedule a room cleaning service' },
     { id: '3', name: 'Laundry Pickup', category: 'Laundry', description: 'Request laundry pickup from your room' },
     { id: '4', name: 'WiFi Support', category: 'Technical', description: 'Get assistance with WiFi connection' },
     { id: '5', name: 'Pillow Options', category: 'Bedding', description: 'Choose from our pillow menu' },
+    { id: '6', name: 'Toothbrush Kit', category: 'Amenities', description: 'Request a toothbrush and toothpaste kit' },
+    { id: '7', name: 'Shower Gel', category: 'Amenities', description: 'Request additional shower gel' },
+    { id: '8', name: 'Room Service Menu', category: 'Dining', description: 'Get a room service menu delivered' },
+    { id: '9', name: 'TV Remote Issue', category: 'Technical', description: 'Report problems with the TV remote' },
+    { id: '10', name: 'Spa Appointment', category: 'Wellness', description: 'Book a spa treatment appointment' },
   ];
 
   const handleSelect = async (item: SearchItem) => {
@@ -82,11 +87,12 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   return (
     <>
       <div 
-        className="relative flex items-center border rounded-md px-3 py-2 bg-white shadow-sm cursor-pointer"
+        className="relative flex items-center border rounded-lg px-4 py-3 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-4 w-4 mr-2 text-gray-400" />
-        <span className="text-gray-500">Search services...</span>
+        <Search className="h-5 w-5 mr-3 text-gray-400" />
+        <span className="text-gray-500">Search for services (towels, cleaning, wifi support...)
+        </span>
       </div>
       
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -109,11 +115,12 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
                     key={item.id}
                     disabled={isSubmitting}
                     onSelect={() => handleSelect(item)}
+                    className="cursor-pointer"
                   >
                     <div>
-                      <div>{item.name}</div>
+                      <div className="font-medium">{item.name}</div>
                       {item.description && (
-                        <div className="text-sm text-gray-500">{item.description}</div>
+                        <div className="text-sm text-gray-500 mt-1">{item.description}</div>
                       )}
                     </div>
                   </CommandItem>

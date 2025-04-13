@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, FileText, Clock, Headphones as HeadphonesIcon } from 'lucide-react';
+import { MessageCircle, FileText, Clock, Headphones as HeadphonesIcon, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +10,7 @@ import ServiceCard from '@/features/services/components/ServiceCard';
 import ServiceChat from '@/features/services/components/ServiceChat';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import RequestDialog from '@/features/services/components/RequestDialog';
+import CommandSearch from '@/pages/my-room/components/CommandSearch';
 
 interface UserInfo {
   name: string;
@@ -74,12 +75,28 @@ const Services = () => {
     setIsRequestDialogOpen(true);
   };
 
+  const handleRequestSuccess = () => {
+    toast({
+      title: "Request Submitted",
+      description: "Your service request has been submitted successfully."
+    });
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-semibold text-secondary mb-4">Hotel Services</h1>
           <p className="text-gray-600">24/7 dedicated concierge support</p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="max-w-xl mx-auto mb-8">
+          <h2 className="text-xl font-medium text-secondary mb-3">Quick Service Search</h2>
+          <CommandSearch 
+            room={room} 
+            onRequestSuccess={handleRequestSuccess} 
+          />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
