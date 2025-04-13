@@ -14,6 +14,7 @@ import { requestService } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { Room } from '@/hooks/useRoom';
 import { useRequestCategories } from '@/hooks/useRequestCategories';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 interface CommandSearchProps {
   room: Room | null;
@@ -25,6 +26,7 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { categories, allItems, isLoading } = useRequestCategories();
+  const { userData } = useAuth();
   
   // Calculer une seule fois les éléments groupés par catégorie
   const itemsByCategory = useMemo(() => {
@@ -45,17 +47,53 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     
     setIsSubmitting(true);
     try {
-      if (!room) {
-        toast({
-          title: "Error",
-          description: "Room information is missing. Please try again.",
-          variant: "destructive",
-        });
-        return;
+      // Get room information with fallbacks
+      const roomInfo = room || { id: '' };
+      let roomId = roomInfo.id;
+      let roomNumber = room?.room_number || userData?.room_number || localStorage.getItem('user_room_number') || '';
+      
+      if (!roomId && !roomNumber) {
+        // Try to get from localStorage first before showing error
+        const userDataStr = localStorage.getItem('user_data');
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            if (userData.room_number) {
+              roomNumber = userData.room_number;
+              // Save for future use
+              localStorage.setItem('user_room_number', roomNumber);
+            }
+          } catch (error) {
+            console.error("Error parsing user data:", error);
+          }
+        }
+        
+        if (!roomNumber) {
+          toast({
+            title: "Room Information Missing",
+            description: "We couldn't find your room information. Please provide it in your profile settings.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Use roomNumber as fallback for roomId
+        roomId = roomNumber;
+      }
+      
+      // Ensure room number is always set in localStorage
+      if (roomNumber && !localStorage.getItem('user_room_number')) {
+        localStorage.setItem('user_room_number', roomNumber);
+      }
+      
+      // If we have roomNumber but no room ID, use roomNumber
+      if (!roomId && roomNumber) {
+        roomId = roomNumber;
       }
       
       await requestService(
-        room.id,
+        roomId,
         'service',
         `${itemName} - ${itemDescription || ''}`,
         itemId,

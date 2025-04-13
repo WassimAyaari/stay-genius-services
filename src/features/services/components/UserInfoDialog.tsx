@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
 
 interface UserInfo {
   name: string;
@@ -29,16 +30,68 @@ const UserInfoDialog = ({
 }: UserInfoDialogProps) => {
   const { toast } = useToast();
   const [showProfileAlert, setShowProfileAlert] = React.useState(false);
+  const { userData } = useAuth();
 
   useEffect(() => {
-    // If dialog is opened and user profile is not set, show alert
-    if (isOpen && (!userInfo.name || !userInfo.roomNumber)) {
-      const userData = localStorage.getItem('user_data');
-      if (!userData) {
-        setShowProfileAlert(true);
+    // If dialog is opened, automatically fetch user data
+    if (isOpen) {
+      // Try to get user profile data from auth context first
+      if (userData) {
+        const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+        const roomNumber = userData.room_number || '';
+        
+        if (fullName || roomNumber) {
+          setUserInfo({
+            ...userInfo,
+            name: fullName || userInfo.name,
+            roomNumber: roomNumber || userInfo.roomNumber
+          });
+        }
+      }
+      
+      // If user info is still incomplete, try localStorage
+      if (!userInfo.name || !userInfo.roomNumber) {
+        const storedUserData = localStorage.getItem('user_data');
+        const storedRoomNumber = localStorage.getItem('user_room_number');
+        
+        if (storedUserData) {
+          try {
+            const parsedData = JSON.parse(storedUserData);
+            const fullName = `${parsedData.first_name || ''} ${parsedData.last_name || ''}`.trim();
+            
+            if (fullName) {
+              setUserInfo(prev => ({
+                ...prev,
+                name: fullName
+              }));
+            }
+            
+            if (parsedData.room_number) {
+              setUserInfo(prev => ({
+                ...prev,
+                roomNumber: parsedData.room_number
+              }));
+            }
+          } catch (error) {
+            console.error("Error parsing user data:", error);
+          }
+        }
+        
+        // If room number is available in localStorage directly
+        if (storedRoomNumber && !userInfo.roomNumber) {
+          setUserInfo(prev => ({
+            ...prev,
+            roomNumber: storedRoomNumber
+          }));
+        }
+        
+        // If still no user info, show alert
+        if (!userInfo.name || !userInfo.roomNumber) {
+          setShowProfileAlert(true);
+        }
       }
     }
-  }, [isOpen, userInfo]);
+  }, [isOpen, userData, userInfo, setUserInfo]);
 
   const handleSubmit = () => {
     if (!userInfo.name.trim()) {
@@ -57,6 +110,21 @@ const UserInfoDialog = ({
         variant: "destructive"
       });
       return;
+    }
+
+    // Store the information for future use
+    try {
+      localStorage.setItem('user_room_number', userInfo.roomNumber);
+      
+      // Store in user_data format for compatibility with the rest of the app
+      const userData = {
+        first_name: userInfo.name.split(' ')[0] || '',
+        last_name: userInfo.name.split(' ').slice(1).join(' ') || '',
+        room_number: userInfo.roomNumber
+      };
+      localStorage.setItem('user_data', JSON.stringify(userData));
+    } catch (error) {
+      console.error("Error storing user data:", error);
     }
 
     onSubmit();

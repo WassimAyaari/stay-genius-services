@@ -28,15 +28,38 @@ const Services = () => {
   const { toast } = useToast();
   const { userData } = useAuth();
   
-  const { data: room } = useRoom(userInfo.roomNumber);
+  // Get room from user info or context
+  const roomNumber = userInfo.roomNumber || userData?.room_number || localStorage.getItem('user_room_number') || '';
+  const { data: room } = useRoom(roomNumber);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user_data');
+    // Initialize user info from various sources
+    // 1. First try Auth context
     if (userData) {
+      const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+      if (fullName || userData.room_number) {
+        setUserInfo({
+          name: fullName || 'Guest',
+          roomNumber: userData.room_number || ''
+        });
+        
+        // Save room number to localStorage for future use
+        if (userData.room_number) {
+          localStorage.setItem('user_room_number', userData.room_number);
+        }
+        return;
+      }
+    }
+    
+    // 2. Try localStorage
+    const storedUserData = localStorage.getItem('user_data');
+    const storedRoomNumber = localStorage.getItem('user_room_number');
+    
+    if (storedUserData) {
       try {
-        const parsedUserData = JSON.parse(userData);
+        const parsedUserData = JSON.parse(storedUserData);
         const fullName = `${parsedUserData.first_name || ''} ${parsedUserData.last_name || ''}`.trim();
-        const roomNumber = parsedUserData.room_number || '';
+        const roomNumber = parsedUserData.room_number || storedRoomNumber || '';
         
         if (fullName || roomNumber) {
           setUserInfo({
@@ -47,8 +70,14 @@ const Services = () => {
       } catch (error) {
         console.error("Error parsing user data:", error);
       }
+    } else if (storedRoomNumber) {
+      // If only room number is available
+      setUserInfo(prev => ({
+        ...prev,
+        roomNumber: storedRoomNumber
+      }));
     }
-  }, []);
+  }, [userData]);
 
   const handleStartChat = () => {
     let userId = localStorage.getItem('user_id');
@@ -56,6 +85,12 @@ const Services = () => {
       userId = uuidv4();
       localStorage.setItem('user_id', userId);
     }
+    
+    // Ensure room number is stored before opening chat
+    if (userInfo.roomNumber && !localStorage.getItem('user_room_number')) {
+      localStorage.setItem('user_room_number', userInfo.roomNumber);
+    }
+    
     setIsChatOpen(true);
   };
 
@@ -72,6 +107,11 @@ const Services = () => {
   };
   
   const handleOpenRequestDialog = () => {
+    // Ensure room number is stored before opening dialog
+    if (userInfo.roomNumber && !localStorage.getItem('user_room_number')) {
+      localStorage.setItem('user_room_number', userInfo.roomNumber);
+    }
+    
     setIsRequestDialogOpen(true);
   };
 
