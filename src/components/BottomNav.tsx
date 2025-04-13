@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { BedDouble, UtensilsCrossed, BellRing, Phone, Grid3X3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,9 +10,13 @@ import { Badge } from './ui/badge';
 
 const BottomNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const { unreadCount } = useNotifications();
+
+  // Log pour le débogage
+  console.log('Current path in BottomNav:', location.pathname);
 
   // Handle scroll to hide/show navigation
   useEffect(() => {
@@ -59,11 +63,18 @@ const BottomNav = () => {
     }, 
     {
       icon: <Grid3X3 className="w-5 h-5" />,
-      label: 'Directory',
-      path: '/hotel-directory',
+      label: 'Menu',
+      path: '#',
       isMenu: true
     }
   ];
+
+  const handleNavigation = (path: string) => {
+    if (path !== '#') {
+      console.log(`Navigating to: ${path}`);
+      navigate(path);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -89,9 +100,9 @@ const BottomNav = () => {
                   <span className="text-xs font-medium">Menu</span>
                 </div>
               ) : (
-                <Link 
+                <button 
                   key={`${item.path}-${item.label}`} 
-                  to={item.path} 
+                  onClick={() => handleNavigation(item.path)}
                   className={cn(
                     "flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors relative",
                     location.pathname === item.path 
@@ -110,7 +121,7 @@ const BottomNav = () => {
                     )}
                   </div>
                   <span className="text-xs font-medium">{item.label}</span>
-                </Link>
+                </button>
               )
             )}
           </div>

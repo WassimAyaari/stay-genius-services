@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -19,6 +19,10 @@ interface MainMenuProps {
 
 const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Ajout d'informations de débogage pour voir le chemin actuel
+  console.log('Current path in MainMenu:', location.pathname);
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: 'Home', path: '/' },
@@ -33,6 +37,11 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
     { icon: <Map className="h-5 w-5" />, label: 'Hotel Map', path: '/map' },
     { icon: <BedDouble className="h-5 w-5" />, label: 'My Room', path: '/my-room' },
   ];
+
+  const handleNavigate = (path: string) => {
+    console.log(`Navigating to: ${path}`);
+    navigate(path);
+  };
 
   return (
     <Sheet>
@@ -58,7 +67,7 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
                   key={item.path}
                   variant="ghost"
                   className="w-full justify-start gap-3 p-4 rounded-xl hover:bg-primary/10 transition-colors"
-                  onClick={() => navigate(item.path)}
+                  onClick={() => handleNavigate(item.path)}
                 >
                   <span className="text-secondary">{item.icon}</span>
                   <span className="font-medium text-secondary">{item.label}</span>
