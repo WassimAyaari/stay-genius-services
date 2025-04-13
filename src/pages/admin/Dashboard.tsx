@@ -10,7 +10,7 @@ import {
   PartyPopper, 
   FileText,
   MessageCircle,
-  Broom,
+  Trash2,  // Replacing Broom with Trash2
   Wrench
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -61,7 +61,7 @@ const AdminDashboard = () => {
     },
     { 
       title: "Housekeeping", 
-      icon: <Broom className="h-5 w-5 text-primary" />, 
+      icon: <Trash2 className="h-5 w-5 text-primary" />, 
       count: null, 
       trend: "", 
       path: "/admin/housekeeping" 
