@@ -17,7 +17,7 @@ interface UserInfoDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   userInfo: UserInfo;
-  setUserInfo: (userInfo: UserInfo) => void;
+  setUserInfo: React.Dispatch<React.SetStateAction<UserInfo>>;
   onSubmit: () => void;
 }
 
@@ -60,14 +60,14 @@ const UserInfoDialog = ({
             const fullName = `${parsedData.first_name || ''} ${parsedData.last_name || ''}`.trim();
             
             if (fullName) {
-              setUserInfo(prev => ({
+              setUserInfo((prev) => ({
                 ...prev,
                 name: fullName
               }));
             }
             
             if (parsedData.room_number) {
-              setUserInfo(prev => ({
+              setUserInfo((prev) => ({
                 ...prev,
                 roomNumber: parsedData.room_number
               }));
@@ -79,7 +79,7 @@ const UserInfoDialog = ({
         
         // If room number is available in localStorage directly
         if (storedRoomNumber && !userInfo.roomNumber) {
-          setUserInfo(prev => ({
+          setUserInfo((prev) => ({
             ...prev,
             roomNumber: storedRoomNumber
           }));
