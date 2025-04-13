@@ -32,10 +32,10 @@ export const useRoom = (roomNumber?: string) => {
       return data as Room;
     },
     enabled: !!roomNumber,
-    staleTime: 1000 * 60 * 15, // 15 minutes de cache
-    cacheTime: 1000 * 60 * 30, // 30 minutes de cache
-    retry: 1, // Limiter les tentatives de récupération en cas d'échec
-    refetchOnMount: false, // Ne pas re-récupérer les données à chaque montage
-    refetchOnWindowFocus: false, // Ne pas re-récupérer les données au focus de la fenêtre
+    staleTime: 1000 * 60 * 15, // 15 minutes cache
+    gcTime: 1000 * 60 * 30, // 30 minutes garbage collection time (formerly cacheTime)
+    retry: 1, // Limit retry attempts on failure
+    refetchOnMount: false, // Don't refetch data on component mount
+    refetchOnWindowFocus: false, // Don't refetch data on window focus
   });
 };
