@@ -33,7 +33,7 @@ const RequestDialog = ({ isOpen, onOpenChange, room }: RequestDialogProps) => {
       const roomId = room?.id || '';
       await requestService(
         roomId,
-        'custom',
+        'service',
         description
       );
 

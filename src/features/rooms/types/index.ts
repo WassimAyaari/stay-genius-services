@@ -10,8 +10,8 @@ export interface ServiceRequest {
   updated_at: string;
   request_item_id?: string;
   category_id?: string;
-  guest_name?: string; // Added for UI display
-  room_number?: string; // Added for UI display
+  guest_name?: string;
+  room_number?: string;
   profiles?: {
     first_name: string | null;
     last_name: string | null;
@@ -40,5 +40,5 @@ export interface RequestItem {
   updated_at: string;
 }
 
-// Adding ServiceType type to fix imports
-export type ServiceType = 'housekeeping' | 'laundry' | 'wifi' | 'bill' | 'preferences' | 'concierge' | 'custom';
+// Simplify ServiceType to just 'service'
+export type ServiceType = 'service' | 'custom';

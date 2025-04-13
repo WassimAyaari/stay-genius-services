@@ -1,4 +1,3 @@
-
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { NotificationItem } from '@/types/notification';
@@ -32,15 +31,15 @@ export const transformServiceRequests = (requests: any[]): NotificationItem[] =>
   return requests.map(request => ({
     id: request.id || `req-${Math.random().toString(36).substr(2, 9)}`,
     type: 'request',
-    title: `Demande: ${request.type || 'Service'}`,
+    title: 'Demande de service',
     description: request.description || 'Service hôtelier',
-    icon: getServiceIcon(request.type),
+    icon: '🔔',
     status: request.status || 'pending',
     time: createSafeDate(request.created_at) || new Date(),
     link: `/requests/${request.id}`,
     data: {
       room_number: request.room_number,
-      service_type: request.type,
+      service_type: 'service',
       description: request.description
     }
   }));
@@ -99,7 +98,7 @@ export const transformEventReservations = (reservations: any[]): NotificationIte
   
   return reservations.map(reservation => ({
     id: reservation.id || `event-${Math.random().toString(36).substr(2, 9)}`,
-    type: 'event_reservation', // S'assurer que le type est 'event_reservation' et non 'notification'
+    type: 'event_reservation',
     title: 'Réservation d\'événement',
     description: `${reservation.date} - ${reservation.guests} personne(s)`,
     icon: '📅',

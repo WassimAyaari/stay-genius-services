@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Loader2, CheckCircle2, Timer, XCircle, Clock, ShowerHead, Shirt, PhoneCall, Wifi, FileText, Settings, Search } from 'lucide-react';
+import { Loader2, CheckCircle2, Timer, XCircle, Clock, FileText } from 'lucide-react';
 import { ServiceRequest } from '@/features/rooms/types';
 
 interface RequestHistoryProps {
@@ -23,25 +23,6 @@ const RequestHistory = ({ isLoading, requests }: RequestHistoryProps) => {
     }
   };
 
-  const getServiceIcon = (type: string) => {
-    switch (type) {
-      case 'housekeeping':
-        return <ShowerHead className="h-6 w-6" />;
-      case 'laundry':
-        return <Shirt className="h-6 w-6" />;
-      case 'wifi':
-        return <Wifi className="h-6 w-6" />;
-      case 'bill':
-        return <FileText className="h-6 w-6" />;
-      case 'preferences':
-        return <Settings className="h-6 w-6" />;
-      case 'concierge':
-        return <PhoneCall className="h-6 w-6" />;
-      default:
-        return <Search className="h-6 w-6" />;
-    }
-  };
-
   return (
     <>
       <h2 className="text-2xl font-bold text-secondary mb-6">Recent Requests</h2>
@@ -58,11 +39,11 @@ const RequestHistory = ({ isLoading, requests }: RequestHistoryProps) => {
                 className="flex items-center gap-4 p-4 bg-gray-50/80 rounded-xl hover:bg-gray-100/80 transition-colors"
               >
                 <div className="p-2 bg-white rounded-lg">
-                  {getServiceIcon(request.type)}
+                  <FileText className="h-6 w-6" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium capitalize">{request.type.replace('_', ' ')}</p>
+                    <p className="font-medium">Service Request</p>
                     {getStatusIcon(request.status)}
                   </div>
                   <p className="text-sm text-gray-600">

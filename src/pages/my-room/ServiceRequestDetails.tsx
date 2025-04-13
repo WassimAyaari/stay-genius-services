@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -8,7 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CheckCircle2, XCircle, Clock, Loader2, ShowerHead, Shirt, PhoneCall, Wifi, FileText, Settings, Search, Ban } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Loader2, FileText, Ban } from 'lucide-react';
 import { toast } from 'sonner';
 import { ServiceRequest } from '@/features/rooms/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -34,7 +33,6 @@ const ServiceRequestDetails = () => {
       return;
     }
     
-    // Only try to find the request if serviceRequests is defined and not empty
     if (serviceRequests && serviceRequests.length > 0) {
       const foundRequest = serviceRequests.find(r => r.id === id);
       if (foundRequest) {
@@ -44,7 +42,6 @@ const ServiceRequestDetails = () => {
         navigate('/notifications');
       }
     } else if (!isLoadingRequests && !isError) {
-      // If we're not still loading but have no requests, show an error
       toast.error("Aucune demande disponible");
       navigate('/notifications');
     }
@@ -59,7 +56,6 @@ const ServiceRequestDetails = () => {
       toast.success("Votre demande a été annulée");
       setIsCancelDialogOpen(false);
       
-      // Mettre à jour l'état local
       if (request) {
         setRequest({
           ...request,
@@ -112,38 +108,11 @@ const ServiceRequestDetails = () => {
   };
   
   const getTypeIcon = () => {
-    if (!request) return <Search className="h-6 w-6" />;
-    
-    switch (request.type) {
-      case 'housekeeping':
-        return <ShowerHead className="h-6 w-6" />;
-      case 'laundry':
-        return <Shirt className="h-6 w-6" />;
-      case 'wifi':
-        return <Wifi className="h-6 w-6" />;
-      case 'bill':
-        return <FileText className="h-6 w-6" />;
-      case 'preferences':
-        return <Settings className="h-6 w-6" />;
-      case 'concierge':
-        return <PhoneCall className="h-6 w-6" />;
-      default:
-        return <Search className="h-6 w-6" />;
-    }
+    return <FileText className="h-6 w-6" />;
   };
   
   const getTypeText = () => {
-    if (!request) return "";
-    
-    switch (request.type) {
-      case 'housekeeping': return "Service de chambre";
-      case 'laundry': return "Service de blanchisserie";
-      case 'wifi': return "Assistance WiFi";
-      case 'bill': return "Demande de facture";
-      case 'preferences': return "Préférences";
-      case 'concierge': return "Service de conciergerie";
-      default: return request.type || "Service";
-    }
+    return "Service Request";
   };
   
   if (isLoadingRequests) {
@@ -315,7 +284,6 @@ const ServiceRequestDetails = () => {
         </Card>
       </div>
       
-      {/* Dialog de confirmation d'annulation */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
