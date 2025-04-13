@@ -8,20 +8,45 @@ import { useToast } from '@/hooks/use-toast';
 interface AuthGuardProps {
   children: React.ReactNode;
   adminRequired?: boolean;
+  publicAccess?: boolean; // New prop to allow public access
 }
 
-/**
- * Composant de garde d'authentification pour sécuriser les routes
- * Vérifie si l'utilisateur est authentifié avant d'afficher le contenu
- */
-const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
+const AuthGuard = ({ 
+  children, 
+  adminRequired = false, 
+  publicAccess = false // Default to false, but can be overridden
+}: AuthGuardProps) => {
   const { loading, authorized, isAuthPage } = useAuthGuard(adminRequired);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
+  // Public routes that should always be accessible
+  const publicRoutes = [
+    '/', 
+    '/about', 
+    '/contact', 
+    '/destination', 
+    '/rooms', 
+    '/dining', 
+    '/spa', 
+    '/activities', 
+    '/events', 
+    '/map'
+  ];
+
   useEffect(() => {
-    // Si on n'est pas sur une page d'auth et qu'on n'est pas autorisé
+    // Check if the current route is a public route
+    const isPublicRoute = publicRoutes.some(route => 
+      location.pathname === route || location.pathname.startsWith(route + '/')
+    );
+
+    // If it's a public route or explicitly marked for public access, allow access
+    if (isPublicRoute || publicAccess || isAuthPage()) {
+      return;
+    }
+
+    // If not authorized and not on an auth page
     if (!isAuthPage() && !authorized && !loading) {
       console.log('Redirection vers la page de connexion depuis:', location.pathname);
       
@@ -34,14 +59,20 @@ const AuthGuard = ({ children, adminRequired = false }: AuthGuardProps) => {
       // Rediriger vers la page de connexion
       navigate('/auth/login', { state: { from: location.pathname } });
     }
-  }, [authorized, isAuthPage, loading, navigate, toast, location]);
+  }, [authorized, isAuthPage, loading, navigate, toast, location, publicRoutes]);
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  // Si nous sommes sur une page auth, ou si l'utilisateur est autorisé, afficher les enfants
-  return (isAuthPage() || authorized) ? <>{children}</> : null;
+  // Allow access if:
+  // 1. It's an auth page
+  // 2. User is authorized
+  // 3. Route is public
+  // 4. Explicitly marked for public access
+  return (isAuthPage() || authorized || publicRoutes.some(route => 
+    location.pathname === route || location.pathname.startsWith(route + '/')) || 
+    publicAccess) ? <>{children}</> : null;
 };
 
 export default AuthGuard;

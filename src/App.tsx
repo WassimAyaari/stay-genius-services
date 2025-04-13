@@ -57,8 +57,19 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth/login" element={<Login />} />
+              
               <Route path="/rooms" element={<Rooms />} />
               <Route path="/rooms/:id" element={<RoomDetails />} />
+              <Route path="/dining" element={<Dining />} />
+              <Route path="/dining/:id" element={<RestaurantDetail />} />
+              <Route path="/spa" element={<Spa />} />
+              <Route path="/activities" element={<Activities />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/destination" element={<Destination />} />
+              <Route path="/map" element={<HotelMap />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+
               <Route path="/requests/:id" element={
                 <AuthGuard>
                   <ServiceRequestDetails />
@@ -89,22 +100,6 @@ function App() {
                 </AuthGuard>
               } />
               
-              <Route path="/dining" element={<Dining />} />
-              <Route path="/dining/:id" element={<RestaurantDetail />} />
-              <Route path="/spa" element={<Spa />} />
-              <Route path="/activities" element={<Activities />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/destination" element={<Destination />} />
-              <Route path="/map" element={<HotelMap />} />
-              <Route path="/profile" element={
-                <AuthGuard>
-                  <Profile />
-                </AuthGuard>
-              } />
-              
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/notifications/:type/:id" element={
