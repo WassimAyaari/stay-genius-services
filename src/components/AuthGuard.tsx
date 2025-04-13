@@ -32,7 +32,12 @@ const AuthGuard = ({
     '/spa', 
     '/activities', 
     '/events', 
-    '/map'
+    '/services',
+    '/map',
+    '/shops',
+    '/feedback',
+    '/messages',
+    '/notifications'
   ];
 
   useEffect(() => {

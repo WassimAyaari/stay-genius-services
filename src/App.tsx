@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -58,6 +59,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/auth/login" element={<Login />} />
               
+              {/* Public routes */}
               <Route path="/rooms" element={<Rooms />} />
               <Route path="/rooms/:id" element={<RoomDetails />} />
               <Route path="/dining" element={<Dining />} />
@@ -69,7 +71,17 @@ function App() {
               <Route path="/map" element={<HotelMap />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
-
+              <Route path="/services" element={<Services />} />
+              <Route path="/shops" element={<Shops />} />
+              <Route path="/feedback" element={<Feedback />} />
+              
+              {/* Protected routes */}
+              <Route path="/profile" element={
+                <AuthGuard>
+                  <Profile />
+                </AuthGuard>
+              } />
+              
               <Route path="/requests/:id" element={
                 <AuthGuard>
                   <ServiceRequestDetails />
@@ -108,9 +120,7 @@ function App() {
                 </AuthGuard>
               } />
               
-              <Route path="/feedback" element={<Feedback />} />
-              <Route path="/shops" element={<Shops />} />
-              
+              {/* Admin routes */}
               <Route path="/admin" element={
                 <AuthGuard adminRequired={true}>
                   <AdminDashboard />
