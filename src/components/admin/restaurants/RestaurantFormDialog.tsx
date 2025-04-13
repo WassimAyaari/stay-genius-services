@@ -91,8 +91,7 @@ const RestaurantFormDialog = ({
         });
         toast.success('Restaurant updated successfully');
       } else {
-        // Create new restaurant
-        // Ensure all required fields are present for the Omit<Restaurant, "id"> type
+        // Create new restaurant - Ensure all required fields are explicitly present
         await createRestaurant({
           name: values.name,
           description: values.description,
