@@ -18,6 +18,8 @@ import { restaurantFormSchema, RestaurantFormValues } from './form/RestaurantFor
 import RestaurantBasicInfo from './form/RestaurantBasicInfo';
 import RestaurantDetails from './form/RestaurantDetails';
 import ImageUploader from './form/ImageUploader';
+import { useRestaurants } from '@/hooks/useRestaurants';
+import { toast } from 'sonner';
 
 interface RestaurantFormDialogProps {
   isOpen: boolean;
@@ -32,6 +34,8 @@ const RestaurantFormDialog = ({
   onClose, 
   restaurant 
 }: RestaurantFormDialogProps) => {
+  const { createRestaurant, updateRestaurant, isCreating, isUpdating } = useRestaurants();
+  
   const form = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantFormSchema),
     defaultValues: {
@@ -42,6 +46,7 @@ const RestaurantFormDialog = ({
       location: "",
       status: "open",
       actionText: "Book a Table",
+      isFeatured: false,
       images: [],
     },
   });
@@ -57,6 +62,7 @@ const RestaurantFormDialog = ({
         location: restaurant.location,
         status: restaurant.status,
         actionText: restaurant.actionText || "Book a Table",
+        isFeatured: restaurant.isFeatured || false,
         images: restaurant.images,
       });
     } else if (isOpen && !restaurant) {
@@ -69,6 +75,7 @@ const RestaurantFormDialog = ({
         location: "",
         status: "open",
         actionText: "Book a Table",
+        isFeatured: false,
         images: [],
       });
     }
@@ -76,12 +83,26 @@ const RestaurantFormDialog = ({
 
   const onSubmit = async (values: RestaurantFormValues) => {
     try {
-      // Handle submission logic here (you'll need to implement this)
+      if (restaurant) {
+        // Update existing restaurant
+        await updateRestaurant({
+          ...restaurant,
+          ...values,
+        });
+        toast.success('Restaurant updated successfully');
+      } else {
+        // Create new restaurant
+        await createRestaurant(values);
+        toast.success('Restaurant created successfully');
+      }
       onClose(true);
     } catch (error) {
       console.error('Error submitting restaurant form:', error);
+      toast.error('Failed to save restaurant. Please try again.');
     }
   };
+
+  const isSubmitting = isCreating || isUpdating;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -101,7 +122,12 @@ const RestaurantFormDialog = ({
               <RestaurantDetails form={form} />
               <ImageUploader form={form} />
               <DialogFooter className="pt-4">
-                <Button type="submit">{restaurant ? "Update" : "Create"}</Button>
+                <Button type="button" variant="outline" onClick={() => onClose(false)} disabled={isSubmitting}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Saving...' : restaurant ? "Update" : "Create"}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
