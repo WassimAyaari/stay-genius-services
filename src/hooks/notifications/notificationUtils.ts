@@ -27,16 +27,7 @@ export const formatTimeAgo = (date: Date | null | undefined): string => {
 
 // Helper function to get an icon based on service type
 function getServiceIcon(type: string): string {
-  switch (type) {
-    case 'housekeeping': return '🧹';
-    case 'laundry': return '👕';
-    case 'maintenance': return '🔧';
-    case 'concierge': return '🔑';
-    case 'wifi': return '📶';
-    case 'bill': return '📄';
-    case 'preferences': return '⚙️';
-    default: return '🔔';
-  }
+  return '🔔'; // Simple default icon for all service types
 }
 
 // Transform service requests to notifications
