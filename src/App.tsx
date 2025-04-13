@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -34,7 +33,6 @@ import NotificationDetail from '@/pages/notifications/NotificationDetail';
 import Feedback from '@/pages/feedback/Feedback';
 import Shops from '@/pages/shops/Shops';
 import AdminDashboard from '@/pages/admin/Dashboard';
-// RequestManager import removed
 import ReservationManager from '@/pages/admin/ReservationManager';
 import RestaurantManager from '@/pages/admin/RestaurantManager';
 import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
@@ -45,6 +43,8 @@ import ChatMessages from '@/pages/admin/ChatMessages';
 import AboutEditor from '@/pages/admin/AboutEditor';
 import EventsManager from '@/pages/admin/EventsManager';
 import ShopsManager from '@/pages/admin/ShopsManager';
+import HousekeepingManager from '@/pages/admin/HousekeepingManager';
+import MaintenanceManager from '@/pages/admin/MaintenanceManager';
 
 const queryClient = new QueryClient();
 
@@ -122,7 +122,17 @@ function App() {
                 </AuthGuard>
               } />
               
-              {/* Route for RequestManager removed */}
+              <Route path="/admin/housekeeping" element={
+                <AuthGuard adminRequired={true}>
+                  <HousekeepingManager />
+                </AuthGuard>
+              } />
+              
+              <Route path="/admin/maintenance" element={
+                <AuthGuard adminRequired={true}>
+                  <MaintenanceManager />
+                </AuthGuard>
+              } />
               
               <Route path="/admin/reservations" element={
                 <AuthGuard adminRequired={true}>

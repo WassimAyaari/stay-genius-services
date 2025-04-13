@@ -13,13 +13,7 @@ import {
 import { requestService } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { Room } from '@/hooks/useRoom';
-
-interface SearchItem {
-  id: string;
-  name: string;
-  category: string;
-  description?: string;
-}
+import { useRequestCategories } from '@/hooks/useRequestCategories';
 
 interface CommandSearchProps {
   room: Room | null;
@@ -30,22 +24,9 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { categories, allItems, isLoading } = useRequestCategories();
   
-  // Mock data - in a real implementation, this would come from an API request using requestCategories and requestItems
-  const items: SearchItem[] = [
-    { id: '1', name: 'Extra Towels', category: 'Housekeeping', description: 'Request additional towels for your room' },
-    { id: '2', name: 'Room Cleaning', category: 'Housekeeping', description: 'Schedule a room cleaning service' },
-    { id: '3', name: 'Laundry Pickup', category: 'Laundry', description: 'Request laundry pickup from your room' },
-    { id: '4', name: 'WiFi Support', category: 'Technical', description: 'Get assistance with WiFi connection' },
-    { id: '5', name: 'Pillow Options', category: 'Bedding', description: 'Choose from our pillow menu' },
-    { id: '6', name: 'Toothbrush Kit', category: 'Amenities', description: 'Request a toothbrush and toothpaste kit' },
-    { id: '7', name: 'Shower Gel', category: 'Amenities', description: 'Request additional shower gel' },
-    { id: '8', name: 'Room Service Menu', category: 'Dining', description: 'Get a room service menu delivered' },
-    { id: '9', name: 'TV Remote Issue', category: 'Technical', description: 'Report problems with the TV remote' },
-    { id: '10', name: 'Spa Appointment', category: 'Wellness', description: 'Book a spa treatment appointment' },
-  ];
-
-  const handleSelect = async (item: SearchItem) => {
+  const handleSelect = async (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
     setIsSubmitting(true);
     try {
       if (!room) {
@@ -60,14 +41,14 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
       await requestService(
         room.id,
         'service',
-        `${item.name} - ${item.description || ''}`,
-        undefined,
-        undefined
+        `${itemName} - ${itemDescription || ''}`,
+        itemId,
+        itemCategory
       );
       
       toast({
         title: "Request Submitted",
-        description: `Your request for ${item.name} has been submitted successfully.`,
+        description: `Your request for ${itemName} has been submitted successfully.`,
       });
       
       onRequestSuccess();
@@ -84,6 +65,18 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     }
   };
 
+  // Group items by category
+  const itemsByCategory = allItems.reduce((acc, item) => {
+    if (!item.is_active) return acc;
+    
+    const categoryId = item.category_id;
+    if (!acc[categoryId]) {
+      acc[categoryId] = [];
+    }
+    acc[categoryId].push(item);
+    return acc;
+  }, {} as Record<string, typeof allItems>);
+
   return (
     <>
       <div 
@@ -97,36 +90,37 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
       
       <CommandDialog open={open} onOpenChange={setOpen}>
         <Command className="rounded-lg border shadow-md">
-          <CommandInput placeholder="Search hotel services..." disabled={isSubmitting} />
+          <CommandInput placeholder="Search hotel services..." disabled={isSubmitting || isLoading} />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
-            {Object.entries(
-              items.reduce<Record<string, SearchItem[]>>((acc, item) => {
-                if (!acc[item.category]) {
-                  acc[item.category] = [];
-                }
-                acc[item.category].push(item);
-                return acc;
-              }, {})
-            ).map(([category, categoryItems]) => (
-              <CommandGroup key={category} heading={category}>
-                {categoryItems.map((item) => (
-                  <CommandItem
-                    key={item.id}
-                    disabled={isSubmitting}
-                    onSelect={() => handleSelect(item)}
-                    className="cursor-pointer"
-                  >
-                    <div>
-                      <div className="font-medium">{item.name}</div>
-                      {item.description && (
-                        <div className="text-sm text-gray-500 mt-1">{item.description}</div>
-                      )}
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ))}
+            {isLoading ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">Loading services...</div>
+            ) : (
+              Object.entries(itemsByCategory).map(([categoryId, items]) => {
+                const category = categories.find(c => c.id === categoryId);
+                if (!category) return null;
+                
+                return (
+                  <CommandGroup key={categoryId} heading={category.name}>
+                    {items.map((item) => (
+                      <CommandItem
+                        key={item.id}
+                        disabled={isSubmitting}
+                        onSelect={() => handleSelect(item.id, item.name, categoryId, item.description)}
+                        className="cursor-pointer"
+                      >
+                        <div>
+                          <div className="font-medium">{item.name}</div>
+                          {item.description && (
+                            <div className="text-sm text-gray-500 mt-1">{item.description}</div>
+                          )}
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                );
+              })
+            )}
           </CommandList>
         </Command>
       </CommandDialog>

@@ -9,7 +9,9 @@ import {
   Store, 
   PartyPopper, 
   FileText,
-  MessageCircle
+  MessageCircle,
+  Broom,
+  Wrench
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -56,6 +58,20 @@ const AdminDashboard = () => {
       count: 36, 
       trend: "+3 today", 
       path: "/admin/chat" 
+    },
+    { 
+      title: "Housekeeping", 
+      icon: <Broom className="h-5 w-5 text-primary" />, 
+      count: null, 
+      trend: "", 
+      path: "/admin/housekeeping" 
+    },
+    { 
+      title: "Maintenance", 
+      icon: <Wrench className="h-5 w-5 text-primary" />, 
+      count: null, 
+      trend: "", 
+      path: "/admin/maintenance" 
     },
     { 
       title: "About", 
