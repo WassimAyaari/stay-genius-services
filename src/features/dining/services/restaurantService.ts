@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Restaurant } from '@/features/dining/types';
 
@@ -102,45 +103,50 @@ export const createRestaurant = async (restaurant: Omit<Restaurant, 'id'>): Prom
     throw new Error("Some required fields are missing");
   }
 
-  // Convert from camelCase to snake_case
-  const { data, error } = await supabase
-    .from('restaurants')
-    .insert({
-      name: restaurant.name,
-      description: restaurant.description,
-      cuisine: restaurant.cuisine,
-      images: restaurant.images,
-      open_hours: restaurant.openHours,
-      location: restaurant.location,
-      status: restaurant.status,
-      action_text: restaurant.actionText,
-      is_featured: restaurant.isFeatured
-    })
-    .select();
+  try {
+    // Convert from camelCase to snake_case
+    const { data, error } = await supabase
+      .from('restaurants')
+      .insert({
+        name: restaurant.name,
+        description: restaurant.description,
+        cuisine: restaurant.cuisine,
+        images: restaurant.images,
+        open_hours: restaurant.openHours,
+        location: restaurant.location,
+        status: restaurant.status,
+        action_text: restaurant.actionText,
+        is_featured: restaurant.isFeatured
+      })
+      .select();
 
-  if (error) {
-    console.error('Error creating restaurant:', error);
+    if (error) {
+      console.error('Error creating restaurant:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from database after insert');
+    }
+
+    console.log('Created restaurant:', data[0]);
+    // Convert from snake_case to camelCase for the returned data
+    return {
+      id: data[0].id,
+      name: data[0].name,
+      description: data[0].description,
+      cuisine: data[0].cuisine,
+      images: data[0].images,
+      openHours: data[0].open_hours,
+      location: data[0].location,
+      status: data[0].status as 'open' | 'closed',
+      actionText: data[0].action_text || "Book a Table",
+      isFeatured: data[0].is_featured || false
+    };
+  } catch (error) {
+    console.error('Error in createRestaurant:', error);
     throw error;
   }
-
-  if (!data || data.length === 0) {
-    throw new Error('No data returned from database after insert');
-  }
-
-  console.log('Created restaurant:', data[0]);
-  // Convert from snake_case to camelCase for the returned data
-  return {
-    id: data[0].id,
-    name: data[0].name,
-    description: data[0].description,
-    cuisine: data[0].cuisine,
-    images: data[0].images,
-    openHours: data[0].open_hours,
-    location: data[0].location,
-    status: data[0].status as 'open' | 'closed',
-    actionText: data[0].action_text || "Book a Table",
-    isFeatured: data[0].is_featured || false
-  };
 };
 
 /**
