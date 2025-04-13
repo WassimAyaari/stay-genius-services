@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { 
   Command, 
@@ -26,7 +26,23 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const { toast } = useToast();
   const { categories, allItems, isLoading } = useRequestCategories();
   
+  // Calculer une seule fois les éléments groupés par catégorie
+  const itemsByCategory = useMemo(() => {
+    return allItems.reduce((acc, item) => {
+      if (!item.is_active) return acc;
+      
+      const categoryId = item.category_id;
+      if (!acc[categoryId]) {
+        acc[categoryId] = [];
+      }
+      acc[categoryId].push(item);
+      return acc;
+    }, {} as Record<string, typeof allItems>);
+  }, [allItems]);
+
   const handleSelect = async (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
     try {
       if (!room) {
@@ -65,18 +81,6 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     }
   };
 
-  // Group items by category
-  const itemsByCategory = allItems.reduce((acc, item) => {
-    if (!item.is_active) return acc;
-    
-    const categoryId = item.category_id;
-    if (!acc[categoryId]) {
-      acc[categoryId] = [];
-    }
-    acc[categoryId].push(item);
-    return acc;
-  }, {} as Record<string, typeof allItems>);
-
   return (
     <>
       <div 
@@ -84,8 +88,7 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
         onClick={() => setOpen(true)}
       >
         <Search className="h-5 w-5 mr-3 text-gray-400" />
-        <span className="text-gray-500">Search for services (towels, cleaning, wifi support...)
-        </span>
+        <span className="text-gray-500">Search for services (towels, cleaning, wifi support...)</span>
       </div>
       
       <CommandDialog open={open} onOpenChange={setOpen}>

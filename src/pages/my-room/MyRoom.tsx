@@ -10,9 +10,18 @@ import ServicesGrid from './components/ServicesGrid';
 import CustomRequestForm from './components/CustomRequestForm';
 
 const MyRoom = () => {
-  const { data: room, isLoading } = useRoom('401');
-  const { data: serviceRequests = [], isLoading: isLoadingRequests, refetch: refetchRequests } = useServiceRequests();
+  // Utiliser le numéro de chambre stocké dans localStorage pour éviter des requêtes supplémentaires
+  const roomNumber = localStorage.getItem('user_room_number') || '401';
+  
+  // Memoiser les requêtes pour éviter des re-rendus inutiles
+  const { data: room, isLoading } = useRoom(roomNumber);
+  const { 
+    data: serviceRequests = [], 
+    isLoading: isLoadingRequests, 
+    refetch: refetchRequests 
+  } = useServiceRequests();
 
+  // Afficher un indicateur de chargement uniquement si les données essentielles ne sont pas disponibles
   if (isLoading) {
     return (
       <Layout>
@@ -29,12 +38,12 @@ const MyRoom = () => {
       
       <CustomRequestForm 
         room={room} 
-        onRequestSuccess={() => refetchRequests()} 
+        onRequestSuccess={refetchRequests} 
       />
 
       <ServicesGrid 
         room={room} 
-        onRequestSuccess={() => refetchRequests()} 
+        onRequestSuccess={refetchRequests} 
       />
 
       <RequestHistory 

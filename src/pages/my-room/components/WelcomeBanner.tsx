@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Room } from '@/hooks/useRoom';
 import { format } from 'date-fns';
@@ -10,45 +10,44 @@ interface WelcomeBannerProps {
 }
 
 const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
-  const [roomNumber, setRoomNumber] = useState<string>('');
-  const [userName, setUserName] = useState<string>('');
-  const [checkInDate, setCheckInDate] = useState<string>('');
-  const [checkOutDate, setCheckOutDate] = useState<string>('');
-  
-  useEffect(() => {
-    // Get user data from localStorage to get room number
-    const userDataString = localStorage.getItem('user_data');
-    if (userDataString) {
-      try {
-        const userData = JSON.parse(userDataString);
-        if (userData.room_number) {
-          setRoomNumber(userData.room_number);
-        }
-        
-        // Get user's name
-        const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-        if (fullName) {
-          setUserName(fullName);
-        }
-        
-        // Get stay dates
-        if (userData.check_in_date) {
-          const checkIn = new Date(userData.check_in_date);
-          setCheckInDate(format(checkIn, 'dd MMMM yyyy', { locale: enUS }));
-        }
-        
-        if (userData.check_out_date) {
-          const checkOut = new Date(userData.check_out_date);
-          setCheckOutDate(format(checkOut, 'dd MMMM yyyy', { locale: enUS }));
-        }
-      } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
-      }
+  // Utiliser useMemo pour calculer les valeurs une seule fois
+  const userData = useMemo(() => {
+    try {
+      const userDataString = localStorage.getItem('user_data');
+      return userDataString ? JSON.parse(userDataString) : null;
+    } catch (error) {
+      console.error("Error parsing user data from localStorage:", error);
+      return null;
     }
   }, []);
-
-  // Use room number from localStorage if it exists, otherwise use the one from room object
-  const displayRoomNumber = roomNumber || (room?.room_number || 'Suite 401');
+  
+  // Calculer les valeurs dérivées une seule fois
+  const displayRoomNumber = useMemo(() => {
+    return userData?.room_number || room?.room_number || 'Suite 401';
+  }, [userData, room]);
+  
+  const userName = useMemo(() => {
+    if (!userData) return '';
+    return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+  }, [userData]);
+  
+  const checkInDate = useMemo(() => {
+    if (!userData?.check_in_date) return '';
+    try {
+      return format(new Date(userData.check_in_date), 'dd MMMM yyyy', { locale: enUS });
+    } catch (e) {
+      return '';
+    }
+  }, [userData]);
+  
+  const checkOutDate = useMemo(() => {
+    if (!userData?.check_out_date) return '';
+    try {
+      return format(new Date(userData.check_out_date), 'dd MMMM yyyy', { locale: enUS });
+    } catch (e) {
+      return '';
+    }
+  }, [userData]);
 
   return (
     <Card className="mb-8 p-8 bg-gradient-to-r from-primary-light via-white to-white border-none shadow-lg rounded-3xl">

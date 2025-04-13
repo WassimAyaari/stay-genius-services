@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BedDouble, UtensilsCrossed, BellRing, Phone, Grid3X3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,28 +18,29 @@ const BottomNav = () => {
   // Log pour le débogage
   console.log('Current path in BottomNav:', location.pathname);
 
-  // Handle scroll to hide/show navigation
+  // Optimiser la gestion du scroll pour de meilleures performances
+  const handleScroll = useCallback(() => {
+    const currentScrollY = window.scrollY;
+    if (currentScrollY > lastScrollY && currentScrollY > 20) {
+      // Scrolling down - hide the navbar
+      setIsVisible(false);
+    } else {
+      // Scrolling up - show the navbar
+      setIsVisible(true);
+    }
+    setLastScrollY(currentScrollY);
+  }, [lastScrollY]);
+  
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 20) {
-        // Scrolling down - hide the navbar
-        setIsVisible(false);
-      } else {
-        // Scrolling up - show the navbar
-        setIsVisible(true);
-      }
-      setLastScrollY(currentScrollY);
-    };
-    
     window.addEventListener('scroll', handleScroll, {
       passive: true
     });
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [handleScroll]);
 
-  const navItems = [
+  // Créer le tableau navItems une seule fois et le mettre en cache
+  const navItems = useMemo(() => [
     {
       icon: <BellRing className="w-5 h-5" />,
       label: 'Notif',
@@ -67,14 +68,15 @@ const BottomNav = () => {
       path: '#',
       isMenu: true
     }
-  ];
+  ], [unreadCount]);
 
-  const handleNavigation = (path: string) => {
+  // Optimiser la fonction de navigation
+  const handleNavigation = useCallback((path: string) => {
     if (path !== '#') {
       console.log(`Navigating to: ${path}`);
       navigate(path);
     }
-  };
+  }, [navigate]);
 
   return (
     <AnimatePresence>
