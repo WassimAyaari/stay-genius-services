@@ -1,3 +1,4 @@
+
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { NotificationItem } from '@/types/notification';
@@ -24,6 +25,20 @@ export const formatTimeAgo = (date: Date | null | undefined): string => {
   }
 };
 
+// Helper function to get an icon based on service type
+function getServiceIcon(type: string): string {
+  switch (type) {
+    case 'housekeeping': return '🧹';
+    case 'laundry': return '👕';
+    case 'maintenance': return '🔧';
+    case 'concierge': return '🔑';
+    case 'wifi': return '📶';
+    case 'bill': return '📄';
+    case 'preferences': return '⚙️';
+    default: return '🔔';
+  }
+}
+
 // Transform service requests to notifications
 export const transformServiceRequests = (requests: any[]): NotificationItem[] => {
   if (!Array.isArray(requests)) return [];
@@ -33,13 +48,13 @@ export const transformServiceRequests = (requests: any[]): NotificationItem[] =>
     type: 'request',
     title: 'Demande de service',
     description: request.description || 'Service hôtelier',
-    icon: '🔔',
+    icon: getServiceIcon(request.type),
     status: request.status || 'pending',
     time: createSafeDate(request.created_at) || new Date(),
     link: `/requests/${request.id}`,
     data: {
       room_number: request.room_number,
-      service_type: 'service',
+      service_type: request.type,
       description: request.description
     }
   }));

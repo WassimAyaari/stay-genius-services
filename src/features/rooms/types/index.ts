@@ -40,5 +40,5 @@ export interface RequestItem {
   updated_at: string;
 }
 
-// Simplify ServiceType to just 'service'
-export type ServiceType = 'service' | 'custom';
+// Update ServiceType to include all service types used in ServicesGrid
+export type ServiceType = 'service' | 'custom' | 'housekeeping' | 'laundry' | 'wifi' | 'bill' | 'preferences' | 'concierge';
