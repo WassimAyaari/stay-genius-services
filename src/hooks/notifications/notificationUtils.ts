@@ -130,17 +130,6 @@ export const transformEventReservations = (reservations: any[]): NotificationIte
   }));
 };
 
-// Helper function to get an icon based on service type
-function getServiceIcon(type: string): string {
-  switch (type) {
-    case 'housekeeping': return '🧹';
-    case 'laundry': return '👕';
-    case 'maintenance': return '🔧';
-    case 'concierge': return '🔑';
-    default: return '🔔';
-  }
-}
-
 // Combine and sort all notifications
 export const combineAndSortNotifications = (
   serviceRequests: any[] = [],
