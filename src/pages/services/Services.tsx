@@ -1,15 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, FileText, Clock, Headphones as HeadphonesIcon, Search } from 'lucide-react';
+import { MessageCircle, Clock, Headphones as HeadphonesIcon, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
 import ServiceCard from '@/features/services/components/ServiceCard';
 import ServiceChat from '@/features/services/components/ServiceChat';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
-import RequestDialog from '@/features/services/components/RequestDialog';
 import CommandSearch from '@/pages/my-room/components/CommandSearch';
 
 interface UserInfo {
@@ -20,7 +18,6 @@ interface UserInfo {
 const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: 'Guest',
     roomNumber: ''
@@ -105,22 +102,6 @@ const Services = () => {
     });
     window.open('https://wa.me/+21628784080', '_blank');
   };
-  
-  const handleOpenRequestDialog = () => {
-    // Ensure room number is stored before opening dialog
-    if (userInfo.roomNumber && !localStorage.getItem('user_room_number')) {
-      localStorage.setItem('user_room_number', userInfo.roomNumber);
-    }
-    
-    setIsRequestDialogOpen(true);
-  };
-
-  const handleRequestSuccess = () => {
-    toast({
-      title: "Request Submitted",
-      description: "Your service request has been submitted successfully."
-    });
-  };
 
   return (
     <Layout>
@@ -135,7 +116,7 @@ const Services = () => {
           <h2 className="text-xl font-medium text-secondary mb-3">Quick Service Search</h2>
           <CommandSearch 
             room={room} 
-            onRequestSuccess={handleRequestSuccess} 
+            onRequestSuccess={() => {}} 
           />
         </div>
 
@@ -146,14 +127,6 @@ const Services = () => {
             icon={MessageCircle}
             actionText="Start Chat"
             onAction={handleStartChat}
-          />
-
-          <ServiceCard
-            title="Request Service"
-            description="Submit a specific request for assistance"
-            icon={FileText}
-            actionText="Make Request"
-            onAction={handleOpenRequestDialog}
           />
 
           <ServiceCard
@@ -178,12 +151,6 @@ const Services = () => {
         isChatOpen={isChatOpen}
         setIsChatOpen={setIsChatOpen}
         userInfo={userInfo}
-      />
-      
-      <RequestDialog
-        isOpen={isRequestDialogOpen}
-        onOpenChange={setIsRequestDialogOpen}
-        room={room}
       />
     </Layout>
   );
