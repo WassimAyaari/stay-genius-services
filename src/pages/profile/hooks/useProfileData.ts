@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { CompanionData, UserData } from '@/features/users/types/userTypes';
-import { getCompanions } from '@/features/users/services/companionService';
+import { getCompanions, syncCompanions } from '@/features/users/services/companionService';
 import { syncGuestData } from '@/features/users/services/guestService';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { calculateStayDuration } from '../utils/dateUtils';
@@ -34,6 +34,38 @@ export const useProfileData = () => {
       setCompanions(companionsList);
     } catch (error) {
       console.error('Error fetching companions:', error);
+    }
+  };
+
+  const addCompanion = async (companion: CompanionData) => {
+    const userId = user?.id || localStorage.getItem('user_id');
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Utilisateur non authentifié."
+      });
+      return false;
+    }
+    
+    try {
+      const newCompanions = [...companions, companion];
+      await syncCompanions(userId, newCompanions);
+      setCompanions(newCompanions);
+      
+      toast({
+        title: "Accompagnateur ajouté",
+        description: "L'accompagnateur a été ajouté avec succès."
+      });
+      return true;
+    } catch (error) {
+      console.error('Error adding companion:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'ajouter l'accompagnateur."
+      });
+      return false;
     }
   };
 
@@ -104,6 +136,7 @@ export const useProfileData = () => {
     notifications,
     stayDuration,
     dismissNotification,
-    handleProfileImageChange
+    handleProfileImageChange,
+    addCompanion
   };
 };

@@ -16,7 +16,8 @@ const Profile = () => {
     notifications,
     stayDuration,
     dismissNotification,
-    handleProfileImageChange
+    handleProfileImageChange,
+    addCompanion
   } = useProfileData();
 
   return (
@@ -34,7 +35,10 @@ const Profile = () => {
           stayDuration={stayDuration} 
         />
         
-        <CompanionsList companions={companions} />
+        <CompanionsList 
+          companions={companions} 
+          onAddCompanion={addCompanion}
+        />
         
         <NotificationsList 
           notifications={notifications} 
