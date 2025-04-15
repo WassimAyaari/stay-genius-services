@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '../types/userTypes';
 import { formatDateToString } from '../utils/validationUtils';
 import { validateGuestId, logGuestOperation } from './guestValidation';
+import { cleanupDuplicateGuestRecords } from './guestCleanupService';
 
 /**
  * Synchronise les données d'un invité avec Supabase
