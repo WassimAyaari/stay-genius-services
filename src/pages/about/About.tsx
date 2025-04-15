@@ -45,7 +45,6 @@ const About = () => {
           welcomeTitle={aboutData.welcome_title} 
           welcomeDescription={aboutData.welcome_description} 
           welcomeDescriptionExtended={aboutData.welcome_description_extended}
-          heroImage={aboutData.hero_image}
         />
         
         {aboutData.mission && (
