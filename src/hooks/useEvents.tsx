@@ -7,6 +7,7 @@ import { isBefore, startOfDay } from 'date-fns';
 
 export const useEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -27,14 +28,15 @@ export const useEvents = () => {
       
       console.log('Events fetched successfully:', data);
       
-      // Filter out past events
+      // Filter upcoming events
       const today = startOfDay(new Date());
       const futureEvents = (data as Event[]).filter(event => {
         const eventDate = startOfDay(new Date(event.date));
         return !isBefore(eventDate, today);
       });
       
-      setEvents(futureEvents);
+      setEvents(data as Event[]);
+      setUpcomingEvents(futureEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
       toast({
@@ -157,6 +159,7 @@ export const useEvents = () => {
 
   return {
     events,
+    upcomingEvents,
     loading,
     fetchEvents,
     createEvent,

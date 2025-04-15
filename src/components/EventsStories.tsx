@@ -19,7 +19,7 @@ const EventsStories: React.FC = () => {
     markAsSeen
   } = useStories();
   const {
-    events
+    upcomingEvents // Changed from events to upcomingEvents
   } = useEvents();
   const [viewedStories, setViewedStories] = useState<string[]>([]);
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
@@ -50,7 +50,7 @@ const EventsStories: React.FC = () => {
 
   const getEventTitle = (story: Story) => {
     if (!story.eventId) return null;
-    const linkedEvent = events.find(event => event.id === story.eventId);
+    const linkedEvent = upcomingEvents.find(event => event.id === story.eventId); // Changed from events to upcomingEvents
     return linkedEvent?.title || null;
   };
 
