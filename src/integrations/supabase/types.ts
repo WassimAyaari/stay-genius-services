@@ -936,6 +936,7 @@ export type Database = {
           category: string
           created_at: string
           description: string
+          eventId: string | null
           id: string
           image: string
           is_active: boolean | null
@@ -947,6 +948,7 @@ export type Database = {
           category: string
           created_at?: string
           description: string
+          eventId?: string | null
           id?: string
           image: string
           is_active?: boolean | null
@@ -958,6 +960,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string
+          eventId?: string | null
           id?: string
           image?: string
           is_active?: boolean | null
@@ -965,7 +968,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stories_event_id_fkey"
+            columns: ["eventId"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       table_reservations: {
         Row: {

@@ -19,7 +19,6 @@ export const useStories = () => {
 
       if (error) throw error;
       
-      // Properly cast the data to ensure it matches the Story type
       setStories(data as Story[]);
     } catch (error) {
       console.error('Error fetching stories:', error);
