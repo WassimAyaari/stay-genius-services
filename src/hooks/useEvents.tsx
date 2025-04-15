@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types/event';
 import { useToast } from './use-toast';
+import { isBefore, startOfDay } from 'date-fns';
 
 export const useEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -26,8 +27,14 @@ export const useEvents = () => {
       
       console.log('Events fetched successfully:', data);
       
-      // Properly cast the data to ensure it matches the Event type
-      setEvents(data as Event[]);
+      // Filter out past events
+      const today = startOfDay(new Date());
+      const futureEvents = (data as Event[]).filter(event => {
+        const eventDate = startOfDay(new Date(event.date));
+        return !isBefore(eventDate, today);
+      });
+      
+      setEvents(futureEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
       toast({
