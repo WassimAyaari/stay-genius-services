@@ -90,7 +90,8 @@ export function useAboutData() {
         welcome_description: aboutData.welcome_description || 'Hotel Genius is a luxury hotel located in the heart of the city.',
         welcome_description_extended: aboutData.welcome_description_extended || 'Since our establishment, we have been committed to creating a home away from home for our guests.',
         directory_title: aboutData.directory_title || 'Hotel Directory & Information',
-        hero_image: aboutData.hero_image || defaultHeroImage,
+        // Access hero_image using optional chaining and with a type assertion since TypeScript doesn't know it exists
+        hero_image: (aboutData as any).hero_image || defaultHeroImage,
         important_numbers: parseJsonArray<InfoItem>(aboutData.important_numbers, defaultImportantNumbers),
         facilities: parseJsonArray<InfoItem>(aboutData.facilities, defaultFacilities),
         hotel_policies: parseJsonArray<InfoItem>(aboutData.hotel_policies, defaultPolicies),
