@@ -21,7 +21,7 @@ const formSchema = z.object({
   image: z.string().min(1, 'Image is required'),
   category: z.enum(['event', 'promo']),
   is_active: z.boolean().default(true),
-  eventId: z.string().optional(),
+  eventId: z.string().nullable().optional(),
 });
 
 interface StoryFormProps {
@@ -45,7 +45,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
       image: initialData?.image || '',
       category: initialData?.category || 'event',
       is_active: initialData?.is_active !== false,
-      eventId: initialData?.eventId || '',
+      eventId: initialData?.eventId || null,
     },
   });
   const { events, loading: eventsLoading } = useEvents();
@@ -60,7 +60,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
         image: initialData.image,
         category: initialData.category,
         is_active: initialData.is_active !== false,
-        eventId: initialData.eventId || '',
+        eventId: initialData.eventId || null,
       });
     } else {
       form.reset({
@@ -69,7 +69,7 @@ export const StoryForm: React.FC<StoryFormProps> = ({
         image: '',
         category: 'event',
         is_active: true,
-        eventId: '',
+        eventId: null,
       });
     }
   }, [initialData, form]);
@@ -77,7 +77,13 @@ export const StoryForm: React.FC<StoryFormProps> = ({
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitting(true);
-      await onSubmit(values);
+      // Ensure eventId is null when "none" is selected
+      const submissionData = {
+        ...values,
+        eventId: values.eventId === 'none' || !values.eventId ? null : values.eventId
+      };
+      
+      await onSubmit(submissionData);
       if (onOpenChange) onOpenChange(false);
       form.reset();
     } catch (error) {
@@ -195,7 +201,10 @@ export const StoryForm: React.FC<StoryFormProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Associate with an event (optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value || 'none'}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Choose an event" />

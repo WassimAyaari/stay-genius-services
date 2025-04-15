@@ -34,12 +34,16 @@ export const useStories = () => {
 
   const createStory = async (story: Omit<Story, 'id' | 'created_at' | 'updated_at' | 'seen'>) => {
     try {
+      // Ensure eventId is either a valid UUID or null, never an empty string
+      const storyData = {
+        ...story,
+        eventId: story.eventId && story.eventId.trim() !== '' ? story.eventId : null,
+        seen: false
+      };
+
       const { data, error } = await supabase
         .from('stories')
-        .insert([{
-          ...story,
-          seen: false
-        }])
+        .insert([storyData])
         .select();
 
       if (error) throw error;
@@ -65,9 +69,15 @@ export const useStories = () => {
 
   const updateStory = async (id: string, story: Partial<Story>) => {
     try {
+      // Ensure eventId is either a valid UUID or null, never an empty string
+      const storyData = {
+        ...story,
+        eventId: story.eventId && story.eventId.trim() !== '' ? story.eventId : null
+      };
+
       const { data, error } = await supabase
         .from('stories')
-        .update(story)
+        .update(storyData)
         .eq('id', id)
         .select();
 
