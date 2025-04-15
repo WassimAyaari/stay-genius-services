@@ -94,7 +94,10 @@ export function useAboutData() {
         features: parseJsonArray<FeatureItem>(aboutData.features, defaultFeatures),
         mission: aboutData.mission || 'To provide exceptional hospitality experiences by creating memorable moments for our guests.',
         created_at: aboutData.created_at || new Date().toISOString(),
-        updated_at: aboutData.updated_at || new Date().toISOString()
+        updated_at: aboutData.updated_at || new Date().toISOString(),
+        hero_image: aboutData.hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80',
+        hero_title: aboutData.hero_title || 'Welcome to Our Hotel',
+        hero_subtitle: aboutData.hero_subtitle || 'Discover luxury and comfort'
       };
       
       return transformedData;
@@ -111,6 +114,9 @@ export function useAboutData() {
     if (data.welcome_description_extended) updateData.welcome_description_extended = data.welcome_description_extended;
     if (data.directory_title) updateData.directory_title = data.directory_title;
     if (data.mission) updateData.mission = data.mission;
+    if (data.hero_image) updateData.hero_image = data.hero_image;
+    if (data.hero_title) updateData.hero_title = data.hero_title;
+    if (data.hero_subtitle) updateData.hero_subtitle = data.hero_subtitle;
     
     // Convert arrays back to JSON
     if (data.important_numbers) updateData.important_numbers = data.important_numbers;

@@ -7,6 +7,7 @@ import MissionSection from '@/components/admin/about/MissionSection';
 import FeaturesSection from '@/components/admin/about/FeaturesSection';
 import InfoItemSection from '@/components/admin/about/InfoItemSection';
 import DirectorySection from '@/components/admin/about/DirectorySection';
+import HeroSection from '@/components/admin/about/HeroSection';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -74,7 +75,10 @@ const AboutEditor = () => {
         { label: 'Wi-Fi', value: 'Network "HotelGenius" - Password provided at check-in' },
         { label: 'Parking', value: 'Valet service available' }
       ],
-      directory_title: 'Hotel Directory & Information'
+      directory_title: 'Hotel Directory & Information',
+      hero_image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80',
+      hero_title: 'Welcome to Hotel Genius',
+      hero_subtitle: 'Discover luxury and comfort'
     };
     
     try {
