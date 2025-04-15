@@ -48,6 +48,7 @@ const AboutEditor = () => {
       welcome_title: 'Welcome to Hotel Genius',
       welcome_description: 'A luxury hotel experience in the heart of the city.',
       welcome_description_extended: 'Since our establishment, we have been committed to creating a home away from home for our guests.',
+      hero_image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       mission: 'To provide exceptional hospitality experiences by creating memorable moments for our guests.',
       features: [
         { icon: 'History', title: 'Our History', description: 'Established with a rich heritage' },
@@ -129,6 +130,7 @@ const AboutEditor = () => {
             welcomeTitle={aboutData.welcome_title}
             welcomeDescription={aboutData.welcome_description}
             welcomeDescriptionExtended={aboutData.welcome_description_extended}
+            heroImage={aboutData.hero_image}
             isEditing={true}
             onSave={(data) => updateAboutData({ ...aboutData, ...data })}
           />

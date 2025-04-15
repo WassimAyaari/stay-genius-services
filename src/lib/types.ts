@@ -46,6 +46,7 @@ export interface HotelAbout {
   welcome_description: string;
   welcome_description_extended: string;
   directory_title: string;
+  hero_image: string;
   important_numbers: InfoItem[];
   hotel_policies: InfoItem[];
   facilities: InfoItem[];

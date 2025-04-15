@@ -87,6 +87,7 @@ export function useAboutData() {
         welcome_description: aboutData.welcome_description || 'Hotel Genius is a luxury hotel located in the heart of the city.',
         welcome_description_extended: aboutData.welcome_description_extended || 'Since our establishment, we have been committed to creating a home away from home for our guests.',
         directory_title: aboutData.directory_title || 'Hotel Directory & Information',
+        hero_image: aboutData.hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
         important_numbers: parseJsonArray<InfoItem>(aboutData.important_numbers, defaultImportantNumbers),
         facilities: parseJsonArray<InfoItem>(aboutData.facilities, defaultFacilities),
         hotel_policies: parseJsonArray<InfoItem>(aboutData.hotel_policies, defaultPolicies),
@@ -111,6 +112,7 @@ export function useAboutData() {
     if (data.welcome_description_extended) updateData.welcome_description_extended = data.welcome_description_extended;
     if (data.directory_title) updateData.directory_title = data.directory_title;
     if (data.mission) updateData.mission = data.mission;
+    if (data.hero_image) updateData.hero_image = data.hero_image;
     
     // Convert arrays back to JSON
     if (data.important_numbers) updateData.important_numbers = data.important_numbers;
