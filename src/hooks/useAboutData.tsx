@@ -95,9 +95,10 @@ export function useAboutData() {
         mission: aboutData.mission || 'To provide exceptional hospitality experiences by creating memorable moments for our guests.',
         created_at: aboutData.created_at || new Date().toISOString(),
         updated_at: aboutData.updated_at || new Date().toISOString(),
-        hero_image: aboutData.hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80',
-        hero_title: aboutData.hero_title || 'Welcome to Our Hotel',
-        hero_subtitle: aboutData.hero_subtitle || 'Discover luxury and comfort'
+        // Type assertion as any to deal with potential missing properties in DB schema
+        hero_image: (aboutData as any).hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80',
+        hero_title: (aboutData as any).hero_title || 'Welcome to Our Hotel',
+        hero_subtitle: (aboutData as any).hero_subtitle || 'Discover luxury and comfort'
       };
       
       return transformedData;
