@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { useEvents } from '@/hooks/useEvents';
@@ -13,7 +12,7 @@ import { NewsletterSection } from './components/NewsletterSection';
 import EventsStories from '@/components/EventsStories';
 
 const Events = () => {
-  const { events, loading } = useEvents();
+  const { upcomingEvents: events, loading } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const { toast } = useToast();

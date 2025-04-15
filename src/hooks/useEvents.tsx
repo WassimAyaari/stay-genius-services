@@ -28,7 +28,7 @@ export const useEvents = () => {
       
       console.log('Events fetched successfully:', data);
       
-      // Filter upcoming events
+      // Filter upcoming events (today and future)
       const today = startOfDay(new Date());
       const futureEvents = (data as Event[]).filter(event => {
         const eventDate = startOfDay(new Date(event.date));
@@ -159,7 +159,7 @@ export const useEvents = () => {
 
   return {
     events,
-    upcomingEvents,
+    upcomingEvents, // Changed from events to upcomingEvents
     loading,
     fetchEvents,
     createEvent,
