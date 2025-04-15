@@ -139,6 +139,7 @@ export type Database = {
       }
       events: {
         Row: {
+          capacity: number | null
           category: string
           created_at: string
           date: string
@@ -152,6 +153,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          capacity?: number | null
           category: string
           created_at?: string
           date: string
@@ -165,6 +167,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          capacity?: number | null
           category?: string
           created_at?: string
           date?: string

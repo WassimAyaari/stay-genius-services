@@ -1,18 +1,16 @@
 
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
-import EventsStories from '@/components/EventsStories';
 import { useEvents } from '@/hooks/useEvents';
 import { Event } from '@/types/event';
 import EventBookingDialog from '@/components/events/EventBookingDialog';
 import { useToast } from '@/hooks/use-toast';
+import { EventHeader } from './components/EventHeader';
 import { StoryCarousel } from './components/StoryCarousel';
 import { EventList } from './components/EventList';
 import { PromotionList } from './components/PromotionList';
 import { NewsletterSection } from './components/NewsletterSection';
+import EventsStories from '@/components/EventsStories';
 
 const Events = () => {
   const { events, loading } = useEvents();
@@ -71,19 +69,7 @@ const Events = () => {
         </div>
 
         {/* Event Calendar */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">Event Calendar</h2>
-          <Card className="p-6 rounded-xl">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold mb-1">View all upcoming events</h3>
-              <p className="text-gray-600">Plan your stay with our event calendar</p>
-            </div>
-            <Button className="w-full gap-2">
-              <Calendar className="h-4 w-4" />
-              Open Calendar
-            </Button>
-          </Card>
-        </div>
+        <EventHeader />
 
         {/* Subscribe Section */}
         <div className="mb-8">
