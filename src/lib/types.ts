@@ -1,4 +1,3 @@
-
 export interface Profile {
   id: string;
   first_name: string | null;
@@ -54,6 +53,9 @@ export interface HotelAbout {
   mission: string;
   created_at: string;
   updated_at: string;
+  hero_image: string;
+  hero_title: string;
+  hero_subtitle: string;
 }
 
 export interface InfoItem {

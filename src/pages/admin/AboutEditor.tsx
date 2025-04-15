@@ -13,7 +13,7 @@ import { Card } from '@/components/ui/card';
 
 const AboutEditor = () => {
   const { aboutData, isLoadingAbout, aboutError, updateAboutData, createInitialAboutData } = useAboutData();
-  const [activeTab, setActiveTab] = useState('welcome');
+  const [activeTab, setActiveTab] = useState('hero');
   const [isCreating, setIsCreating] = useState(false);
   
   if (isLoadingAbout) {
@@ -118,17 +118,28 @@ const AboutEditor = () => {
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
+          <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="welcome">Accueil</TabsTrigger>
           <TabsTrigger value="mission">Mission</TabsTrigger>
           <TabsTrigger value="features">Caractéristiques</TabsTrigger>
           <TabsTrigger value="directory">Annuaire</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="welcome" className="space-y-6">
+        <TabsContent value="hero" className="space-y-6">
+          <HeroSection 
+            heroImage={aboutData?.hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80'}
+            heroTitle={aboutData?.hero_title || 'Welcome to Our Hotel'}
+            heroSubtitle={aboutData?.hero_subtitle || 'Discover luxury and comfort'}
+            isEditing={true}
+            onSave={(heroData) => updateAboutData({ ...aboutData, ...heroData })}
+          />
+        </TabsContent>
+        
+        <TabsContent value="welcome">
           <WelcomeSection 
-            welcomeTitle={aboutData.welcome_title}
-            welcomeDescription={aboutData.welcome_description}
-            welcomeDescriptionExtended={aboutData.welcome_description_extended}
+            welcomeTitle={aboutData?.welcome_title || ''}
+            welcomeDescription={aboutData?.welcome_description || ''}
+            welcomeDescriptionExtended={aboutData?.welcome_description_extended || ''}
             isEditing={true}
             onSave={(data) => updateAboutData({ ...aboutData, ...data })}
           />

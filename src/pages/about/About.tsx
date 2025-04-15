@@ -2,6 +2,7 @@
 import React from 'react';
 import Layout from '@/components/Layout';
 import { useAboutData } from '@/hooks/useAboutData';
+import HeroSection from '@/components/admin/about/HeroSection';
 import WelcomeSection from '@/components/admin/about/WelcomeSection';
 import MissionSection from '@/components/admin/about/MissionSection';
 import DirectorySection from '@/components/admin/about/DirectorySection';
@@ -16,6 +17,7 @@ const About = () => {
       <Layout>
         <div className="container mx-auto py-8">
           <div className="space-y-8">
+            <Skeleton className="h-64 w-full" />
             <Skeleton className="h-32 w-full" />
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-64 w-full" />
@@ -40,6 +42,12 @@ const About = () => {
 
   return (
     <Layout>
+      <HeroSection 
+        heroImage={aboutData.hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80'} 
+        heroTitle={aboutData.hero_title || 'Welcome to Our Hotel'} 
+        heroSubtitle={aboutData.hero_subtitle || 'Discover luxury and comfort'} 
+      />
+      
       <div className="container mx-auto py-8">
         <WelcomeSection 
           welcomeTitle={aboutData.welcome_title} 
