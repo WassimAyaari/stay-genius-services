@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '@/features/users/types/userTypes';
 import { syncGuestData } from '@/features/users/services/guestService';
+import { cleanupDuplicateGuestRecords } from '@/features/users/services/guestCleanupService';
 
 /**
  * Connexion d'un utilisateur avec email et mot de passe
@@ -35,13 +36,18 @@ export const loginUser = async (
     }
     
     console.log('User authenticated successfully:', authData.user);
+    
+    // Nettoyer les doublons potentiels immédiatement après connexion
+    await cleanupDuplicateGuestRecords(authData.user.id);
 
     // Récupérer les données de l'utilisateur depuis Supabase
     const { data: guestData, error: guestError } = await supabase
       .from('guests')
       .select('*')
       .eq('user_id', authData.user.id)
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (guestError && guestError.code !== 'PGRST116') {
       console.error('Erreur lors de la récupération des données invité:', guestError);

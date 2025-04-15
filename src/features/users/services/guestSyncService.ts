@@ -6,7 +6,7 @@ import { validateGuestId, logGuestOperation } from './guestValidation';
 
 /**
  * Synchronise les données d'un invité avec Supabase
- * Utilise un INSERT avec ON CONFLICT pour éviter les doublons
+ * Utilise un UPSERT pour éviter les doublons
  */
 export const syncGuestData = async (userId: string, userData: UserData): Promise<boolean> => {
   try {
@@ -38,8 +38,9 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       .from('guests')
       .select('id')
       .eq('user_id', userId)
+      .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
       
     if (checkError && checkError.code !== 'PGRST116') {
       console.error('Error checking existing guest:', checkError);
@@ -47,12 +48,15 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
     
     let result;
     if (existingGuest) {
-      // Mettre à jour l'enregistrement existant
+      // Mettre à jour l'enregistrement existant le plus récent
       console.log('Updating existing guest record with ID:', existingGuest.id);
       result = await supabase
         .from('guests')
         .update(guestData)
         .eq('id', existingGuest.id);
+      
+      // Nettoyer les autres enregistrements s'il y en a
+      await cleanupDuplicateGuestRecords(userId);
     } else {
       // Insérer un nouvel enregistrement
       console.log('Creating new guest record');
@@ -76,9 +80,15 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       localStorage.setItem('user_room_number', userData.room_number);
     }
     
+    // Après synchronisation réussie, garantir qu'il n'y a pas de doublons
+    await cleanupDuplicateGuestRecords(userId);
+    
     return true;
   } catch (error) {
     console.error('Exception when syncing guest data:', error);
     return false;
   }
 };
+
+// Re-export the cleanupDuplicateGuestRecords for convenience
+export { cleanupDuplicateGuestRecords } from './guestCleanupService';

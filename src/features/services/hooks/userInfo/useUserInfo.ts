@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { UserInfo } from './types';
-import { getUserInfoFromDatabase } from './databaseUtils';
+import { getUserInfoFromDatabase, syncAuthUserToGuest } from './databaseUtils';
 import { getLocalUserInfo, saveUserInfo, ensureValidUserInfo } from './localStorageUtils';
+import { cleanupDuplicateGuestRecords } from '@/features/users/services/guestCleanupService';
 
 export function useUserInfo(room: any = null) {
   const { userData } = useAuth();
@@ -20,6 +21,11 @@ export function useUserInfo(room: any = null) {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
+        // Si l'utilisateur est authentifié, d'abord nettoyer les doublons potentiels
+        if (session.user.id) {
+          await cleanupDuplicateGuestRecords(session.user.id);
+        }
+        
         // User is authenticated, check if they have a guest record
         const info = await getUserInfoFromDatabase(session.user.id, userData, room);
         if (info) {

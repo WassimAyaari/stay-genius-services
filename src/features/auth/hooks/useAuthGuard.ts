@@ -81,6 +81,7 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
         
         // Si l'utilisateur est authentifié, nettoyer les doublons potentiels
         if (session?.user?.id) {
+          // Assurons-nous d'utiliser la fonction importée depuis le bon chemin
           await cleanupDuplicateGuestRecords(session.user.id);
         }
         
