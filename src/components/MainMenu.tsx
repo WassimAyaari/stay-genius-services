@@ -40,7 +40,6 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
 
   const handleNavigate = (path: string) => {
     console.log(`Navigating to: ${path}`);
-    // Utiliser le hook navigate directement au lieu de window.location
     navigate(path);
   };
 
