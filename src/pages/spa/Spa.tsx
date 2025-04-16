@@ -63,17 +63,6 @@ const Spa = () => {
           </Card>
         ))}
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-        <Card className="p-4 text-center">
-          <Heart className="w-6 h-6 mx-auto text-primary mb-2" />
-          <h4 className="font-medium">Wellness Classes</h4>
-        </Card>
-        <Card className="p-4 text-center">
-          <Calendar className="w-6 h-6 mx-auto text-primary mb-2" />
-          <h4 className="font-medium">Schedule</h4>
-        </Card>
-      </div>
       
       {isBookingOpen && selectedService && (
         <BookingDialog
