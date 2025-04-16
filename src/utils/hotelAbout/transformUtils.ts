@@ -1,4 +1,3 @@
-
 import { HotelAbout } from '@/lib/types';
 import {
   defaultImportantNumbers,

@@ -249,6 +249,9 @@ export type Database = {
           directory_title: string | null
           facilities: Json | null
           features: Json | null
+          hero_image: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
           hotel_id: string | null
           hotel_policies: Json | null
           icon: string
@@ -271,6 +274,9 @@ export type Database = {
           directory_title?: string | null
           facilities?: Json | null
           features?: Json | null
+          hero_image?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           hotel_id?: string | null
           hotel_policies?: Json | null
           icon: string
@@ -293,6 +299,9 @@ export type Database = {
           directory_title?: string | null
           facilities?: Json | null
           features?: Json | null
+          hero_image?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           hotel_id?: string | null
           hotel_policies?: Json | null
           icon?: string
