@@ -185,7 +185,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
       <SheetContent className="sm:max-w-md p-0 flex flex-col h-full">
         <ChatHeader userInfo={userInfo} onClose={handleCloseChat} />
         <MessageList messages={messages} messagesEndRef={messagesEndRef} />
-        <MessageInput 
+        <MessageInput
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
           handleSendMessage={handleSendMessage}

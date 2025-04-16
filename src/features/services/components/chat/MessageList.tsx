@@ -19,37 +19,27 @@ interface MessageListProps {
   messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages, messagesEndRef }) => {
-  // Scroll to the bottom whenever messages change
+const MessageList = ({ messages, messagesEndRef }: MessageListProps) => {
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, messagesEndRef]);
 
-  // Group messages by date for better readability
-  const renderMessages = () => {
-    if (messages.length === 0) {
-      return (
-        <div className="flex justify-center items-center h-full py-8">
-          <p className="text-muted-foreground text-sm">No messages yet. Start a conversation!</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        {messages.map(message => (
-          <ChatMessage key={message.id} message={message} />
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-    );
-  };
-
   return (
     <ScrollArea className="flex-1 px-4 py-3">
-      {renderMessages()}
+      <div className="space-y-3">
+        {messages.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No messages yet. Start a conversation!</p>
+          </div>
+        ) : (
+          messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
     </ScrollArea>
   );
 };
