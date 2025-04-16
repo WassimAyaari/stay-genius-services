@@ -1,39 +1,35 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Story } from '@/types/event';
 import { useToast } from './use-toast';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const useStories = () => {
-  const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchStories = useCallback(async () => {
-    try {
-      setLoading(true);
+  // Utiliser React Query pour la mise en cache et les états de chargement
+  const { data: stories = [], isLoading: loading, refetch } = useQuery({
+    queryKey: ['stories'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('stories')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10); // Limiter à 10 stories pour améliorer les performances
 
       if (error) throw error;
       
-      setStories(data as Story[]);
-    } catch (error) {
-      console.error('Error fetching stories:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to fetch stories',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+      return data as Story[];
+    },
+    staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
-  const createStory = async (story: Omit<Story, 'id' | 'created_at' | 'updated_at' | 'seen'>) => {
-    try {
+  // Mutation pour créer une story
+  const createStoryMutation = useMutation({
+    mutationFn: async (story: Omit<Story, 'id' | 'created_at' | 'updated_at' | 'seen'>) => {
       // Ensure eventId is either a valid UUID or null, never an empty string
       const storyData = {
         ...story,
@@ -48,28 +44,36 @@ export const useStories = () => {
 
       if (error) throw error;
       
-      setStories(prev => [...prev, ...(data as Story[])]);
+      return data[0] as Story;
+    },
+    onSuccess: (newStory) => {
+      // Mettre à jour le cache React Query
+      queryClient.setQueryData(['stories'], (oldStories: Story[] = []) => 
+        [newStory, ...oldStories]
+      );
       
       toast({
         title: 'Success',
         description: 'Story created successfully',
       });
-      
-      return data[0];
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error creating story:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to create story',
       });
-      throw error;
     }
-  };
+  });
 
-  const updateStory = async (id: string, story: Partial<Story>) => {
-    try {
-      // Ensure eventId is either a valid UUID or null, never an empty string
+  const createStory = useCallback(async (story: Omit<Story, 'id' | 'created_at' | 'updated_at' | 'seen'>) => {
+    return createStoryMutation.mutateAsync(story);
+  }, [createStoryMutation]);
+
+  // Mutation pour mettre à jour une story
+  const updateStoryMutation = useMutation({
+    mutationFn: async ({ id, story }: { id: string, story: Partial<Story> }) => {
       const storyData = {
         ...story,
         eventId: story.eventId && story.eventId.trim() !== '' ? story.eventId : null
@@ -83,27 +87,36 @@ export const useStories = () => {
 
       if (error) throw error;
       
-      setStories(prev => prev.map(s => s.id === id ? { ...s, ...data[0] } as Story : s));
+      return data[0] as Story;
+    },
+    onSuccess: (updatedStory) => {
+      // Mettre à jour le cache React Query
+      queryClient.setQueryData(['stories'], (oldStories: Story[] = []) => 
+        oldStories.map(s => s.id === updatedStory.id ? updatedStory : s)
+      );
       
       toast({
         title: 'Success',
         description: 'Story updated successfully',
       });
-      
-      return data[0];
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error updating story:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to update story',
       });
-      throw error;
     }
-  };
+  });
 
-  const deleteStory = async (id: string) => {
-    try {
+  const updateStory = useCallback(async (id: string, story: Partial<Story>) => {
+    return updateStoryMutation.mutateAsync({ id, story });
+  }, [updateStoryMutation]);
+
+  // Mutation pour supprimer une story
+  const deleteStoryMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('stories')
         .delete()
@@ -111,25 +124,36 @@ export const useStories = () => {
 
       if (error) throw error;
       
-      setStories(prev => prev.filter(s => s.id !== id));
+      return id;
+    },
+    onSuccess: (id) => {
+      // Mettre à jour le cache React Query
+      queryClient.setQueryData(['stories'], (oldStories: Story[] = []) => 
+        oldStories.filter(s => s.id !== id)
+      );
       
       toast({
         title: 'Success',
         description: 'Story deleted successfully',
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error deleting story:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to delete story',
       });
-      throw error;
     }
-  };
+  });
 
-  const markAsSeen = async (id: string) => {
-    try {
+  const deleteStory = useCallback(async (id: string) => {
+    return deleteStoryMutation.mutateAsync(id);
+  }, [deleteStoryMutation]);
+
+  // Mutation pour marquer une story comme vue
+  const markAsSeenMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('stories')
         .update({ seen: true })
@@ -137,20 +161,24 @@ export const useStories = () => {
 
       if (error) throw error;
       
-      setStories(prev => prev.map(s => s.id === id ? { ...s, seen: true } as Story : s));
-    } catch (error) {
-      console.error('Error marking story as seen:', error);
+      return id;
+    },
+    onSuccess: (id) => {
+      // Mettre à jour le cache React Query
+      queryClient.setQueryData(['stories'], (oldStories: Story[] = []) => 
+        oldStories.map(s => s.id === id ? { ...s, seen: true } : s)
+      );
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchStories();
-  }, [fetchStories]);
+  const markAsSeen = useCallback(async (id: string) => {
+    return markAsSeenMutation.mutateAsync(id);
+  }, [markAsSeenMutation]);
 
   return {
     stories,
     loading,
-    fetchStories,
+    fetchStories: refetch,
     createStory,
     updateStory,
     deleteStory,

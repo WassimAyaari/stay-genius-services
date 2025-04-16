@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, Suspense, lazy } from 'react';
 import Layout from '@/components/Layout';
 import { useEvents } from '@/hooks/useEvents';
 import { Event } from '@/types/event';
@@ -9,7 +10,10 @@ import { StoryCarousel } from './components/StoryCarousel';
 import { EventList } from './components/EventList';
 import { PromotionList } from './components/PromotionList';
 import { NewsletterSection } from './components/NewsletterSection';
-import EventsStories from '@/components/EventsStories';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load EventsStories component to improve initial load time
+const EventsStories = lazy(() => import('@/components/EventsStories'));
 
 const Events = () => {
   const { upcomingEvents: events, loading } = useEvents();
@@ -33,10 +37,22 @@ const Events = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4">
-        {/* Story Viewer */}
-        <div className="mb-6">
+        {/* Story Viewer - Lazy loaded */}
+        <Suspense fallback={
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+            <div className="flex space-x-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-16 rounded-full" />
+              ))}
+            </div>
+          </div>
+        }>
           <EventsStories />
-        </div>
+        </Suspense>
 
         {/* Story Carousel */}
         <StoryCarousel 

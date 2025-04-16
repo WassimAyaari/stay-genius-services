@@ -1,55 +1,49 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types/event';
 import { useToast } from './use-toast';
 import { isBefore, startOfDay } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
 
 export const useEvents = () => {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
-  const fetchEvents = useCallback(async () => {
-    try {
-      setLoading(true);
+  
+  // Utiliser React Query pour la mise en cache et les états de chargement
+  const { data: events = [], isLoading: loading, error, refetch } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
       console.log('Fetching events from Supabase...');
       
+      // Ajouter une limite aux résultats pour des performances accrues
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('created_at', { ascending: false });
-
+        .order('created_at', { ascending: false })
+        .limit(20); // Limite de 20 événements pour améliorer les performances
+      
       if (error) {
         console.error('Error in fetchEvents:', error);
         throw error;
       }
       
       console.log('Events fetched successfully:', data);
-      
-      // Filter upcoming events (today and future) immediately
-      const today = startOfDay(new Date());
-      const futureEvents = (data as Event[]).filter(event => {
-        const eventDate = startOfDay(new Date(event.date));
-        return !isBefore(eventDate, today);
-      });
-      
-      setEvents(data as Event[]);
-      setUpcomingEvents(futureEvents);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erreur',
-        description: 'Impossible de récupérer les événements',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+      return data as Event[];
+    },
+    staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
+    refetchOnWindowFocus: false, // Ne pas recharger à chaque focus de fenêtre
+  });
+  
+  // Calculer les événements à venir une seule fois lorsque les événements changent
+  const upcomingEvents = useMemo(() => {
+    const today = startOfDay(new Date());
+    return (events || []).filter(event => {
+      const eventDate = startOfDay(new Date(event.date));
+      return !isBefore(eventDate, today);
+    });
+  }, [events]);
 
-  const createEvent = async (event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) => {
+  const createEvent = useCallback(async (event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       console.log('Creating new event:', event);
       
@@ -65,15 +59,8 @@ export const useEvents = () => {
       
       console.log('Event created successfully:', data);
       
-      const newEvent = data[0] as Event;
-      setEvents(prev => [...prev, newEvent]);
-      
-      // Update upcoming events if the new event is in the future
-      const today = startOfDay(new Date());
-      const eventDate = startOfDay(new Date(newEvent.date));
-      if (!isBefore(eventDate, today)) {
-        setUpcomingEvents(prev => [...prev, newEvent]);
-      }
+      // Actualiser les données après création
+      await refetch();
       
       toast({
         title: 'Succès',
@@ -90,9 +77,9 @@ export const useEvents = () => {
       });
       throw error;
     }
-  };
+  }, [toast, refetch]);
 
-  const updateEvent = async (id: string, event: Partial<Event>) => {
+  const updateEvent = useCallback(async (id: string, event: Partial<Event>) => {
     try {
       console.log('Updating event:', id, event);
       
@@ -109,31 +96,8 @@ export const useEvents = () => {
       
       console.log('Event updated successfully:', data);
       
-      const updatedEvent = data[0] as Event;
-      setEvents(prev => prev.map(e => e.id === id ? { ...e, ...updatedEvent } as Event : e));
-      
-      // Update upcoming events
-      const today = startOfDay(new Date());
-      const eventDate = startOfDay(new Date(updatedEvent.date));
-      const isUpcoming = !isBefore(eventDate, today);
-      
-      setUpcomingEvents(prev => {
-        const eventIndex = prev.findIndex(e => e.id === id);
-        if (eventIndex >= 0) {
-          // Event was already in upcoming, update or remove it
-          if (isUpcoming) {
-            const newList = [...prev];
-            newList[eventIndex] = { ...prev[eventIndex], ...updatedEvent };
-            return newList;
-          } else {
-            return prev.filter(e => e.id !== id);
-          }
-        } else if (isUpcoming) {
-          // Event wasn't in upcoming but now should be
-          return [...prev, updatedEvent];
-        }
-        return prev;
-      });
+      // Actualiser les données après mise à jour
+      await refetch();
       
       toast({
         title: 'Succès',
@@ -150,9 +114,9 @@ export const useEvents = () => {
       });
       throw error;
     }
-  };
+  }, [toast, refetch]);
 
-  const deleteEvent = async (id: string) => {
+  const deleteEvent = useCallback(async (id: string) => {
     try {
       console.log('Deleting event:', id);
       
@@ -168,8 +132,8 @@ export const useEvents = () => {
       
       console.log('Event deleted successfully');
       
-      setEvents(prev => prev.filter(e => e.id !== id));
-      setUpcomingEvents(prev => prev.filter(e => e.id !== id));
+      // Actualiser les données après suppression
+      await refetch();
       
       toast({
         title: 'Succès',
@@ -184,17 +148,14 @@ export const useEvents = () => {
       });
       throw error;
     }
-  };
-
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  }, [toast, refetch]);
 
   return {
     events,
     upcomingEvents,
     loading,
-    fetchEvents,
+    error,
+    fetchEvents: refetch,
     createEvent,
     updateEvent,
     deleteEvent,

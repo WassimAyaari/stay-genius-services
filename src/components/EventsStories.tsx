@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -23,20 +23,34 @@ const EventsStories: React.FC = () => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const isMobile = useIsMobile();
 
-  // Filtrer les stories actives en une seule fois pour éviter les calculs répétés
-  const activeStories = React.useMemo(() => 
-    stories.filter(story => story.is_active),
+  // Mémoiser les stories actives pour éviter des calculs inutiles
+  const activeStories = useMemo(() => 
+    (stories || []).filter(story => story.is_active).slice(0, 10), // Limiter à 10 stories max
     [stories]
   );
 
-  const handleMarkAsSeen = async (id: string, index: number) => {
+  // Mémoiser les titres d'événements pour éviter les recherches répétées
+  const eventTitles = useMemo(() => {
+    const titleMap: Record<string, string> = {};
+    activeStories.forEach(story => {
+      if (story.eventId) {
+        const event = upcomingEvents.find(e => e.id === story.eventId);
+        if (event) {
+          titleMap[story.eventId] = event.title;
+        }
+      }
+    });
+    return titleMap;
+  }, [activeStories, upcomingEvents]);
+
+  const handleMarkAsSeen = useCallback(async (id: string, index: number) => {
     if (!viewedStories.includes(id)) {
-      setViewedStories([...viewedStories, id]);
+      setViewedStories(prev => [...prev, id]);
       await markAsSeen(id);
     }
     setSelectedStoryIndex(index);
     setStoryViewerOpen(true);
-  };
+  }, [viewedStories, markAsSeen]);
 
   React.useEffect(() => {
     if (!carouselApi) return;
@@ -49,11 +63,10 @@ const EventsStories: React.FC = () => {
     };
   }, [carouselApi]);
 
-  const getEventTitle = (story: Story) => {
+  const getEventTitle = useCallback((story: Story) => {
     if (!story.eventId) return null;
-    const linkedEvent = upcomingEvents.find(event => event.id === story.eventId);
-    return linkedEvent?.title || null;
-  };
+    return eventTitles[story.eventId] || null;
+  }, [eventTitles]);
 
   if (loading) {
     return (
@@ -119,6 +132,7 @@ const EventsStories: React.FC = () => {
                             src={story.image} 
                             alt={story.title} 
                             className="object-cover" 
+                            loading="lazy"
                           />
                           <AvatarFallback className="bg-primary/10 text-primary">
                             {story.title.substring(0, 2)}
@@ -162,7 +176,8 @@ const EventsStories: React.FC = () => {
                       <AvatarImage 
                         src={story.image} 
                         alt={story.title} 
-                        className="object-cover" 
+                        className="object-cover"
+                        loading="lazy"
                       />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {story.title.substring(0, 2)}

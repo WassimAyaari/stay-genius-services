@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Users, Heart, Share } from 'lucide-react';
@@ -14,6 +14,13 @@ interface EventListProps {
 }
 
 export const EventList = ({ events, loading, onBookEvent }: EventListProps) => {
+  // Memoize filtered events to prevent unnecessary calculations
+  const filteredEvents = useMemo(() => {
+    return events
+      .filter(event => event.category === 'event')
+      .slice(0, 5); // Limiter à 5 événements pour la performance
+  }, [events]);
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -41,8 +48,6 @@ export const EventList = ({ events, loading, onBookEvent }: EventListProps) => {
     );
   }
 
-  const filteredEvents = events.filter(event => event.category === 'event');
-
   if (filteredEvents.length === 0) {
     return (
       <Card className="p-4 text-center">
@@ -62,6 +67,7 @@ export const EventList = ({ events, loading, onBookEvent }: EventListProps) => {
                 alt={event.title} 
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
               <div className="absolute top-2 right-2 flex space-x-2">
                 <Button size="icon" variant="outline" className="h-8 w-8 rounded-full bg-white/80">

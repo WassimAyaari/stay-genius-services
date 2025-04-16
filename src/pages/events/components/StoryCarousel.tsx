@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -22,14 +22,23 @@ interface StoryCarouselProps {
 export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  // Memoize filtered events to prevent unnecessary renders
+  const filteredEvents = useMemo(() => {
+    return events.slice(0, 5); // Limiter à 5 événements pour améliorer les performances
+  }, [events]);
+
+  const handleIntervalChange = useCallback(() => {
+    if (!loading && filteredEvents.length > 0) {
+      setSelectedIndex((prevIndex) => (prevIndex + 1) % filteredEvents.length);
+    }
+  }, [loading, filteredEvents.length]);
+
   useEffect(() => {
-    if (!loading && events.length > 0) {
-      const interval = setInterval(() => {
-        setSelectedIndex((prevIndex) => (prevIndex + 1) % events.length);
-      }, 5000);
+    if (!loading && filteredEvents.length > 0) {
+      const interval = setInterval(handleIntervalChange, 5000);
       return () => clearInterval(interval);
     }
-  }, [loading, events.length]);
+  }, [loading, filteredEvents.length, handleIntervalChange]);
 
   if (loading) {
     return (
@@ -39,7 +48,7 @@ export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselPro
     );
   }
 
-  if (events.length === 0) {
+  if (filteredEvents.length === 0) {
     return (
       <div className="h-[50vh] rounded-3xl bg-gray-100 flex items-center justify-center mb-6">
         <p className="text-gray-500">No events available</p>
@@ -61,7 +70,7 @@ export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselPro
         }}
       >
         <CarouselContent>
-          {events.map((event) => (
+          {filteredEvents.map((event) => (
             <CarouselItem key={event.id}>
               <div className="relative rounded-3xl overflow-hidden">
                 <img 
@@ -69,10 +78,12 @@ export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselPro
                   alt={event.title} 
                   className="w-full h-[70vh] object-cover"
                   loading="lazy" 
+                  decoding="async"
+                  fetchpriority="high"
                 />
                 <div className="absolute top-0 left-0 right-0 p-2">
                   <div className="flex space-x-1">
-                    {events.map((_, i) => (
+                    {filteredEvents.map((_, i) => (
                       <div 
                         key={i} 
                         className={`h-1 flex-1 rounded-full ${i === selectedIndex ? 'bg-white' : 'bg-white/30'}`}
@@ -100,7 +111,7 @@ export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselPro
           <CarouselNext className="right-4" />
         </div>
       </Carousel>
-      <SwipeIndicator selectedIndex={selectedIndex} totalSlides={events.length} />
+      <SwipeIndicator selectedIndex={selectedIndex} totalSlides={filteredEvents.length} />
     </div>
   );
 };

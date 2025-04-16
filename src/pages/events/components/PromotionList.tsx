@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Percent } from 'lucide-react';
@@ -14,6 +14,13 @@ interface PromotionListProps {
 }
 
 export const PromotionList = ({ events, loading, onBookEvent }: PromotionListProps) => {
+  // Memoize promotions to prevent unnecessary calculations
+  const promotions = useMemo(() => {
+    return events
+      .filter(event => event.category === 'promo')
+      .slice(0, 4); // Limiter à 4 promotions maximum pour la performance
+  }, [events]);
+
   if (loading) {
     return (
       <>
@@ -31,8 +38,6 @@ export const PromotionList = ({ events, loading, onBookEvent }: PromotionListPro
       </>
     );
   }
-
-  const promotions = events.filter(event => event.category === 'promo');
 
   if (promotions.length === 0) {
     return (
@@ -52,6 +57,7 @@ export const PromotionList = ({ events, loading, onBookEvent }: PromotionListPro
               alt={promo.title} 
               className="w-full h-full object-cover"
               loading="lazy"
+              decoding="async"
             />
             <div className="absolute top-0 left-0 bg-primary text-white text-xs font-bold px-3 py-1 m-3 rounded-full">
               <Percent className="h-3 w-3 inline mr-1" />
