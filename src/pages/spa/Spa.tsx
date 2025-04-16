@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Heart, Calendar } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { useSpaServices } from '@/hooks/useSpaServices';
 import BookingDialog from '@/features/spa/components/SpaBookingDialog';
