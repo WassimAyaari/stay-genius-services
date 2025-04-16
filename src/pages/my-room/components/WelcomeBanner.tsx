@@ -1,16 +1,14 @@
-
 import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Room } from '@/hooks/useRoom';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { en } from 'date-fns/locale';
 
 interface WelcomeBannerProps {
   room: Room | null;
 }
 
 const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
-  // Utiliser useMemo pour calculer les valeurs une seule fois
   const userData = useMemo(() => {
     try {
       const userDataString = localStorage.getItem('user_data');
@@ -21,7 +19,6 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
     }
   }, []);
   
-  // Calculer les valeurs dérivées une seule fois
   const displayRoomNumber = useMemo(() => {
     return userData?.room_number || room?.room_number || 'Suite 401';
   }, [userData, room]);
@@ -32,17 +29,16 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
   }, [userData]);
   
   const formatDateIfValid = (dateString: string | undefined): string => {
-    if (!dateString) return 'Non défini';
+    if (!dateString) return 'Not set';
     try {
       const date = new Date(dateString);
-      // Vérifier si la date est valide
       if (isNaN(date.getTime())) {
-        return 'Date invalide';
+        return 'Invalid Date';
       }
-      return format(date, 'dd MMMM yyyy', { locale: fr });
+      return format(date, 'dd MMMM yyyy', { locale: en });
     } catch (e) {
-      console.error("Erreur lors du formatage de la date:", e, dateString);
-      return 'Date invalide';
+      console.error("Error formatting date:", e, dateString);
+      return 'Invalid Date';
     }
   };
   
@@ -69,7 +65,7 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           </div>
         </div>
         
-        {(checkInDate !== 'Non défini' || checkOutDate !== 'Non défini') && (
+        {(checkInDate !== 'Not set' || checkOutDate !== 'Not set') && (
           <div className="mt-2 p-3 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center">
               <div>
