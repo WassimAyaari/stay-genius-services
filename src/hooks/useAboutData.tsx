@@ -17,16 +17,16 @@ export function useAboutData() {
     mutationFn: updateAboutData,
     onSuccess: () => {
       toast({
-        title: "Mise à jour réussie",
-        description: "Les informations de l'hôtel ont été mises à jour avec succès",
+        title: "Update Successful",
+        description: "Hotel information has been updated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ['hotelAbout'] });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: `Une erreur est survenue lors de la mise à jour: ${error.message}`,
+        title: "Error",
+        description: `An error occurred during update: ${error.message}`,
       });
     }
   });
@@ -35,16 +35,16 @@ export function useAboutData() {
     mutationFn: createInitialAbout,
     onSuccess: () => {
       toast({
-        title: "Création réussie",
-        description: "Les informations de l'hôtel ont été créées avec succès",
+        title: "Creation Successful",
+        description: "Hotel information has been created successfully",
       });
       queryClient.invalidateQueries({ queryKey: ['hotelAbout'] });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: `Une erreur est survenue lors de la création: ${error.message}`,
+        title: "Error",
+        description: `An error occurred during creation: ${error.message}`,
       });
     }
   });
@@ -57,4 +57,3 @@ export function useAboutData() {
     createInitialAboutData: createInitialAboutMutation.mutate
   };
 }
-

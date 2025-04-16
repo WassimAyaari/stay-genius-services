@@ -68,4 +68,3 @@ export const createInitialAbout = async (initialData: Partial<HotelAbout>) => {
   
   return data;
 };
-
