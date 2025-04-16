@@ -79,7 +79,7 @@ export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselPro
                   className="w-full h-[70vh] object-cover"
                   loading="lazy" 
                   decoding="async"
-                  fetchpriority="high"
+                  fetchPriority="high"
                 />
                 <div className="absolute top-0 left-0 right-0 p-2">
                   <div className="flex space-x-1">
