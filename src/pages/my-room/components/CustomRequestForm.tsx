@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Room } from '@/hooks/useRoom';
 import { requestService } from '@/features/rooms/controllers/roomService';
@@ -6,20 +5,21 @@ import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useUserInfo } from '../hooks/useUserInfo';
-
 interface CustomRequestFormProps {
   room: Room | null;
   onRequestSuccess: () => void;
 }
-
 const CustomRequestForm = ({
   room,
   onRequestSuccess
 }: CustomRequestFormProps) => {
   const [customRequest, setCustomRequest] = useState('');
-  const { toast } = useToast();
-  const { getUserInfo } = useUserInfo(room);
-
+  const {
+    toast
+  } = useToast();
+  const {
+    getUserInfo
+  } = useUserInfo(room);
   const handleCustomRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customRequest.trim() || !room) return;
@@ -41,25 +41,6 @@ const CustomRequestForm = ({
       });
     }
   };
-
-  return (
-    <div className="mb-8">
-      <h2 className="text-2xl font-bold text-secondary mb-4">Custom Request</h2>
-      <form onSubmit={handleCustomRequest} className="space-y-4">
-        <div>
-          <Input
-            placeholder="What can we help you with?"
-            value={customRequest}
-            onChange={(e) => setCustomRequest(e.target.value)}
-            className="w-full"
-          />
-        </div>
-        <Button type="submit" disabled={!customRequest.trim()}>
-          Submit Request
-        </Button>
-      </form>
-    </div>
-  );
+  return;
 };
-
 export default CustomRequestForm;
