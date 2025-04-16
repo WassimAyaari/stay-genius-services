@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -45,6 +46,7 @@ import EventsManager from '@/pages/admin/EventsManager';
 import ShopsManager from '@/pages/admin/ShopsManager';
 import HousekeepingManager from '@/pages/admin/HousekeepingManager';
 import MaintenanceManager from '@/pages/admin/MaintenanceManager';
+import DestinationManager from '@/pages/admin/DestinationManager';
 
 const queryClient = new QueryClient();
 
@@ -177,6 +179,12 @@ function App() {
               <Route path="/admin/shops" element={
                 <AuthGuard adminRequired={true}>
                   <ShopsManager />
+                </AuthGuard>
+              } />
+              
+              <Route path="/admin/destination" element={
+                <AuthGuard adminRequired={true}>
+                  <DestinationManager />
                 </AuthGuard>
               } />
               

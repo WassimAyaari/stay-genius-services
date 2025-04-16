@@ -14,11 +14,15 @@ const ChatHeader = ({ userInfo, onClose }: ChatHeaderProps) => {
     <div className="h-16 border-b flex items-center px-4 justify-between bg-background">
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10 bg-sky-100">
-          <AvatarFallback className="text-primary">C</AvatarFallback>
+          <AvatarFallback className="text-primary">
+            {userInfo.name ? userInfo.name.charAt(0).toUpperCase() : 'C'}
+          </AvatarFallback>
         </Avatar>
         <div>
           <h3 className="font-medium">Concierge</h3>
-          <p className="text-xs text-muted-foreground">Available 8AM-10PM</p>
+          <p className="text-xs text-muted-foreground">
+            {userInfo.roomNumber ? `Room ${userInfo.roomNumber}` : 'Available 8AM-10PM'}
+          </p>
         </div>
       </div>
       <Button variant="ghost" size="icon" onClick={onClose}>
