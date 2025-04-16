@@ -16,6 +16,9 @@ const ProductsTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ShopProduct | null>(null);
 
+  // Filter only hotel shops
+  const hotelShops = shops.filter(shop => shop.is_hotel_shop);
+
   const { data: products = [], isLoading: isLoadingProducts } = productsQuery(selectedShopId);
 
   const handleCreateProduct = () => {
@@ -42,17 +45,17 @@ const ProductsTab = () => {
     <>
       <Card className="p-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h2 className="text-xl font-medium">Produits des boutiques</h2>
+          <h2 className="text-xl font-medium">Hotel Shop Products</h2>
           
           <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
             <div className="w-full md:w-[250px]">
               <Select value={selectedShopId} onValueChange={setSelectedShopId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Filtrer par boutique" />
+                  <SelectValue placeholder="Select hotel shop" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={undefined as any}>Toutes les boutiques</SelectItem>
-                  {shops.map(shop => (
+                  <SelectItem value={undefined as any}>All hotel shops</SelectItem>
+                  {hotelShops.map(shop => (
                     <SelectItem key={shop.id} value={shop.id}>{shop.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -60,7 +63,7 @@ const ProductsTab = () => {
             </div>
             
             <Button onClick={handleCreateProduct} size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Ajouter un produit
+              <Plus className="h-4 w-4 mr-2" /> Add product
             </Button>
           </div>
         </div>
