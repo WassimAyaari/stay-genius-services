@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Users, Heart, Share } from 'lucide-react';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface EventListProps {
   events: Event[];
@@ -14,10 +15,35 @@ interface EventListProps {
 
 export const EventList = ({ events, loading, onBookEvent }: EventListProps) => {
   if (loading) {
-    return <div className="h-48 rounded-lg bg-gray-100 animate-pulse"></div>;
+    return (
+      <div className="space-y-6">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <Card key={index} className="overflow-hidden">
+            <div className="md:flex">
+              <Skeleton className="md:w-1/3 h-48 md:h-auto" />
+              <div className="p-6 md:w-2/3">
+                <Skeleton className="h-7 w-3/4 mb-3" />
+                <div className="space-y-2 mb-4">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-4 w-2/5" />
+                </div>
+                <Skeleton className="h-20 w-full mb-4" />
+                <div className="flex gap-3">
+                  <Skeleton className="h-9 w-20" />
+                  <Skeleton className="h-9 w-40" />
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
   }
 
-  if (events.length === 0) {
+  const filteredEvents = events.filter(event => event.category === 'event');
+
+  if (filteredEvents.length === 0) {
     return (
       <Card className="p-4 text-center">
         <p className="text-gray-500">No upcoming events</p>
@@ -27,7 +53,7 @@ export const EventList = ({ events, loading, onBookEvent }: EventListProps) => {
 
   return (
     <div className="space-y-6">
-      {events.filter(event => event.category === 'event').map(event => (
+      {filteredEvents.map(event => (
         <Card key={event.id} className="overflow-hidden">
           <div className="md:flex">
             <div className="md:w-1/3 h-48 md:h-auto relative">
@@ -35,6 +61,7 @@ export const EventList = ({ events, loading, onBookEvent }: EventListProps) => {
                 src={event.image} 
                 alt={event.title} 
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
               <div className="absolute top-2 right-2 flex space-x-2">
                 <Button size="icon" variant="outline" className="h-8 w-8 rounded-full bg-white/80">

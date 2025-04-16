@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { UtensilsCrossed, Wine, Calendar, MapPin } from 'lucide-react';
 import { useTodayHighlights } from '@/hooks/useTodayHighlights';
 import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const TodayHighlightsSection = () => {
   const { todayEvents, loading } = useTodayHighlights();
@@ -15,8 +16,26 @@ const TodayHighlightsSection = () => {
       <section className="px-6 mb-10">
         <h2 className="text-2xl font-bold text-secondary mb-4">Today's Events</h2>
         <div className="grid grid-cols-1 gap-4">
-          <Card className="p-4 h-32 animate-pulse bg-gray-100" />
-          <Card className="p-4 h-32 animate-pulse bg-gray-100" />
+          <Card className="overflow-hidden">
+            <div className="flex items-center">
+              <Skeleton className="w-1/3 h-32" />
+              <div className="p-4 flex-1">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-3" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            </div>
+          </Card>
+          <Card className="overflow-hidden">
+            <div className="flex items-center">
+              <Skeleton className="w-1/3 h-32" />
+              <div className="p-4 flex-1">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-3" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            </div>
+          </Card>
         </div>
       </section>
     );
@@ -50,6 +69,7 @@ const TodayHighlightsSection = () => {
                   src={event.image} 
                   alt={event.title} 
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div className="p-4 flex-1">

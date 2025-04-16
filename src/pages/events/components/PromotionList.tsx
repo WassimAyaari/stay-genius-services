@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Percent } from 'lucide-react';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PromotionListProps {
   events: Event[];
@@ -17,7 +18,15 @@ export const PromotionList = ({ events, loading, onBookEvent }: PromotionListPro
     return (
       <>
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="h-64 rounded-lg bg-gray-100 animate-pulse"></div>
+          <Card key={i} className="overflow-hidden">
+            <Skeleton className="h-40 w-full" />
+            <div className="p-4">
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-2/3 mb-3" />
+              <Skeleton className="h-4 w-full mb-4" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+          </Card>
         ))}
       </>
     );
@@ -42,6 +51,7 @@ export const PromotionList = ({ events, loading, onBookEvent }: PromotionListPro
               src={promo.image} 
               alt={promo.title} 
               className="w-full h-full object-cover"
+              loading="lazy"
             />
             <div className="absolute top-0 left-0 bg-primary text-white text-xs font-bold px-3 py-1 m-3 rounded-full">
               <Percent className="h-3 w-3 inline mr-1" />

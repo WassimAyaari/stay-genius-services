@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
 import SwipeIndicator from '@/components/ui/swipe-indicator';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface StoryCarouselProps {
   events: Event[];
@@ -32,15 +33,15 @@ export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselPro
 
   if (loading) {
     return (
-      <div className="h-[70vh] rounded-3xl bg-gray-100 animate-pulse flex items-center justify-center">
-        <p className="text-gray-500">Loading events...</p>
+      <div className="mb-6">
+        <Skeleton className="h-[70vh] rounded-3xl w-full" />
       </div>
     );
   }
 
   if (events.length === 0) {
     return (
-      <div className="h-[50vh] rounded-3xl bg-gray-100 flex items-center justify-center">
+      <div className="h-[50vh] rounded-3xl bg-gray-100 flex items-center justify-center mb-6">
         <p className="text-gray-500">No events available</p>
       </div>
     );
@@ -67,6 +68,7 @@ export const StoryCarousel = ({ events, loading, onBookEvent }: StoryCarouselPro
                   src={event.image} 
                   alt={event.title} 
                   className="w-full h-[70vh] object-cover"
+                  loading="lazy" 
                 />
                 <div className="absolute top-0 left-0 right-0 p-2">
                   <div className="flex space-x-1">

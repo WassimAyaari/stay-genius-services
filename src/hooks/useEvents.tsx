@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types/event';
 import { useToast } from './use-toast';
@@ -11,7 +11,7 @@ export const useEvents = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
       console.log('Fetching events from Supabase...');
@@ -28,7 +28,7 @@ export const useEvents = () => {
       
       console.log('Events fetched successfully:', data);
       
-      // Filter upcoming events (today and future)
+      // Filter upcoming events (today and future) immediately
       const today = startOfDay(new Date());
       const futureEvents = (data as Event[]).filter(event => {
         const eventDate = startOfDay(new Date(event.date));
@@ -47,7 +47,7 @@ export const useEvents = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const createEvent = async (event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) => {
     try {
@@ -65,7 +65,15 @@ export const useEvents = () => {
       
       console.log('Event created successfully:', data);
       
-      setEvents(prev => [...prev, ...(data as Event[])]);
+      const newEvent = data[0] as Event;
+      setEvents(prev => [...prev, newEvent]);
+      
+      // Update upcoming events if the new event is in the future
+      const today = startOfDay(new Date());
+      const eventDate = startOfDay(new Date(newEvent.date));
+      if (!isBefore(eventDate, today)) {
+        setUpcomingEvents(prev => [...prev, newEvent]);
+      }
       
       toast({
         title: 'Succès',
@@ -101,7 +109,31 @@ export const useEvents = () => {
       
       console.log('Event updated successfully:', data);
       
-      setEvents(prev => prev.map(e => e.id === id ? { ...e, ...data[0] } as Event : e));
+      const updatedEvent = data[0] as Event;
+      setEvents(prev => prev.map(e => e.id === id ? { ...e, ...updatedEvent } as Event : e));
+      
+      // Update upcoming events
+      const today = startOfDay(new Date());
+      const eventDate = startOfDay(new Date(updatedEvent.date));
+      const isUpcoming = !isBefore(eventDate, today);
+      
+      setUpcomingEvents(prev => {
+        const eventIndex = prev.findIndex(e => e.id === id);
+        if (eventIndex >= 0) {
+          // Event was already in upcoming, update or remove it
+          if (isUpcoming) {
+            const newList = [...prev];
+            newList[eventIndex] = { ...prev[eventIndex], ...updatedEvent };
+            return newList;
+          } else {
+            return prev.filter(e => e.id !== id);
+          }
+        } else if (isUpcoming) {
+          // Event wasn't in upcoming but now should be
+          return [...prev, updatedEvent];
+        }
+        return prev;
+      });
       
       toast({
         title: 'Succès',
@@ -137,6 +169,7 @@ export const useEvents = () => {
       console.log('Event deleted successfully');
       
       setEvents(prev => prev.filter(e => e.id !== id));
+      setUpcomingEvents(prev => prev.filter(e => e.id !== id));
       
       toast({
         title: 'Succès',
@@ -155,11 +188,11 @@ export const useEvents = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [fetchEvents]);
 
   return {
     events,
-    upcomingEvents, // Changed from events to upcomingEvents
+    upcomingEvents,
     loading,
     fetchEvents,
     createEvent,

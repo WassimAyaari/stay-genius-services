@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Story } from '@/types/event';
 import { useToast } from './use-toast';
@@ -9,7 +9,7 @@ export const useStories = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchStories = async () => {
+  const fetchStories = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -30,7 +30,7 @@ export const useStories = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const createStory = async (story: Omit<Story, 'id' | 'created_at' | 'updated_at' | 'seen'>) => {
     try {
@@ -145,7 +145,7 @@ export const useStories = () => {
 
   useEffect(() => {
     fetchStories();
-  }, []);
+  }, [fetchStories]);
 
   return {
     stories,
