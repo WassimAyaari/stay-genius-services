@@ -51,4 +51,3 @@ export const prepareDataForUpdate = (data: Partial<HotelAbout>) => {
   
   return updateData;
 };
-

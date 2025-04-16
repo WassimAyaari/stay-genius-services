@@ -21,7 +21,7 @@ const AboutEditor = () => {
     return (
       <div className="p-8 flex justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Chargement des informations...</span>
+        <span className="ml-2">Loading information...</span>
       </div>
     );
   }
@@ -29,14 +29,14 @@ const AboutEditor = () => {
   if (aboutError) {
     return (
       <Card className="p-8 m-4 text-center text-red-500">
-        <h2 className="text-xl font-bold mb-4">Erreur de chargement</h2>
+        <h2 className="text-xl font-bold mb-4">Loading Error</h2>
         <p>{aboutError.message}</p>
         <Button 
           variant="outline" 
           className="mt-4"
           onClick={() => window.location.reload()}
         >
-          Réessayer
+          Try Again
         </Button>
       </Card>
     );
@@ -95,8 +95,8 @@ const AboutEditor = () => {
     return (
       <div className="p-8 text-center">
         <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Aucune information trouvée</h2>
-          <p className="mb-6">Les informations de la page "À propos" n'ont pas encore été configurées. Voulez-vous créer un contenu par défaut ?</p>
+          <h2 className="text-xl font-bold mb-4">No information found</h2>
+          <p className="mb-6">The "About" page information has not been configured yet. Would you like to create default content?</p>
           <Button 
             onClick={handleCreateAboutData}
             disabled={isCreating}
@@ -105,10 +105,10 @@ const AboutEditor = () => {
             {isCreating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Création en cours...
+                Creating content...
               </>
             ) : (
-              'Créer un contenu par défaut'
+              'Create default content'
             )}
           </Button>
         </Card>
@@ -118,15 +118,15 @@ const AboutEditor = () => {
   
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Éditeur de la page À propos</h1>
+      <h1 className="text-2xl font-bold mb-6">About Page Editor</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="hero">Hero</TabsTrigger>
-          <TabsTrigger value="welcome">Accueil</TabsTrigger>
+          <TabsTrigger value="welcome">Welcome</TabsTrigger>
           <TabsTrigger value="mission">Mission</TabsTrigger>
-          <TabsTrigger value="features">Caractéristiques</TabsTrigger>
-          <TabsTrigger value="directory">Annuaire</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="directory">Directory</TabsTrigger>
         </TabsList>
         
         <TabsContent value="hero" className="space-y-6">
@@ -166,10 +166,10 @@ const AboutEditor = () => {
         </TabsContent>
         
         <TabsContent value="directory">
-          <h2 className="text-xl font-semibold mb-4">Annuaire et informations</h2>
+          <h2 className="text-xl font-semibold mb-4">Directory and Information</h2>
           <InfoItemSection 
-            title="Titre de l'annuaire"
-            items={[{ label: 'Titre', value: aboutData.directory_title }]}
+            title="Directory Title"
+            items={[{ label: 'Title', value: aboutData.directory_title }]}
             isEditing={true}
             onSave={(items) => updateAboutData({ ...aboutData, directory_title: String(items[0].value) })}
             singleItem={true}
