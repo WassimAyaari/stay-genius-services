@@ -11,13 +11,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Activity } from '@/features/types/supabaseTypes';
 
-interface Activity {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-}
-
 const ActivitiesTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
