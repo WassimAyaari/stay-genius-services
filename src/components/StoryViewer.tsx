@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Story } from '@/types/event';
 import { useEvents } from '@/hooks/useEvents';
+import EventBookingDialog from '@/components/events/EventBookingDialog';
 
 interface StoryViewerProps {
   stories: Story[];
@@ -20,22 +21,22 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialStoryIndex);
   const [progress, setProgress] = useState(0);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const navigate = useNavigate();
-  const { events } = useEvents();
+  const { upcomingEvents } = useEvents();
   
   const currentStory = stories[currentIndex];
   const storyDuration = 5000; // 5 seconds per story
   
-  // Trouver l'événement associé à la story courante, s'il existe
+  // Find the associated event if it exists and is upcoming
   const linkedEvent = currentStory?.eventId 
-    ? events.find(event => event.id === currentStory.eventId)
+    ? upcomingEvents.find(event => event.id === currentStory.eventId)
     : null;
   
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          // Move to next story when progress reaches 100%
           if (currentIndex < stories.length - 1) {
             setCurrentIndex(prev => prev + 1);
             return 0;
@@ -53,7 +54,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   }, [currentIndex, stories.length, onClose]);
   
   useEffect(() => {
-    // Reset progress when story changes
     setProgress(0);
   }, [currentIndex]);
   
@@ -80,10 +80,13 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     navigate('/events');
   };
   
-  const navigateToEventBooking = (e: React.MouseEvent, eventId: string) => {
+  const handleBookEvent = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onClose();
-    navigate(`/events?book=${eventId}`);
+    setIsBookingOpen(true);
+  };
+  
+  const handleBookingSuccess = () => {
+    setIsBookingOpen(false);
   };
   
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -171,7 +174,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
               {linkedEvent && (
                 <Button 
                   variant="secondary"
-                  onClick={(e) => navigateToEventBooking(e, linkedEvent.id)} 
+                  onClick={handleBookEvent} 
                   className="flex gap-2 items-center mb-2"
                 >
                   <Calendar className="w-4 h-4" />
@@ -185,20 +188,31 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
       
       {/* Navigation buttons */}
       <button 
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 
-          flex items-center justify-start"
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 flex items-center justify-start"
         onClick={handlePrevious}
       >
         <ArrowLeft className="w-6 h-6" />
       </button>
       
       <button 
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 
-          flex items-center justify-end"
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white h-16 w-16 flex items-center justify-end"
         onClick={handleNext}
       >
         <ArrowRight className="w-6 h-6" />
       </button>
+      
+      {/* Event Booking Dialog */}
+      {linkedEvent && (
+        <EventBookingDialog
+          isOpen={isBookingOpen}
+          onOpenChange={setIsBookingOpen}
+          eventId={linkedEvent.id}
+          eventTitle={linkedEvent.title}
+          eventDate={linkedEvent.date}
+          onSuccess={handleBookingSuccess}
+          maxGuests={linkedEvent.capacity || 10}
+        />
+      )}
     </motion.div>
   );
 };
