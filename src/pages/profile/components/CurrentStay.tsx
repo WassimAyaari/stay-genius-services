@@ -13,6 +13,9 @@ interface CurrentStayProps {
 }
 
 const CurrentStay = ({ userData, stayDuration }: CurrentStayProps) => {
+  const formatCheckInDate = userData?.check_in_date ? formatDate(userData.check_in_date) : 'Non défini';
+  const formatCheckOutDate = userData?.check_out_date ? formatDate(userData.check_out_date) : 'Non défini';
+  
   return (
     <Card className="mb-6">
       <CardContent className="p-0">
@@ -43,7 +46,7 @@ const CurrentStay = ({ userData, stayDuration }: CurrentStayProps) => {
               <div>
                 <p className="font-medium">Dates de séjour</p>
                 <p className="text-sm text-muted-foreground">
-                  Du {formatDate(userData?.check_in_date)} au {formatDate(userData?.check_out_date)}
+                  Du {formatCheckInDate} au {formatCheckOutDate}
                 </p>
               </div>
             </div>

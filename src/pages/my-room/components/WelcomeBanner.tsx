@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Room } from '@/hooks/useRoom';
 import { format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import { fr } from 'date-fns/locale';
 
 interface WelcomeBannerProps {
   room: Room | null;
@@ -31,22 +31,27 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
   }, [userData]);
   
-  const checkInDate = useMemo(() => {
-    if (!userData?.check_in_date) return '';
+  const formatDateIfValid = (dateString: string | undefined): string => {
+    if (!dateString) return 'Non défini';
     try {
-      return format(new Date(userData.check_in_date), 'dd MMMM yyyy', { locale: enUS });
+      const date = new Date(dateString);
+      // Vérifier si la date est valide
+      if (isNaN(date.getTime())) {
+        return 'Date invalide';
+      }
+      return format(date, 'dd MMMM yyyy', { locale: fr });
     } catch (e) {
-      return '';
+      console.error("Erreur lors du formatage de la date:", e, dateString);
+      return 'Date invalide';
     }
+  };
+  
+  const checkInDate = useMemo(() => {
+    return formatDateIfValid(userData?.check_in_date);
   }, [userData]);
   
   const checkOutDate = useMemo(() => {
-    if (!userData?.check_out_date) return '';
-    try {
-      return format(new Date(userData.check_out_date), 'dd MMMM yyyy', { locale: enUS });
-    } catch (e) {
-      return '';
-    }
+    return formatDateIfValid(userData?.check_out_date);
   }, [userData]);
 
   return (
@@ -60,21 +65,21 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           </div>
           <div className="text-right">
             <p className="text-sm font-medium text-gray-600">Check-out</p>
-            <p className="text-lg font-semibold text-secondary">{checkOutDate || 'Not set'}</p>
+            <p className="text-lg font-semibold text-secondary">{checkOutDate}</p>
           </div>
         </div>
         
-        {(checkInDate || checkOutDate) && (
+        {(checkInDate !== 'Non défini' || checkOutDate !== 'Non défini') && (
           <div className="mt-2 p-3 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm font-medium text-gray-600">Arrival</p>
-                <p className="text-md font-medium">{checkInDate || 'Not set'}</p>
+                <p className="text-md font-medium">{checkInDate}</p>
               </div>
               <div className="h-8 border-l border-gray-300"></div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Departure</p>
-                <p className="text-md font-medium">{checkOutDate || 'Not set'}</p>
+                <p className="text-md font-medium">{checkOutDate}</p>
               </div>
             </div>
           </div>
