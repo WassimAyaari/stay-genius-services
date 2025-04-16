@@ -3,7 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Paperclip, Send } from 'lucide-react';
-import { SheetFooter } from '@/components/ui/sheet';
 
 interface MessageInputProps {
   inputMessage: string;
@@ -19,7 +18,7 @@ const MessageInput = ({
   handleMessageSubmit
 }: MessageInputProps) => {
   return (
-    <SheetFooter className="border-t p-4 mt-auto">
+    <div className="border-t p-4 bg-background">
       <form onSubmit={handleMessageSubmit} className="flex items-center gap-2 w-full">
         <Button type="button" variant="ghost" size="icon" className="rounded-full">
           <Paperclip className="h-5 w-5" />
@@ -45,7 +44,7 @@ const MessageInput = ({
           <Send className="h-5 w-5" />
         </Button>
       </form>
-    </SheetFooter>
+    </div>
   );
 };
 

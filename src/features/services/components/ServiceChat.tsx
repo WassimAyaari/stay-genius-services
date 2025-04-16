@@ -1,6 +1,4 @@
-
 import React, { useEffect } from 'react';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useChatMessages } from './chat/useChatMessages';
 import ChatHeader from './chat/ChatHeader';
 import MessageList from './chat/MessageList';
@@ -180,19 +178,19 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
     setIsChatOpen(false);
   };
 
+  if (!isChatOpen) return null;
+
   return (
-    <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
-      <SheetContent className="sm:max-w-md p-0 flex flex-col h-full">
-        <ChatHeader userInfo={userInfo} onClose={handleCloseChat} />
-        <MessageList messages={messages} messagesEndRef={messagesEndRef} />
-        <MessageInput
-          inputMessage={inputMessage}
-          setInputMessage={setInputMessage}
-          handleSendMessage={handleSendMessage}
-          handleMessageSubmit={handleMessageSubmit}
-        />
-      </SheetContent>
-    </Sheet>
+    <div className="fixed inset-0 bg-background z-50 flex flex-col h-screen">
+      <ChatHeader userInfo={userInfo} onClose={handleCloseChat} />
+      <MessageList messages={messages} messagesEndRef={messagesEndRef} />
+      <MessageInput
+        inputMessage={inputMessage}
+        setInputMessage={setInputMessage}
+        handleSendMessage={handleSendMessage}
+        handleMessageSubmit={handleMessageSubmit}
+      />
+    </div>
   );
 };
 

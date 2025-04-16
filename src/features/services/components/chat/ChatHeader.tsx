@@ -11,7 +11,7 @@ interface ChatHeaderProps {
 
 const ChatHeader = ({ userInfo, onClose }: ChatHeaderProps) => {
   return (
-    <div className="h-16 border-b flex items-center px-4 justify-between">
+    <div className="h-16 border-b flex items-center px-4 justify-between bg-background">
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10 bg-sky-100">
           <AvatarFallback className="text-primary">C</AvatarFallback>
