@@ -1,8 +1,9 @@
+
 import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Room } from '@/hooks/useRoom';
 import { format } from 'date-fns';
-import { en } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 interface WelcomeBannerProps {
   room: Room | null;
@@ -35,7 +36,7 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
       if (isNaN(date.getTime())) {
         return 'Invalid Date';
       }
-      return format(date, 'dd MMMM yyyy', { locale: en });
+      return format(date, 'dd MMMM yyyy', { locale: enUS });
     } catch (e) {
       console.error("Error formatting date:", e, dateString);
       return 'Invalid Date';

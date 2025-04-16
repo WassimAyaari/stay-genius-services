@@ -1,23 +1,23 @@
 
 import { format, isValid } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 export const formatDate = (dateString?: string | Date) => {
-  if (!dateString) return 'Non défini';
+  if (!dateString) return 'Not defined';
   
   try {
     const date = new Date(dateString);
     
-    // Vérifier si la date est valide
+    // Check if date is valid
     if (!isValid(date)) {
-      console.error('Date invalide:', dateString);
-      return 'Date invalide';
+      console.error('Invalid date:', dateString);
+      return 'Invalid date';
     }
     
-    return format(date, 'dd MMMM yyyy', { locale: fr });
+    return format(date, 'dd MMMM yyyy', { locale: enUS });
   } catch (error) {
-    console.error('Erreur lors du formatage de la date:', error, 'Valeur originale:', dateString);
-    return 'Date invalide';
+    console.error('Error formatting date:', error, 'Original value:', dateString);
+    return 'Invalid date';
   }
 };
 
@@ -28,9 +28,9 @@ export const calculateStayDuration = (checkInDate?: string | Date, checkOutDate?
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
     
-    // Vérifier si les dates sont valides
+    // Check if dates are valid
     if (!isValid(checkIn) || !isValid(checkOut)) {
-      console.error('Dates invalides lors du calcul de la durée de séjour:', { checkInDate, checkOutDate });
+      console.error('Invalid dates when calculating stay duration:', { checkInDate, checkOutDate });
       return null;
     }
     
