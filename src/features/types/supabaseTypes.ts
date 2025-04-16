@@ -1,4 +1,3 @@
-
 // Custom type definitions for Supabase tables to avoid modifying the read-only types.ts file
 
 // This type will be used whenever we need to access service_requests table
@@ -91,6 +90,53 @@ export interface HotelConfigType {
   enabled_features: string[];
   contact_email?: string;
   contact_phone?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Destination Management Types
+export interface DestinationCategory {
+  id: string;
+  name: string;
+  icon: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Activity {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Attraction {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  distance: string;
+  opening_hours: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CarRental {
+  id: string;
+  name: string;
+  description: string;
+  website?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PublicTransport {
+  id: string;
+  name: string;
+  description: string;
+  website?: string;
   created_at?: string;
   updated_at?: string;
 }

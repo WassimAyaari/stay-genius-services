@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +9,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Attraction } from '@/features/types/supabaseTypes';
 
 interface Attraction {
   id: string;
@@ -34,7 +34,7 @@ const AttractionsTab = () => {
   });
   
   // Fetch attractions
-  const { data: attractions, isLoading } = useQuery({
+  const { data: attractions, isLoading } = useQuery<Attraction[]>({
     queryKey: ['attractions'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -43,13 +43,13 @@ const AttractionsTab = () => {
         .order('name');
       
       if (error) throw error;
-      return data as Attraction[];
+      return data;
     }
   });
   
   // Add a new attraction
   const addMutation = useMutation({
-    mutationFn: async (newAttraction: Omit<Attraction, 'id'>) => {
+    mutationFn: async (newAttraction: Omit<Attraction, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('attractions')
         .insert(newAttraction)
