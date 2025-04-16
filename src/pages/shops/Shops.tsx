@@ -9,14 +9,14 @@ import { useShops } from '@/hooks/useShops';
 const Shops = () => {
   const { shops } = useShops();
   
-  // Séparons les boutiques en deux catégories
+  // Separate shops into two categories
   const hotelShops = shops.filter(shop => shop.is_hotel_shop);
   const nearbyShops = shops.filter(shop => !shop.is_hotel_shop);
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Section Boutiques de l'Hôtel */}
+        {/* Hotel Shops Section */}
         <div className="relative mb-8 rounded-3xl overflow-hidden">
           <img 
             src="https://images.unsplash.com/photo-1581539250439-c96689b516dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
@@ -25,15 +25,15 @@ const Shops = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
           <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
-            <h1 className="text-3xl font-bold mb-2">Boutiques de l'Hôtel</h1>
-            <p className="text-xl mb-6">Découvrez nos boutiques exclusives</p>
+            <h1 className="text-3xl font-bold mb-2">Hotel Shops</h1>
+            <p className="text-xl mb-6">Discover our exclusive shops</p>
           </div>
         </div>
 
         <div className="space-y-4 mb-16">
           {hotelShops.length === 0 ? (
             <Card className="p-6 text-center text-gray-500">
-              Aucune boutique d'hôtel disponible pour le moment.
+              No hotel shops available at the moment.
             </Card>
           ) : (
             hotelShops.map((shop) => (
@@ -51,13 +51,13 @@ const Shops = () => {
                     <h3 className="font-semibold mb-1">{shop.name}</h3>
                     <div className="flex items-center text-sm text-gray-500 mb-1">
                       <MapPin className="h-3 w-3 mr-1" />
-                      <span>{shop.location || "Dans l'hôtel"}</span>
+                      <span>{shop.location || "Inside the hotel"}</span>
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{shop.description}</p>
                     <div className="flex gap-2">
                       {shop.hours && (
                         <div className="text-xs text-gray-500">
-                          Horaires: {shop.hours}
+                          Hours: {shop.hours}
                         </div>
                       )}
                     </div>
@@ -68,7 +68,7 @@ const Shops = () => {
           )}
         </div>
 
-        {/* Section Centres Commerciaux */}
+        {/* Shopping Centers Section */}
         {nearbyShops.length > 0 && (
           <>
             <div className="relative mb-8 rounded-3xl overflow-hidden">
@@ -79,8 +79,8 @@ const Shops = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
-                <h1 className="text-3xl font-bold mb-2">Centres Commerciaux</h1>
-                <p className="text-xl mb-6">Découvrez les meilleures expériences de shopping près de vous</p>
+                <h1 className="text-3xl font-bold mb-2">Shopping Centers</h1>
+                <p className="text-xl mb-6">Discover the best shopping experiences near you</p>
               </div>
             </div>
 
@@ -107,7 +107,7 @@ const Shops = () => {
                         {shop.location && (
                           <Button size="sm" variant="outline" className="text-xs" asChild>
                             <a href={`https://maps.google.com/?q=${encodeURIComponent(shop.location)}`} target="_blank" rel="noopener noreferrer">
-                              Itinéraire
+                              Directions
                             </a>
                           </Button>
                         )}
