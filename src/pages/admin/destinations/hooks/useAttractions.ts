@@ -10,13 +10,21 @@ export const useAttractions = () => {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [currentAttraction, setCurrentAttraction] = useState<Attraction | null>(null);
-  const [formData, setFormData] = useState<Omit<Attraction, 'id' | 'created_at' | 'updated_at'>>({
+  const [formData, setFormDataState] = useState<Omit<Attraction, 'id' | 'created_at' | 'updated_at'>>({
     name: '',
     description: '',
     image: '',
     distance: '',
     opening_hours: ''
   });
+  
+  // Custom implementation to handle Partial<Attraction> input
+  const setFormData = (data: Partial<Attraction>) => {
+    setFormDataState(prev => ({
+      ...prev,
+      ...data
+    }));
+  };
   
   const { data: attractions, isLoading } = useQuery<Attraction[]>({
     queryKey: ['attractions'],
@@ -142,7 +150,7 @@ export const useAttractions = () => {
   const handleEdit = (attraction: Attraction) => {
     setIsEditing(true);
     setCurrentAttraction(attraction);
-    setFormData({
+    setFormDataState({
       name: attraction.name,
       description: attraction.description,
       image: attraction.image,
@@ -160,7 +168,7 @@ export const useAttractions = () => {
   const resetForm = () => {
     setIsEditing(false);
     setCurrentAttraction(null);
-    setFormData({
+    setFormDataState({
       name: '',
       description: '',
       image: '',
