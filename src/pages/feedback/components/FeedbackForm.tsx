@@ -33,13 +33,13 @@ const FeedbackForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Utiliser une approche typée pour l'insertion
+      // Utiliser le type FeedbackType pour l'insertion
       const { error } = await supabase.from('guest_feedback').insert({
         guest_name: name,
         guest_email: email,
         rating,
         comment
-      } as unknown as Partial<FeedbackType>);
+      });
 
       if (error) throw error;
 

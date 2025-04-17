@@ -293,6 +293,36 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          guest_email: string
+          guest_name: string
+          id: string
+          rating: number
+          updated_at: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          guest_email: string
+          guest_name: string
+          id?: string
+          rating: number
+          updated_at?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          guest_email?: string
+          guest_name?: string
+          id?: string
+          rating?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       guests: {
         Row: {
           birth_date: string | null
@@ -442,6 +472,7 @@ export type Database = {
           contact_phone: string | null
           created_at: string | null
           enabled_features: string[] | null
+          feedback_hero_image: string | null
           id: string
           logo_url: string | null
           name: string
@@ -454,6 +485,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           enabled_features?: string[] | null
+          feedback_hero_image?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -466,6 +498,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           enabled_features?: string[] | null
+          feedback_hero_image?: string | null
           id?: string
           logo_url?: string | null
           name?: string

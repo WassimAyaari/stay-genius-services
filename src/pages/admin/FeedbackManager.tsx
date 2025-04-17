@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,24 +11,19 @@ import { useHotelConfig } from '@/hooks/useHotelConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { FeedbackType } from '@/pages/feedback/types/feedbackTypes';
 
-// Types pour les feedbacks
-interface Feedback extends FeedbackType {}
-
 const FeedbackManager = () => {
   const [activeTab, setActiveTab] = useState('reviews');
-  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [feedbacks, setFeedbacks] = useState<FeedbackType[]>([]);
   const [heroImage, setHeroImage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(true);
   const { toast } = useToast();
   const { config, isLoading: configLoading, updateConfig } = useHotelConfig();
 
-  // Charger les feedbacks depuis Supabase
   useEffect(() => {
     const fetchFeedbacks = async () => {
       setIsLoadingFeedback(true);
       try {
-        // Utiliser une approche typée pour la requête Supabase
         const { data, error } = await supabase
           .from('guest_feedback')
           .select('*')
@@ -40,8 +34,7 @@ const FeedbackManager = () => {
         }
         
         if (data) {
-          // Convertir explicitement le type
-          const typedData = data as unknown as Feedback[];
+          const typedData = data as FeedbackType[];
           setFeedbacks(typedData);
         }
       } catch (error) {
@@ -59,14 +52,12 @@ const FeedbackManager = () => {
     fetchFeedbacks();
   }, [toast]);
 
-  // Charger l'image de l'en-tête depuis la configuration
   useEffect(() => {
     console.log("Admin config loaded:", config);
     if (config && config.feedback_hero_image) {
       console.log("Admin setting hero image to:", config.feedback_hero_image);
       setHeroImage(config.feedback_hero_image);
     } else {
-      // Image par défaut
       setHeroImage('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
     }
   }, [config]);
@@ -76,7 +67,6 @@ const FeedbackManager = () => {
     
     console.log("Updating hero image to:", heroImage);
     
-    // Mettre à jour la configuration avec la nouvelle image
     updateConfig({
       feedback_hero_image: heroImage
     });
