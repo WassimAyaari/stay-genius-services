@@ -1,33 +1,44 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
 
 const FAQSection = () => {
   return (
     <div className="mb-10">
       <h2 className="text-2xl font-bold text-secondary mb-4">Frequently Asked Questions</h2>
-      <div className="space-y-3">
-        <Card className="p-4 rounded-xl">
-          <h3 className="font-semibold mb-2">How do I request special accommodations?</h3>
-          <p className="text-sm text-gray-600">
+      <Accordion type="single" collapsible className="space-y-2">
+        <AccordionItem value="item-1" className="border rounded-xl px-4 py-2 shadow-sm">
+          <AccordionTrigger className="text-secondary font-semibold hover:no-underline">
+            How do I request special accommodations?
+          </AccordionTrigger>
+          <AccordionContent className="text-sm text-gray-600 pt-2 pb-3">
             You can request special accommodations by contacting our concierge service directly through the app or by visiting the front desk.
-          </p>
-        </Card>
+          </AccordionContent>
+        </AccordionItem>
         
-        <Card className="p-4 rounded-xl">
-          <h3 className="font-semibold mb-2">What is the check-out process?</h3>
-          <p className="text-sm text-gray-600">
+        <AccordionItem value="item-2" className="border rounded-xl px-4 py-2 shadow-sm">
+          <AccordionTrigger className="text-secondary font-semibold hover:no-underline">
+            What is the check-out process?
+          </AccordionTrigger>
+          <AccordionContent className="text-sm text-gray-600 pt-2 pb-3">
             You can check out directly through the app, or visit the front desk. All room charges will be compiled and ready for review.
-          </p>
-        </Card>
+          </AccordionContent>
+        </AccordionItem>
         
-        <Card className="p-4 rounded-xl">
-          <h3 className="font-semibold mb-2">How can I extend my stay?</h3>
-          <p className="text-sm text-gray-600">
+        <AccordionItem value="item-3" className="border rounded-xl px-4 py-2 shadow-sm">
+          <AccordionTrigger className="text-secondary font-semibold hover:no-underline">
+            How can I extend my stay?
+          </AccordionTrigger>
+          <AccordionContent className="text-sm text-gray-600 pt-2 pb-3">
             To extend your stay, please contact the front desk at least 24 hours before your scheduled check-out time to check availability.
-          </p>
-        </Card>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 };
