@@ -23,11 +23,16 @@ const Feedback = () => {
     }
   }, [config]);
 
+  // Log pour le débogage
+  useEffect(() => {
+    console.log("Current heroImage state:", heroImage);
+  }, [heroImage]);
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <HeroSection heroImage={heroImage} />
+        {/* Hero Section with key to force re-render when image changes */}
+        <HeroSection key={heroImage} heroImage={heroImage} />
 
         {/* Feedback Form */}
         <FeedbackForm />
