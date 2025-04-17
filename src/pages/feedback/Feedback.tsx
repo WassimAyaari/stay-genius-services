@@ -25,7 +25,7 @@ const Feedback = () => {
 
   // Log pour le débogage
   useEffect(() => {
-    console.log("Current heroImage state:", heroImage);
+    console.log("Current heroImage state in Feedback page:", heroImage);
   }, [heroImage]);
 
   return (
