@@ -39,7 +39,7 @@ const FeedbackForm = () => {
         guest_email: email,
         rating,
         comment
-      } as Partial<FeedbackType>);
+      } as unknown as Partial<FeedbackType>);
 
       if (error) throw error;
 

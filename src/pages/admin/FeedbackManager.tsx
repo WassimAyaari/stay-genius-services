@@ -40,7 +40,9 @@ const FeedbackManager = () => {
         }
         
         if (data) {
-          setFeedbacks(data as Feedback[]);
+          // Convertir explicitement le type
+          const typedData = data as unknown as Feedback[];
+          setFeedbacks(typedData);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des feedbacks:', error);
