@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Star, MessageSquare, Image, UserCheck, Mail } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useHotelConfig } from '@/hooks/useHotelConfig';
 
 // Types pour les feedbacks
 interface Feedback {
@@ -24,9 +25,10 @@ interface Feedback {
 const FeedbackManager = () => {
   const [activeTab, setActiveTab] = useState('reviews');
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
-  const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+  const [heroImage, setHeroImage] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { config, isLoading: configLoading, updateConfig } = useHotelConfig();
 
   // Simuler le chargement des feedbacks (à remplacer par une vraie API)
   useEffect(() => {
@@ -60,9 +62,24 @@ const FeedbackManager = () => {
     setFeedbacks(mockFeedbacks);
   }, []);
 
+  // Charger l'image de l'en-tête depuis la configuration
+  useEffect(() => {
+    if (config && config.feedback_hero_image) {
+      setHeroImage(config.feedback_hero_image);
+    } else {
+      // Image par défaut
+      setHeroImage('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+    }
+  }, [config]);
+
   const handleImageUpdate = () => {
     setLoading(true);
-    // Simuler une mise à jour d'image
+    
+    // Mettre à jour la configuration avec la nouvelle image
+    updateConfig({
+      feedback_hero_image: heroImage
+    });
+    
     setTimeout(() => {
       setLoading(false);
       toast({
