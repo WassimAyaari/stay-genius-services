@@ -5,23 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Star, MessageSquare, Image, UserCheck, Mail } from 'lucide-react';
+import { Star, MessageSquare, Image } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
 import { supabase } from '@/integrations/supabase/client';
+import { FeedbackType } from '@/pages/feedback/types/feedbackTypes';
 
 // Types pour les feedbacks
-interface Feedback {
-  id: string;
-  guest_name: string;
-  guest_email: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-}
+interface Feedback extends FeedbackType {}
 
 const FeedbackManager = () => {
   const [activeTab, setActiveTab] = useState('reviews');
@@ -37,6 +29,7 @@ const FeedbackManager = () => {
     const fetchFeedbacks = async () => {
       setIsLoadingFeedback(true);
       try {
+        // Utiliser une approche typée pour la requête Supabase
         const { data, error } = await supabase
           .from('guest_feedback')
           .select('*')
@@ -47,7 +40,7 @@ const FeedbackManager = () => {
         }
         
         if (data) {
-          setFeedbacks(data);
+          setFeedbacks(data as Feedback[]);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des feedbacks:', error);

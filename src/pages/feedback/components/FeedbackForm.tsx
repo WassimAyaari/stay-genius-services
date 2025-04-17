@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import StarRating from './StarRating';
+import { FeedbackType } from '../types/feedbackTypes';
 
 const FeedbackForm = () => {
   const [name, setName] = useState('');
@@ -32,12 +33,13 @@ const FeedbackForm = () => {
     setIsSubmitting(true);
 
     try {
+      // Utiliser une approche typée pour l'insertion
       const { error } = await supabase.from('guest_feedback').insert({
         guest_name: name,
         guest_email: email,
         rating,
         comment
-      });
+      } as Partial<FeedbackType>);
 
       if (error) throw error;
 
