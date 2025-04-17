@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Send } from 'lucide-react';
+import { Send, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUserInfo } from '@/features/services/hooks/userInfo';
 import StarRating from './StarRating';
@@ -15,6 +15,7 @@ const FeedbackForm = () => {
   const [comment, setComment] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
   const { userInfo } = useUserInfo();
 
@@ -46,11 +47,31 @@ const FeedbackForm = () => {
       description: 'Your comments have been submitted successfully.'
     });
 
-    // Reset form
-    setRating(0);
-    setComment('');
-    // Don't reset name and email for better user experience
+    // Set submitted state
+    setIsSubmitted(true);
+
+    // Reset form after a delay
+    setTimeout(() => {
+      setIsSubmitted(false);
+      setRating(0);
+      setComment('');
+    }, 3000);
   };
+
+  // Render success state
+  if (isSubmitted) {
+    return (
+      <div className="mb-10">
+        <Card className="p-6 rounded-xl bg-green-50 border-green-200 text-center">
+          <div className="flex flex-col items-center space-y-4">
+            <CheckCircle className="h-12 w-12 text-green-500" />
+            <h2 className="text-2xl font-bold text-green-700">Feedback Received</h2>
+            <p className="text-green-600">Thank you for helping us improve!</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-10">
@@ -93,7 +114,7 @@ const FeedbackForm = () => {
             </div>
           </div>
           
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full" disabled={rating === 0}>
             <Send className="h-4 w-4 mr-2" />
             Submit Feedback
           </Button>
