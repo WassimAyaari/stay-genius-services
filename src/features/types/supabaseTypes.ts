@@ -90,6 +90,7 @@ export interface HotelConfigType {
   enabled_features: string[];
   contact_email?: string;
   contact_phone?: string;
+  feedback_hero_image?: string;
   created_at?: string;
   updated_at?: string;
 }

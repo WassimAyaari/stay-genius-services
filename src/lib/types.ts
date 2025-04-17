@@ -35,6 +35,7 @@ export interface HotelConfig {
   contact_email: string | null;
   contact_phone: string | null;
   address: string | null;
+  feedback_hero_image?: string | null;
   created_at: string;
   updated_at: string;
 }
