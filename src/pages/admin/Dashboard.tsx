@@ -10,8 +10,9 @@ import {
   PartyPopper, 
   FileText,
   MessageCircle,
-  Trash2,  // Replacing Broom with Trash2
-  Wrench
+  Trash2,
+  Wrench,
+  MessageSquare
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -58,6 +59,13 @@ const AdminDashboard = () => {
       count: 36, 
       trend: "+3 today", 
       path: "/admin/chat" 
+    },
+    { 
+      title: "Feedback", 
+      icon: <MessageSquare className="h-5 w-5 text-primary" />, 
+      count: 3, 
+      trend: "+1 today", 
+      path: "/admin/feedback" 
     },
     { 
       title: "Housekeeping", 

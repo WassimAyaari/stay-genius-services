@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -47,6 +46,7 @@ import ShopsManager from '@/pages/admin/ShopsManager';
 import HousekeepingManager from '@/pages/admin/HousekeepingManager';
 import MaintenanceManager from '@/pages/admin/MaintenanceManager';
 import DestinationManager from '@/pages/admin/DestinationManager';
+import FeedbackManager from '@/pages/admin/FeedbackManager';
 
 const queryClient = new QueryClient();
 
@@ -60,7 +60,6 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/auth/login" element={<Login />} />
               
-              {/* Public routes */}
               <Route path="/rooms" element={<Rooms />} />
               <Route path="/rooms/:id" element={<RoomDetails />} />
               <Route path="/dining" element={<Dining />} />
@@ -76,7 +75,6 @@ function App() {
               <Route path="/shops" element={<Shops />} />
               <Route path="/feedback" element={<Feedback />} />
               
-              {/* Protected routes */}
               <Route path="/profile" element={
                 <AuthGuard>
                   <Profile />
@@ -121,7 +119,6 @@ function App() {
                 </AuthGuard>
               } />
               
-              {/* Admin routes */}
               <Route path="/admin" element={
                 <AuthGuard adminRequired={true}>
                   <AdminDashboard />
@@ -197,6 +194,12 @@ function App() {
               <Route path="/admin/about" element={
                 <AuthGuard adminRequired={true}>
                   <AboutEditor />
+                </AuthGuard>
+              } />
+              
+              <Route path="/admin/feedback" element={
+                <AuthGuard adminRequired={true}>
+                  <FeedbackManager />
                 </AuthGuard>
               } />
               

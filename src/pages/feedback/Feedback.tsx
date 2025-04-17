@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,24 +8,38 @@ import { ThumbsUp, Star, MessageSquare, Send, ExternalLink, Upload, Link as Link
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+
 const Feedback = () => {
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
+  // Pré-remplir avec les informations du guest (simulé ici)
+  useEffect(() => {
+    // Dans un cas réel, ces données viendraient de votre contexte d'authentification
+    // ou d'une API qui récupérerait les infos du guest
+    const guestInfo = {
+      name: localStorage.getItem('guestName') || '',
+      email: localStorage.getItem('guestEmail') || ''
+    };
+    
+    if (guestInfo.name) setName(guestInfo.name);
+    if (guestInfo.email) setEmail(guestInfo.email);
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Here you would typically submit to your backend
+    // Ici vous enverriez normalement ces données à votre backend
     console.log({
       rating,
       comment,
       name,
       email
     });
+    
     toast({
       title: 'Thank you for your feedback!',
       description: 'Your comments have been submitted successfully.'
@@ -33,14 +48,19 @@ const Feedback = () => {
     // Reset form
     setRating(0);
     setComment('');
-    setName('');
-    setEmail('');
+    // Ne pas réinitialiser le nom et l'email pour une meilleure expérience utilisateur
   };
-  return <Layout>
+
+  return (
+    <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="relative mb-8 rounded-3xl overflow-hidden">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Feedback" className="w-full h-64 object-cover" />
+          <img 
+            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+            alt="Feedback" 
+            className="w-full h-64 object-cover" 
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
           <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
             <h1 className="text-3xl font-bold mb-2">Your Feedback Matters</h1>
@@ -56,25 +76,50 @@ const Feedback = () => {
               <div className="space-y-2">
                 <Label htmlFor="rating">How would you rate your overall experience?</Label>
                 <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(star => <button key={star} type="button" onClick={() => setRating(star)} className="p-2 rounded-full transition-colors">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button 
+                      key={star} 
+                      type="button" 
+                      onClick={() => setRating(star)} 
+                      className="p-2 rounded-full transition-colors"
+                    >
                       <Star className={`h-8 w-8 ${rating >= star ? 'fill-primary text-primary' : 'text-gray-300'}`} />
-                    </button>)}
+                    </button>
+                  ))}
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="comment">Your comments</Label>
-                <Textarea id="comment" placeholder="Tell us about your experience..." className="resize-none" rows={5} value={comment} onChange={e => setComment(e.target.value)} />
+                <Textarea 
+                  id="comment" 
+                  placeholder="Tell us about your experience..." 
+                  className="resize-none" 
+                  rows={5} 
+                  value={comment} 
+                  onChange={e => setComment(e.target.value)} 
+                />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
+                  <Input 
+                    id="name" 
+                    placeholder="Your name" 
+                    value={name} 
+                    onChange={e => setName(e.target.value)} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="Your email" 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                  />
                 </div>
               </div>
               
@@ -121,9 +166,6 @@ const Feedback = () => {
           </Card>
         </div>
 
-        {/* Recent Reviews */}
-        
-
         {/* FAQ Section */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-secondary mb-4">Frequently Asked Questions</h2>
@@ -167,6 +209,8 @@ const Feedback = () => {
           </Card>
         </div>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default Feedback;
