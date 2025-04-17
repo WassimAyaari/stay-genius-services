@@ -64,7 +64,10 @@ const SpaSection = ({
           <CarouselNext className="static transform-none" />
         </div>
         <div className="mt-4 flex justify-center">
-          <SwipeIndicator />
+          <SwipeIndicator 
+            selectedIndex={selectedIndex} 
+            totalSlides={displayServices.length}
+          />
         </div>
       </Carousel>
     </div>
