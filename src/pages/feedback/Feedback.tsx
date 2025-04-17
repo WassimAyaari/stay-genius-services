@@ -8,6 +8,7 @@ import { ThumbsUp, Star, MessageSquare, Send, ExternalLink, Upload, Link as Link
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useUserInfo } from '@/features/services/hooks/userInfo';
 
 const Feedback = () => {
   const [rating, setRating] = useState<number>(0);
@@ -15,19 +16,19 @@ const Feedback = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const { toast } = useToast();
+  const { userInfo } = useUserInfo();
 
-  // Pré-remplir avec les informations du guest (simulé ici)
+  // Pré-remplir avec les informations du guest
   useEffect(() => {
-    // Dans un cas réel, ces données viendraient de votre contexte d'authentification
-    // ou d'une API qui récupérerait les infos du guest
-    const guestInfo = {
-      name: localStorage.getItem('guestName') || '',
-      email: localStorage.getItem('guestEmail') || ''
-    };
-    
-    if (guestInfo.name) setName(guestInfo.name);
-    if (guestInfo.email) setEmail(guestInfo.email);
-  }, []);
+    if (userInfo) {
+      if (userInfo.name && userInfo.name !== 'Guest') {
+        setName(userInfo.name);
+      }
+      if (userInfo.email) {
+        setEmail(userInfo.email);
+      }
+    }
+  }, [userInfo]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
