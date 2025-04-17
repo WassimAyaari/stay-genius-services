@@ -19,7 +19,7 @@ const Feedback = () => {
   const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
   const { toast } = useToast();
   const { userInfo } = useUserInfo();
-  const { config } = useHotelConfig();
+  const { config, isLoading } = useHotelConfig();
 
   // Pré-remplir avec les informations du guest
   useEffect(() => {
@@ -35,7 +35,9 @@ const Feedback = () => {
 
   // Charger l'image d'en-tête depuis la configuration
   useEffect(() => {
-    if (config && config.feedback_hero_image) {
+    console.log("Config loaded:", config);
+    if (config && config.feedback_hero_image && config.feedback_hero_image.trim() !== '') {
+      console.log("Setting hero image to:", config.feedback_hero_image);
       setHeroImage(config.feedback_hero_image);
     }
   }, [config]);

@@ -64,7 +64,9 @@ const FeedbackManager = () => {
 
   // Charger l'image de l'en-tête depuis la configuration
   useEffect(() => {
+    console.log("Admin config loaded:", config);
     if (config && config.feedback_hero_image) {
+      console.log("Admin setting hero image to:", config.feedback_hero_image);
       setHeroImage(config.feedback_hero_image);
     } else {
       // Image par défaut
@@ -74,6 +76,8 @@ const FeedbackManager = () => {
 
   const handleImageUpdate = () => {
     setLoading(true);
+    
+    console.log("Updating hero image to:", heroImage);
     
     // Mettre à jour la configuration avec la nouvelle image
     updateConfig({
