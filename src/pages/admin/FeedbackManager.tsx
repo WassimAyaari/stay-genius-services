@@ -11,15 +11,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Star, MessageSquare, Image, UserCheck, Mail } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
+import { supabase } from '@/integrations/supabase/client';
 
 // Types pour les feedbacks
 interface Feedback {
   id: string;
-  name: string;
-  email: string;
+  guest_name: string;
+  guest_email: string;
   rating: number;
   comment: string;
-  date: string;
+  created_at: string;
 }
 
 const FeedbackManager = () => {
@@ -27,40 +28,41 @@ const FeedbackManager = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [heroImage, setHeroImage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(true);
   const { toast } = useToast();
   const { config, isLoading: configLoading, updateConfig } = useHotelConfig();
 
-  // Simuler le chargement des feedbacks (à remplacer par une vraie API)
+  // Charger les feedbacks depuis Supabase
   useEffect(() => {
-    // Simuler un chargement de données
-    const mockFeedbacks: Feedback[] = [
-      {
-        id: '1',
-        name: 'Jean Dupont',
-        email: 'jean.dupont@example.com',
-        rating: 5,
-        comment: 'Excellent séjour, le personnel est très professionnel et attentionné.',
-        date: '2025-04-15'
-      },
-      {
-        id: '2',
-        name: 'Marie Martin',
-        email: 'marie.martin@example.com',
-        rating: 4,
-        comment: 'Très bon séjour, mais certains équipements mériteraient d\'être modernisés.',
-        date: '2025-04-14'
-      },
-      {
-        id: '3',
-        name: 'Pierre Lefebvre',
-        email: 'pierre.lefebvre@example.com',
-        rating: 5,
-        comment: 'Une expérience inoubliable, je reviendrai certainement!',
-        date: '2025-04-12'
+    const fetchFeedbacks = async () => {
+      setIsLoadingFeedback(true);
+      try {
+        const { data, error } = await supabase
+          .from('guest_feedback')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          setFeedbacks(data);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des feedbacks:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les avis clients.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoadingFeedback(false);
       }
-    ];
-    setFeedbacks(mockFeedbacks);
-  }, []);
+    };
+
+    fetchFeedbacks();
+  }, [toast]);
 
   // Charger l'image de l'en-tête depuis la configuration
   useEffect(() => {
@@ -99,6 +101,11 @@ const FeedbackManager = () => {
     ));
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
   return (
     <Layout>
       <div className="container py-8">
@@ -123,8 +130,12 @@ const FeedbackManager = () => {
                 <CardTitle className="text-lg">Avis récents</CardTitle>
               </CardHeader>
               <CardContent>
-                {feedbacks.length === 0 ? (
-                  <p className="text-muted-foreground">Aucun avis pour le moment.</p>
+                {isLoadingFeedback ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : feedbacks.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">Aucun avis pour le moment.</p>
                 ) : (
                   <ScrollArea className="h-[450px] pr-4">
                     <div className="space-y-4">
@@ -132,8 +143,8 @@ const FeedbackManager = () => {
                         <Card key={feedback.id} className="p-4">
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <h3 className="font-semibold">{feedback.name}</h3>
-                              <p className="text-sm text-muted-foreground">{feedback.email}</p>
+                              <h3 className="font-semibold">{feedback.guest_name}</h3>
+                              <p className="text-sm text-muted-foreground">{feedback.guest_email}</p>
                             </div>
                             <div className="flex items-center">
                               {renderStars(feedback.rating)}
@@ -142,7 +153,7 @@ const FeedbackManager = () => {
                           <p className="text-sm mb-2">{feedback.comment}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-muted-foreground">
-                              {new Date(feedback.date).toLocaleDateString()}
+                              {formatDate(feedback.created_at)}
                             </span>
                             <Button variant="ghost" size="sm">
                               Répondre
