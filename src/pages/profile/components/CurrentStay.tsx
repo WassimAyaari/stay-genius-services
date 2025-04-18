@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building, Key, Calendar } from "lucide-react";
+import { Building, Key, Calendar, Receipt } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserData } from '@/features/users/types/userTypes';
 import { formatDate } from '../utils/dateUtils';
@@ -34,10 +34,16 @@ const CurrentStay = ({ userData, stayDuration }: CurrentStayProps) => {
                 <p className="text-sm text-muted-foreground">{userData?.room_number || '406'}</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Key className="h-4 w-4" />
-              Mobile Key
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Receipt className="h-4 w-4" />
+                View Bill
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Key className="h-4 w-4" />
+                Mobile Key
+              </Button>
+            </div>
           </div>
           
           <div className="p-4 flex justify-between items-center">
