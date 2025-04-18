@@ -15,6 +15,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { MenuItemFormValues } from '../MenuItemFormSchema';
 import { cn } from '@/lib/utils';
 import { compressAndConvertToWebP } from '@/lib/imageUtils';
+import { toast } from 'sonner';
 
 interface MenuItemImageFieldProps {
   form: UseFormReturn<MenuItemFormValues>;

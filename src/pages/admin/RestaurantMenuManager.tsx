@@ -11,9 +11,9 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { MenuItem } from '@/features/dining/types';
 import { Plus, ArrowLeft, Store } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import MenuItemForm from './menu/MenuItemForm';
-import MenuItemsTable from './menu/MenuItemsTable';
-import { MenuItemFormValues } from './menu/MenuItemFormSchema';
+import MenuItemForm from './restaurants/menu/MenuItemForm';
+import MenuItemsTable from './restaurants/menu/MenuItemsTable';
+import { MenuItemFormValues } from './restaurants/menu/MenuItemFormSchema';
 
 const RestaurantMenuManager = () => {
   const [searchParams, setSearchParams] = useSearchParams();
