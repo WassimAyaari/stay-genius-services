@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,14 +33,14 @@ const CurrentStay = ({ userData, stayDuration }: CurrentStayProps) => {
                 <p className="text-sm text-muted-foreground">{userData?.room_number || '406'}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Receipt className="h-4 w-4" />
-                View Bill
-              </Button>
+            <div className="flex flex-col gap-2">
               <Button variant="outline" size="sm" className="gap-2">
                 <Key className="h-4 w-4" />
                 Mobile Key
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Receipt className="h-4 w-4" />
+                View Bill
               </Button>
             </div>
           </div>
