@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
@@ -6,13 +5,7 @@ import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Restaurant } from '@/features/dining/types';
 import { toast } from 'sonner';
-
-// Import components
-import RestaurantGallery from './components/RestaurantGallery';
-import RestaurantInfo from './components/RestaurantInfo';
-import AboutRestaurant from './components/AboutRestaurant';
-import RestaurantMenu from './components/RestaurantMenu';
-import BookingDialog from './components/BookingDialog';
+import { Dialog, DialogContent, DialogHeader, Button } from '@radix-ui/react-dialog';
 
 const RestaurantDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +16,7 @@ const RestaurantDetail = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(openBookingFromNavigation);
   const [activeTab, setActiveTab] = useState("info");
+  const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   
   const { fetchRestaurantById, isLoading: isLoadingRestaurant } = useRestaurants();
   const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(id);
@@ -47,7 +41,11 @@ const RestaurantDetail = () => {
   };
 
   const handleViewMenu = () => {
-    setActiveTab("menu");
+    if (restaurant?.menuPdf) {
+      setSelectedPdf(restaurant.menuPdf);
+    } else {
+      setActiveTab("menu");
+    }
   };
 
   if (isLoadingRestaurant || !restaurant) {
@@ -93,6 +91,29 @@ const RestaurantDetail = () => {
         onSuccess={handleReservationSuccess}
         buttonText={restaurant.actionText}
       />
+
+      <Dialog open={!!selectedPdf} onOpenChange={(open) => !open && setSelectedPdf(null)}>
+        <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
+          <DialogHeader className="absolute top-0 right-0 z-10 p-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0 rounded-full" 
+              onClick={() => setSelectedPdf(null)}
+            >
+              ✕
+            </Button>
+          </DialogHeader>
+          {selectedPdf && (
+            <iframe
+              src={selectedPdf}
+              className="w-full h-full"
+              title="Menu PDF"
+              style={{ border: 'none' }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
