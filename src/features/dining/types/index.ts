@@ -1,3 +1,4 @@
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -9,6 +10,7 @@ export interface Restaurant {
   status: 'open' | 'closed';
   actionText?: string;
   isFeatured?: boolean;
+  menuPdf?: string;
 }
 
 export interface DiningReservation {

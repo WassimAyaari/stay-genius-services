@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
@@ -5,7 +6,15 @@ import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Restaurant } from '@/features/dining/types';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, Button } from '@radix-ui/react-dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+
+// Import components
+import RestaurantGallery from './components/RestaurantGallery';
+import RestaurantInfo from './components/RestaurantInfo';
+import AboutRestaurant from './components/AboutRestaurant';
+import RestaurantMenu from './components/RestaurantMenu';
+import BookingDialog from './components/BookingDialog';
 
 const RestaurantDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,7 +50,7 @@ const RestaurantDetail = () => {
   };
 
   const handleViewMenu = () => {
-    if (restaurant?.menuPdf) {
+    if (restaurant && restaurant.menuPdf) {
       setSelectedPdf(restaurant.menuPdf);
     } else {
       setActiveTab("menu");
@@ -94,7 +103,7 @@ const RestaurantDetail = () => {
 
       <Dialog open={!!selectedPdf} onOpenChange={(open) => !open && setSelectedPdf(null)}>
         <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
-          <DialogHeader className="absolute top-0 right-0 z-10 p-2">
+          <div className="absolute top-0 right-0 z-10 p-2">
             <Button 
               variant="ghost" 
               size="sm" 
@@ -103,7 +112,7 @@ const RestaurantDetail = () => {
             >
               ✕
             </Button>
-          </DialogHeader>
+          </div>
           {selectedPdf && (
             <iframe
               src={selectedPdf}
