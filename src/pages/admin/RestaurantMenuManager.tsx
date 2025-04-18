@@ -36,13 +36,27 @@ const RestaurantMenuManager = () => {
         await updateMenuItem({
           id: editingItem.id,
           restaurantId,
-          ...values,
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          category: values.category,
+          image: values.image,
+          isFeatured: values.isFeatured,
+          status: values.status,
+          menuPdf: values.menuPdf,
         });
         toast.success("Menu item updated successfully");
       } else {
         await createMenuItem({
           restaurantId,
-          ...values,
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          category: values.category,
+          image: values.image,
+          isFeatured: values.isFeatured,
+          status: values.status,
+          menuPdf: values.menuPdf,
         });
         toast.success("Menu item added successfully");
       }
