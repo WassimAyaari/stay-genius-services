@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building, Key, Calendar, Receipt } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserData } from '@/features/users/types/userTypes';
 import { formatDate } from '../utils/dateUtils';
+import BillDialog from './BillDialog';
 
 interface CurrentStayProps {
   userData: UserData | null;
@@ -12,6 +13,7 @@ interface CurrentStayProps {
 }
 
 const CurrentStay = ({ userData, stayDuration }: CurrentStayProps) => {
+  const [billDialogOpen, setBillDialogOpen] = useState(false);
   const formatCheckInDate = userData?.check_in_date ? formatDate(userData.check_in_date) : 'Not defined';
   const formatCheckOutDate = userData?.check_out_date ? formatDate(userData.check_out_date) : 'Not defined';
   
@@ -38,7 +40,12 @@ const CurrentStay = ({ userData, stayDuration }: CurrentStayProps) => {
                 <Key className="h-4 w-4" />
                 Mobile Key
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setBillDialogOpen(true)}
+              >
                 <Receipt className="h-4 w-4" />
                 View Bill
               </Button>
@@ -63,6 +70,14 @@ const CurrentStay = ({ userData, stayDuration }: CurrentStayProps) => {
           </div>
         </div>
       </CardContent>
+
+      <BillDialog
+        open={billDialogOpen}
+        onOpenChange={setBillDialogOpen}
+        firstName={userData?.first_name || ''}
+        lastName={userData?.last_name || ''}
+        stayDuration={stayDuration}
+      />
     </Card>
   );
 };
