@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
@@ -5,6 +6,13 @@ import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Restaurant } from '@/features/dining/types';
 import { toast } from 'sonner';
+
+// Import components
+import RestaurantGallery from './components/RestaurantGallery';
+import RestaurantInfo from './components/RestaurantInfo';
+import AboutRestaurant from './components/AboutRestaurant';
+import RestaurantMenu from './components/RestaurantMenu';
+import BookingDialog from './components/BookingDialog';
 
 const RestaurantDetail = () => {
   const { id } = useParams<{ id: string }>();

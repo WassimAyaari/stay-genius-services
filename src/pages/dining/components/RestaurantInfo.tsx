@@ -25,7 +25,7 @@ const RestaurantInfo = ({
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Clock className="h-5 w-5 text-muted-foreground" />
-          <span>{restaurant.workingHours}</span>
+          <span>{restaurant.openHours}</span>
         </div>
         <div className="flex items-center gap-3">
           <MapPin className="h-5 w-5 text-muted-foreground" />
