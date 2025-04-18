@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { MenuItem } from '@/features/dining/types';
-import { Pencil, Trash2, Plus, Image, ArrowLeft, Upload, Store } from 'lucide-react';
+import { Pencil, Trash2, Plus, Image, ArrowLeft, Upload, Store, FileText } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -70,6 +69,7 @@ const formSchema = z.object({
   image: z.string().optional(),
   isFeatured: z.boolean().default(false),
   status: z.enum(['available', 'unavailable']),
+  menuPdf: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -103,6 +103,7 @@ const RestaurantMenuManager: React.FC = () => {
       image: "",
       isFeatured: false,
       status: "available" as const,
+      menuPdf: "",
     },
   });
 
@@ -117,6 +118,7 @@ const RestaurantMenuManager: React.FC = () => {
         image: editingItem.image || "",
         isFeatured: editingItem.isFeatured,
         status: editingItem.status,
+        menuPdf: editingItem.menuPdf || "",
       });
     } else if (isDialogOpen && !editingItem) {
       // Reset form when opening for a new menu item
@@ -128,6 +130,7 @@ const RestaurantMenuManager: React.FC = () => {
         image: "",
         isFeatured: false,
         status: "available" as const,
+        menuPdf: "",
       });
     }
   }, [isDialogOpen, editingItem, form]);
@@ -152,6 +155,7 @@ const RestaurantMenuManager: React.FC = () => {
           image: values.image || undefined,
           isFeatured: values.isFeatured,
           status: values.status,
+          menuPdf: values.menuPdf || undefined,
         });
         toast("Menu item updated", {
           description: "The menu item has been updated successfully."
@@ -166,6 +170,7 @@ const RestaurantMenuManager: React.FC = () => {
           image: values.image || undefined,
           isFeatured: values.isFeatured,
           status: values.status,
+          menuPdf: values.menuPdf || undefined,
         });
         toast("Menu item added", {
           description: "The menu item has been added successfully."
@@ -309,6 +314,35 @@ const RestaurantMenuManager: React.FC = () => {
       )}
     </div>
   );
+
+  const handlePdfUpload = async (file: File) => {
+    if (!file.type.startsWith('application/pdf')) {
+      toast.error("Seuls les fichiers PDF sont acceptés");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error("Le fichier PDF ne doit pas dépasser 5MB");
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      // Convert PDF to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          form.setValue("menuPdf", reader.result);
+        }
+      };
+    } catch (error) {
+      console.error("Erreur lors du traitement du PDF:", error);
+      toast.error("Erreur lors du traitement du PDF");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (isLoadingRestaurants) return <div className="p-8 text-center">Chargement des restaurants...</div>;
   if (!restaurantId) return <RestaurantSelector />;
@@ -488,6 +522,82 @@ const RestaurantMenuManager: React.FC = () => {
                         <FormDescription>
                           Téléchargez une image ou fournissez une URL pour le plat.
                         </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="menuPdf"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Menu PDF (optionnel)</FormLabel>
+                        <FormControl>
+                          <div className="space-y-4">
+                            {field.value && (
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">PDF ajouté</span>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => form.setValue("menuPdf", "")}
+                                >
+                                  Supprimer
+                                </Button>
+                              </div>
+                            )}
+                            <div
+                              className={cn(
+                                "border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer transition-colors",
+                                dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/20 hover:border-muted-foreground/50",
+                                isProcessing && "opacity-50 cursor-not-allowed"
+                              )}
+                              onDragEnter={handleDrag}
+                              onDragOver={handleDrag}
+                              onDragLeave={handleDrag}
+                              onDrop={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setDragActive(false);
+                                
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                  await handlePdfUpload(e.dataTransfer.files[0]);
+                                }
+                              }}
+                              onClick={() => !isProcessing && document.getElementById('pdf-upload')?.click()}
+                            >
+                              <input
+                                id="pdf-upload"
+                                type="file"
+                                accept="application/pdf"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const files = e.target.files;
+                                  if (files && files.length > 0) {
+                                    await handlePdfUpload(files[0]);
+                                    e.target.value = '';
+                                  }
+                                }}
+                                disabled={isProcessing}
+                              />
+                              <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                              <p className="text-sm text-muted-foreground text-center mb-1">
+                                Déposez un PDF ici ou cliquez pour naviguer
+                              </p>
+                              <p className="text-xs text-muted-foreground text-center">
+                                Taille maximale: 5MB
+                              </p>
+                              {isProcessing && (
+                                <p className="text-xs text-primary mt-2 animate-pulse">
+                                  Traitement du PDF...
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

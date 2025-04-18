@@ -1,4 +1,3 @@
-
 export interface Restaurant {
   id: string;
   name: string;
@@ -32,6 +31,7 @@ export interface MenuItem {
   image?: string;
   isFeatured: boolean;
   status: 'available' | 'unavailable';
+  menuPdf?: string;
 }
 
 export interface TableReservation {

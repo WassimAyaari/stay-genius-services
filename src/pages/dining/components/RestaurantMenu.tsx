@@ -1,7 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MenuItem } from '@/features/dining/types';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RestaurantMenuProps {
   menuItems: MenuItem[] | undefined;
@@ -9,6 +12,8 @@ interface RestaurantMenuProps {
 }
 
 const RestaurantMenu = ({ menuItems, isLoading }: RestaurantMenuProps) => {
+  const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
+
   if (isLoading) {
     return <div className="text-center py-8">Chargement du menu...</div>;
   }
@@ -21,46 +26,72 @@ const RestaurantMenu = ({ menuItems, isLoading }: RestaurantMenuProps) => {
     );
   }
   
-  // Get unique categories
   const categories = [...new Set(menuItems.map(item => item.category))];
   
   return (
-    <div className="space-y-8">
-      {categories.map(category => (
-        <div key={category} className="space-y-4">
-          <h3 className="text-xl font-semibold border-b pb-2">{category}</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {menuItems.filter(item => item.category === category).map(item => (
-              <Card key={item.id} className="overflow-hidden">
-                {item.image && (
-                  <div className="relative aspect-video">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {item.isFeatured && (
-                      <div className="absolute top-2 left-2">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                          Recommandé
-                        </span>
+    <>
+      <div className="space-y-8">
+        {categories.map(category => (
+          <div key={category} className="space-y-4">
+            <h3 className="text-xl font-semibold border-b pb-2">{category}</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {menuItems.filter(item => item.category === category).map(item => (
+                <Card key={item.id} className="overflow-hidden">
+                  {item.image && (
+                    <div className="relative aspect-video">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                      {item.isFeatured && (
+                        <div className="absolute top-2 left-2">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                            Recommandé
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-1">
+                      <div>
+                        <h4 className="font-semibold">{item.name}</h4>
+                        <p className="text-sm text-gray-600">{item.description}</p>
                       </div>
-                    )}
-                  </div>
-                )}
-                <CardContent className="p-4">
-                  <div className="flex justify-between mb-1">
-                    <h4 className="font-semibold">{item.name}</h4>
-                    <span className="font-semibold">{item.price} €</span>
-                  </div>
-                  <p className="text-sm text-gray-600">{item.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="font-semibold">{item.price} €</span>
+                        {item.menuPdf && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => setSelectedPdf(item.menuPdf)}
+                          >
+                            <FileText className="h-4 w-4" />
+                            Voir le menu
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      <Dialog open={!!selectedPdf} onOpenChange={() => setSelectedPdf(null)}>
+        <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
+          <iframe
+            src={selectedPdf || ''}
+            className="w-full h-full"
+            title="Menu PDF"
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
