@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FormField,
   FormItem,
@@ -21,6 +21,22 @@ interface MenuItemPdfFieldProps {
 export const MenuItemPdfField = ({ form }: MenuItemPdfFieldProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  
+  // Log when component is mounted with current PDF value
+  useEffect(() => {
+    const currentPdf = form.getValues("menuPdf");
+    console.log("État initial du PDF:", currentPdf ? "PDF présent" : "Aucun PDF");
+  }, [form]);
+
+  // Log when PDF value changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "menuPdf") {
+        console.log("Valeur du PDF modifiée:", value.menuPdf ? "PDF présent" : "Aucun PDF");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const handlePdfUpload = async (file: File) => {
     if (!file.type.startsWith('application/pdf')) {
@@ -35,11 +51,15 @@ export const MenuItemPdfField = ({ form }: MenuItemPdfFieldProps) => {
 
     try {
       setIsProcessing(true);
+      console.log("Traitement du PDF commencé:", file.name, file.size, "bytes");
+      
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
+          console.log("PDF converti en base64, début:", reader.result.substring(0, 50) + "...");
           form.setValue("menuPdf", reader.result);
+          toast.success("PDF ajouté avec succès");
         }
       };
     } catch (error) {
@@ -77,7 +97,10 @@ export const MenuItemPdfField = ({ form }: MenuItemPdfFieldProps) => {
                     type="button"
                     variant="destructive"
                     size="sm"
-                    onClick={() => form.setValue("menuPdf", "")}
+                    onClick={() => {
+                      form.setValue("menuPdf", "");
+                      console.log("PDF supprimé par l'utilisateur");
+                    }}
                   >
                     Supprimer
                   </Button>
