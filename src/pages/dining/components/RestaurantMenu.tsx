@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MenuItem } from '@/features/dining/types';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 import { FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -82,13 +82,26 @@ const RestaurantMenu = ({ menuItems, isLoading }: RestaurantMenuProps) => {
         ))}
       </div>
 
-      <Dialog open={!!selectedPdf} onOpenChange={() => setSelectedPdf(null)}>
+      <Dialog open={!!selectedPdf} onOpenChange={(open) => !open && setSelectedPdf(null)}>
         <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
-          <iframe
-            src={selectedPdf || ''}
-            className="w-full h-full"
-            title="Menu PDF"
-          />
+          <DialogHeader className="absolute top-0 right-0 z-10 p-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0 rounded-full" 
+              onClick={() => setSelectedPdf(null)}
+            >
+              ✕
+            </Button>
+          </DialogHeader>
+          {selectedPdf && (
+            <iframe
+              src={selectedPdf}
+              className="w-full h-full"
+              title="Menu PDF"
+              style={{ border: 'none' }}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>
