@@ -2,9 +2,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { MenuItem } from '@/features/dining/types';
 
-/**
- * Fetches all menu items or items for a specific restaurant
- */
 export const fetchMenuItems = async (restaurantId?: string): Promise<MenuItem[]> => {
   let query = supabase
     .from('restaurant_menus')
@@ -35,9 +32,6 @@ export const fetchMenuItems = async (restaurantId?: string): Promise<MenuItem[]>
   }));
 };
 
-/**
- * Fetches a specific menu item by ID
- */
 export const fetchMenuItemById = async (id: string): Promise<MenuItem | null> => {
   const { data, error } = await supabase
     .from('restaurant_menus')
@@ -47,7 +41,6 @@ export const fetchMenuItemById = async (id: string): Promise<MenuItem | null> =>
   
   if (error) {
     if (error.code === 'PGRST116') {
-      // Item not found
       return null;
     }
     console.error('Error fetching menu item:', error);
@@ -70,16 +63,13 @@ export const fetchMenuItemById = async (id: string): Promise<MenuItem | null> =>
   };
 };
 
-/**
- * Creates a new menu item
- */
 export const createMenuItem = async (item: Omit<MenuItem, 'id'>): Promise<MenuItem> => {
   console.log('Creating menu item with data:', item);
-  console.log('menuPdf présent:', !!item.menuPdf);
+  console.log('menuPdf present:', !!item.menuPdf);
   
   if (item.menuPdf) {
-    console.log('Longueur du PDF:', item.menuPdf.length, 'caractères');
-    console.log('Début du PDF:', item.menuPdf.substring(0, 50) + '...');
+    console.log('PDF length:', item.menuPdf.length, 'characters');
+    console.log('PDF start:', item.menuPdf.substring(0, 50) + '...');
   }
   
   const { data, error } = await supabase
@@ -119,16 +109,13 @@ export const createMenuItem = async (item: Omit<MenuItem, 'id'>): Promise<MenuIt
   };
 };
 
-/**
- * Updates an existing menu item
- */
 export const updateMenuItem = async (item: MenuItem): Promise<MenuItem> => {
   console.log('Updating menu item with data:', item);
-  console.log('menuPdf présent:', !!item.menuPdf);
+  console.log('menuPdf present:', !!item.menuPdf);
   
   if (item.menuPdf) {
-    console.log('Longueur du PDF:', item.menuPdf.length, 'caractères');
-    console.log('Début du PDF:', item.menuPdf.substring(0, 50) + '...');
+    console.log('PDF length:', item.menuPdf.length, 'characters');
+    console.log('PDF start:', item.menuPdf.substring(0, 50) + '...');
   }
   
   const { data, error } = await supabase
@@ -169,9 +156,6 @@ export const updateMenuItem = async (item: MenuItem): Promise<MenuItem> => {
   };
 };
 
-/**
- * Deletes a menu item by ID
- */
 export const deleteMenuItem = async (id: string): Promise<void> => {
   const { error } = await supabase
     .from('restaurant_menus')

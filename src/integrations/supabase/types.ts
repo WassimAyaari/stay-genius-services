@@ -645,6 +645,7 @@ export type Database = {
           id: string
           image: string | null
           is_featured: boolean | null
+          menu_pdf: string | null
           name: string
           price: number
           restaurant_id: string | null
@@ -658,6 +659,7 @@ export type Database = {
           id?: string
           image?: string | null
           is_featured?: boolean | null
+          menu_pdf?: string | null
           name: string
           price: number
           restaurant_id?: string | null
@@ -671,6 +673,7 @@ export type Database = {
           id?: string
           image?: string | null
           is_featured?: boolean | null
+          menu_pdf?: string | null
           name?: string
           price?: number
           restaurant_id?: string | null
