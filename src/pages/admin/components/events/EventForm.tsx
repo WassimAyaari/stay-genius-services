@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ import { FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from '@/components/ui/select';
 
 export interface EventFormProps {
-  initialData?: Event | null;
+  initialData?: Partial<Event> | null; // Make Partial so we can pass just restaurant_id
   onSubmit: (event: Partial<Event>) => Promise<void>;
   onCancel?: () => void;
 }
@@ -33,13 +34,13 @@ const EventForm: React.FC<EventFormProps> = ({
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: initialData ? {
-      title: initialData.title,
-      description: initialData.description,
-      image: initialData.image,
-      category: initialData.category,
+      title: initialData.title || '',
+      description: initialData.description || '',
+      image: initialData.image || '',
+      category: initialData.category || 'event',
       is_featured: initialData.is_featured || false,
       location: initialData.location || '',
-      date: initialData.date,
+      date: initialData.date || format(new Date(), 'yyyy-MM-dd'),
       time: initialData.time || '',
       restaurant_id: initialData.restaurant_id ?? null
     } : {
@@ -68,6 +69,9 @@ const EventForm: React.FC<EventFormProps> = ({
     }
   };
 
+  const restaurantLocked =
+    !!(initialData && typeof initialData.restaurant_id === 'string' && initialData.restaurant_id);
+
   return (
     <Form {...form}>
       <ScrollArea className="h-[70vh] pr-4">
@@ -80,9 +84,14 @@ const EventForm: React.FC<EventFormProps> = ({
                 <Select
                   value={form.watch('restaurant_id') ?? ''}
                   onValueChange={val => form.setValue('restaurant_id', val === '' ? null : val)}
+                  disabled={restaurantLocked}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="No restaurant" />
+                    <SelectValue placeholder={
+                      restaurantLocked
+                        ? (restaurants?.find(r => r.id === form.watch('restaurant_id'))?.name ?? "Linked Restaurant")
+                        : "No restaurant"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">No restaurant</SelectItem>
@@ -104,7 +113,7 @@ const EventForm: React.FC<EventFormProps> = ({
                 </Button>
               )}
               <Button type="submit">
-                {initialData ? 'Update' : 'Create'} Event
+                {initialData && initialData.title ? 'Update' : 'Create'} Event
               </Button>
             </div>
           </form>

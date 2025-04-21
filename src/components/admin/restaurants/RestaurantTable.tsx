@@ -2,7 +2,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, UtensilsCrossed, Utensils, CalendarDays } from 'lucide-react';
+import { Edit, Trash2, UtensilsCrossed, Utensils, CalendarDays, PlusCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface RestaurantTableProps {
@@ -11,6 +11,7 @@ interface RestaurantTableProps {
   onDelete: (id: string) => void;
   onViewMenus: (id: string) => void;
   onViewReservations: (id: string) => void;
+  onAddEvent?: (restaurant: any) => void; // new prop
 }
 
 export const RestaurantTable: React.FC<RestaurantTableProps> = ({
@@ -18,7 +19,8 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
   onEdit,
   onDelete,
   onViewMenus,
-  onViewReservations
+  onViewReservations,
+  onAddEvent
 }) => {
   if (!restaurants || restaurants.length === 0) {
     return (
@@ -38,7 +40,7 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
             <TableHead>Location</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Featured</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,8 +71,8 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
                   '-'
                 )}
               </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end space-x-2">
+              <TableCell>
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -103,6 +105,18 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Delete</span>
                   </Button>
+                  {/* Add Event button */}
+                  {onAddEvent && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onAddEvent(restaurant)}
+                      title="Add Event"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                      <span className="sr-only">Add Event</span>
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
@@ -112,3 +126,4 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
     </div>
   );
 };
+
