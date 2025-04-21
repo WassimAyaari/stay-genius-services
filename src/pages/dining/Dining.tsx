@@ -2,22 +2,30 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UtensilsCrossed, Clock, Coffee, Pizza, Wine, ChefHat, MapPin, Calendar, BookText } from 'lucide-react';
+import { UtensilsCrossed, Clock, MapPin, Calendar, BookText } from 'lucide-react';
 import Layout from '@/components/Layout';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
+import { useEvents } from '@/hooks/useEvents';
 import { useToast } from '@/hooks/use-toast';
 
 const Dining = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { restaurants, isLoading } = useRestaurants();
+  const { upcomingEvents } = useEvents();
   
   const handleBookTable = (restaurantId: string) => {
     navigate(`/dining/${restaurantId}`, { state: { openBooking: true } });
   };
 
-  return <Layout>
+  // Helper: get next event for a restaurant
+  const getEventsForRestaurant = (restaurantId: string) => {
+    return (upcomingEvents || []).filter(event => event.restaurant_id === restaurantId);
+  };
+
+  return (
+    <Layout>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Dining Experiences</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
@@ -67,7 +75,7 @@ const Dining = () => {
                   <span>{restaurant.location}</span>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 mb-2">
                   <Button 
                     onClick={() => handleBookTable(restaurant.id)}
                     className="w-full flex items-center justify-center gap-1"
@@ -84,12 +92,27 @@ const Dining = () => {
                     View Details
                   </Button>
                 </div>
+                {/* New: Show upcoming events for this restaurant */}
+                {getEventsForRestaurant(restaurant.id).length > 0 && (
+                  <div className="mt-2">
+                    <h4 className="text-sm font-semibold mb-1 text-primary">Upcoming Events</h4>
+                    <ul className="space-y-1">
+                      {getEventsForRestaurant(restaurant.id).map(event => (
+                        <li key={event.id} className="flex items-center gap-2 text-[15px]">
+                          <Calendar className="w-4 h-4 text-primary" />
+                          <span>{event.title} — {event.date}{event.time ? `, ${event.time}` : ''}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </Card>
           ))}
         </div>
       )}
-    </Layout>;
+    </Layout>
+  );
 };
 
 export default Dining;

@@ -18,7 +18,8 @@ export const EventsTab = () => {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
+  // Update: accept all fields including restaurant_id
   const handleCreateEvent = async (event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) => {
     await createEvent(event);
     setIsEventDialogOpen(false);

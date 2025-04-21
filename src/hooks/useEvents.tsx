@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types/event';
@@ -9,19 +8,17 @@ import { useQuery } from '@tanstack/react-query';
 export const useEvents = () => {
   const { toast } = useToast();
   
-  // Utiliser React Query pour la mise en cache et les états de chargement
   const { data: events = [], isLoading: loading, error, refetch } = useQuery({
     queryKey: ['events'],
     queryFn: async () => {
       console.log('Fetching events from Supabase...');
       
-      // Ajouter une limite aux résultats pour des performances accrues
       const { data, error } = await supabase
         .from('events')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(20); // Limite de 20 événements pour améliorer les performances
-      
+        .limit(20);
+
       if (error) {
         console.error('Error in fetchEvents:', error);
         throw error;
@@ -30,11 +27,10 @@ export const useEvents = () => {
       console.log('Events fetched successfully:', data);
       return data as Event[];
     },
-    staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
-    refetchOnWindowFocus: false, // Ne pas recharger à chaque focus de fenêtre
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
-  
-  // Calculer les événements à venir une seule fois lorsque les événements changent
+
   const upcomingEvents = useMemo(() => {
     const today = startOfDay(new Date());
     return (events || []).filter(event => {
@@ -59,7 +55,6 @@ export const useEvents = () => {
       
       console.log('Event created successfully:', data);
       
-      // Actualiser les données après création
       await refetch();
       
       toast({
@@ -96,7 +91,6 @@ export const useEvents = () => {
       
       console.log('Event updated successfully:', data);
       
-      // Actualiser les données après mise à jour
       await refetch();
       
       toast({
@@ -132,7 +126,6 @@ export const useEvents = () => {
       
       console.log('Event deleted successfully');
       
-      // Actualiser les données après suppression
       await refetch();
       
       toast({

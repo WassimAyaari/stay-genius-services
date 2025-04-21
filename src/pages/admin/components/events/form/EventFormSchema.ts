@@ -1,6 +1,7 @@
 
 import * as z from 'zod';
 
+// Add restaurant_id as a string or null
 export const eventSchema = z.object({
   title: z.string().min(3, {
     message: 'Title is required'
@@ -20,7 +21,9 @@ export const eventSchema = z.object({
     message: 'Date is required'
   }),
   time: z.string().optional(),
-  capacity: z.number().optional().default(10)
+  capacity: z.number().optional().default(10),
+  restaurant_id: z.string().nullable().optional() // new field
 });
 
 export type EventFormValues = z.infer<typeof eventSchema>;
+

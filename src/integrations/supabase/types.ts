@@ -259,6 +259,7 @@ export type Database = {
           image: string
           is_featured: boolean | null
           location: string | null
+          restaurant_id: string | null
           time: string | null
           title: string
           updated_at: string
@@ -273,6 +274,7 @@ export type Database = {
           image: string
           is_featured?: boolean | null
           location?: string | null
+          restaurant_id?: string | null
           time?: string | null
           title: string
           updated_at?: string
@@ -287,11 +289,20 @@ export type Database = {
           image?: string
           is_featured?: boolean | null
           location?: string | null
+          restaurant_id?: string | null
           time?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       guest_feedback: {
         Row: {
