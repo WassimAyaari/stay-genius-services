@@ -34,6 +34,7 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ItemToRequest | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const { categories, allItems, isLoading } = useRequestCategories();
   const { userData } = useAuth();
@@ -53,6 +54,15 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const securityCategory = categories.find(
     (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('sécurité') || cat.name?.toLowerCase().includes('security')
   );
+
+  const filterItems = (items: typeof allItems) => {
+    if (!searchTerm) return items;
+    const lower = searchTerm.toLowerCase();
+    return items.filter(item =>
+      (item.name && item.name.toLowerCase().includes(lower)) ||
+      (item.description && item.description.toLowerCase().includes(lower))
+    );
+  };
 
   const handleSelect = (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
     setSelectedItem({
@@ -143,7 +153,12 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
       
       <CommandDialog open={open} onOpenChange={setOpen}>
         <Command className="rounded-lg border shadow-md">
-          <CommandInput placeholder="Search hotel services..." disabled={isSubmitting || isLoading} />
+          <CommandInput 
+            placeholder="Search hotel services..." 
+            value={searchTerm}
+            onValueChange={setSearchTerm}
+            disabled={isSubmitting || isLoading}
+          />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             {isLoading ? (
@@ -152,32 +167,34 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
               <>
                 {securityCategory && (
                   <CommandGroup heading={securityCategory.name}>
-                    {allItems
-                      .filter(item => item.category_id === securityCategory.id && item.is_active)
-                      .map((item) => (
-                        <CommandItem
-                          key={item.id}
-                          disabled={isSubmitting}
-                          onSelect={() => handleSelect(item.id, item.name, securityCategory.id, item.description)}
-                          className="cursor-pointer"
-                        >
-                          <div>
-                            <div className="font-medium">{item.name}</div>
-                            {item.description && (
-                              <div className="text-sm text-gray-500 mt-1">{item.description}</div>
-                            )}
-                          </div>
-                        </CommandItem>
-                      ))}
+                    {filterItems(
+                      allItems.filter(item => item.category_id === securityCategory.id && item.is_active)
+                    ).map((item) => (
+                      <CommandItem
+                        key={item.id}
+                        disabled={isSubmitting}
+                        onSelect={() => handleSelect(item.id, item.name, securityCategory.id, item.description)}
+                        className="cursor-pointer"
+                      >
+                        <div>
+                          <div className="font-medium">{item.name}</div>
+                          {item.description && (
+                            <div className="text-sm text-gray-500 mt-1">{item.description}</div>
+                          )}
+                        </div>
+                      </CommandItem>
+                    ))}
                   </CommandGroup>
                 )}
                 {Object.entries(itemsByCategory).map(([categoryId, items]) => {
                   if (securityCategory && securityCategory.id === categoryId) return null;
                   const category = categories.find(c => c.id === categoryId);
                   if (!category) return null;
+                  const filtered = filterItems(items);
+                  if (filtered.length === 0) return null;
                   return (
                     <CommandGroup key={categoryId} heading={category.name}>
-                      {items.map((item) => (
+                      {filtered.map((item) => (
                         <CommandItem
                           key={item.id}
                           disabled={isSubmitting}
