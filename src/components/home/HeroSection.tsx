@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { Search, X, Leaf } from 'lucide-react';
+import { Search, X, Leaf, UtensilsCrossed, Store } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CommandDialog, 
@@ -11,11 +11,13 @@ import {
   CommandGroup,
   CommandEmpty
 } from '@/components/ui/command';
-import { toast } from '@/components/ui/use-toast';
-// Ajouter l'import pour les services spa
+import { toast } from '@/hooks/use-toast';
+// Ajouter les hooks pour récupérer les autres services
 import { useSpaServices } from '@/hooks/useSpaServices';
+import { useRestaurants } from '@/hooks/useRestaurants';
+import { useShops } from '@/hooks/useShops';
 
-// Hotel features/services list
+// Liste des pages/fonctionnalités "fixes" principales de l'hôtel
 const SEARCHABLE_PAGES = [
   { label: "About Us", route: "/about", keywords: "information hotel story", type: 'page' },
   { label: "Gastronomy", route: "/dining", keywords: "dining restaurant food", type: 'page' },
@@ -29,7 +31,7 @@ const SEARCHABLE_PAGES = [
   { label: "My Room", route: "/my-room", keywords: "room command requests", type: 'page' },
   { label: "Contact", route: "/contact", keywords: "contact help assistance", type: 'page' },
   { label: "Feedback", route: "/feedback", keywords: "review feedback", type: 'page' },
-  // Add more as needed...
+  // ... Ajouter d'autres pages fixes ici si besoin
 ];
 
 const normalize = (str: string) =>
@@ -38,35 +40,62 @@ const normalize = (str: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
-// Main component
 const HeroSection = () => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
-  // 1. Charger dynamiquement les services spa
-  const { featuredServices = [] } = useSpaServices();
+  // 1. Récupérer tous les services, restaurants et shops
+  const { services: spaServices = [] } = useSpaServices();
+  const { restaurants = [] } = useRestaurants();
+  const { shops = [] } = useShops();
 
-  // 2. Préparer les résultats dynamiques (services spa)
-  const spaSearchOptions = featuredServices.map((service) => ({
+  // 2. Préparer chaque option pour la recherche
+
+  // Spa Services (chaque service du spa)
+  const spaServiceOptions = spaServices.map((service) => ({
     label: service.name,
     route: `/spa?service=${service.id}`,
-    keywords: `${service.description ?? ''} spa ${service.name}`,
+    keywords: `${service.name} ${service.description ?? ''} spa wellness soins`,
     type: 'spa-service',
     icon: <Leaf className="w-4 h-4 text-green-600 mr-2 inline" />,
     image: service.image,
-    category: "Spa" // (utile pour l'affichage)
+    category: "Spa"
   }));
 
-  // 3. Combiner toutes les options de recherche (pages + spa + extensible plus tard)
+  // Restaurants
+  const restaurantOptions = restaurants.map((rest) => ({
+    label: rest.name,
+    route: `/dining/restaurant/${rest.id}`,
+    keywords: `${rest.name} ${rest.cuisine ?? ''} restaurant gastronomy food ${rest.description ?? ''}`,
+    type: 'restaurant',
+    icon: <UtensilsCrossed className="w-4 h-4 text-primary mr-2 inline" />,
+    image: rest.images?.[0],
+    category: "Restaurants",
+  }));
+
+  // Shops (hôtel & extérieurs)
+  const shopOptions = shops.map((shop) => ({
+    label: shop.name,
+    route: `/shops?shop=${shop.id}`,
+    keywords: `${shop.name} ${shop.description ?? ''} shop boutique shopping magasin`,
+    type: 'shop',
+    icon: <Store className="w-4 h-4 text-yellow-700 mr-2 inline" />,
+    image: shop.image,
+    category: shop.is_hotel_shop ? "Hotel Shops" : "Nearby Shops"
+  }));
+
+  // 3. Fusionner toutes les options (pages principales + chaque item de chaque catégorie)
   const allSearchOptions = [
     ...SEARCHABLE_PAGES,
-    ...spaSearchOptions,
-    // ...similairement pour d'autres catégories si on souhaite plus tard
+    ...spaServiceOptions,
+    ...restaurantOptions,
+    ...shopOptions,
+    // ...autres catégories dynamiques à ajouter plus tard ici
   ];
 
   useEffect(() => {
-    // Handle Ctrl+K or Cmd+K shortcut
+    // Gestion du raccourci clavier Ctrl+K ou Cmd+K
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -79,7 +108,7 @@ const HeroSection = () => {
 
   const handleClearSearch = () => setQuery('');
 
-  // Filter results (amélioré pour mixer catégories/types)
+  // 4. Recherche et filtrage sur tous les items/pages
   const filteredResults = useMemo(() => {
     if (!query) return allSearchOptions;
     const normQ = normalize(query);
@@ -111,7 +140,7 @@ const HeroSection = () => {
         </div>
       </div>
       
-      {/* Search Bar */}
+      {/* Barre de recherche principale */}
       <div className="absolute -bottom-6 left-6 right-6">
         <div className="relative">
           <Input
@@ -150,7 +179,8 @@ const HeroSection = () => {
         </div>
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          {/* Grouper les résultats : d'abord les pages principales, puis les sous-services dynamiques */}
+          
+          {/* Groupe pages principales */}
           <CommandGroup heading="Pages principales">
             {filteredResults.filter(item => item.type === 'page').map(item => (
               <CommandItem
@@ -162,6 +192,8 @@ const HeroSection = () => {
               </CommandItem>
             ))}
           </CommandGroup>
+
+          {/* Groupe Spa */}
           <CommandGroup heading="Spa & Bien-être">
             {filteredResults.filter(item => item.type === 'spa-service').map(item => (
               <CommandItem
@@ -174,7 +206,35 @@ const HeroSection = () => {
               </CommandItem>
             ))}
           </CommandGroup>
-          {/* Ajouter d'autres groupes ici si besoin */}
+
+          {/* Groupe Restaurants */}
+          <CommandGroup heading="Restaurants">
+            {filteredResults.filter(item => item.type === 'restaurant').map(item => (
+              <CommandItem
+                key={item.route}
+                onSelect={() => handleSelect(item.route)}
+                className="cursor-pointer flex items-center"
+              >
+                <UtensilsCrossed className="w-4 h-4 text-primary mr-2" />
+                {item.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+
+          {/* Groupe Shops */}
+          <CommandGroup heading="Shops">
+            {filteredResults.filter(item => item.type === 'shop').map(item => (
+              <CommandItem
+                key={item.route}
+                onSelect={() => handleSelect(item.route)}
+                className="cursor-pointer flex items-center"
+              >
+                <Store className="w-4 h-4 text-yellow-700 mr-2" />
+                {item.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          
         </CommandList>
       </CommandDialog>
     </section>
@@ -182,3 +242,4 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+
