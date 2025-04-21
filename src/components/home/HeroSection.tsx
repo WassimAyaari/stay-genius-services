@@ -1,49 +1,75 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CommandDialog, 
-  CommandInput
+  CommandInput,
+  CommandList,
+  CommandItem,
+  CommandGroup,
+  CommandEmpty
 } from '@/components/ui/command';
 import { toast } from '@/components/ui/use-toast';
 
+// Hotel features/services list
+const SEARCHABLE_PAGES = [
+  { label: "About Us", route: "/about", keywords: "information hotel story" },
+  { label: "Gastronomy", route: "/dining", keywords: "dining restaurant food" },
+  { label: "Concierge", route: "/services", keywords: "concierge service support" },
+  { label: "Spa & Wellness", route: "/spa", keywords: "spa wellness relax" },
+  { label: "Shops", route: "/shops", keywords: "shopping shop luxury" },
+  { label: "Hotel Map", route: "/map", keywords: "map navigation directions" },
+  { label: "Destination", route: "/destination", keywords: "nearby activities" },
+  { label: "Events", route: "/events", keywords: "event" },
+  { label: "Activities", route: "/activities", keywords: "activity leisure fun" },
+  { label: "My Room", route: "/my-room", keywords: "room command requests" },
+  { label: "Contact", route: "/contact", keywords: "contact help assistance" },
+  { label: "Feedback", route: "/feedback", keywords: "review feedback" },
+  // Add more as needed...
+];
+
+const normalize = (str: string) =>
+  str
+    .toLocaleLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+// Main component
 const HeroSection = () => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Close search with Escape key
+    // Handle Ctrl+K or Cmd+K shortcut
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen(open => !open);
       }
     };
-
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  const handleClearSearch = () => {
-    setQuery('');
-  };
+  const handleClearSearch = () => setQuery('');
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Filter results
+  const filteredResults = useMemo(() => {
+    if (!query) return SEARCHABLE_PAGES;
+    const normQ = normalize(query);
+    return SEARCHABLE_PAGES.filter(
+      ({ label, keywords }) =>
+        normalize(label).includes(normQ) ||
+        normalize(keywords).includes(normQ)
+    );
+  }, [query]);
+
+  const handleSelect = (route: string) => {
+    navigate(route);
     setOpen(false);
-    
-    if (query.trim()) {
-      toast({
-        title: "Search",
-        description: "Taking you to relevant results",
-        duration: 2000,
-      });
-      navigate('/map');
-    }
-    
     setQuery('');
   };
 
@@ -71,20 +97,22 @@ const HeroSection = () => {
             className="w-full pl-12 pr-4 py-4 rounded-xl text-base bg-white shadow-lg border-none"
             onClick={() => setOpen(true)}
             onFocus={() => setOpen(true)}
+            readOnly
           />
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
       </div>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <form onSubmit={handleSearch}>
-          <div className="flex items-center border-b px-3">
+        <div className="px-3 pt-4">
+          <div className="flex items-center border-b">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <CommandInput 
               placeholder="Type to search..." 
               value={query}
               onValueChange={setQuery}
-              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+              autoFocus
             />
             {query && (
               <button 
@@ -96,7 +124,21 @@ const HeroSection = () => {
               </button>
             )}
           </div>
-        </form>
+        </div>
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup>
+            {filteredResults.map(item => (
+              <CommandItem
+                key={item.route}
+                onSelect={() => handleSelect(item.route)}
+                className="cursor-pointer"
+              >
+                {item.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
       </CommandDialog>
     </section>
   );
