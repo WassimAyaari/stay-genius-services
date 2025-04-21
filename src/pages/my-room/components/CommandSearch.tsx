@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { 
   Command, 
@@ -39,6 +40,7 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const { categories, allItems, isLoading } = useRequestCategories();
   const { userData } = useAuth();
   
+  // Group items by category
   const itemsByCategory = useMemo(() => {
     return allItems.reduce((acc, item) => {
       if (!item.is_active) return acc;
@@ -51,6 +53,7 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     }, {} as Record<string, typeof allItems>);
   }, [allItems]);
 
+  // Find security category
   const securityCategory = categories.find(
     (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('sécurité') || cat.name?.toLowerCase().includes('security')
   );
@@ -79,20 +82,24 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     return name;
   };
 
-  const filterItems = (items: typeof allItems) => {
+  // Filter items based on search term - memoized to prevent recalculation on every render
+  const filterItems = useCallback((items: typeof allItems) => {
     if (!searchTerm) return items;
+    
+    // Normalize text to handle accents and case
     const normalized = (str?: string) =>
       (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
     const search = normalized(searchTerm);
 
     return items.filter(item => {
       const name = normalized(item.name);
       const desc = normalized(item.description);
-      const matchInName = name.includes(search);
-      const matchInDesc = desc.includes(search);
-      return matchInName || matchInDesc;
+      
+      // Check if name or description contains the search term
+      return name.includes(search) || desc.includes(search);
     });
-  };
+  }, [searchTerm]);
 
   const handleSelect = (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
     setSelectedItem({
@@ -171,6 +178,12 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     }
   };
 
+  // Get filtered items by category for the UI
+  const getFilteredItemsForCategory = useCallback((categoryId: string) => {
+    const items = itemsByCategory[categoryId] || [];
+    return filterItems(items);
+  }, [itemsByCategory, filterItems]);
+
   return (
     <>
       <div 
@@ -220,8 +233,12 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
                   if (securityCategory && securityCategory.id === categoryId) return null;
                   const category = categories.find(c => c.id === categoryId);
                   if (!category) return null;
-                  const filtered = filterItems(items);
+                  
+                  // Get filtered items for this category
+                  const filtered = getFilteredItemsForCategory(categoryId);
+                  
                   if (filtered.length === 0) return null;
+                  
                   return (
                     <CommandGroup key={categoryId} heading={category.name}>
                       {filtered.map((item) => (
