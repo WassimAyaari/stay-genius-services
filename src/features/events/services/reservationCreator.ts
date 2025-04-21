@@ -32,7 +32,7 @@ export const createEventReservation = async (reservation: CreateEventReservation
   const reservationData = mapDtoToRow(reservation, userId);
   
   try {
-    // Use the full row data object instead of a partial one
+    // Use the properly typed row data object
     const { data, error } = await supabase
       .from('event_reservations')
       .insert(reservationData)
