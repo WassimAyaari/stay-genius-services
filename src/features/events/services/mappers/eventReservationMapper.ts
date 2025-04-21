@@ -1,31 +1,10 @@
 
-import { EventReservation, CreateEventReservationDTO } from '@/types/event';
+import { EventReservation } from '@/types/event';
 import { EventReservationRow } from '../../types/eventReservation';
+import { CreateEventReservationDTO } from '@/types/event';
 
 /**
- * Map a DTO to a row structure for database insertion
- */
-export const mapDtoToRow = (dto: CreateEventReservationDTO, userId: string | null): EventReservationRow => {
-  // Return a complete EventReservationRow with all required fields
-  return {
-    event_id: dto.eventId,
-    user_id: userId || null,
-    guest_name: dto.guestName || null,
-    guest_email: dto.guestEmail || null,
-    guest_phone: dto.guestPhone || null,
-    room_number: dto.roomNumber || null,
-    date: dto.date, // Ensure date is always provided
-    guests: dto.guests,
-    special_requests: dto.specialRequests || null,
-    status: dto.status || 'pending',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    id: crypto.randomUUID() // Generate a UUID for new records
-  };
-};
-
-/**
- * Map a database row to an EventReservation object
+ * Map a row from the database to an EventReservation
  */
 export const mapRowToEventReservation = (row: EventReservationRow): EventReservation => {
   return {
@@ -41,5 +20,23 @@ export const mapRowToEventReservation = (row: EventReservationRow): EventReserva
     specialRequests: row.special_requests || undefined,
     status: row.status as 'pending' | 'confirmed' | 'cancelled',
     createdAt: row.created_at
+  };
+};
+
+/**
+ * Map a DTO to a row for the database
+ */
+export const mapDtoToRow = (dto: CreateEventReservationDTO, userId?: string | null): Partial<EventReservationRow> => {
+  return {
+    event_id: dto.eventId,
+    user_id: userId || null,
+    guest_name: dto.guestName || null,
+    guest_email: dto.guestEmail || null,
+    guest_phone: dto.guestPhone || null,
+    room_number: dto.roomNumber || null,
+    date: dto.date,
+    guests: dto.guests,
+    special_requests: dto.specialRequests || null,
+    status: dto.status || 'pending',
   };
 };

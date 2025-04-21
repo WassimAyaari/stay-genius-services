@@ -158,4 +158,3 @@ const RestaurantManager = () => {
 };
 
 export default RestaurantManager;
-
