@@ -3,9 +3,6 @@ import { EventReservation } from '@/types/event';
 import { EventReservationRow } from '../../types/eventReservation';
 import { CreateEventReservationDTO } from '@/types/event';
 
-/**
- * Map a row from the database to an EventReservation
- */
 export const mapRowToEventReservation = (row: EventReservationRow): EventReservation => {
   return {
     id: row.id,
@@ -23,10 +20,10 @@ export const mapRowToEventReservation = (row: EventReservationRow): EventReserva
   };
 };
 
-/**
- * Map a DTO to a row for the database
- */
-export const mapDtoToRow = (dto: CreateEventReservationDTO, userId?: string | null): Omit<EventReservationRow, 'id' | 'created_at' | 'updated_at'> => {
+export const mapDtoToRow = (
+  dto: CreateEventReservationDTO, 
+  userId?: string | null
+): Omit<EventReservationRow, 'id' | 'created_at' | 'updated_at'> => {
   return {
     event_id: dto.eventId,
     user_id: userId || null,
@@ -34,7 +31,7 @@ export const mapDtoToRow = (dto: CreateEventReservationDTO, userId?: string | nu
     guest_email: dto.guestEmail || null,
     guest_phone: dto.guestPhone || null,
     room_number: dto.roomNumber || null,
-    date: dto.date,
+    date: dto.date,  // Ensure this is always present
     guests: dto.guests,
     special_requests: dto.specialRequests || null,
     status: dto.status || 'pending',

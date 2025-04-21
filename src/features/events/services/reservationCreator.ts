@@ -28,11 +28,10 @@ export const createEventReservation = async (reservation: CreateEventReservation
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || null;
   
-  // Create the reservation payload for Supabase format
+  // Create the properly typed reservation data
   const reservationData = mapDtoToRow(reservation, userId);
   
   try {
-    // Use the properly typed row data object
     const { data, error } = await supabase
       .from('event_reservations')
       .insert(reservationData)
