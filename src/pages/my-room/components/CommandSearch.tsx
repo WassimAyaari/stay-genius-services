@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { 
@@ -28,7 +27,6 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const { categories, allItems, isLoading } = useRequestCategories();
   const { userData } = useAuth();
   
-  // Calculer une seule fois les éléments groupés par catégorie
   const itemsByCategory = useMemo(() => {
     return allItems.reduce((acc, item) => {
       if (!item.is_active) return acc;
@@ -42,25 +40,26 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     }, {} as Record<string, typeof allItems>);
   }, [allItems]);
 
+  const securityCategory = categories.find(
+    (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('sécurité') || cat.name?.toLowerCase().includes('security')
+  );
+
   const handleSelect = async (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
     try {
-      // Get room information with fallbacks
       const roomInfo = room || { id: '' };
       let roomId = roomInfo.id;
       let roomNumber = room?.room_number || userData?.room_number || localStorage.getItem('user_room_number') || '';
       
       if (!roomId && !roomNumber) {
-        // Try to get from localStorage first before showing error
         const userDataStr = localStorage.getItem('user_data');
         if (userDataStr) {
           try {
             const userData = JSON.parse(userDataStr);
             if (userData.room_number) {
               roomNumber = userData.room_number;
-              // Save for future use
               localStorage.setItem('user_room_number', roomNumber);
             }
           } catch (error) {
@@ -78,16 +77,13 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
           return;
         }
         
-        // Use roomNumber as fallback for roomId
         roomId = roomNumber;
       }
       
-      // Ensure room number is always set in localStorage
       if (roomNumber && !localStorage.getItem('user_room_number')) {
         localStorage.setItem('user_room_number', roomNumber);
       }
       
-      // If we have roomNumber but no room ID, use roomNumber
       if (!roomId && roomNumber) {
         roomId = roomNumber;
       }
@@ -137,30 +133,54 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
             {isLoading ? (
               <div className="p-4 text-center text-sm text-muted-foreground">Loading services...</div>
             ) : (
-              Object.entries(itemsByCategory).map(([categoryId, items]) => {
-                const category = categories.find(c => c.id === categoryId);
-                if (!category) return null;
-                
-                return (
-                  <CommandGroup key={categoryId} heading={category.name}>
-                    {items.map((item) => (
-                      <CommandItem
-                        key={item.id}
-                        disabled={isSubmitting}
-                        onSelect={() => handleSelect(item.id, item.name, categoryId, item.description)}
-                        className="cursor-pointer"
-                      >
-                        <div>
-                          <div className="font-medium">{item.name}</div>
-                          {item.description && (
-                            <div className="text-sm text-gray-500 mt-1">{item.description}</div>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
+              <>
+                {securityCategory && (
+                  <CommandGroup heading={securityCategory.name}>
+                    {allItems
+                      .filter(item => item.category_id === securityCategory.id && item.is_active)
+                      .map((item) => (
+                        <CommandItem
+                          key={item.id}
+                          disabled={isSubmitting}
+                          onSelect={() => handleSelect(item.id, item.name, securityCategory.id, item.description)}
+                          className="cursor-pointer"
+                        >
+                          <div>
+                            <div className="font-medium">{item.name}</div>
+                            {item.description && (
+                              <div className="text-sm text-gray-500 mt-1">{item.description}</div>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
                   </CommandGroup>
-                );
-              })
+                )}
+                {Object.entries(itemsByCategory).map(([categoryId, items]) => {
+                  if (securityCategory && securityCategory.id === categoryId) return null;
+                  const category = categories.find(c => c.id === categoryId);
+                  if (!category) return null;
+                  
+                  return (
+                    <CommandGroup key={categoryId} heading={category.name}>
+                      {items.map((item) => (
+                        <CommandItem
+                          key={item.id}
+                          disabled={isSubmitting}
+                          onSelect={() => handleSelect(item.id, item.name, categoryId, item.description)}
+                          className="cursor-pointer"
+                        >
+                          <div>
+                            <div className="font-medium">{item.name}</div>
+                            {item.description && (
+                              <div className="text-sm text-gray-500 mt-1">{item.description}</div>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  );
+                })}
+              </>
             )}
           </CommandList>
         </Command>

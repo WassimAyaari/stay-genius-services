@@ -1,4 +1,3 @@
-
 export interface ServiceRequest {
   id: string;
   room_id: string;
@@ -40,5 +39,5 @@ export interface RequestItem {
   updated_at: string;
 }
 
-// Update ServiceType to only include basic service types
-export type ServiceType = 'service' | 'custom';
+// Étendre les types pour permettre de filtrer par "sécurité"
+export type ServiceType = 'service' | 'custom' | 'securite';
