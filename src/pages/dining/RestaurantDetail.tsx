@@ -1,129 +1,123 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { useRestaurants } from '@/hooks/useRestaurants';
-import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Restaurant } from '@/features/dining/types';
-import { toast } from 'sonner';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-// Import components
-import RestaurantGallery from './components/RestaurantGallery';
-import RestaurantInfo from './components/RestaurantInfo';
-import AboutRestaurant from './components/AboutRestaurant';
-import RestaurantMenu from './components/RestaurantMenu';
-import BookingDialog from './components/BookingDialog';
+import { UtensilsCrossed, Clock, MapPin, Calendar, BookText } from 'lucide-react';
+import Layout from '@/components/Layout';
+import { useRestaurants } from '@/hooks/useRestaurants';
+import { useToast } from '@/hooks/use-toast';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { EventsSection } from '@/components/events/EventsSection';
+import { useEvents } from '@/hooks/useEvents';
 
 const RestaurantDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const location = useLocation();
+  const { id } = useParams();
+  const restaurantId = id as string;
   const navigate = useNavigate();
-  const openBookingFromNavigation = location.state?.openBooking || false;
-  
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [isBookingOpen, setIsBookingOpen] = useState(openBookingFromNavigation);
-  const [activeTab, setActiveTab] = useState("info");
-  const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
-  
-  const { fetchRestaurantById, isLoading: isLoadingRestaurant } = useRestaurants();
-  const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(id);
-  
+  const location = useLocation();
+  const { toast } = useToast();
+  const { restaurant, isLoading } = useRestaurants(restaurantId);
+  const { upcomingEvents } = useEvents();
+  const [openBooking, setOpenBooking] = useState(false);
+
   useEffect(() => {
-    if (id && id !== ':id') {
-      fetchRestaurantById(id)
-        .then(data => setRestaurant(data))
-        .catch(err => {
-          console.error("Error fetching restaurant:", err);
-          toast.error("Erreur lors du chargement du restaurant");
-          navigate('/dining');
-        });
-    } else {
-      toast.error("ID de restaurant invalide");
-      navigate('/dining');
+    if (location.state?.openBooking) {
+      setOpenBooking(true);
     }
-  }, [id, fetchRestaurantById, navigate]);
-  
-  const handleReservationSuccess = () => {
-    setIsBookingOpen(false);
+  }, [location.state]);
+
+  const handleBookTable = () => {
+    toast({
+      title: "Success",
+      description: "Table reserved successfully!",
+    });
   };
 
-  const handleViewMenu = () => {
-    if (restaurant && restaurant.menuPdf) {
-      setSelectedPdf(restaurant.menuPdf);
-    } else {
-      setActiveTab("menu");
-    }
-  };
-
-  if (isLoadingRestaurant || !restaurant) {
-    return <div className="p-8 text-center">Chargement du restaurant...</div>;
-  }
+  const restaurantEvents = upcomingEvents?.filter(
+    event => event.restaurant_id === restaurantId
+  ) || [];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <RestaurantGallery 
-          images={restaurant.images} 
-          name={restaurant.name} 
-          status={restaurant.status}
-        />
-        
-        <RestaurantInfo
-          restaurant={restaurant}
-          onBookingClick={() => setIsBookingOpen(true)}
-          onViewMenuClick={handleViewMenu}
-        />
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="info">Informations</TabsTrigger>
-          <TabsTrigger value="menu">Menu</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="info" className="mt-6">
-          <AboutRestaurant restaurant={restaurant} />
-        </TabsContent>
-        
-        <TabsContent value="menu" className="mt-6">
-          <RestaurantMenu menuItems={menuItems} isLoading={isLoadingMenuItems} />
-        </TabsContent>
-      </Tabs>
-      
-      <BookingDialog
-        isOpen={isBookingOpen}
-        onOpenChange={setIsBookingOpen}
-        restaurantId={id || ''}
-        restaurantName={restaurant.name}
-        onSuccess={handleReservationSuccess}
-        buttonText={restaurant.actionText}
-      />
-
-      <Dialog open={!!selectedPdf} onOpenChange={(open) => !open && setSelectedPdf(null)}>
-        <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
-          <div className="absolute top-0 right-0 z-10 p-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0 rounded-full" 
-              onClick={() => setSelectedPdf(null)}
-            >
-              ✕
-            </Button>
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-pulse text-gray-400">Loading restaurant details...</div>
           </div>
-          {selectedPdf && (
-            <iframe
-              src={selectedPdf}
-              className="w-full h-full"
-              title="Menu PDF"
-              style={{ border: 'none' }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+        ) : !restaurant ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-400">Restaurant not found.</div>
+          </div>
+        ) : (
+          <>
+            <section className="mb-8">
+              <Card className="overflow-hidden">
+                <div className="md:flex">
+                  <div className="md:w-1/2 relative">
+                    <Carousel
+                      opts={{
+                        loop: true,
+                      }}
+                      className="w-full"
+                    >
+                      <CarouselContent className="w-full">
+                        {restaurant.images.map((image, index) => (
+                          <CarouselItem key={index} className="w-full">
+                            <img
+                              src={image}
+                              alt={`${restaurant.name} - Image ${index + 1}`}
+                              className="w-full h-96 object-cover"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious className="hidden sm:flex" />
+                      <CarouselNext className="hidden sm:flex" />
+                    </Carousel>
+                  </div>
+                  <div className="p-6 md:w-1/2">
+                    <h1 className="text-3xl font-semibold text-secondary mb-4">{restaurant.name}</h1>
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <UtensilsCrossed className="w-4 h-4" />
+                      <span>{restaurant.cuisine}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Clock className="w-4 h-4" />
+                      <span>{restaurant.openHours}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600 mb-4">
+                      <MapPin className="w-4 h-4" />
+                      <span>{restaurant.location}</span>
+                    </div>
+                    <p className="text-gray-600 mb-6">{restaurant.description}</p>
+                    <Button onClick={handleBookTable}>
+                      {restaurant.actionText || "Book a Table"}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </section>
+
+            {/* Add Events Section */}
+            <section className="mb-10">
+              <h2 className="text-2xl font-bold text-secondary mb-6">
+                Événements à venir
+              </h2>
+              <EventsSection events={restaurantEvents} />
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-secondary mb-6">Reviews</h2>
+              <Card className="p-6">
+                <p className="text-gray-600">No reviews yet.</p>
+              </Card>
+            </section>
+          </>
+        )}
+      </div>
+    </Layout>
   );
 };
 
