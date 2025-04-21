@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   CommandDialog,
@@ -25,12 +26,12 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ open, setOpen }) => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setOpen(!open);
       }
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, [setOpen]);
+  }, [setOpen, open]);
 
   const handleClearSearch = () => setQuery('');
 

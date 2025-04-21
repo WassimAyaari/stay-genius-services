@@ -90,4 +90,3 @@ export const useCommandSearchOptions = () => {
 
   return { allSearchOptions, getFilteredResults };
 };
-
