@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -11,6 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { EventsSection } from '@/components/events/EventsSection';
 import { useEvents } from '@/hooks/useEvents';
+import { useQuery } from '@tanstack/react-query';
+import { fetchRestaurantById } from '@/features/dining/services/restaurantService';
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -18,9 +21,15 @@ const RestaurantDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { restaurant, isLoading } = useRestaurants(restaurantId);
   const { upcomingEvents } = useEvents();
   const [openBooking, setOpenBooking] = useState(false);
+
+  // Use React Query directly to fetch a single restaurant
+  const { data: restaurant, isLoading } = useQuery({
+    queryKey: ['restaurant', restaurantId],
+    queryFn: () => fetchRestaurantById(restaurantId),
+    enabled: !!restaurantId,
+  });
 
   useEffect(() => {
     if (location.state?.openBooking) {
