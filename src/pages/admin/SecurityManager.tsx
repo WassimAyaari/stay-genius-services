@@ -20,6 +20,21 @@ const statusColors = {
   cancelled: 'bg-gray-100 text-gray-800',
 };
 
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'Pending';
+    case 'in_progress':
+      return 'In Progress';
+    case 'completed':
+      return 'Completed';
+    case 'cancelled':
+      return 'Cancelled';
+    default:
+      return status;
+  }
+};
+
 const SecurityManager = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('requests');
@@ -61,21 +76,17 @@ const SecurityManager = () => {
             Room {request.room_number || request.room_id}
           </CardTitle>
           <div className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[request.status] || statusColors['pending']}`}>
-            {request.status === 'pending'
-              ? 'Pending'
-              : request.status === 'in_progress'
-              ? 'In Progress'
-              : request.status === 'completed'
-              ? 'Completed'
-              : request.status === 'cancelled'
-              ? 'Cancelled'
-              : request.status}
+            {getStatusLabel(request.status)}
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="mb-2 text-sm">
           <span className="font-medium text-gray-700">Guest:</span> {request.guest_name || '-'}
+        </div>
+        <div className="mb-2 text-sm">
+          <span className="font-medium text-gray-700">Request:</span>{' '}
+          {request.request_items?.name || request.type}
         </div>
         <p className="text-sm mb-3">{request.description}</p>
         <div className="text-xs text-gray-500 mb-3">
@@ -89,7 +100,7 @@ const SecurityManager = () => {
                 variant="outline"
                 onClick={() => handleStatusChange(request.id, 'in_progress')}
               >
-                Take charge
+                Start
               </Button>
               <Button
                 size="sm"
