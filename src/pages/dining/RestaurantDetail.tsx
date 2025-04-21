@@ -14,6 +14,10 @@ import { EventsSection } from '@/components/events/EventsSection';
 import { useEvents } from '@/hooks/useEvents';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRestaurantById } from '@/features/dining/services/restaurantService';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import RestaurantMenu from './components/RestaurantMenu';
+import RestaurantInfo from './components/RestaurantInfo';
+import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -23,6 +27,8 @@ const RestaurantDetail = () => {
   const { toast } = useToast();
   const { upcomingEvents } = useEvents();
   const [openBooking, setOpenBooking] = useState(false);
+  const [activeTab, setActiveTab] = useState("info");
+  const { menuItems, isLoading: menuLoading } = useRestaurantMenus(restaurantId);
 
   // Use React Query directly to fetch a single restaurant
   const { data: restaurant, isLoading } = useQuery({
@@ -106,6 +112,34 @@ const RestaurantDetail = () => {
                     </Button>
                   </div>
                 </div>
+              </Card>
+            </section>
+
+            <section className="mb-8">
+              <Card>
+                <Tabs 
+                  value={activeTab} 
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="info">Information</TabsTrigger>
+                    <TabsTrigger value="menu">Menu</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="info" className="p-4">
+                    <RestaurantInfo 
+                      restaurant={restaurant} 
+                      onBookingClick={handleBookTable}
+                      onViewMenuClick={() => setActiveTab("menu")}
+                    />
+                  </TabsContent>
+                  <TabsContent value="menu" className="p-4">
+                    <RestaurantMenu 
+                      menuItems={menuItems} 
+                      isLoading={menuLoading} 
+                    />
+                  </TabsContent>
+                </Tabs>
               </Card>
             </section>
 
