@@ -26,7 +26,7 @@ export const mapRowToEventReservation = (row: EventReservationRow): EventReserva
 /**
  * Map a DTO to a row for the database
  */
-export const mapDtoToRow = (dto: CreateEventReservationDTO, userId?: string | null): Partial<EventReservationRow> => {
+export const mapDtoToRow = (dto: CreateEventReservationDTO, userId?: string | null): Omit<EventReservationRow, 'id' | 'created_at' | 'updated_at'> => {
   return {
     event_id: dto.eventId,
     user_id: userId || null,
