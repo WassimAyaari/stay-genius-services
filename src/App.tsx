@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -49,7 +48,6 @@ import MaintenanceManager from '@/pages/admin/MaintenanceManager';
 import DestinationManager from '@/pages/admin/DestinationManager';
 import FeedbackManager from '@/pages/admin/FeedbackManager';
 import SecurityManager from '@/pages/admin/SecurityManager';
-import InformationTechnologyManager from '@/pages/admin/InformationTechnologyManager';
 
 const queryClient = new QueryClient();
 
@@ -143,12 +141,6 @@ function App() {
               <Route path="/admin/maintenance" element={
                 <AuthGuard adminRequired={true}>
                   <MaintenanceManager />
-                </AuthGuard>
-              } />
-              
-              <Route path="/admin/information-technology" element={
-                <AuthGuard adminRequired={true}>
-                  <InformationTechnologyManager />
                 </AuthGuard>
               } />
               

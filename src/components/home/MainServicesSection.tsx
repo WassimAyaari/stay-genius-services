@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UtensilsCrossed, Heart, Phone, Info, Laptop } from 'lucide-react';
+import { UtensilsCrossed, Heart, Phone, Info } from 'lucide-react';
 import ServiceCard from './ServiceCard';
 import { useLocation } from 'react-router-dom';
 
@@ -49,15 +49,6 @@ const MainServicesSection = () => {
           description="Relax and rejuvenate" 
           actionText="Book Treatment" 
           actionLink="/spa" 
-          status="Available" 
-        />
-        
-        <ServiceCard 
-          icon={<Laptop className="w-6 h-6 text-primary" />} 
-          title="IT Support" 
-          description="Technical assistance" 
-          actionText="Request Help" 
-          actionLink="/services" 
           status="Available" 
         />
       </div>
