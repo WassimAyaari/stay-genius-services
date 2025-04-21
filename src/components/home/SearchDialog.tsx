@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   CommandDialog,
@@ -8,7 +7,7 @@ import {
   CommandGroup,
   CommandEmpty
 } from '@/components/ui/command';
-import { Search, X, Leaf, UtensilsCrossed, Store } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCommandSearchOptions } from './useCommandSearchOptions';
 
@@ -80,40 +79,49 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ open, setOpen }) => {
           ))}
         </CommandGroup>
         <CommandGroup heading="Spa & Bien-être">
-          {filteredResults.filter(item => item.type === 'spa-service').map(item => (
-            <CommandItem
-              key={item.route}
-              onSelect={() => handleSelect(item.route)}
-              className="cursor-pointer flex items-center"
-            >
-              <Leaf className="w-4 h-4 text-green-600 mr-2" />
-              {item.label}
-            </CommandItem>
-          ))}
+          {filteredResults.filter(item => item.type === 'spa-service').map(item => {
+            const Icon = item.icon;
+            return (
+              <CommandItem
+                key={item.route}
+                onSelect={() => handleSelect(item.route)}
+                className="cursor-pointer flex items-center"
+              >
+                {Icon && <Icon className="w-4 h-4 text-green-600 mr-2" />}
+                {item.label}
+              </CommandItem>
+            );
+          })}
         </CommandGroup>
         <CommandGroup heading="Restaurants">
-          {filteredResults.filter(item => item.type === 'restaurant').map(item => (
-            <CommandItem
-              key={item.route}
-              onSelect={() => handleSelect(item.route)}
-              className="cursor-pointer flex items-center"
-            >
-              <UtensilsCrossed className="w-4 h-4 text-primary mr-2" />
-              {item.label}
-            </CommandItem>
-          ))}
+          {filteredResults.filter(item => item.type === 'restaurant').map(item => {
+            const Icon = item.icon;
+            return (
+              <CommandItem
+                key={item.route}
+                onSelect={() => handleSelect(item.route)}
+                className="cursor-pointer flex items-center"
+              >
+                {Icon && <Icon className="w-4 h-4 text-primary mr-2" />}
+                {item.label}
+              </CommandItem>
+            );
+          })}
         </CommandGroup>
         <CommandGroup heading="Shops">
-          {filteredResults.filter(item => item.type === 'shop').map(item => (
-            <CommandItem
-              key={item.route}
-              onSelect={() => handleSelect(item.route)}
-              className="cursor-pointer flex items-center"
-            >
-              <Store className="w-4 h-4 text-yellow-700 mr-2" />
-              {item.label}
-            </CommandItem>
-          ))}
+          {filteredResults.filter(item => item.type === 'shop').map(item => {
+            const Icon = item.icon;
+            return (
+              <CommandItem
+                key={item.route}
+                onSelect={() => handleSelect(item.route)}
+                className="cursor-pointer flex items-center"
+              >
+                {Icon && <Icon className="w-4 h-4 text-yellow-700 mr-2" />}
+                {item.label}
+              </CommandItem>
+            );
+          })}
         </CommandGroup>
       </CommandList>
     </CommandDialog>

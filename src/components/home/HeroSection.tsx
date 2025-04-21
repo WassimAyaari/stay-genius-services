@@ -1,4 +1,5 @@
 
+// Refactor HeroSection to use smaller components
 import React, { useState } from 'react';
 import HeroBanner from './HeroBanner';
 import SearchBar from './SearchBar';

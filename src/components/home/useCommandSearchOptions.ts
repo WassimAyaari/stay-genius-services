@@ -31,7 +31,7 @@ interface SearchOption {
   route: string;
   keywords: string;
   type: string;
-  icon?: React.ReactNode;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   image?: string;
   category?: string;
 }
@@ -46,7 +46,7 @@ export const useCommandSearchOptions = () => {
     route: `/spa?service=${service.id}`,
     keywords: `${service.name} ${service.description ?? ''} spa wellness soins`,
     type: 'spa-service',
-    icon: <Leaf className="w-4 h-4 text-green-600 mr-2 inline" />,
+    icon: Leaf,
     image: service.image,
     category: "Spa"
   }));
@@ -56,7 +56,7 @@ export const useCommandSearchOptions = () => {
     route: `/dining/${rest.id}`,
     keywords: `${rest.name} ${rest.cuisine ?? ''} restaurant gastronomy food ${rest.description ?? ''}`,
     type: 'restaurant',
-    icon: <UtensilsCrossed className="w-4 h-4 text-primary mr-2 inline" />,
+    icon: UtensilsCrossed,
     image: rest.images?.[0],
     category: "Restaurants",
   }));
@@ -66,7 +66,7 @@ export const useCommandSearchOptions = () => {
     route: `/shops?shop=${shop.id}`,
     keywords: `${shop.name} ${shop.description ?? ''} shop boutique shopping magasin`,
     type: 'shop',
-    icon: <Store className="w-4 h-4 text-yellow-700 mr-2 inline" />,
+    icon: Store,
     image: shop.image,
     category: shop.is_hotel_shop ? "Hotel Shops" : "Nearby Shops"
   }));
@@ -90,3 +90,4 @@ export const useCommandSearchOptions = () => {
 
   return { allSearchOptions, getFilteredResults };
 };
+
