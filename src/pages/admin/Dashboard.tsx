@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +12,8 @@ import {
   Trash2,
   Wrench,
   MessageSquare,
-  Shield
+  Shield,
+  Wifi
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -102,6 +102,13 @@ const AdminDashboard = () => {
       count: 132, 
       trend: "+28 this week", 
       path: "#" 
+    },
+    { 
+      title: "Information Technology", 
+      icon: <Wifi className="h-5 w-5 text-primary" />, 
+      count: null, 
+      trend: "", 
+      path: "/admin/information-technology" 
     }
   ];
 
