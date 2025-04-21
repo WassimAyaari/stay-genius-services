@@ -64,11 +64,11 @@ export const createServiceRequest = async (requestData: {
             .from('guests')
             .select('first_name, last_name')
             .eq('room_number', requestData.room_number)
-            .limit(1)
-            .maybeSingle();
+            .order('updated_at', { ascending: false })
+            .limit(1);
           
-          if (!guestError && guestData) {
-            requestData.guest_name = `${guestData.first_name || ''} ${guestData.last_name || ''}`.trim() || 'Guest';
+          if (!guestError && guestData && guestData.length > 0) {
+            requestData.guest_name = `${guestData[0].first_name || ''} ${guestData[0].last_name || ''}`.trim() || 'Guest';
             console.log('Using guest name from database:', requestData.guest_name);
           }
         } catch (error) {
@@ -150,7 +150,26 @@ export const requestService = async (
       localStorage.setItem('user_room_number', room_number);
     }
     
-    console.log('Submitting service request with room_number:', room_number);
+    // Si guest_name est 'Guest' et que nous avons un room_number, essayer d'obtenir le nom réel
+    if ((guest_name === 'Guest' || !guest_name) && room_number) {
+      try {
+        const { data: guestData, error: guestError } = await supabase
+          .from('guests')
+          .select('first_name, last_name')
+          .eq('room_number', room_number)
+          .order('updated_at', { ascending: false })
+          .limit(1);
+        
+        if (!guestError && guestData && guestData.length > 0) {
+          guest_name = `${guestData[0].first_name || ''} ${guestData[0].last_name || ''}`.trim() || 'Guest';
+          console.log('Found guest name from database:', guest_name);
+        }
+      } catch (error) {
+        console.error("Error fetching guest data:", error);
+      }
+    }
+    
+    console.log('Submitting service request with room_number:', room_number, 'and guest_name:', guest_name);
     
     // Vérifier si le roomId est au format UUID ou au format numéro de chambre
     let actualRoomId = roomId;

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -53,27 +54,41 @@ const SecurityManager = () => {
   const inProgressRequests = securityRequests.filter(req => req.status === 'in_progress');
   const completedRequests = securityRequests.filter(req => req.status === 'completed');
 
+  // Fonction améliorée pour obtenir le nom du guest
   const fetchGuestNameForRoom = async (roomNumber: string, currentGuestName: string | undefined) => {
-    if (currentGuestName && currentGuestName !== 'Guest') return currentGuestName;
+    // Si le nom actuel n'est ni vide, ni "Guest", on le retourne
+    if (currentGuestName && currentGuestName !== 'Guest') {
+      return currentGuestName;
+    }
+    
+    if (!roomNumber) {
+      console.log("No room number provided for guest lookup");
+      return 'Guest';
+    }
     
     try {
+      console.log(`Fetching guest name for room ${roomNumber}`);
+      
+      // Recherche du guest basée sur le numéro de chambre
       const { data, error } = await supabase
         .from('guests')
         .select('first_name, last_name')
         .eq('room_number', roomNumber)
         .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
         
       if (error) {
         console.error("Error fetching guest data:", error);
         return currentGuestName || 'Guest';
       }
       
-      if (data) {
-        return `${data.first_name} ${data.last_name}`.trim();
+      if (data && data.length > 0) {
+        const fullName = `${data[0].first_name || ''} ${data[0].last_name || ''}`.trim();
+        console.log(`Found guest: ${fullName} for room ${roomNumber}`);
+        return fullName || currentGuestName || 'Guest';
       }
       
+      console.log(`No guest found for room ${roomNumber}`);
       return currentGuestName || 'Guest';
     } catch (error) {
       console.error("Error in fetchGuestNameForRoom:", error);
@@ -104,11 +119,14 @@ const SecurityManager = () => {
   const RequestCard = ({ request }: { request: any }) => {
     const [guestName, setGuestName] = useState<string>(request.guest_name || 'Guest');
     
-    React.useEffect(() => {
+    useEffect(() => {
       const getGuestName = async () => {
-        if (request.room_number && (!request.guest_name || request.guest_name === 'Guest')) {
+        // Tenter de récupérer le nom même si guest_name existe mais vaut "Guest"
+        if (request.room_number) {
           const name = await fetchGuestNameForRoom(request.room_number, request.guest_name);
-          setGuestName(name);
+          if (name !== 'Guest' || name !== request.guest_name) {
+            setGuestName(name);
+          }
         }
       };
       
