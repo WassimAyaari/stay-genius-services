@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +10,8 @@ import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { Button } from '@/components/ui/button';
 import { ServiceRequest } from '@/features/rooms/types';
 import SecurityItemsTab from './security/SecurityItemsTab';
-import AddItemDialog from '../housekeeping/components/AddItemDialog';
-import EditItemDialog from '../housekeeping/components/EditItemDialog';
+import AddItemDialog from './security/AddItemDialog';
+import EditItemDialog from './security/EditItemDialog';
 import { RequestItem } from '@/features/rooms/types';
 import { useCreateRequestItem, useUpdateRequestItem } from '@/hooks/useRequestCategories';
 
@@ -144,7 +145,7 @@ const SecurityManager = () => {
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible d’ajouter l’item",
+        description: "Impossible d'ajouter l'item",
         variant: "destructive"
       });
     }
@@ -163,7 +164,7 @@ const SecurityManager = () => {
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Erreur mise à jour de l’item",
+        description: "Erreur mise à jour de l'item",
         variant: "destructive"
       });
     }
