@@ -55,13 +55,43 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('sécurité') || cat.name?.toLowerCase().includes('security')
   );
 
+  const getActualGuestName = () => {
+    const { userData } = useAuth();
+    let name = '';
+    if (userData) {
+      const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+      if (fullName && fullName.toLowerCase() !== 'guest') {
+        name = fullName;
+      }
+    }
+    if (!name) {
+      const stored = localStorage.getItem('user_data');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          const localFullName = `${parsed.first_name || ''} ${parsed.last_name || ''}`.trim();
+          if (localFullName && localFullName.toLowerCase() !== 'guest') {
+            name = localFullName;
+          }
+        } catch {}
+      }
+    }
+    return name;
+  };
+
   const filterItems = (items: typeof allItems) => {
     if (!searchTerm) return items;
-    const lower = searchTerm.toLowerCase();
-    return items.filter(item =>
-      (item.name && item.name.toLowerCase().includes(lower)) ||
-      (item.description && item.description.toLowerCase().includes(lower))
-    );
+    const normalized = (str?: string) =>
+      (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const search = normalized(searchTerm);
+
+    return items.filter(item => {
+      const name = normalized(item.name);
+      const desc = normalized(item.description);
+      const matchInName = name.includes(search);
+      const matchInDesc = desc.includes(search);
+      return matchInName || matchInDesc;
+    });
   };
 
   const handleSelect = (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
