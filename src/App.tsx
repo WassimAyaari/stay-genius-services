@@ -49,6 +49,7 @@ import DestinationManager from '@/pages/admin/DestinationManager';
 import FeedbackManager from '@/pages/admin/FeedbackManager';
 import SecurityManager from '@/pages/admin/SecurityManager';
 import InformationTechnologyManager from '@/pages/admin/InformationTechnologyManager';
+import RestaurantEventsManager from '@/pages/admin/RestaurantEventsManager';
 
 const queryClient = new QueryClient();
 

@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, UtensilsCrossed, Utensils, CalendarDays, PlusCircle } from 'lucide-react';
+import { Edit, Trash2, UtensilsCrossed, Utensils, CalendarDays, PlusCircle, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import RestaurantEventsDialog from '@/pages/admin/components/restaurants/RestaurantEventsDialog';
 import { useEvents } from '@/hooks/useEvents';
@@ -13,6 +14,7 @@ interface RestaurantTableProps {
   onDelete: (id: string) => void;
   onViewMenus: (id: string) => void;
   onViewReservations: (id: string) => void;
+  onAddEvent?: (restaurant: any) => void;
 }
 
 export const RestaurantTable: React.FC<RestaurantTableProps> = ({
@@ -21,6 +23,7 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
   onDelete,
   onViewMenus,
   onViewReservations,
+  onAddEvent,
 }) => {
   const navigate = useNavigate();
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
@@ -135,7 +138,7 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
                       onClick={() => navigate(`/admin/restaurants/${restaurant.id}/events`)}
                       title="Manage Events"
                     >
-                      <CalendarPlus className="h-4 w-4" />
+                      <Calendar className="h-4 w-4" />
                       <span className="sr-only">Manage Events</span>
                     </Button>
                   </div>

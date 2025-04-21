@@ -36,7 +36,7 @@ const RestaurantEventsDialog = ({ isOpen, onOpenChange, restaurant, event }: Res
           time: data.time,
           capacity: data.capacity,
           price: data.price
-        };
+        } as Omit<Event, 'id' | 'created_at' | 'updated_at'>;
         
         await createEvent(eventData);
         toast.success("Événement créé avec succès");

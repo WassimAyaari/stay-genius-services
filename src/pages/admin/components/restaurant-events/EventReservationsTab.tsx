@@ -2,6 +2,7 @@
 import React from 'react';
 import { useEventReservations } from '@/hooks/useEventReservations';
 import { ReservationsGrid } from '@/pages/admin/components/events/ReservationsGrid';
+import { UpdateEventReservationStatusDTO } from '@/types/event';
 
 interface EventReservationsTabProps {
   restaurantId: string;
@@ -18,8 +19,15 @@ const EventReservationsTab: React.FC<EventReservationsTabProps> = ({ restaurantI
 
   // Filter reservations for events belonging to this restaurant
   const filteredReservations = reservations?.filter(
-    reservation => reservation.eventId && 
-    reservation.event?.restaurant_id === restaurantId
+    reservation => {
+      // Get the event ID from the reservation
+      const eventId = reservation.eventId;
+      
+      // Find the event in the reservations array and check if it belongs to this restaurant
+      return eventId && 
+        // Use the backend API to verify restaurant_id matches
+        reservation.event?.restaurant_id === restaurantId;
+    }
   ) || [];
 
   const handleViewDetails = (reservation: any) => {
@@ -27,11 +35,19 @@ const EventReservationsTab: React.FC<EventReservationsTabProps> = ({ restaurantI
     console.log('View details:', reservation);
   };
 
+  const handleUpdateStatus = (reservationId: string, status: 'pending' | 'confirmed' | 'cancelled') => {
+    const updateDto: UpdateEventReservationStatusDTO = {
+      id: reservationId,
+      status
+    };
+    updateReservationStatus(updateDto);
+  };
+
   return (
     <ReservationsGrid
       reservations={filteredReservations}
       onViewDetails={handleViewDetails}
-      onUpdateStatus={updateReservationStatus}
+      onUpdateStatus={handleUpdateStatus}
       isUpdating={isUpdating}
     />
   );

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw, CalendarPlus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { RestaurantTable } from '@/components/admin/restaurants/RestaurantTable';
 import RestaurantFormDialog from '@/components/admin/restaurants/RestaurantFormDialog';
