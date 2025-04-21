@@ -63,10 +63,10 @@ const HeroSection = () => {
     category: "Spa"
   }));
 
-  // Restaurants
+  // Restaurants - Correction de la route pour correspondre à App.tsx (/dining/:id au lieu de /dining/restaurant/:id)
   const restaurantOptions = restaurants.map((rest) => ({
     label: rest.name,
-    route: `/dining/restaurant/${rest.id}`,
+    route: `/dining/${rest.id}`,
     keywords: `${rest.name} ${rest.cuisine ?? ''} restaurant gastronomy food ${rest.description ?? ''}`,
     type: 'restaurant',
     icon: <UtensilsCrossed className="w-4 h-4 text-primary mr-2 inline" />,
@@ -242,4 +242,3 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
-
