@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,11 @@ import { useRequestCategories, useSecurityCategory } from '@/hooks/useRequestCat
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { Button } from '@/components/ui/button';
 import { ServiceRequest } from '@/features/rooms/types';
+import SecurityItemsTab from './security/SecurityItemsTab';
+import AddItemDialog from '../housekeeping/components/AddItemDialog';
+import EditItemDialog from '../housekeeping/components/EditItemDialog';
+import { RequestItem } from '@/features/rooms/types';
+import { useCreateRequestItem, useUpdateRequestItem } from '@/hooks/useRequestCategories';
 
 const SecurityManager = () => {
   const { toast } = useToast();
@@ -17,26 +21,20 @@ const SecurityManager = () => {
   const { categories } = useRequestCategories();
   const securityCategory = useSecurityCategory();
 
-  // Filtrer les demandes liées à la sécurité
   const securityRequests = allRequests?.filter(
     request => request.category_id === securityCategory?.id
   ) || [];
 
-  // Gérer les demandes par statut
   const pendingRequests = securityRequests.filter(req => req.status === 'pending');
   const inProgressRequests = securityRequests.filter(req => req.status === 'in_progress');
   const completedRequests = securityRequests.filter(req => req.status === 'completed');
 
   const handleStatusChange = async (requestId: string, newStatus: 'in_progress' | 'completed') => {
     try {
-      // Cette partie doit être adaptée à votre logique de mise à jour des demandes
-      // Pour l'instant, nous utilisons juste une notification toast
       toast({
         title: "Statut mis à jour",
         description: `Demande ${requestId} mise à jour avec le statut: ${newStatus}`,
       });
-      
-      // Rafraîchir les données après mise à jour
       refetch();
     } catch (error) {
       console.error("Erreur lors de la mise à jour du statut:", error);
@@ -97,6 +95,85 @@ const SecurityManager = () => {
     </Card>
   );
 
+  const [itemsTabSearch, setItemsTabSearch] = useState('');
+  const [newItem, setNewItem] = useState({
+    name: '',
+    description: '',
+    category_id: '',
+    is_active: true
+  });
+  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
+  const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<RequestItem | null>(null);
+  const createItem = useCreateRequestItem();
+  const updateItem = useUpdateRequestItem();
+
+  const handleAddItem = async () => {
+    if (!securityCategory) {
+      toast({
+        title: "Erreur",
+        description: "Catégorie sécurité introuvable",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (!newItem.name) {
+      toast({
+        title: "Validation",
+        description: "Le nom de l'item est requis",
+        variant: "destructive"
+      });
+      return;
+    }
+    try {
+      await createItem.mutateAsync({
+        ...newItem,
+        category_id: securityCategory.id
+      });
+      toast({
+        title: "Succès",
+        description: "Item ajouté avec succès"
+      });
+      setNewItem({
+        name: '',
+        description: '',
+        category_id: '',
+        is_active: true
+      });
+      setIsAddItemDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d’ajouter l’item",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateItem = async () => {
+    if (!editingItem) return;
+    try {
+      await updateItem.mutateAsync(editingItem);
+      toast({
+        title: "Succès",
+        description: "Item mis à jour"
+      });
+      setIsEditItemDialogOpen(false);
+      setEditingItem(null);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur mise à jour de l’item",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const openEditDialog = (item: RequestItem) => {
+    setEditingItem(item);
+    setIsEditItemDialogOpen(true);
+  };
+
   return (
     <Layout>
       <div className="container py-8">
@@ -108,6 +185,7 @@ const SecurityManager = () => {
         <Tabs defaultValue="requests" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="requests">Demandes de sécurité</TabsTrigger>
+            <TabsTrigger value="items">Items</TabsTrigger>
             <TabsTrigger value="settings">Paramètres</TabsTrigger>
           </TabsList>
 
@@ -159,6 +237,15 @@ const SecurityManager = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="items">
+            <SecurityItemsTab
+              searchTerm={itemsTabSearch}
+              setSearchTerm={setItemsTabSearch}
+              openAddItemDialog={() => setIsAddItemDialogOpen(true)}
+              openEditDialog={openEditDialog}
+            />
+          </TabsContent>
+
           <TabsContent value="settings">
             <Card>
               <CardHeader>
@@ -183,6 +270,22 @@ const SecurityManager = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <AddItemDialog
+          isOpen={isAddItemDialogOpen}
+          onOpenChange={setIsAddItemDialogOpen}
+          newItem={newItem}
+          setNewItem={setNewItem}
+          onAdd={handleAddItem}
+        />
+
+        <EditItemDialog
+          isOpen={isEditItemDialogOpen}
+          onOpenChange={setIsEditItemDialogOpen}
+          editingItem={editingItem}
+          setEditingItem={setEditingItem}
+          onUpdate={handleUpdateItem}
+        />
       </div>
     </Layout>
   );
