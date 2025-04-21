@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { 
@@ -55,7 +54,6 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('sécurité') || cat.name?.toLowerCase().includes('security')
   );
 
-  // When user selects an item, show confirmation dialog
   const handleSelect = (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
     setSelectedItem({
       id: itemId,
@@ -66,7 +64,6 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     setConfirmDialogOpen(true);
   };
 
-  // Actually send request after confirmation
   const handleConfirmRequest = async () => {
     if (!selectedItem) return;
     setIsSubmitting(true);
@@ -203,11 +200,10 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
           </CommandList>
         </Command>
       </CommandDialog>
-      {/* Confirmation Dialog */}
       <Dialog open={confirmDialogOpen} onOpenChange={(open) => { setConfirmDialogOpen(open); if (!open) setSelectedItem(null); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Request</DialogTitle>
+            <DialogTitle>Confirm Service Request</DialogTitle>
             <DialogDescription>
               {selectedItem ? (
                 <>
@@ -244,4 +240,3 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
 };
 
 export default CommandSearch;
-
