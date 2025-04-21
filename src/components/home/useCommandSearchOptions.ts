@@ -3,6 +3,7 @@ import { useSpaServices } from '@/hooks/useSpaServices';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useShops } from '@/hooks/useShops';
 import { Leaf, UtensilsCrossed, Store } from 'lucide-react';
+import React from 'react';
 
 const SEARCHABLE_PAGES = [
   { label: "About Us", route: "/about", keywords: "information hotel story", type: 'page' },
@@ -25,12 +26,22 @@ const normalize = (str: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
+interface SearchOption {
+  label: string;
+  route: string;
+  keywords: string;
+  type: string;
+  icon?: React.ReactNode;
+  image?: string;
+  category?: string;
+}
+
 export const useCommandSearchOptions = () => {
   const { services: spaServices = [] } = useSpaServices();
   const { restaurants = [] } = useRestaurants();
   const { shops = [] } = useShops();
 
-  const spaServiceOptions = spaServices.map((service) => ({
+  const spaServiceOptions: SearchOption[] = spaServices.map((service) => ({
     label: service.name,
     route: `/spa?service=${service.id}`,
     keywords: `${service.name} ${service.description ?? ''} spa wellness soins`,
@@ -40,7 +51,7 @@ export const useCommandSearchOptions = () => {
     category: "Spa"
   }));
 
-  const restaurantOptions = restaurants.map((rest) => ({
+  const restaurantOptions: SearchOption[] = restaurants.map((rest) => ({
     label: rest.name,
     route: `/dining/${rest.id}`,
     keywords: `${rest.name} ${rest.cuisine ?? ''} restaurant gastronomy food ${rest.description ?? ''}`,
@@ -50,7 +61,7 @@ export const useCommandSearchOptions = () => {
     category: "Restaurants",
   }));
 
-  const shopOptions = shops.map((shop) => ({
+  const shopOptions: SearchOption[] = shops.map((shop) => ({
     label: shop.name,
     route: `/shops?shop=${shop.id}`,
     keywords: `${shop.name} ${shop.description ?? ''} shop boutique shopping magasin`,
