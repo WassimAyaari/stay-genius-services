@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +13,7 @@ import EditItemDialog from './security/EditItemDialog';
 import { RequestItem } from '@/features/rooms/types';
 import { useCreateRequestItem, useUpdateRequestItem } from '@/hooks/useRequestCategories';
 import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
+import { supabase } from '@/integrations/supabase/client';
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -53,9 +53,36 @@ const SecurityManager = () => {
   const inProgressRequests = securityRequests.filter(req => req.status === 'in_progress');
   const completedRequests = securityRequests.filter(req => req.status === 'completed');
 
+  const fetchGuestNameForRoom = async (roomNumber: string, currentGuestName: string | undefined) => {
+    if (currentGuestName && currentGuestName !== 'Guest') return currentGuestName;
+    
+    try {
+      const { data, error } = await supabase
+        .from('guests')
+        .select('first_name, last_name')
+        .eq('room_number', roomNumber)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Error fetching guest data:", error);
+        return currentGuestName || 'Guest';
+      }
+      
+      if (data) {
+        return `${data.first_name} ${data.last_name}`.trim();
+      }
+      
+      return currentGuestName || 'Guest';
+    } catch (error) {
+      console.error("Error in fetchGuestNameForRoom:", error);
+      return currentGuestName || 'Guest';
+    }
+  };
+
   const handleStatusChange = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     try {
-      // Call the updateRequestStatus function
       await updateRequestStatus(requestId, newStatus);
       
       toast({
@@ -63,7 +90,6 @@ const SecurityManager = () => {
         description: `Request ${requestId} updated to ${getStatusLabel(newStatus)}`,
       });
       
-      // Refetch data after successful update
       refetch();
     } catch (error) {
       console.error("Error updating status:", error);
@@ -75,73 +101,88 @@ const SecurityManager = () => {
     }
   };
 
-  const RequestCard = ({ request }: { request: any }) => (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-base font-semibold">
-            Room {request.room_number || request.room_id}
-          </CardTitle>
-          <div className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[request.status] || statusColors['pending']}`}>
-            {getStatusLabel(request.status)}
+  const RequestCard = ({ request }: { request: any }) => {
+    const [guestName, setGuestName] = useState<string>(request.guest_name || 'Guest');
+    
+    React.useEffect(() => {
+      const getGuestName = async () => {
+        if (request.room_number && (!request.guest_name || request.guest_name === 'Guest')) {
+          const name = await fetchGuestNameForRoom(request.room_number, request.guest_name);
+          setGuestName(name);
+        }
+      };
+      
+      getGuestName();
+    }, [request.room_number, request.guest_name]);
+    
+    return (
+      <Card className="mb-4 hover:shadow-md transition-shadow">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-base font-semibold">
+              Room {request.room_number || request.room_id}
+            </CardTitle>
+            <div className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[request.status] || statusColors['pending']}`}>
+              {getStatusLabel(request.status)}
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-2 text-sm">
-          <span className="font-medium text-gray-700">Guest:</span> {request.guest_name || '-'}
-        </div>
-        <div className="mb-2 text-sm">
-          <span className="font-medium text-gray-700">Request:</span>{' '}
-          {request.request_items?.name || request.type}
-        </div>
-        <p className="text-sm mb-3">{request.description}</p>
-        <div className="text-xs text-gray-500 mb-3">
-          Created on {new Date(request.created_at).toLocaleString()}
-        </div>
-        <div className="flex gap-2">
-          {request.status === 'pending' && (
-            <>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => handleStatusChange(request.id, 'in_progress')}
-              >
-                Start
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-red-500"
-                onClick={() => handleStatusChange(request.id, 'cancelled')}
-              >
-                Cancel
-              </Button>
-            </>
-          )}
-          {request.status === 'in_progress' && (
-            <>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => handleStatusChange(request.id, 'completed')}
-              >
-                Complete
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-red-500"
-                onClick={() => handleStatusChange(request.id, 'cancelled')}
-              >
-                Cancel
-              </Button>
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardHeader>
+        <CardContent>
+          <div className="mb-2 text-sm">
+            <span className="font-medium text-gray-700">Guest:</span> {guestName}
+          </div>
+          <div className="mb-2 text-sm">
+            <span className="font-medium text-gray-700">Request:</span>{' '}
+            {request.request_items?.name || request.type}
+          </div>
+          <p className="text-sm mb-3">{request.description}</p>
+          <div className="text-xs text-gray-500 mb-3">
+            Created on {new Date(request.created_at).toLocaleString()}
+          </div>
+          <div className="flex gap-2">
+            {request.status === 'pending' && (
+              <>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleStatusChange(request.id, 'in_progress')}
+                >
+                  Start
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-red-500"
+                  onClick={() => handleStatusChange(request.id, 'cancelled')}
+                >
+                  Cancel
+                </Button>
+              </>
+            )}
+            {request.status === 'in_progress' && (
+              <>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleStatusChange(request.id, 'completed')}
+                >
+                  Complete
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-red-500"
+                  onClick={() => handleStatusChange(request.id, 'cancelled')}
+                >
+                  Cancel
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const [itemsTabSearch, setItemsTabSearch] = useState('');
   const [newItem, setNewItem] = useState({

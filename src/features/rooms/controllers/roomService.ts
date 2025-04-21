@@ -42,7 +42,7 @@ export const createServiceRequest = async (requestData: {
     }
 
     // S'assurer que le guest_name est toujours présent
-    if (!requestData.guest_name) {
+    if (!requestData.guest_name || requestData.guest_name === 'Guest') {
       const userDataStr = localStorage.getItem('user_data');
       if (userDataStr) {
         try {
@@ -54,6 +54,25 @@ export const createServiceRequest = async (requestData: {
           }
         } catch (error) {
           console.error("Error parsing user data:", error);
+        }
+      }
+      
+      // If still no guest name, try to get it from the database based on room number
+      if ((!requestData.guest_name || requestData.guest_name === 'Guest') && requestData.room_number) {
+        try {
+          const { data: guestData, error: guestError } = await supabase
+            .from('guests')
+            .select('first_name, last_name')
+            .eq('room_number', requestData.room_number)
+            .limit(1)
+            .maybeSingle();
+          
+          if (!guestError && guestData) {
+            requestData.guest_name = `${guestData.first_name || ''} ${guestData.last_name || ''}`.trim() || 'Guest';
+            console.log('Using guest name from database:', requestData.guest_name);
+          }
+        } catch (error) {
+          console.error("Error fetching guest data:", error);
         }
       }
     }
