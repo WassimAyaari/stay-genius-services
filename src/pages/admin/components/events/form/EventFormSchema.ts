@@ -26,4 +26,3 @@ export const eventSchema = z.object({
 });
 
 export type EventFormValues = z.infer<typeof eventSchema>;
-
