@@ -12,6 +12,7 @@ export interface Event {
   updated_at: string;
   capacity?: number;
   price?: number;
+  restaurant_id?: string | null; // Added restaurant_id as optional string or null
 }
 
 export interface Story {
