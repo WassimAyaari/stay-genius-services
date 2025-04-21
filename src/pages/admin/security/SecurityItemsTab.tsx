@@ -20,40 +20,48 @@ type Props = {
   setSearchTerm: (term: string) => void;
   openAddItemDialog: () => void;
   openEditDialog: (item: RequestItem) => void;
+  createSecurityCategory: () => Promise<any>;
 };
 
 const SecurityItemsTab = ({
   searchTerm,
   setSearchTerm,
   openAddItemDialog,
-  openEditDialog
+  openEditDialog,
+  createSecurityCategory
 }: Props) => {
   const { categories, allItems, isLoading } = useRequestCategories();
 
-  // Catégorie sécurité (nom contient 'sécurité', 'secur', 'security')
+  // Security category (name contains 'security', 'secur')
   const securityCategory = categories.find(cat =>
     cat.name?.toLowerCase().includes('secur')
-    || cat.name?.toLowerCase().includes('sécurité')
     || cat.name?.toLowerCase().includes('security')
   );
 
-  // Items filtrés (catégorie sécurité, recherche par nom)
+  // Filtered items (security category, search by name)
   const securityItems = allItems.filter(
     item => item.category_id === (securityCategory?.id || '') &&
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleAddItem = () => {
+    if (!securityCategory) {
+      createSecurityCategory().then(() => {
+        setTimeout(openAddItemDialog, 500); // Small delay to allow category to be created
+      });
+    } else {
+      openAddItemDialog();
+    }
+  };
+
   return (
     <Card className="mb-6">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Items de sécurité</CardTitle>
-          <Button
-            onClick={openAddItemDialog}
-            disabled={!securityCategory}
-          >
+          <CardTitle>Security Items</CardTitle>
+          <Button onClick={handleAddItem}>
             <PlusCircle className="h-4 w-4 mr-2" />
-            Ajouter un item
+            Add Item
           </Button>
         </div>
       </CardHeader>
@@ -62,7 +70,7 @@ const SecurityItemsTab = ({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher des items…"
+              placeholder="Search items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -71,12 +79,12 @@ const SecurityItemsTab = ({
         </div>
 
         {isLoading ? (
-          <div className="text-center py-4">Chargement…</div>
+          <div className="text-center py-4">Loading…</div>
         ) : securityItems.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nom</TableHead>
+                <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -89,7 +97,7 @@ const SecurityItemsTab = ({
                   <TableCell>{item.description || '-'}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {item.is_active ? 'Actif' : 'Inactif'}
+                      {item.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -108,8 +116,8 @@ const SecurityItemsTab = ({
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             {!securityCategory
-              ? "Catégorie sécurité introuvable. Créez-la d'abord."
-              : "Aucun item de sécurité trouvé."}
+              ? "Security category not found. Create it first."
+              : "No security items found."}
           </div>
         )}
       </CardContent>
@@ -118,4 +126,3 @@ const SecurityItemsTab = ({
 };
 
 export default SecurityItemsTab;
-

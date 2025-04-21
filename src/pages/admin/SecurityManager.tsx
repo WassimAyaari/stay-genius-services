@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRequestCategories, useSecurityCategory } from '@/hooks/useRequestCategories';
+import { useRequestCategories, useSecurityCategory, useCreateRequestCategory } from '@/hooks/useRequestCategories';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { Button } from '@/components/ui/button';
 import { ServiceRequest } from '@/features/rooms/types';
@@ -21,6 +21,7 @@ const SecurityManager = () => {
   const { data: allRequests, isLoading, refetch } = useServiceRequests();
   const { categories } = useRequestCategories();
   const securityCategory = useSecurityCategory();
+  const createCategory = useCreateRequestCategory();
 
   const securityRequests = allRequests?.filter(
     request => request.category_id === securityCategory?.id
@@ -33,15 +34,15 @@ const SecurityManager = () => {
   const handleStatusChange = async (requestId: string, newStatus: 'in_progress' | 'completed') => {
     try {
       toast({
-        title: "Statut mis à jour",
-        description: `Demande ${requestId} mise à jour avec le statut: ${newStatus}`,
+        title: "Status updated",
+        description: `Request ${requestId} updated with status: ${newStatus}`,
       });
       refetch();
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du statut:", error);
+      console.error("Error updating status:", error);
       toast({
-        title: "Erreur",
-        description: "Échec de la mise à jour du statut",
+        title: "Error",
+        description: "Failed to update status",
         variant: "destructive",
       });
     }
@@ -52,7 +53,7 @@ const SecurityManager = () => {
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-base font-semibold">
-            Chambre {request.room_number || request.room_id}
+            Room {request.room_number || request.room_id}
           </CardTitle>
           <div className={`px-2 py-1 text-xs font-medium rounded-full 
             ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
@@ -60,9 +61,9 @@ const SecurityManager = () => {
               request.status === 'completed' ? 'bg-green-100 text-green-800' : 
               'bg-gray-100 text-gray-800'}`}
           >
-            {request.status === 'pending' ? 'En attente' : 
-             request.status === 'in_progress' ? 'En cours' : 
-             request.status === 'completed' ? 'Complété' : 
+            {request.status === 'pending' ? 'Pending' : 
+             request.status === 'in_progress' ? 'In Progress' : 
+             request.status === 'completed' ? 'Completed' : 
              request.status}
           </div>
         </div>
@@ -70,7 +71,7 @@ const SecurityManager = () => {
       <CardContent>
         <p className="text-sm mb-3">{request.description}</p>
         <div className="text-xs text-gray-500 mb-3">
-          Créé le {new Date(request.created_at).toLocaleString()}
+          Created on {new Date(request.created_at).toLocaleString()}
         </div>
         <div className="flex justify-end gap-2">
           {request.status === 'pending' && (
@@ -79,7 +80,7 @@ const SecurityManager = () => {
               variant="outline" 
               onClick={() => handleStatusChange(request.id, 'in_progress')}
             >
-              Prendre en charge
+              Take charge
             </Button>
           )}
           {request.status === 'in_progress' && (
@@ -88,7 +89,7 @@ const SecurityManager = () => {
               variant="outline" 
               onClick={() => handleStatusChange(request.id, 'completed')}
             >
-              Marquer comme complété
+              Mark as completed
             </Button>
           )}
         </div>
@@ -109,43 +110,73 @@ const SecurityManager = () => {
   const createItem = useCreateRequestItem();
   const updateItem = useUpdateRequestItem();
 
-  const handleAddItem = async () => {
-    if (!securityCategory) {
+  const createSecurityCategory = async () => {
+    try {
+      const newCategory = await createCategory.mutateAsync({
+        name: 'Security',
+        description: 'Security related requests',
+        is_active: true,
+        icon: 'shield'
+      });
+      
       toast({
-        title: "Erreur",
-        description: "Catégorie sécurité introuvable",
+        title: "Success",
+        description: "Security category created"
+      });
+      
+      return newCategory;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create security category",
         variant: "destructive"
       });
-      return;
+      return null;
     }
+  };
+
+  const handleAddItem = async () => {
+    let targetCategoryId = securityCategory?.id;
+    
+    // If security category doesn't exist, create it first
+    if (!targetCategoryId) {
+      const newCategory = await createSecurityCategory();
+      if (!newCategory) return;
+      targetCategoryId = newCategory.id;
+    }
+    
     if (!newItem.name) {
       toast({
         title: "Validation",
-        description: "Le nom de l'item est requis",
+        description: "Item name is required",
         variant: "destructive"
       });
       return;
     }
+    
     try {
       await createItem.mutateAsync({
         ...newItem,
-        category_id: securityCategory.id
+        category_id: targetCategoryId
       });
+      
       toast({
-        title: "Succès",
-        description: "Item ajouté avec succès"
+        title: "Success",
+        description: "Item added successfully"
       });
+      
       setNewItem({
         name: '',
         description: '',
         category_id: '',
         is_active: true
       });
+      
       setIsAddItemDialogOpen(false);
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter l'item",
+        title: "Error",
+        description: "Unable to add item",
         variant: "destructive"
       });
     }
@@ -156,15 +187,15 @@ const SecurityManager = () => {
     try {
       await updateItem.mutateAsync(editingItem);
       toast({
-        title: "Succès",
-        description: "Item mis à jour"
+        title: "Success",
+        description: "Item updated"
       });
       setIsEditItemDialogOpen(false);
       setEditingItem(null);
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Erreur mise à jour de l'item",
+        title: "Error",
+        description: "Error updating item",
         variant: "destructive"
       });
     }
@@ -180,26 +211,26 @@ const SecurityManager = () => {
       <div className="container py-8">
         <div className="flex items-center gap-3 mb-6">
           <Shield className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">Gestion de la Sécurité</h1>
+          <h1 className="text-2xl font-bold">Security Management</h1>
         </div>
 
         <Tabs defaultValue="requests" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="requests">Demandes de sécurité</TabsTrigger>
+            <TabsTrigger value="requests">Security Requests</TabsTrigger>
             <TabsTrigger value="items">Items</TabsTrigger>
-            <TabsTrigger value="settings">Paramètres</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="requests" className="space-y-4">
             {isLoading ? (
-              <div className="text-center py-8">Chargement des demandes...</div>
+              <div className="text-center py-8">Loading requests...</div>
             ) : securityRequests.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-8">
                   <ShieldAlert className="h-12 w-12 text-gray-400 mb-3" />
-                  <p className="text-lg font-medium text-gray-900">Aucune demande de sécurité</p>
+                  <p className="text-lg font-medium text-gray-900">No security requests</p>
                   <p className="text-sm text-gray-500 max-w-md text-center mt-1">
-                    Les demandes de sécurité soumises par les clients apparaîtront ici.
+                    Security requests submitted by guests will appear here.
                   </p>
                 </CardContent>
               </Card>
@@ -208,7 +239,7 @@ const SecurityManager = () => {
                 <div>
                   <h3 className="font-medium mb-4 flex items-center gap-2">
                     <span className="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span>
-                    En attente ({pendingRequests.length})
+                    Pending ({pendingRequests.length})
                   </h3>
                   {pendingRequests.map(request => (
                     <RequestCard key={request.id} request={request} />
@@ -218,7 +249,7 @@ const SecurityManager = () => {
                 <div>
                   <h3 className="font-medium mb-4 flex items-center gap-2">
                     <span className="inline-block w-3 h-3 bg-blue-400 rounded-full"></span>
-                    En cours ({inProgressRequests.length})
+                    In Progress ({inProgressRequests.length})
                   </h3>
                   {inProgressRequests.map(request => (
                     <RequestCard key={request.id} request={request} />
@@ -228,7 +259,7 @@ const SecurityManager = () => {
                 <div>
                   <h3 className="font-medium mb-4 flex items-center gap-2">
                     <span className="inline-block w-3 h-3 bg-green-400 rounded-full"></span>
-                    Complétés ({completedRequests.length})
+                    Completed ({completedRequests.length})
                   </h3>
                   {completedRequests.map(request => (
                     <RequestCard key={request.id} request={request} />
@@ -244,28 +275,39 @@ const SecurityManager = () => {
               setSearchTerm={setItemsTabSearch}
               openAddItemDialog={() => setIsAddItemDialogOpen(true)}
               openEditDialog={openEditDialog}
+              createSecurityCategory={createSecurityCategory}
             />
           </TabsContent>
 
           <TabsContent value="settings">
             <Card>
               <CardHeader>
-                <CardTitle>Paramètres de sécurité</CardTitle>
+                <CardTitle>Security Settings</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-500 mb-4">
-                  Configurez les paramètres de sécurité et ajoutez des items de demande pour la catégorie sécurité.
+                  Configure security settings and add request items for the security category.
                 </p>
                 
                 {securityCategory ? (
                   <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="font-medium mb-2">Catégorie de sécurité</h3>
+                    <h3 className="font-medium mb-2">Security Category</h3>
                     <p className="text-sm">ID: {securityCategory.id}</p>
-                    <p className="text-sm">Nom: {securityCategory.name}</p>
-                    <p className="text-sm">Description: {securityCategory.description || 'Aucune description'}</p>
+                    <p className="text-sm">Name: {securityCategory.name}</p>
+                    <p className="text-sm">Description: {securityCategory.description || 'No description'}</p>
                   </div>
                 ) : (
-                  <p>Aucune catégorie de sécurité trouvée.</p>
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <p>No security category found.</p>
+                    <Button 
+                      className="mt-2" 
+                      variant="outline" 
+                      onClick={createSecurityCategory}
+                      disabled={createCategory.isPending}
+                    >
+                      {createCategory.isPending ? "Creating..." : "Create Security Category"}
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

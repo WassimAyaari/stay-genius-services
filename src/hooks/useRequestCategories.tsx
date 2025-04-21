@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -183,11 +184,11 @@ export function useRequestItems(categoryId?: string) {
   });
 }
 
-// Mettre à jour la logique pour filtrer/identifier la catégorie sécurité
+// Update logic to filter/identify the security category
 export function useSecurityCategory() {
   const { categories } = useRequestCategories();
   const securityCategory = categories.find(
-    (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('sécurité') || cat.name?.toLowerCase().includes('security')
+    (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('security')
   );
   return securityCategory;
 }

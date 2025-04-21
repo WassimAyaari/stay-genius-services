@@ -43,17 +43,17 @@ const AddItemDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ajouter un item de sécurité</DialogTitle>
+          <DialogTitle>Add Security Item</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           <div className="grid gap-2">
-            <label htmlFor="name" className="text-sm font-medium">Nom</label>
+            <label htmlFor="name" className="text-sm font-medium">Name</label>
             <Input
               id="name"
               value={newItem.name}
               onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-              placeholder="Caméra de surveillance"
+              placeholder="Surveillance Camera"
             />
           </div>
           
@@ -63,17 +63,17 @@ const AddItemDialog = ({
               id="description"
               value={newItem.description || ''}
               onChange={(e) => setNewItem({...newItem, description: e.target.value})}
-              placeholder="Demander l'installation d'une caméra de surveillance"
+              placeholder="Request surveillance camera installation"
             />
           </div>
         </div>
         
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Annuler</Button>
+            <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button onClick={onAdd} disabled={createItem.isPending}>
-            {createItem.isPending ? 'Ajout en cours...' : 'Ajouter l\'item'}
+            {createItem.isPending ? 'Adding...' : 'Add Item'}
           </Button>
         </DialogFooter>
       </DialogContent>

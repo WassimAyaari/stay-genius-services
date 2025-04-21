@@ -36,12 +36,12 @@ const EditItemDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Modifier l'item de sécurité</DialogTitle>
+          <DialogTitle>Edit Security Item</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           <div className="grid gap-2">
-            <label htmlFor="edit-name" className="text-sm font-medium">Nom</label>
+            <label htmlFor="edit-name" className="text-sm font-medium">Name</label>
             <Input
               id="edit-name"
               value={editingItem.name}
@@ -66,16 +66,16 @@ const EditItemDialog = ({
               onChange={(e) => setEditingItem({...editingItem, is_active: e.target.checked})}
               className="h-4 w-4 rounded border-gray-300"
             />
-            <label htmlFor="is_active" className="text-sm font-medium">Actif</label>
+            <label htmlFor="is_active" className="text-sm font-medium">Active</label>
           </div>
         </div>
         
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Annuler</Button>
+            <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button onClick={onUpdate} disabled={updateItem.isPending}>
-            {updateItem.isPending ? 'Enregistrement...' : 'Enregistrer'}
+            {updateItem.isPending ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>
