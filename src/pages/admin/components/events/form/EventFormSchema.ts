@@ -1,3 +1,4 @@
+
 import * as z from 'zod';
 
 export const eventSchema = z.object({
@@ -20,6 +21,7 @@ export const eventSchema = z.object({
   }),
   time: z.string().optional(),
   capacity: z.number().optional().default(10),
+  price: z.number().optional(),
   restaurant_id: z.string().nullable().optional()
 });
 

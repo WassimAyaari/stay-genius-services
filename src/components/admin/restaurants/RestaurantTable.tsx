@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ interface RestaurantTableProps {
   onDelete: (id: string) => void;
   onViewMenus: (id: string) => void;
   onViewReservations: (id: string) => void;
+  onAddEvent?: (restaurant: any) => void; // Added this prop
 }
 
 export const RestaurantTable: React.FC<RestaurantTableProps> = ({
@@ -20,14 +22,19 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
   onDelete,
   onViewMenus,
   onViewReservations,
+  onAddEvent,
 }) => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const { events } = useEvents();
 
   const handleAddEvent = (restaurant: any) => {
-    setSelectedRestaurant(restaurant);
-    setIsEventDialogOpen(true);
+    if (onAddEvent) {
+      onAddEvent(restaurant);
+    } else {
+      setSelectedRestaurant(restaurant);
+      setIsEventDialogOpen(true);
+    }
   };
 
   if (!restaurants || restaurants.length === 0) {

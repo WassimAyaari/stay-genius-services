@@ -22,7 +22,23 @@ const RestaurantEventsDialog = ({ isOpen, onOpenChange, restaurant, event }: Res
         await updateEvent(event.id, { ...data, restaurant_id: restaurant.id });
         toast.success("Événement mis à jour avec succès");
       } else {
-        await createEvent({ ...data, restaurant_id: restaurant.id });
+        // Ensure all required fields are present
+        const eventData = {
+          title: data.title || '',
+          description: data.description || '',
+          image: data.image || '',
+          category: data.category || 'event',
+          is_featured: data.is_featured || false,
+          date: data.date || new Date().toISOString().split('T')[0],
+          restaurant_id: restaurant.id,
+          // Optional fields
+          location: data.location,
+          time: data.time,
+          capacity: data.capacity,
+          price: data.price
+        };
+        
+        await createEvent(eventData);
         toast.success("Événement créé avec succès");
       }
       onOpenChange(false);
