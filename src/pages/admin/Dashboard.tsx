@@ -13,7 +13,8 @@ import {
   Trash2,
   Wrench,
   MessageSquare,
-  Shield
+  Shield,
+  Laptop
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -88,6 +89,13 @@ const AdminDashboard = () => {
       count: null, 
       trend: "", 
       path: "/admin/maintenance" 
+    },
+    { 
+      title: "IT", 
+      icon: <Laptop className="h-5 w-5 text-primary" />, 
+      count: null, 
+      trend: "", 
+      path: "/admin/information-technology" 
     },
     { 
       title: "About", 
