@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Edit, Trash2, UtensilsCrossed, Utensils, CalendarDays, PlusCircle } fro
 import { Badge } from '@/components/ui/badge';
 import RestaurantEventsDialog from '@/pages/admin/components/restaurants/RestaurantEventsDialog';
 import { useEvents } from '@/hooks/useEvents';
+import { useNavigate } from 'react-router-dom';
 
 interface RestaurantTableProps {
   restaurants: any[];
@@ -13,7 +13,6 @@ interface RestaurantTableProps {
   onDelete: (id: string) => void;
   onViewMenus: (id: string) => void;
   onViewReservations: (id: string) => void;
-  onAddEvent?: (restaurant: any) => void; // Added this prop
 }
 
 export const RestaurantTable: React.FC<RestaurantTableProps> = ({
@@ -22,8 +21,8 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
   onDelete,
   onViewMenus,
   onViewReservations,
-  onAddEvent,
 }) => {
+  const navigate = useNavigate();
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const { events } = useEvents();
@@ -129,6 +128,15 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
                     >
                       <PlusCircle className="h-4 w-4" />
                       <span className="sr-only">Gérer les événements</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/admin/restaurants/${restaurant.id}/events`)}
+                      title="Manage Events"
+                    >
+                      <CalendarPlus className="h-4 w-4" />
+                      <span className="sr-only">Manage Events</span>
                     </Button>
                   </div>
                 </TableCell>

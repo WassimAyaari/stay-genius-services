@@ -217,6 +217,8 @@ function App() {
                 </AuthGuard>
               } />
               
+              <Route path="/admin/restaurants/:id/events" element={<RestaurantEventsManager />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster richColors position="top-right" closeButton />
