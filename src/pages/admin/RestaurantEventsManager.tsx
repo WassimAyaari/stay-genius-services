@@ -16,7 +16,7 @@ const RestaurantEventsManager = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { fetchRestaurantById } = useRestaurants();
-  const { events, loading: eventsLoading, refetch } = useEvents();
+  const { events, loading: eventsLoading, refetch, deleteEvent } = useEvents();
   const [restaurant, setRestaurant] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -47,6 +47,17 @@ const RestaurantEventsManager = () => {
   const handleEditEvent = (event: any) => {
     setSelectedEvent(event);
     setIsAddEventOpen(true);
+  };
+
+  const handleDeleteEvent = async (event: any) => {
+    try {
+      await deleteEvent(event.id);
+      toast.success('Event deleted successfully');
+      await refetch();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast.error('Failed to delete event');
+    }
   };
 
   const filteredEvents = events?.filter(event => event.restaurant_id === id) || [];
@@ -103,6 +114,7 @@ const RestaurantEventsManager = () => {
               <RestaurantEventsList 
                 events={filteredEvents}
                 onEditEvent={handleEditEvent}
+                onDeleteEvent={handleDeleteEvent}
                 isLoading={eventsLoading}
               />
             </TabsContent>

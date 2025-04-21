@@ -4,18 +4,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
-import { Edit, Calendar } from 'lucide-react';
+import { Edit, Trash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface RestaurantEventsListProps {
   events: Event[];
   onEditEvent: (event: Event) => void;
+  onDeleteEvent: (event: Event) => void;
   isLoading: boolean;
 }
 
 const RestaurantEventsList: React.FC<RestaurantEventsListProps> = ({
   events,
   onEditEvent,
+  onDeleteEvent,
   isLoading
 }) => {
   if (isLoading) {
@@ -44,7 +47,7 @@ const RestaurantEventsList: React.FC<RestaurantEventsListProps> = ({
             <TableHead>Date</TableHead>
             <TableHead>Location</TableHead>
             <TableHead>Featured</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -67,7 +70,7 @@ const RestaurantEventsList: React.FC<RestaurantEventsListProps> = ({
                 )}
               </TableCell>
               <TableCell>
-                <div className="flex gap-2">
+                <div className="flex justify-end gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -76,6 +79,32 @@ const RestaurantEventsList: React.FC<RestaurantEventsListProps> = ({
                     <Edit className="h-4 w-4" />
                     <span className="sr-only">Edit</span>
                   </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-600">
+                        <Trash className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this event? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => onDeleteEvent(event)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </TableCell>
             </TableRow>
