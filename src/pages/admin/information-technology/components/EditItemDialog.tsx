@@ -3,6 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { RequestItem } from '@/features/rooms/types';
 
 type EditItemDialogProps = {
@@ -22,18 +23,24 @@ const EditItemDialog = ({ isOpen, onOpenChange, editingItem, setEditingItem, onU
           <DialogTitle>Edit IT Item</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <Input
-            label="Name"
-            placeholder="Item Name"
-            value={editingItem.name}
-            onChange={e => setEditingItem({ ...editingItem, name: e.target.value } as RequestItem)}
-          />
-          <Input
-            label="Description"
-            placeholder="Description"
-            value={editingItem.description}
-            onChange={e => setEditingItem({ ...editingItem, description: e.target.value } as RequestItem)}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="edit-item-name">Name</Label>
+            <Input
+              id="edit-item-name"
+              placeholder="Item Name"
+              value={editingItem.name}
+              onChange={e => setEditingItem({ ...editingItem, name: e.target.value } as RequestItem)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-item-description">Description</Label>
+            <Input
+              id="edit-item-description"
+              placeholder="Description"
+              value={editingItem.description}
+              onChange={e => setEditingItem({ ...editingItem, description: e.target.value } as RequestItem)}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button onClick={onUpdate}>Update</Button>
