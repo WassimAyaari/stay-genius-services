@@ -82,8 +82,8 @@ const EventForm: React.FC<EventFormProps> = ({
               <FormLabel>Link to Restaurant (optional)</FormLabel>
               <FormControl>
                 <Select
-                  value={form.watch('restaurant_id') ?? ''}
-                  onValueChange={val => form.setValue('restaurant_id', val === '' ? null : val)}
+                  value={form.watch('restaurant_id') ?? 'null'}
+                  onValueChange={val => form.setValue('restaurant_id', val === 'null' ? null : val)}
                   disabled={restaurantLocked}
                 >
                   <SelectTrigger>
@@ -94,7 +94,7 @@ const EventForm: React.FC<EventFormProps> = ({
                     } />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No restaurant</SelectItem>
+                    <SelectItem value="null">No restaurant</SelectItem>
                     {(restaurants || []).map(r => (
                       <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                     ))}
