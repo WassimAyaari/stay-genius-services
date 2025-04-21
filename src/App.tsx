@@ -47,6 +47,7 @@ import HousekeepingManager from '@/pages/admin/HousekeepingManager';
 import MaintenanceManager from '@/pages/admin/MaintenanceManager';
 import DestinationManager from '@/pages/admin/DestinationManager';
 import FeedbackManager from '@/pages/admin/FeedbackManager';
+import SecurityManager from '@/pages/admin/SecurityManager';
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,12 @@ function App() {
               <Route path="/admin" element={
                 <AuthGuard adminRequired={true}>
                   <AdminDashboard />
+                </AuthGuard>
+              } />
+              
+              <Route path="/admin/security" element={
+                <AuthGuard adminRequired={true}>
+                  <SecurityManager />
                 </AuthGuard>
               } />
               

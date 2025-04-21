@@ -12,7 +12,8 @@ import {
   MessageCircle,
   Trash2,
   Wrench,
-  MessageSquare
+  MessageSquare,
+  Shield
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -66,6 +67,13 @@ const AdminDashboard = () => {
       count: 3, 
       trend: "+1 today", 
       path: "/admin/feedback" 
+    },
+    { 
+      title: "Security", 
+      icon: <Shield className="h-5 w-5 text-primary" />, 
+      count: null, 
+      trend: "", 
+      path: "/admin/security" 
     },
     { 
       title: "Housekeeping", 
