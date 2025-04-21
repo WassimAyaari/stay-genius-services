@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { 
@@ -9,6 +10,8 @@ import {
   CommandItem, 
   CommandList 
 } from '@/components/ui/command';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { requestService } from '@/features/rooms/controllers/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { Room } from '@/hooks/useRoom';
@@ -20,9 +23,18 @@ interface CommandSearchProps {
   onRequestSuccess: () => void;
 }
 
+type ItemToRequest = {
+  id: string;
+  name: string;
+  category: string;
+  description?: string;
+};
+
 const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<ItemToRequest | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const { toast } = useToast();
   const { categories, allItems, isLoading } = useRequestCategories();
   const { userData } = useAuth();
@@ -30,7 +42,6 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   const itemsByCategory = useMemo(() => {
     return allItems.reduce((acc, item) => {
       if (!item.is_active) return acc;
-      
       const categoryId = item.category_id;
       if (!acc[categoryId]) {
         acc[categoryId] = [];
@@ -44,10 +55,22 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
     (cat) => cat.name?.toLowerCase().includes('secur') || cat.name?.toLowerCase().includes('sécurité') || cat.name?.toLowerCase().includes('security')
   );
 
-  const handleSelect = async (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
-    if (isSubmitting) return;
-    
+  // When user selects an item, show confirmation dialog
+  const handleSelect = (itemId: string, itemName: string, itemCategory: string, itemDescription?: string) => {
+    setSelectedItem({
+      id: itemId,
+      name: itemName,
+      category: itemCategory,
+      description: itemDescription,
+    });
+    setConfirmDialogOpen(true);
+  };
+
+  // Actually send request after confirmation
+  const handleConfirmRequest = async () => {
+    if (!selectedItem) return;
     setIsSubmitting(true);
+
     try {
       const roomInfo = room || { id: '' };
       let roomId = roomInfo.id;
@@ -66,52 +89,48 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
             console.error("Error parsing user data:", error);
           }
         }
-        
         if (!roomNumber) {
           toast({
-            title: "Room Information Missing",
-            description: "We couldn't find your room information. Please provide it in your profile settings.",
+            title: "Room Information Needed",
+            description: "We couldn't find your room. Please complete your profile settings.",
             variant: "destructive",
           });
           setIsSubmitting(false);
+          setConfirmDialogOpen(false);
           return;
         }
-        
         roomId = roomNumber;
       }
-      
       if (roomNumber && !localStorage.getItem('user_room_number')) {
         localStorage.setItem('user_room_number', roomNumber);
       }
-      
       if (!roomId && roomNumber) {
         roomId = roomNumber;
       }
-      
       await requestService(
         roomId,
         'service',
-        `${itemName} - ${itemDescription || ''}`,
-        itemId,
-        itemCategory
+        `${selectedItem.name}${selectedItem.description ? " - " + selectedItem.description : ""}`,
+        selectedItem.id,
+        selectedItem.category
       );
-      
       toast({
-        title: "Request Submitted",
-        description: `Your request for ${itemName} has been submitted successfully.`,
+        title: "Request Sent",
+        description: `Your request for "${selectedItem.name}" was sent successfully.`,
       });
-      
       onRequestSuccess();
       setOpen(false);
+      setSelectedItem(null);
     } catch (error) {
-      console.error("Error submitting request:", error);
+      console.error("Error sending request:", error);
       toast({
         title: "Error",
-        description: "Failed to submit your request. Please try again.",
+        description: "Could not send the request. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
+      setConfirmDialogOpen(false);
     }
   };
 
@@ -159,7 +178,6 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
                   if (securityCategory && securityCategory.id === categoryId) return null;
                   const category = categories.find(c => c.id === categoryId);
                   if (!category) return null;
-                  
                   return (
                     <CommandGroup key={categoryId} heading={category.name}>
                       {items.map((item) => (
@@ -185,8 +203,45 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
           </CommandList>
         </Command>
       </CommandDialog>
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={(open) => { setConfirmDialogOpen(open); if (!open) setSelectedItem(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Request</DialogTitle>
+            <DialogDescription>
+              {selectedItem ? (
+                <>
+                  Are you sure you want to send a request for <b>{selectedItem.name}</b>?
+                  {selectedItem.description && (
+                    <>
+                      <br />
+                      <span className="text-xs text-gray-500">Description: {selectedItem.description}</span>
+                    </>
+                  )}
+                </>
+              ) : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmRequest}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
 
 export default CommandSearch;
+
