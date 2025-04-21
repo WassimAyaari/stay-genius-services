@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +13,7 @@ import AddItemDialog from './security/AddItemDialog';
 import EditItemDialog from './security/EditItemDialog';
 import { RequestItem } from '@/features/rooms/types';
 import { useCreateRequestItem, useUpdateRequestItem } from '@/hooks/useRequestCategories';
+import { updateRequestStatus } from '@/features/rooms/controllers/roomService';
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -53,10 +55,15 @@ const SecurityManager = () => {
 
   const handleStatusChange = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     try {
+      // Call the updateRequestStatus function
+      await updateRequestStatus(requestId, newStatus);
+      
       toast({
         title: "Status Updated",
-        description: `Request ${requestId} updated to ${newStatus.replace('_', ' ')}`,
+        description: `Request ${requestId} updated to ${getStatusLabel(newStatus)}`,
       });
+      
+      // Refetch data after successful update
       refetch();
     } catch (error) {
       console.error("Error updating status:", error);
