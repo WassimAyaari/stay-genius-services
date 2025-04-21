@@ -5,7 +5,18 @@ import { useShops } from '@/hooks/useShops';
 import { Leaf, UtensilsCrossed, Store } from 'lucide-react';
 import React from 'react';
 
-const SEARCHABLE_PAGES = [
+// Define the SearchOption interface at the top
+interface SearchOption {
+  label: string;
+  route: string;
+  keywords: string;
+  type: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  image?: string;
+  category?: string;
+}
+
+const SEARCHABLE_PAGES: SearchOption[] = [
   { label: "About Us", route: "/about", keywords: "information hotel story", type: 'page' },
   { label: "Gastronomy", route: "/dining", keywords: "dining restaurant food", type: 'page' },
   { label: "Concierge", route: "/services", keywords: "concierge service support", type: 'page' },
@@ -25,16 +36,6 @@ const normalize = (str: string) =>
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
-
-interface SearchOption {
-  label: string;
-  route: string;
-  keywords: string;
-  type: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  image?: string;
-  category?: string;
-}
 
 export const useCommandSearchOptions = () => {
   const { services: spaServices = [] } = useSpaServices();
