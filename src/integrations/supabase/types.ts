@@ -260,6 +260,7 @@ export type Database = {
           is_featured: boolean | null
           location: string | null
           restaurant_id: string | null
+          spa_facility_id: string | null
           time: string | null
           title: string
           updated_at: string
@@ -275,6 +276,7 @@ export type Database = {
           is_featured?: boolean | null
           location?: string | null
           restaurant_id?: string | null
+          spa_facility_id?: string | null
           time?: string | null
           title: string
           updated_at?: string
@@ -290,6 +292,7 @@ export type Database = {
           is_featured?: boolean | null
           location?: string | null
           restaurant_id?: string | null
+          spa_facility_id?: string | null
           time?: string | null
           title?: string
           updated_at?: string
@@ -300,6 +303,13 @@ export type Database = {
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_spa_facility_id_fkey"
+            columns: ["spa_facility_id"]
+            isOneToOne: false
+            referencedRelation: "spa_facilities"
             referencedColumns: ["id"]
           },
         ]

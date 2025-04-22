@@ -1,182 +1,106 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Edit, Trash2, RefreshCw } from 'lucide-react';
 import { useSpaFacilities } from '@/hooks/useSpaFacilities';
-import { SpaFacility } from '@/features/spa/types';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useEvents } from '@/hooks/useEvents';
 import SpaFacilityDialog from './SpaFacilityDialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Skeleton } from '@/components/ui/skeleton';
+import SpaEventsDialog from './SpaEventsDialog';
+import SpaEventsList from './SpaEventsList';
+import { Event } from '@/types/event';
 
-export default function SpaFacilitiesTab() {
-  const [selectedFacility, setSelectedFacility] = useState<SpaFacility | null>(null);
+const SpaFacilitiesTab = () => {
+  const { facilities, isLoading } = useSpaFacilities();
+  const [selectedFacility, setSelectedFacility] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const { events, loading: eventsLoading, deleteEvent } = useEvents();
 
-  const { 
-    facilities, 
-    isLoading, 
-    error, 
-    deleteFacility, 
-    isDeleting,
-    refetch
-  } = useSpaFacilities();
-
-  const handleAddNew = () => {
-    setSelectedFacility(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleEdit = (facility: SpaFacility) => {
+  const handleEditFacility = (facility: any) => {
     setSelectedFacility(facility);
     setIsDialogOpen(true);
   };
 
-  const handleDeleteClick = (id: string) => {
-    setDeleteId(id);
+  const handleAddEvent = () => {
+    setSelectedEvent(null);
+    setIsEventDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (deleteId) {
-      deleteFacility(deleteId);
-      setDeleteId(null);
-    }
+  const handleEditEvent = (event: Event) => {
+    setSelectedEvent(event);
+    setIsEventDialogOpen(true);
   };
 
-  const handleDialogClose = (success: boolean) => {
-    setIsDialogOpen(false);
-    if (success) {
-      refetch();
-    }
-  };
-
-  const renderFacilityCard = (facility: SpaFacility) => (
-    <Card key={facility.id} className="mb-4">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="text-lg">{facility.name}</CardTitle>
-          <div className="text-sm text-muted-foreground mt-1">{facility.location}</div>
-        </div>
-        <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => handleEdit(facility)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={() => handleDeleteClick(facility.id)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action supprimera définitivement l'installation "{facility.name}" et tous les services associés.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={confirmDelete}
-                  className="bg-red-500 hover:bg-red-600"
-                >
-                  Supprimer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="text-sm font-medium">Description</h4>
-            <p className="text-sm text-muted-foreground">{facility.description || 'Aucune description'}</p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium">Détails</h4>
-            <div className="text-sm text-muted-foreground">
-              <p>Heures d'ouverture: {facility.opening_hours || 'Non spécifiées'}</p>
-              <p>Capacité: {facility.capacity || 'Non spécifiée'}</p>
-              <p>Status: <span className={facility.status === 'open' ? 'text-green-500' : 'text-red-500'}>
-                {facility.status === 'open' ? 'Ouvert' : 'Fermé'}
-              </span></p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const filteredEvents = events?.filter(event => event.spa_facility_id === selectedFacility?.id) || [];
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Installations Spa</h2>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => refetch()}
-            className="flex items-center"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
-          <Button onClick={handleAddNew} className="flex items-center">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Ajouter
-          </Button>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Installations du Spa</h2>
+        <Button onClick={() => setIsDialogOpen(true)} className="bg-[#00AEBB]">
+          <Plus className="h-4 w-4 mr-2" />
+          Ajouter une installation
+        </Button>
       </div>
-      
-      {error ? (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>
-            Erreur lors du chargement des installations: {error.message}
-          </AlertDescription>
-        </Alert>
-      ) : isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="mb-4">
-              <CardHeader>
-                <Skeleton className="h-6 w-48" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : facilities.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground mb-4">Aucune installation trouvée</p>
-          <Button onClick={handleAddNew}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Ajouter une installation
-          </Button>
-        </div>
-      ) : (
-        <div>
-          {facilities.map(renderFacilityCard)}
-        </div>
-      )}
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {facilities?.map((facility) => (
+          <Card key={facility.id} className="p-6">
+            <div className="relative aspect-video mb-4">
+              <img
+                src={facility.image_url || '/placeholder.svg'}
+                alt={facility.name}
+                className="rounded-lg object-cover w-full h-full"
+              />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">{facility.name}</h3>
+            <p className="text-gray-600 mb-4">{facility.description}</p>
+            <div className="flex justify-between items-center">
+              <Button variant="outline" onClick={() => handleEditFacility(facility)}>
+                Modifier
+              </Button>
+              <Button onClick={() => {
+                setSelectedFacility(facility);
+                handleAddEvent();
+              }}>
+                Ajouter un événement
+              </Button>
+            </div>
+
+            {selectedFacility?.id === facility.id && (
+              <div className="mt-6">
+                <h4 className="text-lg font-semibold mb-4">Événements</h4>
+                <SpaEventsList 
+                  events={filteredEvents}
+                  onEditEvent={handleEditEvent}
+                  onDeleteEvent={deleteEvent}
+                  isLoading={eventsLoading}
+                />
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
 
       <SpaFacilityDialog
-        open={isDialogOpen}
+        isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         facility={selectedFacility}
-        onClose={handleDialogClose}
       />
+
+      {selectedFacility && (
+        <SpaEventsDialog
+          isOpen={isEventDialogOpen}
+          onOpenChange={setIsEventDialogOpen}
+          facility={selectedFacility}
+          event={selectedEvent}
+        />
+      )}
     </div>
   );
-}
+};
+
+export default SpaFacilitiesTab;
