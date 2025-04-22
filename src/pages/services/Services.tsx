@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, Clock, Headphones as HeadphonesIcon, Search } from 'lucide-react';
+import { MessageCircle, Headphones as HeadphonesIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
@@ -91,10 +91,6 @@ const Services = () => {
     setIsChatOpen(true);
   };
 
-  const handleNavigateToSupport = () => {
-    navigate('/messages?contact=1');
-  };
-
   const handleWhatsAppService = () => {
     toast({
       title: "WhatsApp Service",
@@ -127,14 +123,6 @@ const Services = () => {
             icon={MessageCircle}
             actionText="Start Chat"
             onAction={handleStartChat}
-          />
-
-          <ServiceCard
-            title="24/7 Support"
-            description="Round-the-clock assistance for all your needs"
-            icon={Clock}
-            actionText="Contact Support"
-            onAction={handleNavigateToSupport}
           />
 
           <ServiceCard
