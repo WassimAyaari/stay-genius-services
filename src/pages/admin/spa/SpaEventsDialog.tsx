@@ -15,7 +15,7 @@ interface SpaEventsDialogProps {
 }
 
 const SpaEventsDialog = ({ open, onOpenChange, facility, event }: SpaEventsDialogProps) => {
-  const { createEvent, updateEvent } = useEvents();
+  const { createEvent, updateEvent, refetch } = useEvents();
 
   const handleSubmit = async (data: Partial<Event>) => {
     try {
@@ -36,9 +36,16 @@ const SpaEventsDialog = ({ open, onOpenChange, facility, event }: SpaEventsDialo
           capacity: data.capacity
         } as Omit<Event, 'id' | 'created_at' | 'updated_at'>;
         
+        // S'assurer que restaurant_id est null pour les événements spa
+        eventData.restaurant_id = null;
+        
         await createEvent(eventData);
         toast.success("Événement créé avec succès");
       }
+      
+      // Forcer le rafraîchissement des événements après création ou mise à jour
+      await refetch();
+      
       onOpenChange(false);
     } catch (error) {
       console.error('Error submitting event:', error);

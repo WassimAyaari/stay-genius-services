@@ -72,6 +72,7 @@ const EventForm: React.FC<EventFormProps> = ({
   };
 
   // Determine if restaurant selection should be displayed
+  // Ne pas afficher le champ restaurant si c'est un événement de spa
   const showRestaurantField = !initialData?.spa_facility_id;
   
   // Check if either restaurant or spa facility is locked
@@ -85,7 +86,7 @@ const EventForm: React.FC<EventFormProps> = ({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <BasicInfoFields form={form} />
             
-            {showRestaurantField && (
+            {showRestaurantField && !spaFacilityLocked && (
               <FormItem>
                 <FormLabel>Link to Restaurant (optional)</FormLabel>
                 <FormControl>

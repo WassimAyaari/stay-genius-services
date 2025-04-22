@@ -6,19 +6,25 @@ import { useToast } from './use-toast';
 import { isBefore, startOfDay } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 
-export const useEvents = () => {
+export const useEvents = (filterBySpaFacility = false) => {
   const { toast } = useToast();
   
   const { data: events = [], isLoading: loading, error, refetch } = useQuery({
-    queryKey: ['events'],
+    queryKey: ['events', { filterBySpaFacility }],
     queryFn: async () => {
-      console.log('Fetching events from Supabase...');
+      console.log('Fetching events from Supabase...', filterBySpaFacility ? 'Filtering by spa facility' : 'All events');
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('events')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .order('created_at', { ascending: false });
+        
+      // Si on filtre par spa, on ne récupère que les événements liés à un spa
+      if (filterBySpaFacility) {
+        query = query.not('spa_facility_id', 'is', null);
+      }
+      
+      const { data, error } = await query.limit(100);
 
       if (error) {
         console.error('Error in fetchEvents:', error);

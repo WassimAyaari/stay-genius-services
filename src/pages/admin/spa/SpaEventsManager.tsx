@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { format } from 'date-fns';
 import { Event } from '@/types/event';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash, Calendar, Users } from 'lucide-react';
+import { Edit, Trash, Calendar, Users, Plus } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useEventReservations } from '@/hooks/useEventReservations';
 import { EventReservationDetail } from '@/pages/admin/components/events/EventReservationDetail';
@@ -17,7 +17,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SpaEventsDialog from './SpaEventsDialog';
 
 const SpaEventsManager = () => {
-  const { events, loading, deleteEvent } = useEvents();
+  // Utiliser le filtre pour récupérer uniquement les événements du spa
+  const { events, loading, deleteEvent, refetch } = useEvents(true);
   const { facilities } = useSpaFacilities();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
@@ -27,8 +28,14 @@ const SpaEventsManager = () => {
   const [selectedReservation, setSelectedReservation] = useState<EventReservation | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
-  // Filter events by spa facility
-  const spaEvents = events?.filter(event => event.spa_facility_id) || [];
+  const handleAddEvent = () => {
+    // Utiliser la première installation comme défaut si aucune n'est sélectionnée
+    if (facilities && facilities.length > 0 && !selectedFacility) {
+      setSelectedFacility(facilities[0]);
+    }
+    setSelectedEvent(null);
+    setIsEventDialogOpen(true);
+  };
 
   const handleEditEvent = (event: Event) => {
     const facility = facilities?.find(f => f.id === event.spa_facility_id);
@@ -64,6 +71,17 @@ const SpaEventsManager = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Événements du Spa</h2>
+        <Button 
+          onClick={handleAddEvent} 
+          className="bg-[#00AEBB]"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Ajouter un événement
+        </Button>
+      </div>
+
       <Tabs defaultValue="list">
         <TabsList>
           <TabsTrigger value="list">Liste des événements</TabsTrigger>
@@ -80,7 +98,7 @@ const SpaEventsManager = () => {
             <CardContent>
               {loading ? (
                 <div className="text-center py-4">Chargement des événements...</div>
-              ) : spaEvents.length === 0 ? (
+              ) : !events || events.length === 0 ? (
                 <div className="text-center py-4">Aucun événement trouvé pour le spa</div>
               ) : (
                 <Table>
@@ -95,7 +113,7 @@ const SpaEventsManager = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {spaEvents.map((event) => (
+                    {events.map((event) => (
                       <TableRow key={event.id}>
                         <TableCell className="font-medium">{event.title}</TableCell>
                         <TableCell>{getFacilityName(event.spa_facility_id!)}</TableCell>
