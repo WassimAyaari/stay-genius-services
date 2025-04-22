@@ -20,7 +20,8 @@ const SpaEventsManager = () => {
   const { reservations, isLoading: reservationsLoading, updateReservationStatus } = useEventReservations(selectedEventId);
   const [selectedReservation, setSelectedReservation] = useState<EventReservation | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState<'list' | 'reservations'>('list'); // NEW
+
   const handleAddEvent = () => {
     if (facilities && facilities.length > 0 && !selectedFacility) {
       setSelectedFacility(facilities[0]);
@@ -41,6 +42,7 @@ const SpaEventsManager = () => {
   const handleViewReservations = (event: Event) => {
     setSelectedEventId(event.id);
     setSelectedEvent(event);
+    setActiveTab('reservations'); // Switch to reservations tab
   };
 
   const handleViewReservation = (reservation: EventReservation) => {
@@ -52,7 +54,6 @@ const SpaEventsManager = () => {
     updateReservationStatus({ id: reservationId, status });
   };
 
-  // Create a wrapper function that takes an Event and calls deleteEvent with just the id
   const handleDeleteEvent = (event: Event) => {
     if (event && event.id) {
       deleteEvent(event.id);
@@ -61,7 +62,7 @@ const SpaEventsManager = () => {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="list">
+      <Tabs value={activeTab} defaultValue="list" onValueChange={value => setActiveTab(value as 'list' | 'reservations')}>
         <TabsList>
           <TabsTrigger value="list">Liste des événements</TabsTrigger>
           {selectedEvent && (
@@ -77,6 +78,7 @@ const SpaEventsManager = () => {
             onEditEvent={handleEditEvent}
             onDeleteEvent={handleDeleteEvent}
             facilities={facilities || []}
+            onViewReservations={handleViewReservations}
           />
         </TabsContent>
 

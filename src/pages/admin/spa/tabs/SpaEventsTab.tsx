@@ -14,6 +14,7 @@ interface SpaEventsTabProps {
   onEditEvent: (event: Event) => void;
   onDeleteEvent: (event: Event) => void;
   facilities: SpaFacility[];
+  onViewReservations?: (event: Event) => void; // NEW
 }
 
 const SpaEventsTab: React.FC<SpaEventsTabProps> = ({
@@ -22,7 +23,8 @@ const SpaEventsTab: React.FC<SpaEventsTabProps> = ({
   onAddEvent,
   onEditEvent,
   onDeleteEvent,
-  facilities
+  facilities,
+  onViewReservations // NEW
 }) => {
   return (
     <Card>
@@ -42,6 +44,7 @@ const SpaEventsTab: React.FC<SpaEventsTabProps> = ({
           onEditEvent={onEditEvent}
           onDeleteEvent={onDeleteEvent}
           isLoading={loading}
+          onViewReservations={onViewReservations} // propagate
           facilities={facilities}
         />
       </CardContent>
@@ -49,4 +52,4 @@ const SpaEventsTab: React.FC<SpaEventsTabProps> = ({
   );
 };
 
-export default SpaEventsTab;
+export default SpaEventsTab;  

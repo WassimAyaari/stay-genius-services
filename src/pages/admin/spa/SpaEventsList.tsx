@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
-import { Edit, Trash } from 'lucide-react';
+import { Edit, Trash, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -13,13 +13,15 @@ interface SpaEventsListProps {
   onEditEvent: (event: Event) => void;
   onDeleteEvent: (event: Event) => void;
   isLoading: boolean;
+  onViewReservations?: (event: Event) => void; // NOUVEAU
 }
 
 const SpaEventsList: React.FC<SpaEventsListProps> = ({
   events,
   onEditEvent,
   onDeleteEvent,
-  isLoading
+  isLoading,
+  onViewReservations // NOUVEAU PROP
 }) => {
   if (isLoading) {
     return (
@@ -71,6 +73,16 @@ const SpaEventsList: React.FC<SpaEventsListProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex justify-end gap-2">
+                  {onViewReservations && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewReservations(event)}
+                      title="Voir les réservations"
+                    >
+                      <Users className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
