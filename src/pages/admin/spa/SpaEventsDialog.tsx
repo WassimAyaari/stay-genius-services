@@ -7,13 +7,13 @@ import { Event } from '@/types/event';
 import { toast } from 'sonner';
 
 interface SpaEventsDialogProps {
-  isOpen: boolean;
+  open: boolean;  // Changed from isOpen to open to match the prop being passed
   onOpenChange: (open: boolean) => void;
   facility: any;
   event?: Event;
 }
 
-const SpaEventsDialog = ({ isOpen, onOpenChange, facility, event }: SpaEventsDialogProps) => {
+const SpaEventsDialog = ({ open, onOpenChange, facility, event }: SpaEventsDialogProps) => {
   const { createEvent, updateEvent } = useEvents();
 
   const handleSubmit = async (data: Partial<Event>) => {
@@ -46,7 +46,7 @@ const SpaEventsDialog = ({ isOpen, onOpenChange, facility, event }: SpaEventsDia
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
