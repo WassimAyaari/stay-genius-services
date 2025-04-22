@@ -50,6 +50,7 @@ import FeedbackManager from '@/pages/admin/FeedbackManager';
 import SecurityManager from '@/pages/admin/SecurityManager';
 import InformationTechnologyManager from '@/pages/admin/InformationTechnologyManager';
 import RestaurantEventsManager from '@/pages/admin/RestaurantEventsManager';
+import DestinationAdmin from '@/pages/admin/DestinationAdmin';
 
 const queryClient = new QueryClient();
 
@@ -219,6 +220,12 @@ function App() {
               } />
               
               <Route path="/admin/restaurants/:id/events" element={<RestaurantEventsManager />} />
+              
+              <Route path="/admin/destination-admin" element={
+                <AuthGuard adminRequired={true}>
+                  <DestinationAdmin />
+                </AuthGuard>
+              } />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
