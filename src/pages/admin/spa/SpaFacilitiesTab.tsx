@@ -9,16 +9,17 @@ import SpaFacilityDialog from './SpaFacilityDialog';
 import SpaEventsDialog from './SpaEventsDialog';
 import SpaEventsList from './SpaEventsList';
 import { Event } from '@/types/event';
+import { SpaFacility } from '@/features/spa/types';
 
 const SpaFacilitiesTab = () => {
   const { facilities, isLoading } = useSpaFacilities();
-  const [selectedFacility, setSelectedFacility] = useState<any | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<SpaFacility | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const { events, loading: eventsLoading, deleteEvent } = useEvents();
 
-  const handleEditFacility = (facility: any) => {
+  const handleEditFacility = (facility: SpaFacility) => {
     setSelectedFacility(facility);
     setIsDialogOpen(true);
   };
@@ -70,10 +71,12 @@ const SpaFacilitiesTab = () => {
               <Button variant="outline" onClick={() => handleEditFacility(facility)}>
                 Modifier
               </Button>
-              <Button onClick={() => {
-                setSelectedFacility(facility);
-                handleAddEvent();
-              }}>
+              <Button 
+                onClick={() => {
+                  setSelectedFacility(facility);
+                  handleAddEvent();
+                }}
+              >
                 Ajouter un événement
               </Button>
             </div>
@@ -102,7 +105,7 @@ const SpaFacilitiesTab = () => {
 
       {selectedFacility && (
         <SpaEventsDialog
-          isOpen={isEventDialogOpen}
+          open={isEventDialogOpen}
           onOpenChange={setIsEventDialogOpen}
           facility={selectedFacility}
           event={selectedEvent}
@@ -113,3 +116,4 @@ const SpaFacilitiesTab = () => {
 };
 
 export default SpaFacilitiesTab;
+
