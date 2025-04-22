@@ -52,6 +52,13 @@ const SpaEventsManager = () => {
     updateReservationStatus({ id: reservationId, status });
   };
 
+  // Create a wrapper function that takes an Event and calls deleteEvent with just the id
+  const handleDeleteEvent = (event: Event) => {
+    if (event && event.id) {
+      deleteEvent(event.id);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="list">
@@ -68,7 +75,7 @@ const SpaEventsManager = () => {
             loading={loading}
             onAddEvent={handleAddEvent}
             onEditEvent={handleEditEvent}
-            onDeleteEvent={deleteEvent}
+            onDeleteEvent={handleDeleteEvent}
             facilities={facilities || []}
           />
         </TabsContent>
