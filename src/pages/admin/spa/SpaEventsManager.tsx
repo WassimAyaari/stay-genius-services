@@ -2,22 +2,15 @@
 import React, { useState } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { useSpaFacilities } from '@/hooks/useSpaFacilities';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { format } from 'date-fns';
-import { Event } from '@/types/event';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash, Calendar, Users, Plus } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useEventReservations } from '@/hooks/useEventReservations';
-import { EventReservationDetail } from '@/pages/admin/components/events/EventReservationDetail';
-import { EventReservation } from '@/types/event';
+import { Event, EventReservation } from '@/types/event';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SpaEventsDialog from './SpaEventsDialog';
+import { EventReservationDetail } from '@/pages/admin/components/events/EventReservationDetail';
+import { useEventReservations } from '@/hooks/useEventReservations';
+import SpaEventsTab from './tabs/SpaEventsTab';
+import SpaEventReservationsTab from './tabs/SpaEventReservationsTab';
 
 const SpaEventsManager = () => {
-  // Utiliser le filtre pour récupérer uniquement les événements du spa
   const { events, loading, deleteEvent, refetch } = useEvents(true);
   const { facilities } = useSpaFacilities();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -29,7 +22,6 @@ const SpaEventsManager = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
   const handleAddEvent = () => {
-    // Utiliser la première installation comme défaut si aucune n'est sélectionnée
     if (facilities && facilities.length > 0 && !selectedFacility) {
       setSelectedFacility(facilities[0]);
     }
@@ -46,10 +38,6 @@ const SpaEventsManager = () => {
     }
   };
 
-  const handleDeleteEvent = (event: Event) => {
-    deleteEvent(event.id);
-  };
-
   const handleViewReservations = (event: Event) => {
     setSelectedEventId(event.id);
     setSelectedEvent(event);
@@ -64,24 +52,8 @@ const SpaEventsManager = () => {
     updateReservationStatus({ id: reservationId, status });
   };
 
-  const getFacilityName = (facilityId: string) => {
-    const facility = facilities?.find(f => f.id === facilityId);
-    return facility ? facility.name : 'Non spécifié';
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Événements du Spa</h2>
-        <Button 
-          onClick={handleAddEvent} 
-          className="bg-[#00AEBB]"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un événement
-        </Button>
-      </div>
-
       <Tabs defaultValue="list">
         <TabsList>
           <TabsTrigger value="list">Liste des événements</TabsTrigger>
@@ -90,163 +62,24 @@ const SpaEventsManager = () => {
           )}
         </TabsList>
 
-        <TabsContent value="list" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Événements du Spa</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-4">Chargement des événements...</div>
-              ) : !events || events.length === 0 ? (
-                <div className="text-center py-4">Aucun événement trouvé pour le spa</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Titre</TableHead>
-                      <TableHead>Installation</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Réservations</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {events.map((event) => (
-                      <TableRow key={event.id}>
-                        <TableCell className="font-medium">{event.title}</TableCell>
-                        <TableCell>{getFacilityName(event.spa_facility_id!)}</TableCell>
-                        <TableCell>
-                          {format(new Date(event.date), 'dd/MM/yyyy')}
-                          {event.time && ` à ${event.time}`}
-                        </TableCell>
-                        <TableCell>
-                          {event.is_featured ? (
-                            <Badge variant="secondary">Mis en avant</Badge>
-                          ) : (
-                            <Badge variant="outline">Standard</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewReservations(event)}
-                            className="flex items-center gap-1"
-                          >
-                            <Calendar className="h-4 w-4" />
-                            <span>Voir</span>
-                          </Button>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditEvent(event)}
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span className="sr-only">Modifier</span>
-                            </Button>
-
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-600">
-                                  <Trash className="h-4 w-4" />
-                                  <span className="sr-only">Supprimer</span>
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Supprimer l'événement</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Êtes-vous sûr de vouloir supprimer cet événement ? Cette action ne peut pas être annulée.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteEvent(event)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
-                                    Supprimer
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="list">
+          <SpaEventsTab
+            events={events}
+            loading={loading}
+            onAddEvent={handleAddEvent}
+            onEditEvent={handleEditEvent}
+            onDeleteEvent={deleteEvent}
+            facilities={facilities || []}
+          />
         </TabsContent>
 
         <TabsContent value="reservations">
-          {selectedEvent && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Réservations pour: {selectedEvent.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {reservationsLoading ? (
-                  <div className="text-center py-4">Chargement des réservations...</div>
-                ) : reservations.length === 0 ? (
-                  <div className="text-center py-4">Aucune réservation trouvée pour cet événement</div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Invité</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Chambre</TableHead>
-                        <TableHead>Nombre d'invités</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {reservations.map((reservation) => (
-                        <TableRow key={reservation.id}>
-                          <TableCell className="font-medium">{reservation.guestName || 'N/A'}</TableCell>
-                          <TableCell>{reservation.guestEmail || 'N/A'}</TableCell>
-                          <TableCell>{reservation.roomNumber || 'N/A'}</TableCell>
-                          <TableCell>{reservation.guests}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={
-                                reservation.status === 'confirmed' ? 'default' :
-                                reservation.status === 'cancelled' ? 'destructive' : 'outline'
-                              }
-                            >
-                              {reservation.status === 'confirmed' ? 'Confirmé' :
-                              reservation.status === 'cancelled' ? 'Annulé' : 'En attente'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewReservation(reservation)}
-                              >
-                                <Users className="h-4 w-4" />
-                                <span className="sr-only">Détails</span>
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <SpaEventReservationsTab
+            reservations={reservations}
+            isLoading={reservationsLoading}
+            onViewReservation={handleViewReservation}
+            selectedEvent={selectedEvent}
+          />
         </TabsContent>
       </Tabs>
 
@@ -259,7 +92,6 @@ const SpaEventsManager = () => {
         />
       )}
 
-      {/* Reservation Detail Dialog */}
       {selectedReservation && (
         <EventReservationDetail
           reservation={selectedReservation}
