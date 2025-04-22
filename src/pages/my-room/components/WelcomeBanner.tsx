@@ -34,12 +34,12 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        return 'Invalid Date';
+        return 'Not set';
       }
       return format(date, 'dd MMMM yyyy', { locale: enUS });
     } catch (e) {
       console.error("Error formatting date:", e, dateString);
-      return 'Invalid Date';
+      return 'Not set';
     }
   };
   
@@ -50,6 +50,9 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
   const checkOutDate = useMemo(() => {
     return formatDateIfValid(userData?.check_out_date);
   }, [userData]);
+
+  // Always show the dates section but handle "Not set" case within the UI
+  const shouldShowDatesSection = true;
 
   return (
     <Card className="mb-8 p-8 bg-gradient-to-r from-primary-light via-white to-white border-none shadow-lg rounded-3xl">
@@ -66,7 +69,7 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           </div>
         </div>
         
-        {(checkInDate !== 'Not set' || checkOutDate !== 'Not set') && (
+        {shouldShowDatesSection && (
           <div className="mt-2 p-3 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center">
               <div>
