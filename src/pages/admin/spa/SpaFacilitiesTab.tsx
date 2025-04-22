@@ -37,6 +37,11 @@ const SpaFacilitiesTab = () => {
     deleteEvent(event.id);
   };
 
+  const handleDialogClose = (success: boolean) => {
+    setIsDialogOpen(false);
+    // You could add additional logic here if needed when the dialog is closed
+  };
+
   const filteredEvents = events?.filter(event => event.spa_facility_id === selectedFacility?.id) || [];
 
   return (
@@ -92,6 +97,7 @@ const SpaFacilitiesTab = () => {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         facility={selectedFacility}
+        onClose={handleDialogClose}
       />
 
       {selectedFacility && (
