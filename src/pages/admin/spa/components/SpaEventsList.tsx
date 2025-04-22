@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
-import { Edit, Trash } from 'lucide-react';
+import { Edit, Trash, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { SpaFacility } from '@/features/spa/types';
@@ -15,6 +15,7 @@ interface SpaEventsListProps {
   onDeleteEvent: (event: Event) => void;
   isLoading: boolean;
   facilities: SpaFacility[];
+  onViewReservations?: (event: Event) => void; // Added this prop
 }
 
 const SpaEventsList: React.FC<SpaEventsListProps> = ({
@@ -22,7 +23,8 @@ const SpaEventsList: React.FC<SpaEventsListProps> = ({
   onEditEvent,
   onDeleteEvent,
   isLoading,
-  facilities
+  facilities,
+  onViewReservations // Added this prop
 }) => {
   const getFacilityName = (facilityId: string) => {
     const facility = facilities?.find(f => f.id === facilityId);
@@ -74,6 +76,17 @@ const SpaEventsList: React.FC<SpaEventsListProps> = ({
             </TableCell>
             <TableCell>
               <div className="flex justify-end gap-2">
+                {onViewReservations && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewReservations(event)}
+                    title="Voir les réservations"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span className="sr-only">Réservations</span>
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
