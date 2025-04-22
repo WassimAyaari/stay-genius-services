@@ -5,12 +5,13 @@ import EventForm from '@/pages/admin/components/events/EventForm';
 import { useEvents } from '@/hooks/useEvents';
 import { Event } from '@/types/event';
 import { toast } from 'sonner';
+import { SpaFacility } from '@/features/spa/types';
 
 interface SpaEventsDialogProps {
-  open: boolean;  // Changed from isOpen to open to match the prop being passed
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  facility: any;
-  event?: Event;
+  facility: SpaFacility;
+  event?: Event | null;
 }
 
 const SpaEventsDialog = ({ open, onOpenChange, facility, event }: SpaEventsDialogProps) => {
@@ -54,7 +55,7 @@ const SpaEventsDialog = ({ open, onOpenChange, facility, event }: SpaEventsDialo
           </DialogTitle>
         </DialogHeader>
         <EventForm
-          initialData={event || { spa_facility_id: facility?.id }}
+          initialData={event ? { ...event } : { spa_facility_id: facility.id }}
           onSubmit={handleSubmit}
           onCancel={() => onOpenChange(false)}
         />

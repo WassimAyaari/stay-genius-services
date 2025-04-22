@@ -42,7 +42,8 @@ const EventForm: React.FC<EventFormProps> = ({
       location: initialData.location || '',
       date: initialData.date || format(new Date(), 'yyyy-MM-dd'),
       time: initialData.time || '',
-      restaurant_id: initialData.restaurant_id ?? null
+      restaurant_id: initialData.restaurant_id ?? null,
+      spa_facility_id: initialData.spa_facility_id ?? null
     } : {
       title: '',
       description: '',
@@ -52,7 +53,8 @@ const EventForm: React.FC<EventFormProps> = ({
       location: '',
       date: format(new Date(), 'yyyy-MM-dd'),
       time: '',
-      restaurant_id: null
+      restaurant_id: null,
+      spa_facility_id: null
     }
   });
 
@@ -69,8 +71,12 @@ const EventForm: React.FC<EventFormProps> = ({
     }
   };
 
-  const restaurantLocked =
-    !!(initialData && typeof initialData.restaurant_id === 'string' && initialData.restaurant_id);
+  // Determine if restaurant selection should be displayed
+  const showRestaurantField = !initialData?.spa_facility_id;
+  
+  // Check if either restaurant or spa facility is locked
+  const restaurantLocked = !!(initialData && typeof initialData.restaurant_id === 'string' && initialData.restaurant_id);
+  const spaFacilityLocked = !!(initialData && typeof initialData.spa_facility_id === 'string' && initialData.spa_facility_id);
 
   return (
     <Form {...form}>
@@ -78,30 +84,34 @@ const EventForm: React.FC<EventFormProps> = ({
         <div className="px-1">
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <BasicInfoFields form={form} />
-            <FormItem>
-              <FormLabel>Link to Restaurant (optional)</FormLabel>
-              <FormControl>
-                <Select
-                  value={form.watch('restaurant_id') ?? 'null'}
-                  onValueChange={val => form.setValue('restaurant_id', val === 'null' ? null : val)}
-                  disabled={restaurantLocked}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      restaurantLocked
-                        ? (restaurants?.find(r => r.id === form.watch('restaurant_id'))?.name ?? "Linked Restaurant")
-                        : "No restaurant"
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="null">No restaurant</SelectItem>
-                    {(restaurants || []).map(r => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
+            
+            {showRestaurantField && (
+              <FormItem>
+                <FormLabel>Link to Restaurant (optional)</FormLabel>
+                <FormControl>
+                  <Select
+                    value={form.watch('restaurant_id') ?? 'null'}
+                    onValueChange={val => form.setValue('restaurant_id', val === 'null' ? null : val)}
+                    disabled={restaurantLocked || spaFacilityLocked}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        restaurantLocked
+                          ? (restaurants?.find(r => r.id === form.watch('restaurant_id'))?.name ?? "Linked Restaurant")
+                          : "No restaurant"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="null">No restaurant</SelectItem>
+                      {(restaurants || []).map(r => (
+                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+            
             <CategoryField form={form} />
             <DateTimeFields form={form} />
             <LocationAndFeaturedFields form={form} />

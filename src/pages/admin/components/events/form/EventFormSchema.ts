@@ -23,7 +23,7 @@ export const eventSchema = z.object({
   capacity: z.number().optional().default(10),
   price: z.number().optional(),
   restaurant_id: z.string().nullable().optional(),
-  spa_facility_id: z.string().nullable().optional() // Ajout de spa_facility_id
+  spa_facility_id: z.string().nullable().optional()
 });
 
 export type EventFormValues = z.infer<typeof eventSchema>;
