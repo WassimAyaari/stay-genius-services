@@ -7,6 +7,7 @@ import Layout from '@/components/Layout';
 import { useSpaServices } from '@/hooks/useSpaServices';
 import BookingDialog from '@/features/spa/components/SpaBookingDialog';
 import SpaSection from '@/features/spa/components/SpaSection';
+import SpaEventsSection from '@/features/spa/components/SpaEventsSection';
 
 const Spa = () => {
   const { featuredServices, isLoading } = useSpaServices();
@@ -31,6 +32,8 @@ const Spa = () => {
         </p>
       </div>
 
+      <SpaEventsSection />
+      
       <SpaSection onBookService={handleBookTreatment} />
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
