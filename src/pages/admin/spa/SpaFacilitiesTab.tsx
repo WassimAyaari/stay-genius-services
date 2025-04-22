@@ -4,7 +4,6 @@ import { useSpaFacilities } from '@/hooks/useSpaFacilities';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEvents } from '@/hooks/useEvents';
 import SpaFacilityDialog from './SpaFacilityDialog';
 import SpaEventsDialog from './SpaEventsDialog';
@@ -32,6 +31,10 @@ const SpaFacilitiesTab = () => {
   const handleEditEvent = (event: Event) => {
     setSelectedEvent(event);
     setIsEventDialogOpen(true);
+  };
+
+  const handleDeleteEvent = (event: Event) => {
+    deleteEvent(event.id);
   };
 
   const filteredEvents = events?.filter(event => event.spa_facility_id === selectedFacility?.id) || [];
@@ -76,7 +79,7 @@ const SpaFacilitiesTab = () => {
                 <SpaEventsList 
                   events={filteredEvents}
                   onEditEvent={handleEditEvent}
-                  onDeleteEvent={deleteEvent}
+                  onDeleteEvent={handleDeleteEvent}
                   isLoading={eventsLoading}
                 />
               </div>
@@ -86,7 +89,7 @@ const SpaFacilitiesTab = () => {
       </div>
 
       <SpaFacilityDialog
-        isOpen={isDialogOpen}
+        open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         facility={selectedFacility}
       />
