@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { useToast } from '@/hooks/use-toast';
@@ -96,14 +95,13 @@ const InformationTechnologyManager = () => {
     setIsEditItemDialogOpen(true);
   };
 
-  // handle IT request status updates & guest notifications are triggered via updateRequestStatus and Realtime hooks
-  const handleUpdateRequestStatus = async (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
+  const handleUpdateRequestStatus = async (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold') => {
     try {
       await updateRequestStatus(requestId, status);
       handleRefresh();
       toast({
         title: "Success",
-        description: `Request marked as ${status}`
+        description: `Request marked as ${status.replace('_', ' ')}`
       });
     } catch (error) {
       console.error("Error updating request status:", error);
