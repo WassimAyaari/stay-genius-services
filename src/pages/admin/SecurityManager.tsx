@@ -2,18 +2,20 @@
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useRequestCategories, useCreateRequestItem, useUpdateRequestItem } from '@/hooks/useRequestCategories';
+import { useRequestCategories, useCreateRequestItem } from '@/hooks/useRequestCategories';
 import { RequestItem } from '@/features/rooms/types';
 import SecurityItemsTab from './security/SecurityItemsTab';
 import SecurityRequestsTab from './security/SecurityRequestsTab';
 import AddItemDialog from './security/AddItemDialog';
 import EditItemDialog from './security/EditItemDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const SecurityManager = () => {
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingItem, setEditingItem] = useState<RequestItem | null>(null);
+  const { toast } = useToast();
   
   const { categories } = useRequestCategories();
   const createItem = useCreateRequestItem();
@@ -35,9 +37,20 @@ const SecurityManager = () => {
         is_active: true,
         category_id: '', // This will be converted to a category
       });
+      
+      toast({
+        title: "Success",
+        description: "Security category created successfully"
+      });
+      
       return result;
     } catch (error) {
       console.error('Error creating security category:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create security category",
+        variant: "destructive"
+      });
       throw error;
     }
   };

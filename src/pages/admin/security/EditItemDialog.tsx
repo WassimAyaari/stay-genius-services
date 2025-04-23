@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,25 +12,58 @@ import {
 } from '@/components/ui/dialog';
 import { RequestItem } from '@/features/rooms/types';
 import { useUpdateRequestItem } from '@/hooks/useRequestCategories';
+import { useToast } from '@/hooks/use-toast';
 
 type EditItemDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  editingItem: RequestItem | null;
-  setEditingItem: React.Dispatch<React.SetStateAction<RequestItem | null>>;
-  onUpdate: () => Promise<void>;
+  item: RequestItem | null;
 };
 
 const EditItemDialog = ({
   isOpen,
   onOpenChange,
-  editingItem,
-  setEditingItem,
-  onUpdate,
+  item
 }: EditItemDialogProps) => {
+  const { toast } = useToast();
   const updateItem = useUpdateRequestItem();
+  const [editingItem, setEditingItem] = useState<RequestItem | null>(item);
+  
+  // Update local state when item prop changes
+  React.useEffect(() => {
+    setEditingItem(item);
+  }, [item]);
 
   if (!editingItem) return null;
+
+  const handleUpdate = async () => {
+    try {
+      if (!editingItem.name.trim()) {
+        toast({
+          title: "Error",
+          description: "Name is required",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      await updateItem.mutateAsync(editingItem);
+      
+      toast({
+        title: "Success",
+        description: "Security item updated successfully"
+      });
+      
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error updating security item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update security item",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -74,7 +107,7 @@ const EditItemDialog = ({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={onUpdate} disabled={updateItem.isPending}>
+          <Button onClick={handleUpdate} disabled={updateItem.isPending}>
             {updateItem.isPending ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>

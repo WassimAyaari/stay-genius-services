@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,33 +11,68 @@ import {
   DialogClose
 } from '@/components/ui/dialog';
 import { useCreateRequestItem } from '@/hooks/useRequestCategories';
+import { useToast } from '@/hooks/use-toast';
 
 type AddItemDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  newItem: {
-    name: string;
-    description: string;
-    category_id: string;
-    is_active: boolean;
-  };
-  setNewItem: React.Dispatch<React.SetStateAction<{
-    name: string;
-    description: string;
-    category_id: string;
-    is_active: boolean;
-  }>>;
-  onAdd: () => Promise<void>;
+  categoryId: string;
 };
 
 const AddItemDialog = ({
   isOpen,
   onOpenChange,
-  newItem,
-  setNewItem,
-  onAdd,
+  categoryId
 }: AddItemDialogProps) => {
+  const { toast } = useToast();
   const createItem = useCreateRequestItem();
+  const [newItem, setNewItem] = useState({
+    name: '',
+    description: '',
+    category_id: categoryId,
+    is_active: true
+  });
+  
+  const handleAdd = async () => {
+    try {
+      if (!newItem.name.trim()) {
+        toast({
+          title: "Error",
+          description: "Name is required",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      await createItem.mutateAsync({
+        name: newItem.name,
+        description: newItem.description,
+        category_id: categoryId,
+        is_active: true
+      });
+      
+      toast({
+        title: "Success",
+        description: "Security item added successfully"
+      });
+      
+      setNewItem({
+        name: '',
+        description: '',
+        category_id: categoryId,
+        is_active: true
+      });
+      
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error adding security item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add security item",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -72,7 +107,7 @@ const AddItemDialog = ({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={onAdd} disabled={createItem.isPending}>
+          <Button onClick={handleAdd} disabled={createItem.isPending}>
             {createItem.isPending ? 'Adding...' : 'Add Item'}
           </Button>
         </DialogFooter>
