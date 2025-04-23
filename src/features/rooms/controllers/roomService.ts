@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceType } from '../types';
 import { toast } from '@/hooks/use-toast';
@@ -240,24 +239,20 @@ export const requestService = async (
 // Function to update the status of a service request
 export const updateRequestStatus = async (
   requestId: string,
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
-) => {
+  status: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled'
+): Promise<void> => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('service_requests')
-      .update({ status })
-      .eq('id', requestId)
-      .select()
-      .single();
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', requestId);
 
     if (error) {
       console.error('Error updating request status:', error);
       throw error;
     }
-
-    return data;
   } catch (error) {
-    console.error('Error in updateRequestStatus:', error);
+    console.error('Error updating request status:', error);
     throw error;
   }
 };
