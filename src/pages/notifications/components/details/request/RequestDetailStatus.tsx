@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CheckCircle2, Clock, Loader2, XCircle, Pause } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export const RequestDetailStatus: React.FC<RequestDetailStatusProps> = ({ status
               <Pause className="h-5 w-5 text-orange-400" />
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-orange-800">Demande en attente</h3>
+              <h3 className="text-sm font-medium text-orange-800">Demande en pause</h3>
               <div className="mt-2 text-sm text-orange-700">
                 <p>Votre demande est temporairement en attente. Notre équipe la traitera dès que possible.</p>
               </div>
