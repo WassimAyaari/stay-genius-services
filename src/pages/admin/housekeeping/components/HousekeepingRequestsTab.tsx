@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Layers } from 'lucide-react';
+import { Search, Layers, Clock, PlayCircle, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ import { useRequestsData } from '@/hooks/useRequestsData';
 type HousekeepingRequestsTabProps = {
   requestsSearchTerm: string;
   setRequestsSearchTerm: (term: string) => void;
-  handleUpdateRequestStatus: (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled') => Promise<void>;
+  handleUpdateRequestStatus: (requestId: string, status: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled') => Promise<void>;
 };
 
 const HousekeepingRequestsTab = ({
@@ -29,19 +29,15 @@ const HousekeepingRequestsTab = ({
   const { categories } = useRequestCategories();
   const { requests, isLoading: isRequestsLoading, handleRefresh } = useRequestsData();
 
-  // Find the Housekeeping category
   const housekeepingCategory = categories.find(cat => cat.name === 'Housekeeping');
   
-  // Filter housekeeping requests
   const housekeepingRequests = requests.filter(
     req => {
-      // Check if the request is related to housekeeping
       const isHousekeeping = 
         req.category_id === housekeepingCategory?.id || 
         req.type?.toLowerCase() === 'housekeeping' ||
         (req.request_items && req.request_items.category_id === housekeepingCategory?.id);
       
-      // Apply search filter
       const matchesSearch = 
         !requestsSearchTerm || 
         req.description?.toLowerCase().includes(requestsSearchTerm.toLowerCase()) ||
@@ -57,6 +53,8 @@ const HousekeepingRequestsTab = ({
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
+      case 'on_hold':
+        return 'bg-orange-100 text-orange-800';
       case 'in_progress':
         return 'bg-blue-100 text-blue-800';
       case 'completed':
@@ -125,17 +123,42 @@ const HousekeepingRequestsTab = ({
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeColor(request.status)}`}>
-                      {request.status}
+                      {request.status.replace('_', ' ')}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       {request.status === 'pending' && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleUpdateRequestStatus(request.id, 'on_hold')}
+                            className="gap-2"
+                          >
+                            <PauseCircle className="h-4 w-4" />
+                            Hold
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
+                            className="gap-2"
+                          >
+                            <PlayCircle className="h-4 w-4" />
+                            Start
+                          </Button>
+                        </>
+                      )}
+
+                      {request.status === 'on_hold' && (
                         <Button 
                           size="sm" 
                           variant="outline"
                           onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
+                          className="gap-2"
                         >
+                          <PlayCircle className="h-4 w-4" />
                           Start
                         </Button>
                       )}
@@ -145,18 +168,21 @@ const HousekeepingRequestsTab = ({
                           size="sm" 
                           variant="outline"
                           onClick={() => handleUpdateRequestStatus(request.id, 'completed')}
+                          className="gap-2"
                         >
+                          <CheckCircle className="h-4 w-4" />
                           Complete
                         </Button>
                       )}
-                      
-                      {(request.status === 'pending' || request.status === 'in_progress') && (
+                    
+                      {(request.status === 'pending' || request.status === 'on_hold' || request.status === 'in_progress') && (
                         <Button 
                           size="sm" 
                           variant="outline"
                           onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
-                          className="text-red-500"
+                          className="gap-2 text-red-500"
                         >
+                          <XCircle className="h-4 w-4" />
                           Cancel
                         </Button>
                       )}

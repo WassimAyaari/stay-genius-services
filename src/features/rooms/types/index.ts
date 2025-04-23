@@ -4,7 +4,7 @@ export interface ServiceRequest {
   guest_id: string;
   type: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled';
   created_at: string;
   updated_at: string;
   request_item_id?: string;
