@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Search, CheckCircle, PlayCircle, XCircle } from 'lucide-react';
+import { Search, CheckCircle, PlayCircle, XCircle, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,7 +26,6 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
   const { toast } = useToast();
   const { requests, isLoading, handleRefresh } = useRequestsData();
   
-  // Filter requests by maintenance and technical categories
   const maintenanceRequests = requests.filter(
     request => 
       (categoryIds.includes(request.category_id || '') || request.type === 'maintenance') &&
@@ -43,6 +41,8 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
     switch(status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
+      case 'on_hold':
+        return 'bg-orange-100 text-orange-800';
       case 'in_progress':
         return 'bg-blue-100 text-blue-800';
       case 'completed':
@@ -54,7 +54,7 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
     }
   };
   
-  const handleStatusChange = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
+  const handleStatusChange = async (requestId: string, newStatus: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled') => {
     try {
       await updateRequestStatus(requestId, newStatus);
       handleRefresh();
@@ -131,39 +131,49 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       {request.status === 'pending' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center text-blue-600"
-                          onClick={() => handleStatusChange(request.id, 'in_progress')}
-                        >
-                          <PlayCircle className="h-4 w-4 mr-1" />
-                          Start
-                        </Button>
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center text-orange-600"
+                            onClick={() => handleStatusChange(request.id, 'on_hold')}
+                          >
+                            <Pause className="h-4 w-4 mr-1" />
+                            On Hold
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center text-blue-600"
+                            onClick={() => handleStatusChange(request.id, 'in_progress')}
+                          >
+                            <PlayCircle className="h-4 w-4 mr-1" />
+                            Start
+                          </Button>
+                        </>
                       )}
                       
-                      {(request.status === 'pending' || request.status === 'in_progress') && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center text-green-600"
-                          onClick={() => handleStatusChange(request.id, 'completed')}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Complete
-                        </Button>
-                      )}
-                      
-                      {(request.status === 'pending' || request.status === 'in_progress') && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center text-red-600"
-                          onClick={() => handleStatusChange(request.id, 'cancelled')}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Cancel
-                        </Button>
+                      {(request.status === 'pending' || request.status === 'on_hold' || request.status === 'in_progress') && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center text-green-600"
+                            onClick={() => handleStatusChange(request.id, 'completed')}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Complete
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center text-red-600"
+                            onClick={() => handleStatusChange(request.id, 'cancelled')}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Cancel
+                          </Button>
+                        </>
                       )}
                     </div>
                   </TableCell>
