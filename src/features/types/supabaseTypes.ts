@@ -1,3 +1,4 @@
+
 // Custom type definitions for Supabase tables to avoid modifying the read-only types.ts file
 
 // This type will be used whenever we need to access service_requests table
@@ -7,7 +8,7 @@ export interface ServiceRequestType {
   room_id: string;
   type: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled';
   created_at: string;
   updated_at?: string;
   request_item_id?: string;

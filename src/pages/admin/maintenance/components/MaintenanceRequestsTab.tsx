@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, CheckCircle, PlayCircle, XCircle, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,17 +41,28 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
   const getStatusBadgeColor = (status: string) => {
     switch(status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'on_hold':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'cancelled':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+  
+  const getStatusLabel = (status: string) => {
+    switch(status) {
+      case 'pending': return 'Pending';
+      case 'on_hold': return 'On Hold';
+      case 'in_progress': return 'In Progress';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
     }
   };
   
@@ -99,88 +111,105 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
         {isLoading ? (
           <div className="text-center py-4">Loading...</div>
         ) : maintenanceRequests.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Room</TableHead>
-                <TableHead>Guest</TableHead>
-                <TableHead>Issue</TableHead>
-                <TableHead>Requested On</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {maintenanceRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell className="font-medium">{request.room_number || 'N/A'}</TableCell>
-                  <TableCell>{request.guest_name || 'Anonymous'}</TableCell>
-                  <TableCell>
-                    {request.request_items 
-                      ? request.request_items.name 
-                      : request.description || 'No description provided'}
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusBadgeColor(request.status)}>
-                      {request.status.replace('_', ' ')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      {request.status === 'pending' && (
-                        <>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Room</TableHead>
+                  <TableHead>Guest</TableHead>
+                  <TableHead>Issue</TableHead>
+                  <TableHead>Requested On</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {maintenanceRequests.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell className="font-medium">{request.room_number || 'N/A'}</TableCell>
+                    <TableCell>{request.guest_name || 'Anonymous'}</TableCell>
+                    <TableCell>
+                      {request.request_items 
+                        ? request.request_items.name 
+                        : request.description || 'No description provided'}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        className={`${getStatusBadgeColor(request.status)} border`} 
+                        variant="outline"
+                      >
+                        {getStatusLabel(request.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end flex-wrap gap-1">
+                        {request.status === 'pending' && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center text-orange-600 whitespace-nowrap"
+                              onClick={() => handleStatusChange(request.id, 'on_hold')}
+                            >
+                              <Pause className="h-4 w-4 mr-1" />
+                              On Hold
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center text-blue-600 whitespace-nowrap"
+                              onClick={() => handleStatusChange(request.id, 'in_progress')}
+                            >
+                              <PlayCircle className="h-4 w-4 mr-1" />
+                              Start
+                            </Button>
+                          </>
+                        )}
+                        
+                        {request.status === 'on_hold' && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center text-orange-600"
-                            onClick={() => handleStatusChange(request.id, 'on_hold')}
-                          >
-                            <Pause className="h-4 w-4 mr-1" />
-                            On Hold
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center text-blue-600"
+                            className="flex items-center text-blue-600 whitespace-nowrap"
                             onClick={() => handleStatusChange(request.id, 'in_progress')}
                           >
                             <PlayCircle className="h-4 w-4 mr-1" />
                             Start
                           </Button>
-                        </>
-                      )}
-                      
-                      {(request.status === 'pending' || request.status === 'on_hold' || request.status === 'in_progress') && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center text-green-600"
-                            onClick={() => handleStatusChange(request.id, 'completed')}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Complete
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center text-red-600"
-                            onClick={() => handleStatusChange(request.id, 'cancelled')}
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Cancel
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        )}
+                        
+                        {(request.status === 'pending' || request.status === 'on_hold' || request.status === 'in_progress') && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center text-green-600 whitespace-nowrap"
+                              onClick={() => handleStatusChange(request.id, 'completed')}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Complete
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center text-red-600 whitespace-nowrap"
+                              onClick={() => handleStatusChange(request.id, 'cancelled')}
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             No maintenance or technical requests found.

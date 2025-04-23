@@ -17,6 +17,7 @@ export const NotificationStatusLabel: React.FC<NotificationStatusLabelProps> = (
         case 'confirmed': return 'Confirmée';
         case 'cancelled': return 'Annulée';
         case 'pending': return 'En attente';
+        case 'on_hold': return 'En pause';
         case 'in_progress': return 'En cours';
         case 'completed': return 'Complétée';
         default: return 'En attente';
@@ -25,6 +26,7 @@ export const NotificationStatusLabel: React.FC<NotificationStatusLabelProps> = (
       switch (status) {
         case 'completed': return 'Complétée';
         case 'in_progress': return 'En cours';
+        case 'on_hold': return 'En pause';
         case 'cancelled': return 'Annulée';
         case 'pending': return 'En attente';
         default: return 'En attente';

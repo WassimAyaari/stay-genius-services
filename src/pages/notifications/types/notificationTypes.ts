@@ -1,3 +1,4 @@
+
 // Types pour les notifications
 
 export interface NotificationItem {
@@ -31,7 +32,7 @@ export interface ServiceRequest {
   id: string;
   type: string;
   description?: string;
-  status: string;
+  status: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled';
   created_at: string;
   updated_at?: string;
   room_number?: string;

@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -282,6 +281,7 @@ const handleServiceStatusChange = (payload: any) => {
   if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
     const statusMap: Record<string, string> = {
       'pending': 'est en attente',
+      'on_hold': 'est mise en attente',
       'in_progress': 'est en cours de traitement',
       'completed': 'a été complétée',
       'cancelled': 'a été annulée'
