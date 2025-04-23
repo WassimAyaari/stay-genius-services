@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { ShowerHead, Calendar, Utensils, FileText, Clock, Bell } from 'lucide-react';
+import { ShowerHead, Calendar, Utensils, FileText, Clock, Bell, CheckCircle, XCircle, Pause } from 'lucide-react';
 
 interface NotificationItemProps {
   id: string;
@@ -51,6 +50,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       case 'completed': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
       case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'on_hold': return 'bg-orange-100 text-orange-800';
       default: return 'bg-yellow-100 text-yellow-800';
     }
   }
@@ -62,7 +62,18 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       case 'completed': return 'Completed';
       case 'cancelled': return 'Cancelled';
       case 'confirmed': return 'Confirmed';
+      case 'on_hold': return 'On hold';
       default: return 'Unknown';
+    }
+  }
+
+  function getStatusIcon(status: string) {
+    switch (status) {
+      case 'confirmed':
+      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'cancelled': return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'on_hold': return <Pause className="h-4 w-4 text-orange-500" />;
+      default: return <Clock className="h-4 w-4 text-yellow-500" />;
     }
   }
 
