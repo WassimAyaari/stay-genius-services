@@ -124,7 +124,7 @@ const Services = () => {
           </div>
           <SearchDialog 
             open={isSearchOpen} 
-            onOpenChange={setIsSearchOpen}
+            setOpen={setIsSearchOpen}
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
             onNavigate={(route) => {
