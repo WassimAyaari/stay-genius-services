@@ -47,6 +47,16 @@ const ServicesGrid = ({
     }
   ];
 
+  // Function to handle service requests
+  const handleServiceRequest = (type: 'service' | 'custom' | 'securite') => {
+    // This would be implemented to handle the service request
+    toast({
+      title: "Service Request",
+      description: `Your ${type} request has been received.`,
+    });
+    onRequestSuccess();
+  };
+
   return (
     <div className="mb-12">
       <h2 className="text-2xl font-bold text-secondary mb-6">Room Services</h2>
@@ -63,8 +73,10 @@ const ServicesGrid = ({
           <ServiceCard
             key={index}
             icon={service.icon}
-            title={service.label}
+            label={service.label}
+            type={service.type}
             description={service.description}
+            onRequest={handleServiceRequest}
           />
         ))}
       </div>
