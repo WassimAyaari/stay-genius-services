@@ -6,11 +6,13 @@ import {
   CommandList,
   CommandItem,
   CommandGroup,
-  CommandEmpty
+  CommandEmpty,
+  CommandSeparator
 } from '@/components/ui/command';
-import { Search, X } from 'lucide-react';
+import { Search, X, ChevronRight, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCommandSearchOptions } from './useCommandSearchOptions';
+import { cn } from "@/lib/utils";
 
 type SearchDialogProps = {
   open: boolean;
@@ -37,6 +39,12 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ open, setOpen }) => {
 
   const filteredResults = useMemo(() => getFilteredResults(query), [query, getFilteredResults]);
 
+  // Group results by type
+  const pageResults = filteredResults.filter(item => item.type === 'page');
+  const spaResults = filteredResults.filter(item => item.type === 'spa-service');
+  const restaurantResults = filteredResults.filter(item => item.type === 'restaurant');
+  const shopResults = filteredResults.filter(item => item.type === 'shop');
+
   const handleSelect = (route: string) => {
     navigate(route);
     setOpen(false);
@@ -44,12 +52,12 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ open, setOpen }) => {
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
-      <div className="px-3 pt-4">
-        <div className="flex items-center border-b">
-          <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+    <CommandDialog open={open} onOpenChange={setOpen} className="overflow-hidden rounded-xl">
+      <div className="px-3 pt-3">
+        <div className="flex items-center border-b pb-2">
+          <Search className="mr-2 h-4 w-4 shrink-0 text-primary" />
           <CommandInput
-            placeholder="Type to search..."
+            placeholder="What are you looking for?"
             value={query}
             onValueChange={setQuery}
             className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
@@ -61,69 +69,126 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ open, setOpen }) => {
               onClick={handleClearSearch}
               className="ml-2 rounded-full p-1 hover:bg-gray-100"
             >
-              <X className="h-4 w-4 opacity-50" />
+              <X className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
         </div>
       </div>
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Pages principales">
-          {filteredResults.filter(item => item.type === 'page').map(item => (
-            <CommandItem
-              key={item.route}
-              onSelect={() => handleSelect(item.route)}
-              className="cursor-pointer"
-            >
-              {item.label}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-        <CommandGroup heading="Spa & Bien-être">
-          {filteredResults.filter(item => item.type === 'spa-service').map(item => {
-            const Icon = item.icon;
-            return (
+
+      <CommandList className="max-h-[65vh] overflow-y-auto py-2">
+        <CommandEmpty>
+          <div className="py-6 text-center flex flex-col items-center">
+            <Search className="h-10 w-10 text-muted-foreground/50 mb-2" />
+            <p className="text-muted-foreground">No results found for "{query}"</p>
+          </div>
+        </CommandEmpty>
+
+        {pageResults.length > 0 && (
+          <CommandGroup heading="Pages principales" className="px-2">
+            {pageResults.map(item => (
               <CommandItem
                 key={item.route}
                 onSelect={() => handleSelect(item.route)}
-                className="cursor-pointer flex items-center"
+                className="px-4 py-3 rounded-lg cursor-pointer flex justify-between items-center group hover:bg-primary/5"
               >
-                {Icon && <Icon className="w-4 h-4 text-green-600 mr-2" />}
-                {item.label}
+                <div className="flex items-center">
+                  <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center mr-3">
+                    <MapPin className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </CommandItem>
-            );
-          })}
-        </CommandGroup>
-        <CommandGroup heading="Restaurants">
-          {filteredResults.filter(item => item.type === 'restaurant').map(item => {
-            const Icon = item.icon;
-            return (
-              <CommandItem
-                key={item.route}
-                onSelect={() => handleSelect(item.route)}
-                className="cursor-pointer flex items-center"
-              >
-                {Icon && <Icon className="w-4 h-4 text-primary mr-2" />}
-                {item.label}
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
-        <CommandGroup heading="Shops">
-          {filteredResults.filter(item => item.type === 'shop').map(item => {
-            const Icon = item.icon;
-            return (
-              <CommandItem
-                key={item.route}
-                onSelect={() => handleSelect(item.route)}
-                className="cursor-pointer flex items-center"
-              >
-                {Icon && <Icon className="w-4 h-4 text-yellow-700 mr-2" />}
-                {item.label}
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
+            ))}
+          </CommandGroup>
+        )}
+
+        {spaResults.length > 0 && (
+          <>
+            {pageResults.length > 0 && <CommandSeparator className="my-2" />}
+            <CommandGroup heading="Spa & Bien-être" className="px-2">
+              {spaResults.map(item => {
+                const Icon = item.icon;
+                return (
+                  <CommandItem
+                    key={item.route}
+                    onSelect={() => handleSelect(item.route)}
+                    className="px-4 py-3 rounded-lg cursor-pointer flex justify-between items-center group hover:bg-primary/5"
+                  >
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 rounded-md bg-green-100 flex items-center justify-center mr-3">
+                        {Icon && <Icon className="h-4 w-4 text-green-600" />}
+                      </div>
+                      <div>
+                        <p className="font-medium">{item.label}</p>
+                        {item.category && <p className="text-xs text-muted-foreground">{item.category}</p>}
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </>
+        )}
+
+        {restaurantResults.length > 0 && (
+          <>
+            {(pageResults.length > 0 || spaResults.length > 0) && <CommandSeparator className="my-2" />}
+            <CommandGroup heading="Restaurants" className="px-2">
+              {restaurantResults.map(item => {
+                const Icon = item.icon;
+                return (
+                  <CommandItem
+                    key={item.route}
+                    onSelect={() => handleSelect(item.route)}
+                    className="px-4 py-3 rounded-lg cursor-pointer flex justify-between items-center group hover:bg-primary/5"
+                  >
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 rounded-md bg-orange-100 flex items-center justify-center mr-3">
+                        {Icon && <Icon className="h-4 w-4 text-primary" />}
+                      </div>
+                      <div>
+                        <p className="font-medium">{item.label}</p>
+                        {item.category && <p className="text-xs text-muted-foreground">{item.category}</p>}
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </>
+        )}
+
+        {shopResults.length > 0 && (
+          <>
+            {(pageResults.length > 0 || spaResults.length > 0 || restaurantResults.length > 0) && <CommandSeparator className="my-2" />}
+            <CommandGroup heading="Shops" className="px-2">
+              {shopResults.map(item => {
+                const Icon = item.icon;
+                return (
+                  <CommandItem
+                    key={item.route}
+                    onSelect={() => handleSelect(item.route)}
+                    className="px-4 py-3 rounded-lg cursor-pointer flex justify-between items-center group hover:bg-primary/5"
+                  >
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 rounded-md bg-yellow-100 flex items-center justify-center mr-3">
+                        {Icon && <Icon className="h-4 w-4 text-yellow-700" />}
+                      </div>
+                      <div>
+                        <p className="font-medium">{item.label}</p>
+                        {item.category && <p className="text-xs text-muted-foreground">{item.category}</p>}
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </>
+        )}
       </CommandList>
     </CommandDialog>
   );
