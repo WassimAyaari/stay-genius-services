@@ -46,7 +46,7 @@ const RoomList = () => {
   }, [emblaApi]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full overflow-x-hidden">
       <Carousel
         opts={{
           align: "start",

@@ -52,7 +52,7 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ open, setOpen }) => {
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen} className="overflow-hidden rounded-xl">
+    <CommandDialog open={open} onOpenChange={setOpen} className="overflow-hidden rounded-xl max-w-full w-[90vw] md:w-[600px]">
       <div className="px-3 pt-3">
         <div className="flex items-center border-b pb-2">
           <Search className="mr-2 h-4 w-4 shrink-0 text-primary" />

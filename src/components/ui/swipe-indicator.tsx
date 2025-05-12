@@ -19,7 +19,7 @@ const SwipeIndicator = ({
         <div 
           key={index} 
           className={cn(
-            "h-2 w-2 rounded-full transition-all duration-300",
+            "h-2 w-2 rounded-full transition-all duration-300 relative",
             index === selectedIndex ? "bg-primary w-4" : "bg-gray-300"
           )}
         >
