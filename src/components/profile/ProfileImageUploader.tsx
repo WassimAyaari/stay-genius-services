@@ -89,8 +89,13 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
       const response = await fetch(croppedImageData);
       const blob = await response.blob();
       
+      // Create a File object from the Blob
+      // We need to convert the Blob to a File because compressAndConvertToWebP expects a File
+      const fileName = `profile_${Date.now()}.jpg`;
+      const fileFromBlob = new File([blob], fileName, { type: blob.type });
+      
       // Compress the cropped image
-      const compressedImage = await compressAndConvertToWebP(blob, 100);
+      const compressedImage = await compressAndConvertToWebP(fileFromBlob, 100);
       
       setImage(compressedImage);
       onImageChange(compressedImage);

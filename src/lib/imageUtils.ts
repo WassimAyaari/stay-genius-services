@@ -10,7 +10,7 @@
  * @returns A promise that resolves to the data URL of the compressed image
  */
 export const compressAndConvertToWebP = async (
-  file: File,
+  file: File | Blob,
   maxSizeKB: number = 30
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
