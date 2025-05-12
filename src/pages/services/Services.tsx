@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, Headphones as HeadphonesIcon } from 'lucide-react';
+import { MessageCircle, Headphones as HeadphonesIcon, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
 import ServiceCard from '@/features/services/components/ServiceCard';
 import ServiceChat from '@/features/services/components/ServiceChat';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
-import SearchBar from '@/components/home/SearchBar';
+import { useCommandSearchOptions } from '@/components/home/useCommandSearchOptions';
 import SearchDialog from '@/components/home/SearchDialog';
 
 interface UserInfo {
@@ -21,12 +21,14 @@ const Services = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: 'Guest',
     roomNumber: ''
   });
   const { toast } = useToast();
   const { userData } = useAuth();
+  const { getFilteredResults } = useCommandSearchOptions();
   
   // Get room from user info or context
   const roomNumber = userInfo.roomNumber || userData?.room_number || localStorage.getItem('user_room_number') || '';
@@ -113,8 +115,24 @@ const Services = () => {
         {/* Search Bar */}
         <div className="relative max-w-xl mx-auto mb-16">
           <h2 className="text-xl font-medium text-secondary mb-3">Quick Service Search</h2>
-          <SearchBar onOpen={() => setIsSearchOpen(true)} />
-          <SearchDialog open={isSearchOpen} setOpen={setIsSearchOpen} />
+          <div
+            className="relative flex items-center border rounded-xl px-4 py-3 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => setIsSearchOpen(true)}
+          >
+            <Search className="h-5 w-5 mr-3 text-primary" />
+            <span className="text-gray-500">Search for services (towels, cleaning, wifi support...)</span>
+          </div>
+          <SearchDialog 
+            open={isSearchOpen} 
+            onOpenChange={setIsSearchOpen}
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+            onNavigate={(route) => {
+              navigate(route);
+              setIsSearchOpen(false);
+            }}
+            results={getFilteredResults(searchTerm)}
+          />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
