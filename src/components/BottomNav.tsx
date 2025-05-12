@@ -1,19 +1,17 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BellRing, UtensilsCrossed, BedDouble, Phone, Grid3X3 } from 'lucide-react';
+import { UtensilsCrossed, BedDouble, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import MainMenu from './MainMenu';
-import { useNotifications } from '@/hooks/useNotifications';
-import { Badge } from './ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const { unreadCount } = useNotifications();
+  const isMobile = useIsMobile();
 
   // Log pour le débogage
   console.log('Current path in BottomNav:', location.pathname);
@@ -42,12 +40,6 @@ const BottomNav = () => {
   // Créer le tableau navItems une seule fois et le mettre en cache
   const navItems = useMemo(() => [
     {
-      icon: <BellRing className="h-5 w-5" />,
-      label: 'Notif',
-      path: '/notifications',
-      badgeCount: unreadCount
-    }, 
-    {
       icon: <UtensilsCrossed className="h-5 w-5" />,
       label: 'Dining',
       path: '/dining'
@@ -61,14 +53,8 @@ const BottomNav = () => {
       icon: <Phone className="h-5 w-5" />,
       label: 'Request',
       path: '/services'
-    }, 
-    {
-      icon: <Grid3X3 className="h-5 w-5" />,
-      label: 'Menu',
-      path: '#',
-      isMenu: true
     }
-  ], [unreadCount]);
+  ], []);
 
   // Optimiser la fonction de navigation
   const handleNavigation = useCallback((path: string) => {
@@ -89,43 +75,23 @@ const BottomNav = () => {
           className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t shadow-lg z-50"
         >
           <div className="flex justify-around items-center h-16">
-            {navItems.map(item => 
-              item.isMenu ? (
-                <div 
-                  key={`${item.path}-${item.label}`} 
-                  className={cn(
-                    "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors",
-                    "text-secondary hover:text-primary"
-                  )}
-                >
-                  <MainMenu buttonClassName="flex flex-col items-center justify-center" />
-                  <span className="text-xs font-medium">Menu</span>
+            {navItems.map(item => (
+              <button 
+                key={`${item.path}-${item.label}`} 
+                onClick={() => handleNavigation(item.path)}
+                className={cn(
+                  "flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors relative",
+                  location.pathname === item.path 
+                    ? "text-primary" 
+                    : "text-secondary hover:text-primary"
+                )}
+              >
+                <div className="relative inline-flex items-center justify-center">
+                  {item.icon}
                 </div>
-              ) : (
-                <button 
-                  key={`${item.path}-${item.label}`} 
-                  onClick={() => handleNavigation(item.path)}
-                  className={cn(
-                    "flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors relative",
-                    location.pathname === item.path 
-                      ? "text-primary" 
-                      : "text-secondary hover:text-primary"
-                  )}
-                >
-                  <div className="relative inline-flex items-center justify-center">
-                    {item.icon}
-                    {item.badgeCount && item.badgeCount > 0 && (
-                      <Badge 
-                        className="absolute -top-1.5 -right-1.5 h-4 w-4 p-0 flex items-center justify-center text-[10px] font-bold bg-primary text-white"
-                      >
-                        {item.badgeCount > 9 ? '9+' : item.badgeCount}
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="text-xs font-medium">{item.label}</span>
-                </button>
-              )
-            )}
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            ))}
           </div>
         </motion.nav>
       )}
