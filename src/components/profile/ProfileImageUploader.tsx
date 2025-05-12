@@ -1,15 +1,20 @@
+
 import React, { useState, useRef, ChangeEvent } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Upload, Camera, X } from "lucide-react";
+import { Upload, Camera, X, Crop, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { compressAndConvertToWebP } from '@/lib/imageUtils';
+import ImageCropper from './ImageCropper';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+
 interface ProfileImageUploaderProps {
   initialImage?: string;
   firstName: string;
   lastName: string;
   onImageChange: (imageData: string | null) => void;
 }
+
 const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
   initialImage,
   firstName,
@@ -18,20 +23,23 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
 }) => {
   const [image, setImage] = useState<string | null>(initialImage || null);
   const [isUploading, setIsUploading] = useState(false);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [tempImage, setTempImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   const getInitials = () => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`;
   };
+
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
     try {
       setIsUploading(true);
 
-      // Vérifier le type de fichier
+      // Check file type
       if (!file.type.startsWith('image/')) {
         toast({
           variant: "destructive",
@@ -41,7 +49,7 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
         return;
       }
 
-      // Vérifier la taille du fichier (max 5MB avant compression)
+      // Check file size (max 5MB before compression)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           variant: "destructive",
@@ -51,15 +59,14 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
         return;
       }
 
-      // Compresser l'image
-      const compressedImage = await compressAndConvertToWebP(file, 100); // max 100KB après compression
-
-      setImage(compressedImage);
-      onImageChange(compressedImage);
-      toast({
-        title: "Image téléchargée",
-        description: "Votre photo de profil a été mise à jour."
-      });
+      // Create a temporary URL for the cropper
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTempImage(reader.result as string);
+        setCropperOpen(true);
+      };
+      reader.readAsDataURL(file);
+      
     } catch (error) {
       console.error('Erreur lors du téléchargement de l\'image:', error);
       toast({
@@ -69,10 +76,48 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
       });
     } finally {
       setIsUploading(false);
-      // Réinitialiser l'input pour permettre de télécharger la même image à nouveau
+      // Reset the input to allow uploading the same image again
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
+  const handleCropComplete = async (croppedImageData: string) => {
+    try {
+      setIsUploading(true);
+      
+      // Convert the base64 string to a blob
+      const response = await fetch(croppedImageData);
+      const blob = await response.blob();
+      
+      // Compress the cropped image
+      const compressedImage = await compressAndConvertToWebP(blob, 100);
+      
+      setImage(compressedImage);
+      onImageChange(compressedImage);
+      setCropperOpen(false);
+      setTempImage(null);
+      
+      toast({
+        title: "Image téléchargée",
+        description: "Votre photo de profil a été mise à jour."
+      });
+    } catch (error) {
+      console.error('Erreur lors du traitement de l\'image:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors du traitement de l'image."
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropperOpen(false);
+    setTempImage(null);
+  };
+
   const handleRemoveImage = () => {
     setImage(null);
     onImageChange(null);
@@ -81,10 +126,13 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
       description: "Votre photo de profil a été supprimée."
     });
   };
+
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
-  return <div className="flex flex-col items-center gap-4">
+
+  return (
+    <div className="flex flex-col items-center gap-4">
       <div className="relative">
         <Avatar className="h-24 w-24 border-2 border-white shadow-md">
           {image ? <AvatarImage src={image} alt="Photo de profil" /> : null}
@@ -98,18 +146,44 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
             <Camera className="h-4 w-4" />
           </Button>
           
-          {image && <Button onClick={handleRemoveImage} size="icon" variant="destructive" className="h-8 w-8 rounded-full shadow">
+          {image && (
+            <Button onClick={handleRemoveImage} size="icon" variant="destructive" className="h-8 w-8 rounded-full shadow">
               <X className="h-4 w-4" />
-            </Button>}
+            </Button>
+          )}
         </div>
       </div>
       
       <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
       
+      <Dialog open={cropperOpen} onOpenChange={setCropperOpen}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <Button variant="outline" size="sm" onClick={handleCropCancel}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Annuler
+              </Button>
+              <h3 className="text-lg font-semibold">Ajuster l'image</h3>
+              <div className="w-[72px]"></div>
+            </div>
+            
+            {tempImage && (
+              <ImageCropper 
+                image={tempImage} 
+                onCropComplete={handleCropComplete} 
+                isUploading={isUploading}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       <div className="text-center text-sm text-muted-foreground">
         
-        
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ProfileImageUploader;
