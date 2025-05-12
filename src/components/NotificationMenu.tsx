@@ -48,16 +48,16 @@ const NotificationMenu = () => {
   return (
     <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Bell className={`h-5 w-5 ${hasNewNotifications ? 'text-primary' : 'text-gray-600'}`} />
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+          <Bell className={`h-5 w-5 ${hasNewNotifications ? 'text-primary' : ''}`} />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-5 w-5 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
-              {unreadCount}
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
+              {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 bg-zinc-100">
+      <DropdownMenuContent align="end" className="w-80 bg-white/90 backdrop-blur-sm">
         <DropdownMenuLabel>Notifications ({notifications.length})</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
@@ -70,7 +70,7 @@ const NotificationMenu = () => {
         
         <DropdownMenuSeparator />
         <Link to="/notifications">
-          <DropdownMenuItem className="text-center cursor-pointer hover:bg-gray-200/70">
+          <DropdownMenuItem className="text-center cursor-pointer hover:bg-gray-100/70">
             <span className="w-full text-center text-primary font-medium">
               View all notifications
             </span>

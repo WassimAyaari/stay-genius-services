@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BedDouble, UtensilsCrossed, BellRing, Phone, Grid3X3 } from 'lucide-react';
+import { BellRing, UtensilsCrossed, BedDouble, Phone, Grid3X3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import MainMenu from './MainMenu';
@@ -42,28 +42,28 @@ const BottomNav = () => {
   // Créer le tableau navItems une seule fois et le mettre en cache
   const navItems = useMemo(() => [
     {
-      icon: <BellRing className="w-5 h-5" />,
+      icon: <BellRing className="h-5 w-5" />,
       label: 'Notif',
       path: '/notifications',
       badgeCount: unreadCount
     }, 
     {
-      icon: <UtensilsCrossed className="w-5 h-5" />,
+      icon: <UtensilsCrossed className="h-5 w-5" />,
       label: 'Dining',
       path: '/dining'
     }, 
     {
-      icon: <BedDouble className="w-5 h-5" />,
+      icon: <BedDouble className="h-5 w-5" />,
       label: 'My Room',
       path: '/my-room'
     }, 
     {
-      icon: <Phone className="w-5 h-5" />,
+      icon: <Phone className="h-5 w-5" />,
       label: 'Request',
       path: '/services'
     }, 
     {
-      icon: <Grid3X3 className="w-5 h-5" />,
+      icon: <Grid3X3 className="h-5 w-5" />,
       label: 'Menu',
       path: '#',
       isMenu: true
@@ -112,11 +112,11 @@ const BottomNav = () => {
                       : "text-secondary hover:text-primary"
                   )}
                 >
-                  <div className="relative">
+                  <div className="relative inline-flex items-center justify-center">
                     {item.icon}
                     {item.badgeCount && item.badgeCount > 0 && (
                       <Badge 
-                        className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px] font-bold bg-teal-500"
+                        className="absolute -top-1.5 -right-1.5 h-4 w-4 p-0 flex items-center justify-center text-[10px] font-bold bg-primary text-white"
                       >
                         {item.badgeCount > 9 ? '9+' : item.badgeCount}
                       </Badge>
