@@ -35,17 +35,27 @@ const ConfirmRequestDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-md mx-4 rounded-2xl">
+      <DialogContent 
+        className="sm:max-w-md mx-4 rounded-2xl animate-fade-in" 
+        aria-labelledby="confirmation-dialog-title"
+        aria-describedby="confirmation-dialog-description"
+      >
         <DialogHeader className="pt-2">
-          <DialogTitle className="text-xl">Confirm Service Request</DialogTitle>
-          <DialogDescription className="text-gray-500">
+          <DialogTitle id="confirmation-dialog-title" className="text-xl">
+            Confirm Service Request
+          </DialogTitle>
+          <DialogDescription 
+            id="confirmation-dialog-description" 
+            className="text-gray-500"
+          >
             Are you sure you want to request the following service?
           </DialogDescription>
         </DialogHeader>
-        <div className="bg-primary/5 rounded-xl p-4 my-4">
+        <div className="bg-primary/5 rounded-xl p-4 my-4 border border-primary/10">
           <div className="font-medium text-lg">{item.name}</div>
+          <div className="text-sm text-gray-500 mt-1">{item.category}</div>
           {item.description && (
-            <div className="text-gray-600 mt-1">{item.description}</div>
+            <div className="text-gray-600 mt-3">{item.description}</div>
           )}
         </div>
         <DialogFooter className="sm:justify-between gap-3">
@@ -53,14 +63,17 @@ const ConfirmRequestDialog = ({
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="w-full sm:w-auto rounded-xl"
+            className="w-full sm:w-auto rounded-xl transition-colors"
+            aria-label="Cancel request"
           >
             Cancel
           </Button>
           <Button 
             onClick={onConfirm}
             disabled={isSubmitting}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl hover:bg-primary/90 transition-colors"
+            aria-label="Confirm request"
+            aria-busy={isSubmitting}
           >
             {isSubmitting ? (
               <>
