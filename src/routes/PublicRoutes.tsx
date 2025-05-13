@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
 import Login from '@/pages/auth/Login';
 import Rooms from '@/pages/rooms/Rooms';
@@ -23,7 +23,7 @@ import NotFound from '@/pages/NotFound';
 
 const PublicRoutes = () => {
   return (
-    <>
+    <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth/login" element={<Login />} />
       <Route path="/rooms" element={<Rooms />} />
@@ -43,7 +43,7 @@ const PublicRoutes = () => {
       <Route path="/messages" element={<Messages />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="*" element={<NotFound />} />
-    </>
+    </Routes>
   );
 };
 

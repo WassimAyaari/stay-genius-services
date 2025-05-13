@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter, Routes } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/features/auth/hooks/useAuthContext';
 import { ThemeProvider } from "next-themes";
@@ -19,9 +19,9 @@ function App() {
         <ThemeProvider attribute="class">
           <AuthProvider>
             <Routes>
-              <PublicRoutes />
-              <AuthenticatedRoutes />
-              <AdminRoutes />
+              <Route path="/*" element={<PublicRoutes />} />
+              <Route path="/*" element={<AuthenticatedRoutes />} />
+              <Route path="/admin/*" element={<AdminRoutes />} />
             </Routes>
             <Toaster richColors position="top-right" closeButton />
             <ShadcnToaster />

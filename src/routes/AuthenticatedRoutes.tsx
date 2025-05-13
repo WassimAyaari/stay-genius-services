@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import AuthGuard from '@/components/AuthGuard';
 import Profile from '@/pages/profile/Profile';
 import ServiceRequestDetails from '@/pages/my-room/ServiceRequestDetails';
@@ -12,7 +12,7 @@ import NotificationDetail from '@/pages/notifications/NotificationDetail';
 
 const AuthenticatedRoutes = () => {
   return (
-    <>
+    <Routes>
       <Route path="/profile" element={
         <AuthGuard>
           <Profile />
@@ -54,7 +54,7 @@ const AuthenticatedRoutes = () => {
           <NotificationDetail />
         </AuthGuard>
       } />
-    </>
+    </Routes>
   );
 };
 

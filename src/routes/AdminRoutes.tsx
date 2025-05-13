@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import AuthGuard from '@/components/AuthGuard';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import SecurityManager from '@/pages/admin/SecurityManager';
@@ -23,115 +23,115 @@ import DestinationAdmin from '@/pages/admin/DestinationAdmin';
 
 const AdminRoutes = () => {
   return (
-    <>
-      <Route path="/admin" element={
+    <Routes>
+      <Route path="/" element={
         <AuthGuard adminRequired={true}>
           <AdminDashboard />
         </AuthGuard>
       } />
       
-      <Route path="/admin/security" element={
+      <Route path="/security" element={
         <AuthGuard adminRequired={true}>
           <SecurityManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/housekeeping" element={
+      <Route path="/housekeeping" element={
         <AuthGuard adminRequired={true}>
           <HousekeepingManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/maintenance" element={
+      <Route path="/maintenance" element={
         <AuthGuard adminRequired={true}>
           <MaintenanceManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/reservations" element={
+      <Route path="/reservations" element={
         <AuthGuard adminRequired={true}>
           <ReservationManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/restaurants" element={
+      <Route path="/restaurants" element={
         <AuthGuard adminRequired={true}>
           <RestaurantManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/restaurants/:id/reservations" element={
+      <Route path="/restaurants/:id/reservations" element={
         <AuthGuard adminRequired={true}>
           <RestaurantReservationsManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/restaurant-menus" element={
+      <Route path="/restaurant-menus" element={
         <AuthGuard adminRequired={true}>
           <RestaurantMenuManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/spa" element={
+      <Route path="/spa" element={
         <AuthGuard adminRequired={true}>
           <SpaManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/events" element={
+      <Route path="/events" element={
         <AuthGuard adminRequired={true}>
           <EventsManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/shops" element={
+      <Route path="/shops" element={
         <AuthGuard adminRequired={true}>
           <ShopsManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/destination" element={
+      <Route path="/destination" element={
         <AuthGuard adminRequired={true}>
           <DestinationManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/chat" element={
+      <Route path="/chat" element={
         <AuthGuard adminRequired={true}>
           <ChatMessages />
         </AuthGuard>
       } />
       
-      <Route path="/admin/about" element={
+      <Route path="/about" element={
         <AuthGuard adminRequired={true}>
           <AboutEditor />
         </AuthGuard>
       } />
       
-      <Route path="/admin/feedback" element={
+      <Route path="/feedback" element={
         <AuthGuard adminRequired={true}>
           <FeedbackManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/information-technology" element={
+      <Route path="/information-technology" element={
         <AuthGuard adminRequired={true}>
           <InformationTechnologyManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/restaurants/:id/events" element={
+      <Route path="/restaurants/:id/events" element={
         <AuthGuard adminRequired={true}>
           <RestaurantEventsManager />
         </AuthGuard>
       } />
       
-      <Route path="/admin/destination-admin" element={
+      <Route path="/destination-admin" element={
         <AuthGuard adminRequired={true}>
           <DestinationAdmin />
         </AuthGuard>
       } />
-    </>
+    </Routes>
   );
 };
 
