@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { useSpaServices } from '@/hooks/useSpaServices';
 import BookingDialog from '@/features/spa/components/SpaBookingDialog';
 import SpaSection from '@/features/spa/components/SpaSection';
 import SpaEventsSection from '@/features/spa/components/SpaEventsSection';
+
 const Spa = () => {
   const {
     featuredServices,
@@ -14,15 +16,18 @@ const Spa = () => {
   } = useSpaServices();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
+
   const handleBookTreatment = (serviceId: string) => {
     setSelectedService(serviceId);
     setIsBookingOpen(true);
   };
+
   const handleBookingSuccess = () => {
     setIsBookingOpen(false);
   };
+
   return <Layout>
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 pt-6 md:pt-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Spa & Wellness</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
           Relax and rejuvenate with our luxurious spa treatments and wellness services
@@ -58,4 +63,5 @@ const Spa = () => {
       {isBookingOpen && selectedService && <BookingDialog isOpen={isBookingOpen} onOpenChange={setIsBookingOpen} serviceId={selectedService} onSuccess={handleBookingSuccess} />}
     </Layout>;
 };
+
 export default Spa;

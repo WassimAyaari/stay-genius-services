@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -122,7 +123,7 @@ const Activities = () => {
 
   return (
     <Layout>
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 pt-6 md:pt-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Things To Do</h1>
         <p className="text-gray-600">Discover activities and experiences</p>
       </div>

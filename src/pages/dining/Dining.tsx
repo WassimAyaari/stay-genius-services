@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useEvents } from '@/hooks/useEvents';
 import { useToast } from '@/hooks/use-toast';
+
 const Dining = () => {
   const navigate = useNavigate();
   const {
@@ -19,6 +21,7 @@ const Dining = () => {
   const {
     upcomingEvents
   } = useEvents();
+
   const handleBookTable = (restaurantId: string) => {
     navigate(`/dining/${restaurantId}`, {
       state: {
@@ -31,8 +34,9 @@ const Dining = () => {
   const getEventsForRestaurant = (restaurantId: string) => {
     return (upcomingEvents || []).filter(event => event.restaurant_id === restaurantId);
   };
+  
   return <Layout>
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 pt-6 md:pt-8">
         <h1 className="text-4xl font-semibold text-secondary mb-4">Dining Experiences</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
           Discover culinary excellence at our restaurants, where every meal becomes a memorable experience
@@ -81,7 +85,7 @@ const Dining = () => {
                     View Details
                   </Button>
                 </div>
-                {/* New: Show upcoming events for this restaurant */}
+                {/* Show upcoming events for this restaurant */}
                 {getEventsForRestaurant(restaurant.id).length > 0 && <div className="mt-2">
                     <h4 className="text-sm font-semibold mb-1 text-primary">Upcoming Events</h4>
                     <ul className="space-y-1">
@@ -96,4 +100,5 @@ const Dining = () => {
         </div>}
     </Layout>;
 };
+
 export default Dining;

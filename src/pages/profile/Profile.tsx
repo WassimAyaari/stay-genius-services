@@ -22,7 +22,7 @@ const Profile = () => {
 
   return (
     <Layout>
-      <div className="container max-w-4xl py-8">
+      <div className="container max-w-4xl py-8 pt-6 md:pt-8">
         <ProfileHeader 
           userData={userData} 
           handleProfileImageChange={handleProfileImageChange} 

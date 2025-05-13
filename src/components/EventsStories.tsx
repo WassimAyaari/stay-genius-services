@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -11,6 +12,7 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/com
 import { useEvents } from '@/hooks/useEvents';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+
 const EventsStories: React.FC = () => {
   const {
     stories,
@@ -27,12 +29,12 @@ const EventsStories: React.FC = () => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const isMobile = useIsMobile();
 
-  // Mémoiser les stories actives pour éviter des calculs inutiles
+  // Memorize active stories to avoid unnecessary calculations
   const activeStories = useMemo(() => (stories || []).filter(story => story.is_active).slice(0, 10),
-  // Limiter à 10 stories max
+  // Limit to 10 stories max
   [stories]);
 
-  // Mémoiser les titres d'événements pour éviter les recherches répétées
+  // Memorize event titles to avoid repeated lookups
   const eventTitles = useMemo(() => {
     const titleMap: Record<string, string> = {};
     activeStories.forEach(story => {
@@ -45,6 +47,7 @@ const EventsStories: React.FC = () => {
     });
     return titleMap;
   }, [activeStories, upcomingEvents]);
+
   const handleMarkAsSeen = useCallback(async (id: string, index: number) => {
     if (!viewedStories.includes(id)) {
       setViewedStories(prev => [...prev, id]);
@@ -53,6 +56,7 @@ const EventsStories: React.FC = () => {
     setSelectedStoryIndex(index);
     setStoryViewerOpen(true);
   }, [viewedStories, markAsSeen]);
+
   React.useEffect(() => {
     if (!carouselApi) return;
     const onSelect = () => {
@@ -63,12 +67,14 @@ const EventsStories: React.FC = () => {
       carouselApi.off("select", onSelect);
     };
   }, [carouselApi]);
+
   const getEventTitle = useCallback((story: Story) => {
     if (!story.eventId) return null;
     return eventTitles[story.eventId] || null;
   }, [eventTitles]);
+
   if (loading) {
-    return <div className="mb-8">
+    return <div className="mb-8 mt-4 md:mt-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-secondary">Events & Promos</h2>
           <Link to="/events" className="text-primary text-sm font-medium">See all</Link>
@@ -86,10 +92,12 @@ const EventsStories: React.FC = () => {
         </div>
       </div>;
   }
+
   if (activeStories.length === 0) {
     return null;
   }
-  return <div className="mb-8">
+
+  return <div className="mb-8 mt-4 md:mt-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-secondary">Events & Promos</h2>
         <Link to="/events" className="text-primary text-sm font-medium">See all</Link>
@@ -149,4 +157,5 @@ const EventsStories: React.FC = () => {
       {storyViewerOpen && <StoryViewer stories={activeStories} initialStoryIndex={selectedStoryIndex} onClose={() => setStoryViewerOpen(false)} />}
     </div>;
 };
+
 export default EventsStories;

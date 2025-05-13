@@ -15,7 +15,7 @@ const About = () => {
   if (isLoadingAbout) {
     return (
       <Layout>
-        <div className="container mx-auto py-8">
+        <div className="container mx-auto py-8 pt-6 md:pt-8">
           <div className="space-y-8">
             <Skeleton className="h-64 w-full" />
             <Skeleton className="h-32 w-full" />
@@ -31,7 +31,7 @@ const About = () => {
   if (!aboutData) {
     return (
       <Layout>
-        <div className="container mx-auto py-8">
+        <div className="container mx-auto py-8 pt-6 md:pt-8">
           <div className="flex justify-center items-center h-64">
             <p className="text-xl">Hotel information not available.</p>
           </div>
@@ -42,11 +42,13 @@ const About = () => {
 
   return (
     <Layout>
-      <HeroSection 
-        heroImage={aboutData.hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80'} 
-        heroTitle={aboutData.hero_title || 'Welcome to Our Hotel'} 
-        heroSubtitle={aboutData.hero_subtitle || 'Discover luxury and comfort'} 
-      />
+      <div className="pt-6 md:pt-8">
+        <HeroSection 
+          heroImage={aboutData.hero_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80'} 
+          heroTitle={aboutData.hero_title || 'Welcome to Our Hotel'} 
+          heroSubtitle={aboutData.hero_subtitle || 'Discover luxury and comfort'} 
+        />
+      </div>
       
       <div className="container mx-auto py-8">
         <WelcomeSection 
