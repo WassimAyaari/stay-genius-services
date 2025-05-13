@@ -8,13 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 interface AuthGuardProps {
   children: React.ReactNode;
   adminRequired?: boolean;
-  publicAccess?: boolean; // New prop to allow public access
+  publicAccess?: boolean;
 }
 
 const AuthGuard = ({ 
   children, 
   adminRequired = false, 
-  publicAccess = false // Default to false, but can be overridden
+  publicAccess = false
 }: AuthGuardProps) => {
   const { loading, authorized, isAuthPage } = useAuthGuard(adminRequired);
   const navigate = useNavigate();
@@ -64,17 +64,13 @@ const AuthGuard = ({
       // Rediriger vers la page de connexion
       navigate('/auth/login', { state: { from: location.pathname } });
     }
-  }, [authorized, isAuthPage, loading, navigate, toast, location, publicRoutes]);
+  }, [authorized, isAuthPage, loading, navigate, toast, location, publicRoutes, publicAccess]);
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  // Allow access if:
-  // 1. It's an auth page
-  // 2. User is authorized
-  // 3. Route is public
-  // 4. Explicitly marked for public access
+  // Allow access if authorized or on auth page or public route
   return (isAuthPage() || authorized || publicRoutes.some(route => 
     location.pathname === route || location.pathname.startsWith(route + '/')) || 
     publicAccess) ? <>{children}</> : null;

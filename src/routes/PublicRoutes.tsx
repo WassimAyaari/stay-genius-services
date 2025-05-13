@@ -24,24 +24,24 @@ import NotFound from '@/pages/NotFound';
 const PublicRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/auth/login" element={<Login />} />
-      <Route path="/rooms" element={<Rooms />} />
-      <Route path="/rooms/:id" element={<RoomDetails />} />
-      <Route path="/dining" element={<Dining />} />
-      <Route path="/dining/:id" element={<RestaurantDetail />} />
-      <Route path="/spa" element={<Spa />} />
-      <Route path="/activities" element={<Activities />} />
-      <Route path="/events" element={<Events />} />
-      <Route path="/destination" element={<Destination />} />
-      <Route path="/map" element={<HotelMap />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/shops" element={<Shops />} />
-      <Route path="/feedback" element={<Feedback />} />
-      <Route path="/messages" element={<Messages />} />
-      <Route path="/notifications" element={<Notifications />} />
+      <Route index element={<Index />} />
+      <Route path="auth/login" element={<Login />} />
+      <Route path="rooms" element={<Rooms />} />
+      <Route path="rooms/:id" element={<RoomDetails />} />
+      <Route path="dining" element={<Dining />} />
+      <Route path="dining/:id" element={<RestaurantDetail />} />
+      <Route path="spa" element={<Spa />} />
+      <Route path="activities" element={<Activities />} />
+      <Route path="events" element={<Events />} />
+      <Route path="destination" element={<Destination />} />
+      <Route path="map" element={<HotelMap />} />
+      <Route path="about" element={<About />} />
+      <Route path="contact" element={<Contact />} />
+      <Route path="services" element={<Services />} />
+      <Route path="shops" element={<Shops />} />
+      <Route path="feedback" element={<Feedback />} />
+      <Route path="messages" element={<Messages />} />
+      <Route path="notifications" element={<Notifications />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

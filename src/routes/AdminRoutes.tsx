@@ -23,115 +23,28 @@ import DestinationAdmin from '@/pages/admin/DestinationAdmin';
 
 const AdminRoutes = () => {
   return (
-    <Routes>
-      <Route path="/" element={
-        <AuthGuard adminRequired={true}>
-          <AdminDashboard />
-        </AuthGuard>
-      } />
-      
-      <Route path="/security" element={
-        <AuthGuard adminRequired={true}>
-          <SecurityManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/housekeeping" element={
-        <AuthGuard adminRequired={true}>
-          <HousekeepingManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/maintenance" element={
-        <AuthGuard adminRequired={true}>
-          <MaintenanceManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/reservations" element={
-        <AuthGuard adminRequired={true}>
-          <ReservationManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/restaurants" element={
-        <AuthGuard adminRequired={true}>
-          <RestaurantManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/restaurants/:id/reservations" element={
-        <AuthGuard adminRequired={true}>
-          <RestaurantReservationsManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/restaurant-menus" element={
-        <AuthGuard adminRequired={true}>
-          <RestaurantMenuManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/spa" element={
-        <AuthGuard adminRequired={true}>
-          <SpaManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/events" element={
-        <AuthGuard adminRequired={true}>
-          <EventsManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/shops" element={
-        <AuthGuard adminRequired={true}>
-          <ShopsManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/destination" element={
-        <AuthGuard adminRequired={true}>
-          <DestinationManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/chat" element={
-        <AuthGuard adminRequired={true}>
-          <ChatMessages />
-        </AuthGuard>
-      } />
-      
-      <Route path="/about" element={
-        <AuthGuard adminRequired={true}>
-          <AboutEditor />
-        </AuthGuard>
-      } />
-      
-      <Route path="/feedback" element={
-        <AuthGuard adminRequired={true}>
-          <FeedbackManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/information-technology" element={
-        <AuthGuard adminRequired={true}>
-          <InformationTechnologyManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/restaurants/:id/events" element={
-        <AuthGuard adminRequired={true}>
-          <RestaurantEventsManager />
-        </AuthGuard>
-      } />
-      
-      <Route path="/destination-admin" element={
-        <AuthGuard adminRequired={true}>
-          <DestinationAdmin />
-        </AuthGuard>
-      } />
-    </Routes>
+    <AuthGuard adminRequired={true}>
+      <Routes>
+        <Route index element={<AdminDashboard />} />
+        <Route path="security" element={<SecurityManager />} />
+        <Route path="housekeeping" element={<HousekeepingManager />} />
+        <Route path="maintenance" element={<MaintenanceManager />} />
+        <Route path="reservations" element={<ReservationManager />} />
+        <Route path="restaurants" element={<RestaurantManager />} />
+        <Route path="restaurants/:id/reservations" element={<RestaurantReservationsManager />} />
+        <Route path="restaurant-menus" element={<RestaurantMenuManager />} />
+        <Route path="spa" element={<SpaManager />} />
+        <Route path="events" element={<EventsManager />} />
+        <Route path="shops" element={<ShopsManager />} />
+        <Route path="destination" element={<DestinationManager />} />
+        <Route path="chat" element={<ChatMessages />} />
+        <Route path="about" element={<AboutEditor />} />
+        <Route path="feedback" element={<FeedbackManager />} />
+        <Route path="information-technology" element={<InformationTechnologyManager />} />
+        <Route path="restaurants/:id/events" element={<RestaurantEventsManager />} />
+        <Route path="destination-admin" element={<DestinationAdmin />} />
+      </Routes>
+    </AuthGuard>
   );
 };
 

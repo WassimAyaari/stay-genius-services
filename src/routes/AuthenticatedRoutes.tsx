@@ -12,49 +12,17 @@ import NotificationDetail from '@/pages/notifications/NotificationDetail';
 
 const AuthenticatedRoutes = () => {
   return (
-    <Routes>
-      <Route path="/profile" element={
-        <AuthGuard>
-          <Profile />
-        </AuthGuard>
-      } />
-      
-      <Route path="/requests/:id" element={
-        <AuthGuard>
-          <ServiceRequestDetails />
-        </AuthGuard>
-      } />
-      
-      <Route path="/dining/reservations/:id" element={
-        <AuthGuard>
-          <ReservationDetails />
-        </AuthGuard>
-      } />
-      
-      <Route path="/spa/booking/:id" element={
-        <AuthGuard>
-          <SpaBookingDetails />
-        </AuthGuard>
-      } />
-      
-      <Route path="/events/:id" element={
-        <AuthGuard>
-          <EventDetail />
-        </AuthGuard>
-      } />
-      
-      <Route path="/my-room" element={
-        <AuthGuard>
-          <MyRoom />
-        </AuthGuard>
-      } />
-      
-      <Route path="/notifications/:type/:id" element={
-        <AuthGuard>
-          <NotificationDetail />
-        </AuthGuard>
-      } />
-    </Routes>
+    <AuthGuard>
+      <Routes>
+        <Route path="/" element={<Profile />} />
+        <Route path="/requests/:id" element={<ServiceRequestDetails />} />
+        <Route path="/dining/reservations/:id" element={<ReservationDetails />} />
+        <Route path="/spa/booking/:id" element={<SpaBookingDetails />} />
+        <Route path="/events/:id" element={<EventDetail />} />
+        <Route path="/my-room" element={<MyRoom />} />
+        <Route path="/notifications/:type/:id" element={<NotificationDetail />} />
+      </Routes>
+    </AuthGuard>
   );
 };
 

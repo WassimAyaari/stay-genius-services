@@ -20,7 +20,13 @@ function App() {
           <AuthProvider>
             <Routes>
               <Route path="/*" element={<PublicRoutes />} />
-              <Route path="/*" element={<AuthenticatedRoutes />} />
+              <Route path="/profile/*" element={<AuthenticatedRoutes />} />
+              <Route path="/requests/*" element={<AuthenticatedRoutes />} />
+              <Route path="/dining/reservations/*" element={<AuthenticatedRoutes />} />
+              <Route path="/spa/booking/*" element={<AuthenticatedRoutes />} />
+              <Route path="/events/*" element={<AuthenticatedRoutes />} />
+              <Route path="/my-room/*" element={<AuthenticatedRoutes />} />
+              <Route path="/notifications/*" element={<AuthenticatedRoutes />} />
               <Route path="/admin/*" element={<AdminRoutes />} />
             </Routes>
             <Toaster richColors position="top-right" closeButton />
