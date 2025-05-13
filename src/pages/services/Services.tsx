@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { MessageCircle, Headphones as HeadphonesIcon } from 'lucide-react';
+import { MessageCircle, Headphones as HeadphonesIcon, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
@@ -107,13 +108,27 @@ const Services = () => {
           <p className="text-gray-600">24/7 dedicated concierge support</p>
         </div>
 
-        {/* Search Bar */}
+        {/* Enhanced Search Bar */}
         <div className="max-w-xl mx-auto mb-8">
           <h2 className="text-xl font-medium text-secondary mb-3">Quick Service Search</h2>
-          <CommandSearch 
-            room={room} 
-            onRequestSuccess={() => {}} 
-          />
+          <div className="relative">
+            <div className="relative flex items-center border rounded-xl px-4 py-3.5 bg-white shadow-md cursor-pointer hover:shadow-lg transition-all group">
+              <Search className="h-5 w-5 mr-3 text-primary group-hover:text-primary/80 transition-colors" />
+              <span className="text-gray-500 group-hover:text-gray-700 transition-colors">Search for services (towels, cleaning, wifi support...)</span>
+            </div>
+            
+            <div className="absolute inset-0" onClick={() => {}}>
+              <CommandSearch 
+                room={room} 
+                onRequestSuccess={() => {
+                  toast({
+                    title: "Request Sent",
+                    description: "Your service request has been submitted successfully."
+                  });
+                }} 
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">

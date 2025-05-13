@@ -131,17 +131,14 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   return (
     <>
       <div
-        className="relative flex items-center border rounded-lg px-4 py-3 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+        className="absolute inset-0 cursor-pointer"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-5 w-5 mr-3 text-gray-400" />
-        <span className="text-gray-500">Search for services (towels, cleaning, wifi support...)</span>
+        <span className="sr-only">Open service search</span>
       </div>
       <SearchDialog
         open={open}
-        onOpenChange={setOpen}
-        searchTerm={searchTerm}
-        onSearchTermChange={setSearchTerm}
+        setOpen={setOpen}
         isSubmitting={isSubmitting}
         isLoading={isLoading}
         categories={categories}
@@ -149,6 +146,8 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
         itemsByCategory={itemsByCategory}
         securityCategory={securityCategory}
         onSelect={handleSelect}
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
       />
       <ConfirmRequestDialog
         open={confirmDialogOpen}
