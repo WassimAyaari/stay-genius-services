@@ -131,10 +131,10 @@ const CommandSearch = ({ room, onRequestSuccess }: CommandSearchProps) => {
   return (
     <>
       <div
-        className="relative flex items-center border rounded-xl px-4 py-3 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+        className="relative flex items-center border rounded-lg px-4 py-3 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-5 w-5 mr-3 text-primary" />
+        <Search className="h-5 w-5 mr-3 text-gray-400" />
         <span className="text-gray-500">Search for services (towels, cleaning, wifi support...)</span>
       </div>
       <SearchDialog
