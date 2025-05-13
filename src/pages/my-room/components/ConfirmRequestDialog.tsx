@@ -35,32 +35,32 @@ const ConfirmRequestDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md mx-4 rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl">Confirm Service Request</DialogTitle>
           <DialogDescription className="text-gray-500">
             Are you sure you want to request the following service?
           </DialogDescription>
         </DialogHeader>
-        <div className="bg-primary/5 rounded-lg p-4 my-4">
+        <div className="bg-primary/5 rounded-xl p-4 my-4">
           <div className="font-medium text-lg">{item.name}</div>
           {item.description && (
             <div className="text-gray-600 mt-1">{item.description}</div>
           )}
         </div>
-        <DialogFooter className="sm:justify-between">
+        <DialogFooter className="sm:justify-between gap-3">
           <Button
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto rounded-xl"
           >
             Cancel
           </Button>
           <Button 
             onClick={onConfirm}
             disabled={isSubmitting}
-            className="w-full sm:w-auto flex items-center justify-center gap-2"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl"
           >
             {isSubmitting ? (
               <>

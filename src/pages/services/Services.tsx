@@ -109,7 +109,7 @@ const Services = () => {
         </div>
 
         {/* Enhanced Search Bar */}
-        <div className="max-w-xl mx-auto mb-8">
+        <div className="max-w-xl mx-auto mb-8 px-4">
           <h2 className="text-xl font-medium text-secondary mb-3">Quick Service Search</h2>
           <div className="relative">
             <div className="relative flex items-center border rounded-xl px-4 py-3.5 bg-white shadow-md cursor-pointer hover:shadow-lg transition-all group">
@@ -117,7 +117,7 @@ const Services = () => {
               <span className="text-gray-500 group-hover:text-gray-700 transition-colors">Search for services (towels, cleaning, wifi support...)</span>
             </div>
             
-            <div className="absolute inset-0" onClick={() => {}}>
+            <div className="absolute inset-0">
               <CommandSearch 
                 room={room} 
                 onRequestSuccess={() => {
@@ -131,7 +131,7 @@ const Services = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-8 px-4">
           <ServiceCard
             title="Live Chat"
             description="Instant messaging with our concierge team"

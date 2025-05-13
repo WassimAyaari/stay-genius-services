@@ -46,8 +46,12 @@ const SearchDialog: React.FC<Props> = ({
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
-      <Command className="rounded-lg border shadow-xl">
+    <CommandDialog 
+      open={open} 
+      onOpenChange={setOpen}
+      className="rounded-xl overflow-hidden"
+    >
+      <Command className="rounded-xl border shadow-xl">
         <div className="relative flex items-center border-b px-3 py-2">
           <Search className="mr-2 h-5 w-5 shrink-0 text-primary" />
           <CommandInput
@@ -82,7 +86,7 @@ const SearchDialog: React.FC<Props> = ({
           ) : (
             <>
               {securityCategory && (
-                <CommandGroup heading={securityCategory.name} className="px-2 py-1">
+                <CommandGroup heading={securityCategory.name} className="px-3 py-2">
                   {filterItemsBySearch(
                     allItems.filter(item => item.category_id === securityCategory.id && item.is_active),
                     searchTerm
@@ -91,10 +95,10 @@ const SearchDialog: React.FC<Props> = ({
                       key={item.id}
                       disabled={isSubmitting}
                       onSelect={() => onSelect(item, securityCategory)}
-                      className="cursor-pointer flex items-center px-3 py-3 rounded-lg group hover:bg-primary/5"
+                      className="cursor-pointer flex items-center px-4 py-3 rounded-lg group hover:bg-primary/5 my-1"
                     >
                       <div className="flex flex-1 items-center">
-                        <div className="mr-3 h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
+                        <div className="mr-3 h-9 w-9 rounded-full bg-red-100 flex items-center justify-center">
                           <span className="text-red-600 text-xs font-semibold">!</span>
                         </div>
                         <div>
@@ -116,16 +120,16 @@ const SearchDialog: React.FC<Props> = ({
                 const filtered = filterItemsBySearch(items, searchTerm);
                 if (filtered.length === 0) return null;
                 return (
-                  <CommandGroup key={categoryId} heading={category.name} className="px-2 py-1">
+                  <CommandGroup key={categoryId} heading={category.name} className="px-3 py-2">
                     {filtered.map(item => (
                       <CommandItem
                         key={item.id}
                         disabled={isSubmitting}
                         onSelect={() => onSelect(item, category)}
-                        className="cursor-pointer flex items-center px-3 py-3 rounded-lg group hover:bg-primary/5"
+                        className="cursor-pointer flex items-center px-4 py-3 rounded-lg group hover:bg-primary/5 my-1"
                       >
                         <div className="flex flex-1 items-center">
-                          <div className="mr-3 h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center">
+                          <div className="mr-3 h-9 w-9 rounded-md bg-primary/10 flex items-center justify-center">
                             <span className="text-primary text-xs font-semibold">{category.name.charAt(0)}</span>
                           </div>
                           <div>
