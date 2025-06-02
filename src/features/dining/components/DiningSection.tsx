@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
 import RestaurantCard from './RestaurantCard';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -8,6 +9,7 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { supabase } from '@/integrations/supabase/client';
 
 const DiningSection = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { featuredRestaurants, isFeaturedLoading } = useRestaurants();
 
@@ -17,13 +19,13 @@ const DiningSection = () => {
       if (!user) throw new Error('Please sign in to book a table');
 
       toast({
-        title: "Success",
+        title: t('common.success'),
         description: "Table reserved successfully!",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: t('common.error'),
         description: error.message,
       });
     }
@@ -32,7 +34,7 @@ const DiningSection = () => {
   if (isFeaturedLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-pulse text-gray-400">Loading featured restaurants...</div>
+        <div className="animate-pulse text-gray-400">{t('dining.featuredRestaurants')}</div>
       </div>
     );
   }
@@ -40,7 +42,7 @@ const DiningSection = () => {
   if (!featuredRestaurants || featuredRestaurants.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-gray-400">No featured restaurants available at the moment.</div>
+        <div className="text-gray-400">{t('dining.noFeaturedRestaurants')}</div>
       </div>
     );
   }
