@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, MapPin, UtensilsCrossed, Calendar, BookText } from 'lucide-react';
@@ -12,6 +13,7 @@ interface RestaurantCardProps {
 }
 
 const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   
   return (
@@ -27,7 +29,7 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
             px-2 py-1 rounded-full text-xs
             ${restaurant.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
           `}>
-            {restaurant.status}
+            {t(`common.${restaurant.status}`)}
           </span>
         </div>
       </div>
@@ -54,7 +56,7 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
             className="w-full flex items-center justify-center gap-1"
           >
             <Calendar size={16} />
-            {restaurant.actionText || "Book a Table"}
+            {restaurant.actionText || t('dining.bookTable')}
           </Button>
           <Button 
             variant="outline" 
@@ -62,7 +64,7 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
             onClick={() => navigate(`/dining/${restaurant.id}`)}
           >
             <BookText size={16} />
-            View Details
+            {t('common.viewDetails')}
           </Button>
         </div>
       </div>
