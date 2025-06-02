@@ -9,6 +9,7 @@ import { Toaster as ShadcnToaster } from '@/components/ui/toaster';
 import PublicRoutes from './routes/PublicRoutes';
 import AuthenticatedRoutes from './routes/AuthenticatedRoutes';
 import AdminRoutes from './routes/AdminRoutes';
+import './i18n';
 
 const queryClient = new QueryClient();
 

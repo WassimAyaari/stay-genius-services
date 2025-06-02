@@ -5,6 +5,7 @@ import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import NotificationMenu from './NotificationMenu';
 import BottomNav from './BottomNav';
+import LanguageSwitcher from './LanguageSwitcher';
 import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -44,7 +45,8 @@ const Layout = ({
                 </span>
               </Link>
               
-              <div className={cn("flex items-center gap-3 justify-end", isMobile ? "w-[110px]" : "w-[120px]")}>
+              <div className={cn("flex items-center gap-2 justify-end", isMobile ? "w-[140px]" : "w-[150px]")}>
+                <LanguageSwitcher />
                 <NotificationMenu />
                 <UserMenu />
                 <Link 

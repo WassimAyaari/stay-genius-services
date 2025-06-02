@@ -1,0 +1,60 @@
+
+{
+  "nav": {
+    "home": "Accueil",
+    "rooms": "Chambres",
+    "dining": "Restauration",
+    "spa": "Spa & Bien-être",
+    "activities": "Activités",
+    "events": "Événements",
+    "destination": "Destination",
+    "about": "À propos",
+    "contact": "Contact",
+    "services": "Services",
+    "shops": "Boutiques",
+    "feedback": "Commentaires",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "myRoom": "Ma Chambre"
+  },
+  "common": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "language": "Langue",
+    "english": "English",
+    "french": "Français",
+    "welcome": "Bienvenue",
+    "book": "Réserver",
+    "reserve": "Réserver",
+    "contact": "Contact",
+    "more": "Plus",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "close": "Fermer"
+  },
+  "home": {
+    "hero": {
+      "title": "Bienvenue à l'Hôtel Genius",
+      "subtitle": "Découvrez le luxe et le confort à son apogée",
+      "loginPrompt": "Connectez-vous pour accéder à tous les services de l'hôtel",
+      "loginButton": "Se connecter"
+    },
+    "services": {
+      "title": "Nos Services",
+      "rooms": "Chambres de Luxe",
+      "dining": "Restauration Gastronomique",
+      "spa": "Spa & Bien-être",
+      "activities": "Activités"
+    }
+  },
+  "auth": {
+    "loginTitle": "Bon Retour",
+    "loginSubtitle": "Connectez-vous à votre compte",
+    "authRequired": "Authentification Requise",
+    "authRequiredDesc": "Veuillez vous connecter pour accéder à cette page"
+  }
+}

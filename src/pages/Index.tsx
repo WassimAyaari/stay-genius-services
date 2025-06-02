@@ -1,4 +1,6 @@
+
 import React, { Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '@/components/Layout';
 import HeroSection from '@/components/home/HeroSection';
 import MainServicesSection from '@/components/home/MainServicesSection';
@@ -66,26 +68,27 @@ const Index = () => {
   console.log("Index page rendering started");
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   return (
     <Layout>
       <div className="pb-20">
         {/* Hero Section */}
         <SectionWrapper id="hero-section">
-          <Suspense fallback={<div className="p-6 text-center">Loading hero section...</div>}>
+          <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <HeroSection />
             
             {/* Bouton de connexion si l'utilisateur n'est pas authentifié */}
             {!isAuthenticated && (
               <div className="text-center my-6">
-                <p className="text-lg mb-4">Connectez-vous pour accéder à tous les services de l'hôtel</p>
+                <p className="text-lg mb-4">{t('home.hero.loginPrompt')}</p>
                 <Button 
                   variant="default" 
                   size="lg" 
                   onClick={() => navigate('/auth/login')}
                   className="mx-auto"
                 >
-                  Se connecter
+                  {t('home.hero.loginButton')}
                 </Button>
               </div>
             )}
@@ -94,21 +97,21 @@ const Index = () => {
 
         {/* Main Services Section */}
         <SectionWrapper id="main-services">
-          <Suspense fallback={<div className="p-6 text-center">Loading services...</div>}>
+          <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <MainServicesSection />
           </Suspense>
         </SectionWrapper>
 
         {/* Featured Experience */}
         <SectionWrapper id="featured-experience">
-          <Suspense fallback={<div className="p-6 text-center">Loading experiences...</div>}>
+          <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <FeaturedExperienceSection />
           </Suspense>
         </SectionWrapper>
 
         {/* Instagram-style Stories Section */}
         <SectionWrapper id="events-stories">
-          <Suspense fallback={<div className="p-6 text-center">Loading events...</div>}>
+          <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <section className="px-6 mb-10">
               <EventsStories />
             </section>
@@ -117,21 +120,21 @@ const Index = () => {
 
         {/* Today's Highlights Section */}
         <SectionWrapper id="highlights">
-          <Suspense fallback={<div className="p-6 text-center">Loading highlights...</div>}>
+          <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <TodayHighlightsSection />
           </Suspense>
         </SectionWrapper>
 
         {/* Additional Services */}
         <SectionWrapper id="additional-services">
-          <Suspense fallback={<div className="p-6 text-center">Loading services...</div>}>
+          <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <AdditionalServicesSection />
           </Suspense>
         </SectionWrapper>
 
         {/* Need Assistance */}
         <SectionWrapper id="assistance">
-          <Suspense fallback={<div className="p-6 text-center">Loading assistance section...</div>}>
+          <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <AssistanceSection />
           </Suspense>
         </SectionWrapper>

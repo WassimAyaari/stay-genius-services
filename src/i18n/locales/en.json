@@ -1,0 +1,60 @@
+
+{
+  "nav": {
+    "home": "Home",
+    "rooms": "Rooms",
+    "dining": "Dining",
+    "spa": "Spa & Wellness",
+    "activities": "Activities",
+    "events": "Events",
+    "destination": "Destination",
+    "about": "About",
+    "contact": "Contact",
+    "services": "Services",
+    "shops": "Shops",
+    "feedback": "Feedback",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "myRoom": "My Room"
+  },
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "language": "Language",
+    "english": "English",
+    "french": "Français",
+    "welcome": "Welcome",
+    "book": "Book",
+    "reserve": "Reserve",
+    "contact": "Contact",
+    "more": "More",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to Hotel Genius",
+      "subtitle": "Experience luxury and comfort at its finest",
+      "loginPrompt": "Log in to access all hotel services",
+      "loginButton": "Log In"
+    },
+    "services": {
+      "title": "Our Services",
+      "rooms": "Luxury Rooms",
+      "dining": "Fine Dining",
+      "spa": "Spa & Wellness",
+      "activities": "Activities"
+    }
+  },
+  "auth": {
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to your account",
+    "authRequired": "Authentication Required",
+    "authRequiredDesc": "Please log in to access this page"
+  }
+}
