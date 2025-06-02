@@ -22,20 +22,31 @@ i18n
     resources,
     lng: savedLanguage,
     fallbackLng: 'en',
-    debug: true, // Enable debug mode to see what's happening
+    debug: true,
     interpolation: {
       escapeValue: false
     },
     react: {
-      useSuspense: false
+      useSuspense: false,
+      bindI18n: 'languageChanged',
+      bindI18nStore: '',
+      transEmptyNodeValue: '',
+      transSupportBasicHtmlNodes: true,
+      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i']
     }
   });
 
-// Save language to localStorage when changed
+// Save language to localStorage when changed and force re-render
 i18n.on('languageChanged', (lng) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('language', lng);
     console.log('Language changed to:', lng);
+    console.log('Available translations for', lng, ':', i18n.getResourceBundle(lng, 'translation'));
+    
+    // Force a page refresh to ensure all components re-render with new language
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   }
 });
 

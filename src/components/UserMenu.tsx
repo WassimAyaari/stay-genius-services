@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,10 +20,17 @@ const UserMenu = () => {
   const isMobile = useIsMobile();
 
   const changeLanguage = async (lng: string) => {
-    console.log('Changing language to:', lng);
-    await i18n.changeLanguage(lng);
-    localStorage.setItem('language', lng);
-    console.log('Current language after change:', i18n.language);
+    console.log('Attempting to change language to:', lng);
+    console.log('Current language before change:', i18n.language);
+    
+    try {
+      await i18n.changeLanguage(lng);
+      localStorage.setItem('language', lng);
+      console.log('Language change completed. New language:', i18n.language);
+      console.log('Translation test:', t('common.english'), t('common.french'));
+    } catch (error) {
+      console.error('Error changing language:', error);
+    }
   };
 
   const handleLogout = async () => {
