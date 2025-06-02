@@ -56,5 +56,10 @@
     "loginSubtitle": "Connectez-vous à votre compte",
     "authRequired": "Authentification Requise",
     "authRequiredDesc": "Veuillez vous connecter pour accéder à cette page"
+  },
+  "user": {
+    "guestStatus": "Invité",
+    "vipStatus": "Invité VIP",
+    "profileImage": "Photo de Profil"
   }
 }

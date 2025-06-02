@@ -20,7 +20,7 @@
   },
   "common": {
     "login": "Login",
-    "logout": "Logout",
+    "logout": "Log out",
     "language": "Language",
     "english": "English",
     "french": "Français",
@@ -56,5 +56,10 @@
     "loginSubtitle": "Sign in to your account",
     "authRequired": "Authentication Required",
     "authRequiredDesc": "Please log in to access this page"
+  },
+  "user": {
+    "guestStatus": "Guest",
+    "vipStatus": "VIP Guest",
+    "profileImage": "Profile Picture"
   }
 }

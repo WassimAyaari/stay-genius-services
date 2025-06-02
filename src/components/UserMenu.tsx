@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User, UserRound } from "lucide-react";
+import { LogOut, Settings, User, UserRound, Languages, Check } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
@@ -16,7 +17,13 @@ const UserMenu = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { userData, isAuthenticated } = useAuth();
+  const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('language', lng);
+  };
 
   const handleLogout = async () => {
     try {
@@ -138,19 +145,36 @@ const UserMenu = () => {
         <Link to="/my-room">
           <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
-            <span>My Room</span>
+            <span>{t('nav.myRoom')}</span>
           </DropdownMenuItem>
         </Link>
         <Link to="/profile">
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            <span>{t('nav.profile')}</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator />
+        <DropdownMenuItem 
+          onClick={() => changeLanguage('en')}
+          className={i18n.language === 'en' ? 'bg-gray-200' : ''}
+        >
+          <Languages className="mr-2 h-4 w-4" />
+          <span>{t('common.english')}</span>
+          {i18n.language === 'en' && <Check className="ml-auto h-4 w-4" />}
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => changeLanguage('fr')}
+          className={i18n.language === 'fr' ? 'bg-gray-200' : ''}
+        >
+          <Languages className="mr-2 h-4 w-4" />
+          <span>{t('common.french')}</span>
+          {i18n.language === 'fr' && <Check className="ml-auto h-4 w-4" />}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{t('common.logout')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
