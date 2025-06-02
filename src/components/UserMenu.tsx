@@ -20,9 +20,11 @@ const UserMenu = () => {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
+  const changeLanguage = async (lng: string) => {
+    console.log('Changing language to:', lng);
+    await i18n.changeLanguage(lng);
     localStorage.setItem('language', lng);
+    console.log('Current language after change:', i18n.language);
   };
 
   const handleLogout = async () => {
@@ -128,7 +130,7 @@ const UserMenu = () => {
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
             {userData?.profile_image ? (
-              <AvatarImage src={userData.profile_image} alt="Photo de profil" />
+              <AvatarImage src={userData.profile_image} alt={t('user.profileImage')} />
             ) : (
               <AvatarImage src="/placeholder.svg" />
             )}
