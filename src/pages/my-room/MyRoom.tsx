@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRoom } from '@/hooks/useRoom';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
 import { Loader2 } from 'lucide-react';
@@ -10,10 +11,11 @@ import ServicesGrid from './components/ServicesGrid';
 import CustomRequestForm from './components/CustomRequestForm';
 
 const MyRoom = () => {
-  // Utiliser le numéro de chambre stocké dans localStorage pour éviter des requêtes supplémentaires
+  const { t } = useTranslation();
+  // Use room number stored in localStorage to avoid extra requests
   const roomNumber = localStorage.getItem('user_room_number') || '401';
   
-  // Memoiser les requêtes pour éviter des re-rendus inutiles
+  // Memoize requests to avoid unnecessary re-renders
   const { data: room, isLoading } = useRoom(roomNumber);
   const { 
     data: serviceRequests = [], 
@@ -21,7 +23,7 @@ const MyRoom = () => {
     refetch: refetchRequests 
   } = useServiceRequests();
 
-  // Afficher un indicateur de chargement uniquement si les données essentielles ne sont pas disponibles
+  // Show loading indicator only if essential data is not available
   if (isLoading) {
     return (
       <Layout>

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 
@@ -22,6 +23,8 @@ const ServiceCard = ({
   status,
   highlighted = false 
 }: ServiceCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Link to={actionLink} className="block h-full">
       <Card className={`h-full overflow-hidden transition-all duration-300 hover:shadow-lg ${highlighted ? 'border-2 border-primary rounded-2xl' : 'rounded-2xl'} hover:scale-[1.02]`}>

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 
 interface ServiceCardProps {
@@ -21,6 +22,8 @@ const ServiceCard = ({
   onClick,
   image 
 }: ServiceCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Card 
       onClick={onClick}

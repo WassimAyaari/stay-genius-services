@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
@@ -18,18 +19,19 @@ interface LayoutProps {
 const Layout = ({
   children
 }: LayoutProps) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isMessagePage = location.pathname === '/messages' || location.pathname.startsWith('/messages?');
   const isSpaManagerPage = location.pathname === '/admin/spa';
   const isMobile = useIsMobile();
 
-  // Pour déboguer, affichons le chemin actuel
+  // For debugging, show current path
   console.log('Current path in Layout:', location.pathname);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Header apparaît sur toutes les pages sauf la page des messages */}
+      {/* Header appears on all pages except messages page */}
       {!isMessagePage && (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
           <div className="container mx-auto px-4">

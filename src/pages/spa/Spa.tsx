@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock } from 'lucide-react';
@@ -10,6 +11,7 @@ import SpaSection from '@/features/spa/components/SpaSection';
 import SpaEventsSection from '@/features/spa/components/SpaEventsSection';
 
 const Spa = () => {
+  const { t } = useTranslation();
   const {
     featuredServices,
     isLoading
@@ -28,9 +30,9 @@ const Spa = () => {
 
   return <Layout>
       <div className="text-center mb-8 pt-6 md:pt-8">
-        <h1 className="text-4xl font-semibold text-secondary mb-4">Spa & Wellness</h1>
+        <h1 className="text-4xl font-semibold text-secondary mb-4">{t('spa.title')}</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Relax and rejuvenate with our luxurious spa treatments and wellness services
+          {t('spa.subtitle')}
         </p>
       </div>
 
@@ -54,7 +56,7 @@ const Spa = () => {
                 {service.description}
               </p>
               <Button className="w-full" onClick={() => handleBookTreatment(service.id)}>
-                Book Treatment
+                {t('spa.bookTreatment')}
               </Button>
             </div>
           </Card>)}

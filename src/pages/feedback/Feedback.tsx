@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '@/components/Layout';
 import { useHotelConfig } from '@/hooks/useHotelConfig';
 
@@ -11,6 +12,7 @@ import FAQSection from './components/FAQSection';
 import ContactCard from './components/ContactCard';
 
 const Feedback = () => {
+  const { t } = useTranslation();
   const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
   const { config, isLoading } = useHotelConfig();
 
@@ -23,7 +25,7 @@ const Feedback = () => {
     }
   }, [config]);
 
-  // Log pour le débogage
+  // Log for debugging
   useEffect(() => {
     console.log("Current heroImage state in Feedback page:", heroImage);
   }, [heroImage]);

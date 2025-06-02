@@ -14,18 +14,21 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 // Custom error boundary fallback component
-const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
-  <div className="p-6 border-2 border-red-300 rounded-md bg-red-50 m-4">
-    <h2 className="text-xl font-bold text-red-800 mb-2">Something went wrong:</h2>
-    <p className="text-red-600 mb-4">{error.message}</p>
-    <button 
-      onClick={resetErrorBoundary}
-      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-    >
-      Try again
-    </button>
-  </div>
-);
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="p-6 border-2 border-red-300 rounded-md bg-red-50 m-4">
+      <h2 className="text-xl font-bold text-red-800 mb-2">{t('errors.generic')}:</h2>
+      <p className="text-red-600 mb-4">{error.message}</p>
+      <button 
+        onClick={resetErrorBoundary}
+        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+      >
+        {t('actions.retry')}
+      </button>
+    </div>
+  );
+};
 
 // Error boundary component
 class SectionErrorBoundary extends React.Component<
@@ -78,7 +81,7 @@ const Index = () => {
           <Suspense fallback={<div className="p-6 text-center">{t('common.loading')}</div>}>
             <HeroSection />
             
-            {/* Bouton de connexion si l'utilisateur n'est pas authentifié */}
+            {/* Login button if user is not authenticated */}
             {!isAuthenticated && (
               <div className="text-center my-6">
                 <p className="text-lg mb-4">{t('home.hero.loginPrompt')}</p>

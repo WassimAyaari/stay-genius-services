@@ -1,5 +1,6 @@
 
 import React, { useState, Suspense, lazy } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '@/components/Layout';
 import { useEvents } from '@/hooks/useEvents';
 import { Event } from '@/types/event';
@@ -16,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const EventsStories = lazy(() => import('@/components/EventsStories'));
 
 const Events = () => {
+  const { t } = useTranslation();
   const { upcomingEvents: events, loading } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -29,8 +31,8 @@ const Events = () => {
   const handleReservationSuccess = () => {
     setIsBookingOpen(false);
     toast({
-      title: "Reservation confirmed",
-      description: "Your reservation has been saved successfully.",
+      title: t('status.confirmed'),
+      description: t('events.registerEvent'),
     });
   };
 
@@ -63,7 +65,7 @@ const Events = () => {
 
         {/* Upcoming Events */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">Upcoming Events</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-6">{t('events.upcomingEvents')}</h2>
           <EventList 
             events={events}
             loading={loading}
@@ -73,7 +75,7 @@ const Events = () => {
 
         {/* Special Promotions */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">Special Promotions</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-6">{t('events.specialOffers')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <PromotionList 
               events={events}

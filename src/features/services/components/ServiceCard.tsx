@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LucideIcon } from 'lucide-react';
@@ -13,6 +14,8 @@ interface ServiceCardProps {
 }
 
 const ServiceCard = ({ title, description, icon: Icon, actionText, onAction }: ServiceCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Card className="p-6">
       <div className="flex items-start gap-4">
