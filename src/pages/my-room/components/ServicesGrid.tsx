@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Room } from '@/hooks/useRoom';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, Coffee, Shirt, Wrench, Wifi, ShoppingBag, Search } from 'lucide-react';
@@ -16,32 +17,33 @@ const ServicesGrid = ({
   room,
   onRequestSuccess
 }: ServicesGridProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   
   const services: Service[] = [
     {
       icon: <FileText className="h-6 w-6" />,
-      label: 'General Service',
+      label: t('myRoom.services.generalService'),
       type: 'service',
-      description: 'Request general hotel services'
+      description: t('myRoom.services.generalServiceDescription')
     },
     {
       icon: <Coffee className="h-6 w-6" />,
-      label: 'Room Service',
+      label: t('myRoom.services.roomService'),
       type: 'service',
-      description: 'Order food and drinks to your room'
+      description: t('myRoom.services.roomServiceDescription')
     },
     {
       icon: <Shirt className="h-6 w-6" />,
-      label: 'Laundry',
+      label: t('myRoom.services.laundry'),
       type: 'service',
-      description: 'Laundry and dry cleaning services'
+      description: t('myRoom.services.laundryDescription')
     },
     {
       icon: <Wrench className="h-6 w-6" />,
-      label: 'Maintenance',
+      label: t('myRoom.services.maintenance'),
       type: 'service',
-      description: 'Report maintenance issues'
+      description: t('myRoom.services.maintenanceDescription')
     }
   ];
 
@@ -66,11 +68,11 @@ const ServicesGrid = ({
 
   return (
     <div className="mb-12">
-      <h2 className="text-2xl font-bold text-secondary mb-6">Room Services</h2>
+      <h2 className="text-2xl font-bold text-secondary mb-6">{t('myRoom.services.title')}</h2>
       
       {/* Search Bar */}
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-secondary mb-4">Search Services</h3>
+        <h3 className="text-lg font-medium text-secondary mb-4">{t('myRoom.services.searchServices')}</h3>
         <CommandSearch room={room} onRequestSuccess={onRequestSuccess} />
       </div>
       

@@ -1,20 +1,23 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UtensilsCrossed, Wine, Calendar, MapPin } from 'lucide-react';
 import { useTodayHighlights } from '@/hooks/useTodayHighlights';
 import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TodayHighlightsSection = () => {
+  const { t } = useTranslation();
   const { todayEvents, loading } = useTodayHighlights();
 
   if (loading) {
     return (
       <section className="px-6 mb-10">
-        <h2 className="text-2xl font-bold text-secondary mb-4">Today's Events</h2>
+        <h2 className="text-2xl font-bold text-secondary mb-4">{t('home.todayEvents.title')}</h2>
         <div className="grid grid-cols-1 gap-4">
           <Card className="overflow-hidden">
             <div className="flex items-center">
@@ -44,12 +47,12 @@ const TodayHighlightsSection = () => {
   if (todayEvents.length === 0) {
     return (
       <section className="px-6 mb-10">
-        <h2 className="text-2xl font-bold text-secondary mb-4">Today's Events</h2>
+        <h2 className="text-2xl font-bold text-secondary mb-4">{t('home.todayEvents.title')}</h2>
         <Card className="p-6 text-center">
-          <p className="text-gray-500">No events scheduled today</p>
+          <p className="text-gray-500">{t('home.todayEvents.noEvents')}</p>
           <Link to="/events">
             <Button variant="link" className="mt-2">
-              View all upcoming events
+              {t('home.todayEvents.viewAllEvents')}
             </Button>
           </Link>
         </Card>
@@ -59,7 +62,7 @@ const TodayHighlightsSection = () => {
 
   return (
     <section className="px-6 mb-10">
-      <h2 className="text-2xl font-bold text-secondary mb-4">Today's Events</h2>
+      <h2 className="text-2xl font-bold text-secondary mb-4">{t('home.todayEvents.title')}</h2>
       <div className="grid grid-cols-1 gap-4">
         {todayEvents.map((event) => (
           <Card key={event.id} className="overflow-hidden">
@@ -82,14 +85,14 @@ const TodayHighlightsSection = () => {
                     )}
                     <h3 className="text-lg font-semibold text-secondary">{event.title}</h3>
                   </div>
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Today</span>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">{t('common.today')}</span>
                 </div>
                 <p className="text-gray-600 text-sm mb-2">
                   {event.time} {event.location && `- ${event.location}`}
                 </p>
                 <Link to="/events">
                   <Button size="sm" className="w-full sm:w-auto">
-                    {event.category === 'event' ? 'Book' : 'View Offer'}
+                    {event.category === 'event' ? t('common.book') : t('common.viewOffer')}
                   </Button>
                 </Link>
               </div>

@@ -1,10 +1,13 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Headphones } from 'lucide-react';
 
 const AssistanceSection = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="px-6 mb-10">
       <Link to="/contact">
@@ -15,8 +18,8 @@ const AssistanceSection = () => {
                 <Headphones className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Need Assistance?</h3>
-                <p className="text-sm">We're here to help 24/7</p>
+                <h3 className="text-lg font-semibold">{t('home.assistance.title')}</h3>
+                <p className="text-sm">{t('home.assistance.subtitle')}</p>
               </div>
             </div>
             <div className="bg-white rounded-full p-2">

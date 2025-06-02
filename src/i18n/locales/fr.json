@@ -16,7 +16,11 @@
     "messages": "Messages",
     "notifications": "Notifications",
     "profile": "Profil",
-    "myRoom": "Ma Chambre"
+    "myRoom": "Ma Chambre",
+    "gastronomy": "Gastronomie",
+    "concierge": "Conciergerie",
+    "eventsPromos": "Événements & Promotions",
+    "hotelMap": "Plan de l'Hôtel"
   },
   "common": {
     "login": "Connexion",
@@ -34,21 +38,78 @@
     "success": "Succès",
     "cancel": "Annuler",
     "confirm": "Confirmer",
-    "close": "Fermer"
+    "close": "Fermer",
+    "open": "Ouvert",
+    "closed": "Fermé",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "today": "Aujourd'hui",
+    "featured": "À la une",
+    "explore": "Explorer",
+    "viewAll": "Voir tout",
+    "reserveTable": "Réserver une table",
+    "contactNow": "Contacter maintenant",
+    "bookTreatment": "Réserver un soin",
+    "shopNow": "Acheter maintenant",
+    "openMap": "Ouvrir la carte",
+    "writeReview": "Écrire un avis",
+    "exploreNow": "Explorer maintenant",
+    "viewOffer": "Voir l'offre",
+    "request": "Demander"
   },
   "home": {
     "hero": {
       "title": "Bienvenue à l'Hôtel Genius",
       "subtitle": "Découvrez le luxe et le confort à son apogée",
       "loginPrompt": "Connectez-vous pour accéder à tous les services de l'hôtel",
-      "loginButton": "Se connecter"
+      "loginButton": "Se connecter",
+      "stayGuideTitle": "Bienvenue dans votre guide de séjour",
+      "stayGuideSubtitle": "Découvrez le luxe et le confort"
     },
     "services": {
       "title": "Nos Services",
+      "mainServicesTitle": "Services Principaux",
       "rooms": "Chambres de Luxe",
       "dining": "Restauration Gastronomique",
       "spa": "Spa & Bien-être",
-      "activities": "Activités"
+      "activities": "Activités",
+      "aboutUs": "À propos de nous",
+      "aboutUsDescription": "Découvrez notre hôtel",
+      "gastronomy": "Gastronomie",
+      "gastronomyDescription": "Expériences culinaires raffinées",
+      "concierge": "Conciergerie",
+      "conciergeDescription": "Services d'assistance 24h/24 et 7j/7",
+      "spaWellness": "Spa & Bien-être",
+      "spaWellnessDescription": "Détendez-vous et ressourcez-vous"
+    },
+    "additionalServices": {
+      "title": "Services Supplémentaires",
+      "shops": "Boutiques",
+      "shopsDescription": "Expérience shopping de luxe",
+      "hotelMap": "Plan de l'Hôtel",
+      "hotelMapDescription": "Navigation interactive intérieure",
+      "destination": "Destination",
+      "destinationDescription": "Activités à proximité",
+      "feedback": "Commentaires",
+      "feedbackDescription": "Partagez votre expérience"
+    },
+    "todayEvents": {
+      "title": "Événements d'Aujourd'hui",
+      "noEvents": "Aucun événement prévu aujourd'hui",
+      "viewAllEvents": "Voir tous les événements à venir"
+    },
+    "featuredExperience": {
+      "title": "Expérience à la Une",
+      "luxurySpa": "Soins de Spa de Luxe",
+      "luxurySpaDescription": "Offrez-vous nos soins signature pour une détente ultime",
+      "wineTasting": "Dégustation de Vins",
+      "wineTastingDescription": "Dégustez les meilleurs vins de notre collection expertement sélectionnée",
+      "spaCategory": "Spa & Bien-être",
+      "diningCategory": "Restauration"
+    },
+    "assistance": {
+      "title": "Besoin d'Aide ?",
+      "subtitle": "Nous sommes là pour vous aider 24h/24 et 7j/7"
     }
   },
   "auth": {
@@ -61,5 +122,38 @@
     "guestStatus": "Invité",
     "vipStatus": "Invité VIP",
     "profileImage": "Photo de Profil"
+  },
+  "myRoom": {
+    "services": {
+      "title": "Services de Chambre",
+      "searchServices": "Rechercher des Services",
+      "generalService": "Service Général",
+      "generalServiceDescription": "Demander des services généraux de l'hôtel",
+      "roomService": "Service de Chambre",
+      "roomServiceDescription": "Commander de la nourriture et des boissons dans votre chambre",
+      "laundry": "Blanchisserie",
+      "laundryDescription": "Services de blanchisserie et nettoyage à sec",
+      "maintenance": "Maintenance",
+      "maintenanceDescription": "Signaler des problèmes de maintenance"
+    },
+    "welcome": {
+      "arrival": "Arrivée",
+      "departure": "Départ",
+      "checkIn": "Enregistrement",
+      "checkOut": "Départ",
+      "notSet": "Non défini"
+    }
+  },
+  "bottomNav": {
+    "dining": "Restauration",
+    "myRoom": "Ma Chambre",
+    "request": "Demande"
+  },
+  "status": {
+    "pending": "En attente",
+    "confirmed": "Confirmé",
+    "completed": "Terminé",
+    "cancelled": "Annulé",
+    "inProgress": "En cours"
   }
 }

@@ -1,15 +1,18 @@
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Room } from '@/hooks/useRoom';
 import { format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import { enUS, fr } from 'date-fns/locale';
 
 interface WelcomeBannerProps {
   room: Room | null;
 }
 
 const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
+  const { t, i18n } = useTranslation();
+  
   const userData = useMemo(() => {
     try {
       const userDataString = localStorage.getItem('user_data');
@@ -30,26 +33,27 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
   }, [userData]);
   
   const formatDateIfValid = (dateString: string | undefined): string => {
-    if (!dateString) return 'Not set';
+    if (!dateString) return t('myRoom.welcome.notSet');
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        return 'Not set';
+        return t('myRoom.welcome.notSet');
       }
-      return format(date, 'dd MMMM yyyy', { locale: enUS });
+      const locale = i18n.language === 'fr' ? fr : enUS;
+      return format(date, 'dd MMMM yyyy', { locale });
     } catch (e) {
       console.error("Error formatting date:", e, dateString);
-      return 'Not set';
+      return t('myRoom.welcome.notSet');
     }
   };
   
   const checkInDate = useMemo(() => {
     return formatDateIfValid(userData?.check_in_date);
-  }, [userData]);
+  }, [userData, t, i18n.language]);
   
   const checkOutDate = useMemo(() => {
     return formatDateIfValid(userData?.check_out_date);
-  }, [userData]);
+  }, [userData, t, i18n.language]);
 
   // Always show the dates section but handle "Not set" case within the UI
   const shouldShowDatesSection = true;
@@ -61,10 +65,10 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           <div>
             <h1 className="text-3xl font-bold text-secondary mb-2">{displayRoomNumber}</h1>
             <p className="text-gray-600 text-lg">{room?.type}</p>
-            {userName && <p className="text-gray-700 mt-1">Welcome, {userName}</p>}
+            {userName && <p className="text-gray-700 mt-1">{t('common.welcome')}, {userName}</p>}
           </div>
           <div className="text-right">
-            <p className="text-sm font-medium text-gray-600">Check-out</p>
+            <p className="text-sm font-medium text-gray-600">{t('myRoom.welcome.checkOut')}</p>
             <p className="text-lg font-semibold text-secondary">{checkOutDate}</p>
           </div>
         </div>
@@ -73,12 +77,12 @@ const WelcomeBanner = ({ room }: WelcomeBannerProps) => {
           <div className="mt-2 p-3 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-sm font-medium text-gray-600">Arrival</p>
+                <p className="text-sm font-medium text-gray-600">{t('myRoom.welcome.arrival')}</p>
                 <p className="text-md font-medium">{checkInDate}</p>
               </div>
               <div className="h-8 border-l border-gray-300"></div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Departure</p>
+                <p className="text-sm font-medium text-gray-600">{t('myRoom.welcome.departure')}</p>
                 <p className="text-md font-medium">{checkOutDate}</p>
               </div>
             </div>

@@ -16,7 +16,11 @@
     "messages": "Messages",
     "notifications": "Notifications",
     "profile": "Profile",
-    "myRoom": "My Room"
+    "myRoom": "My Room",
+    "gastronomy": "Gastronomy",
+    "concierge": "Concierge",
+    "eventsPromos": "Events & Promos",
+    "hotelMap": "Hotel Map"
   },
   "common": {
     "login": "Login",
@@ -34,21 +38,78 @@
     "success": "Success",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "open": "Open",
+    "closed": "Closed",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "today": "Today",
+    "featured": "Featured",
+    "explore": "Explore",
+    "viewAll": "View All",
+    "reserveTable": "Reserve Table",
+    "contactNow": "Contact Now",
+    "bookTreatment": "Book Treatment",
+    "shopNow": "Shop Now",
+    "openMap": "Open Map",
+    "writeReview": "Write Review",
+    "exploreNow": "Explore Now",
+    "viewOffer": "View Offer",
+    "request": "Request"
   },
   "home": {
     "hero": {
       "title": "Welcome to Hotel Genius",
       "subtitle": "Experience luxury and comfort at its finest",
       "loginPrompt": "Log in to access all hotel services",
-      "loginButton": "Log In"
+      "loginButton": "Log In",
+      "stayGuideTitle": "Welcome to Your Stay Guide",
+      "stayGuideSubtitle": "Discover luxury and comfort"
     },
     "services": {
       "title": "Our Services",
+      "mainServicesTitle": "Main Services",
       "rooms": "Luxury Rooms",
       "dining": "Fine Dining",
       "spa": "Spa & Wellness",
-      "activities": "Activities"
+      "activities": "Activities",
+      "aboutUs": "About Us",
+      "aboutUsDescription": "Learn more about our hotel",
+      "gastronomy": "Gastronomy",
+      "gastronomyDescription": "Fine dining experiences",
+      "concierge": "Concierge",
+      "conciergeDescription": "24/7 assistance services",
+      "spaWellness": "Spa & Wellness",
+      "spaWellnessDescription": "Relax and rejuvenate"
+    },
+    "additionalServices": {
+      "title": "Additional Services",
+      "shops": "Shops",
+      "shopsDescription": "Luxury shopping experience",
+      "hotelMap": "Hotel Map",
+      "hotelMapDescription": "Interactive indoor navigation",
+      "destination": "Destination",
+      "destinationDescription": "Things to do nearby",
+      "feedback": "Feedback",
+      "feedbackDescription": "Share your experience"
+    },
+    "todayEvents": {
+      "title": "Today's Events",
+      "noEvents": "No events scheduled today",
+      "viewAllEvents": "View all upcoming events"
+    },
+    "featuredExperience": {
+      "title": "Featured Experience",
+      "luxurySpa": "Luxury Spa Treatments",
+      "luxurySpaDescription": "Indulge in our signature spa treatments for ultimate relaxation",
+      "wineTasting": "Wine Tasting Experience",
+      "wineTastingDescription": "Sample the finest wines from our expertly curated collection",
+      "spaCategory": "Spa & Wellness",
+      "diningCategory": "Dining"
+    },
+    "assistance": {
+      "title": "Need Assistance?",
+      "subtitle": "We're here to help 24/7"
     }
   },
   "auth": {
@@ -61,5 +122,38 @@
     "guestStatus": "Guest",
     "vipStatus": "VIP Guest",
     "profileImage": "Profile Picture"
+  },
+  "myRoom": {
+    "services": {
+      "title": "Room Services",
+      "searchServices": "Search Services",
+      "generalService": "General Service",
+      "generalServiceDescription": "Request general hotel services",
+      "roomService": "Room Service",
+      "roomServiceDescription": "Order food and drinks to your room",
+      "laundry": "Laundry",
+      "laundryDescription": "Laundry and dry cleaning services",
+      "maintenance": "Maintenance",
+      "maintenanceDescription": "Report maintenance issues"
+    },
+    "welcome": {
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "notSet": "Not set"
+    }
+  },
+  "bottomNav": {
+    "dining": "Dining",
+    "myRoom": "My Room",
+    "request": "Request"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "inProgress": "In Progress"
   }
 }

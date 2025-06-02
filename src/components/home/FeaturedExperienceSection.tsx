@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
@@ -8,6 +9,7 @@ import { motion } from 'framer-motion';
 import useEmblaCarousel from 'embla-carousel-react';
 
 const FeaturedExperienceSection = () => {
+  const { t } = useTranslation();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   
@@ -28,25 +30,25 @@ const FeaturedExperienceSection = () => {
   const featuredExperiences = [
     {
       id: '1',
-      title: 'Luxury Spa Treatments',
-      description: 'Indulge in our signature spa treatments for ultimate relaxation',
+      title: t('home.featuredExperience.luxurySpa'),
+      description: t('home.featuredExperience.luxurySpaDescription'),
       image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      category: 'Spa & Wellness',
+      category: t('home.featuredExperience.spaCategory'),
       path: '/spa'
     },
     {
       id: '2',
-      title: 'Wine Tasting Experience',
-      description: 'Sample the finest wines from our expertly curated collection',
+      title: t('home.featuredExperience.wineTasting'),
+      description: t('home.featuredExperience.wineTastingDescription'),
       image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      category: 'Dining',
+      category: t('home.featuredExperience.diningCategory'),
       path: '/dining'
     }
   ];
 
   return (
     <section className="px-6 mb-10">
-      <h2 className="text-2xl font-bold text-secondary mb-4">Featured Experience</h2>
+      <h2 className="text-2xl font-bold text-secondary mb-4">{t('home.featuredExperience.title')}</h2>
       <Carousel className="w-full">
         <CarouselContent ref={emblaRef}>
           {featuredExperiences.map((experience, index) => (
@@ -83,7 +85,7 @@ const FeaturedExperienceSection = () => {
                       className="w-full" 
                       onClick={() => window.location.href = experience.path}
                     >
-                      Explore Now
+                      {t('common.exploreNow')}
                     </Button>
                   </div>
                 </Card>

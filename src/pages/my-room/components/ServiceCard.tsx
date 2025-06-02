@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
@@ -13,6 +14,8 @@ interface ServiceCardProps {
 }
 
 const ServiceCard = ({ icon, title, description, onClick, className }: ServiceCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Card 
       className={cn(
@@ -28,7 +31,7 @@ const ServiceCard = ({ icon, title, description, onClick, className }: ServiceCa
           onClick();
         }
       }}
-      aria-label={`Request ${title}`}
+      aria-label={`${t('common.request')} ${title}`}
     >
       <div className="flex items-start gap-3">
         <div className="p-2 bg-primary/10 text-primary rounded-lg">
@@ -38,7 +41,7 @@ const ServiceCard = ({ icon, title, description, onClick, className }: ServiceCa
           <h3 className="text-lg font-medium text-secondary mb-1">{title}</h3>
           <p className="text-gray-600 text-sm mb-2">{description}</p>
           <div className="flex items-center text-primary text-sm font-medium">
-            <span>Request</span>
+            <span>{t('common.request')}</span>
             <ArrowRight className="w-4 h-4 ml-1" />
           </div>
         </div>

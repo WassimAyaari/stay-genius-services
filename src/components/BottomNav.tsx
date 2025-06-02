@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UtensilsCrossed, BedDouble, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -7,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const BottomNav = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
@@ -41,20 +43,20 @@ const BottomNav = () => {
   const navItems = useMemo(() => [
     {
       icon: <UtensilsCrossed className="h-5 w-5" />,
-      label: 'Dining',
+      label: t('bottomNav.dining'),
       path: '/dining'
     }, 
     {
       icon: <BedDouble className="h-5 w-5" />,
-      label: 'My Room',
+      label: t('bottomNav.myRoom'),
       path: '/my-room'
     }, 
     {
       icon: <Phone className="h-5 w-5" />,
-      label: 'Request',
+      label: t('bottomNav.request'),
       path: '/services'
     }
-  ], []);
+  ], [t]);
 
   // Optimiser la fonction de navigation
   const handleNavigation = useCallback((path: string) => {

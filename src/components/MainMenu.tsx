@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Sheet,
@@ -18,6 +19,7 @@ interface MainMenuProps {
 }
 
 const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,17 +27,17 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
   console.log('Current path in MainMenu:', location.pathname);
 
   const menuItems = [
-    { icon: <Home className="h-5 w-5" />, label: 'Home', path: '/' },
-    { icon: <BellRing className="h-5 w-5" />, label: 'Notifications', path: '/notifications' },
-    { icon: <Info className="h-5 w-5" />, label: 'About Us', path: '/about' },
-    { icon: <UtensilsCrossed className="h-5 w-5" />, label: 'Gastronomy', path: '/dining' },
-    { icon: <Heart className="h-5 w-5" />, label: 'Spa & Wellness', path: '/spa' },
-    { icon: <Phone className="h-5 w-5" />, label: 'Concierge', path: '/services' },
-    { icon: <Calendar className="h-5 w-5" />, label: 'Events & Promos', path: '/events' },
-    { icon: <Compass className="h-5 w-5" />, label: 'Destination', path: '/destination' },
-    { icon: <ShoppingBag className="h-5 w-5" />, label: 'Shops', path: '/shops' },
-    { icon: <Map className="h-5 w-5" />, label: 'Hotel Map', path: '/map' },
-    { icon: <BedDouble className="h-5 w-5" />, label: 'My Room', path: '/my-room' },
+    { icon: <Home className="h-5 w-5" />, label: t('nav.home'), path: '/' },
+    { icon: <BellRing className="h-5 w-5" />, label: t('nav.notifications'), path: '/notifications' },
+    { icon: <Info className="h-5 w-5" />, label: t('nav.about'), path: '/about' },
+    { icon: <UtensilsCrossed className="h-5 w-5" />, label: t('nav.gastronomy'), path: '/dining' },
+    { icon: <Heart className="h-5 w-5" />, label: t('nav.spa'), path: '/spa' },
+    { icon: <Phone className="h-5 w-5" />, label: t('nav.concierge'), path: '/services' },
+    { icon: <Calendar className="h-5 w-5" />, label: t('nav.eventsPromos'), path: '/events' },
+    { icon: <Compass className="h-5 w-5" />, label: t('nav.destination'), path: '/destination' },
+    { icon: <ShoppingBag className="h-5 w-5" />, label: t('nav.shops'), path: '/shops' },
+    { icon: <Map className="h-5 w-5" />, label: t('nav.hotelMap'), path: '/map' },
+    { icon: <BedDouble className="h-5 w-5" />, label: t('nav.myRoom'), path: '/my-room' },
   ];
 
   const handleNavigate = (path: string) => {
@@ -58,7 +60,7 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
       <SheetContent side="left" className="p-0 w-full sm:max-w-full">
         <div className="flex flex-col h-full">
           <SheetHeader className="p-6 bg-gradient-to-br from-primary-light to-white">
-            <SheetTitle className="text-2xl text-secondary">Menu</SheetTitle>
+            <SheetTitle className="text-2xl text-secondary">{t('nav.services')}</SheetTitle>
           </SheetHeader>
           <ScrollArea className="flex-1 h-[calc(100vh-80px)]">
             <div className="grid gap-2 p-4">
