@@ -21,6 +21,27 @@
     "eventsPromos": "Events & Promos",
     "hotelMap": "Hotel Map"
   },
+  "restaurants": {
+    "cuisine": {
+      "Italienne": "Italian",
+      "Italian": "Italian",
+      "Cigar Bar": "Cigar Bar",
+      "International": "International",
+      "Buffet / international": "Buffet / International",
+      "Cocktails bar": "Cocktails Bar",
+      "Non veg": "Non Vegetarian"
+    },
+    "location": {
+      "2nd Floor": "2nd Floor",
+      "Main Lobby": "Main Lobby",
+      "Room": "Room",
+      "Outdoor": "Outdoor",
+      "Poolside": "Poolside"
+    },
+    "description": {
+      "default": "Experience exceptional dining with carefully crafted dishes and impeccable service."
+    }
+  },
   "common": {
     "login": "Login",
     "logout": "Log out",

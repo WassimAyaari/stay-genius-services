@@ -403,5 +403,26 @@
     "download": "Télécharger",
     "share": "Partager",
     "print": "Imprimer"
+  },
+  "restaurants": {
+    "cuisine": {
+      "Italienne": "Italienne",
+      "Italian": "Italienne",
+      "Cigar Bar": "Bar à Cigares",
+      "International": "International",
+      "Buffet / international": "Buffet / International",
+      "Cocktails bar": "Bar à Cocktails",
+      "Non veg": "Non Végétarien"
+    },
+    "location": {
+      "2nd Floor": "2ème Étage",
+      "Main Lobby": "Hall Principal",
+      "Room": "Chambre",
+      "Outdoor": "Extérieur",
+      "Poolside": "Au Bord de la Piscine"
+    },
+    "description": {
+      "default": "Découvrez une cuisine d'exception avec des plats soigneusement préparés et un service impeccable."
+    }
   }
 }

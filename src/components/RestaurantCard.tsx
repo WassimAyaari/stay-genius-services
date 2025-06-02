@@ -38,7 +38,7 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <UtensilsCrossed className="w-4 h-4" />
-            {restaurant.cuisine}
+            {t(`restaurants.cuisine.${restaurant.cuisine}`) || restaurant.cuisine}
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Clock className="w-4 h-4" />
@@ -46,10 +46,10 @@ const RestaurantCard = ({ restaurant, onBookTable }: RestaurantCardProps) => {
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <MapPin className="w-4 h-4" />
-            {restaurant.location}
+            {t(`restaurants.location.${restaurant.location}`) || restaurant.location}
           </div>
         </div>
-        <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
+        <p className="text-sm text-gray-600 mb-4">{t(`restaurants.description.${restaurant.id}`) || restaurant.description}</p>
         <div className="grid grid-cols-2 gap-2">
           <Button 
             onClick={() => onBookTable(restaurant.id)}
