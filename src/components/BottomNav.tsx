@@ -90,7 +90,7 @@ const BottomNav = () => {
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t shadow-lg z-50"
+          className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-md border-t border-border shadow-lg z-50"
         >
           <div className="flex justify-around items-center h-16">
             {navItems.map(item => (
@@ -101,7 +101,7 @@ const BottomNav = () => {
                   "flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors relative",
                   location.pathname === item.path 
                     ? "text-primary" 
-                    : "text-secondary hover:text-primary"
+                    : "text-muted-foreground hover:text-primary"
                 )}
               >
                 <div className="relative inline-flex items-center justify-center">

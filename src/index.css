@@ -7,24 +7,24 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --background: 216 15% 20%;
+    --foreground: 210 40% 98%;
+    --card: 216 15% 18%;
+    --card-foreground: 210 40% 98%;
+    --popover: 216 15% 18%;
+    --popover-foreground: 210 40% 98%;
     --primary: 187 100% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 215 27% 24%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: 216 15% 25%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 216 15% 15%;
+    --muted-foreground: 215.4 16.3% 65%;
+    --accent: 216 15% 22%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 216 15% 25%;
+    --input: 216 15% 25%;
     --ring: 187 100% 36%;
     --radius: 1.5rem;
   }
@@ -36,6 +36,7 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
+    background-color: #333230;
   }
 
   /* Custom scrollbar */
@@ -44,7 +45,7 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100 rounded-full;
+    @apply bg-muted rounded-full;
   }
 
   ::-webkit-scrollbar-thumb {
@@ -59,17 +60,18 @@
   .radix-select-content,
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
-    background-color: white !important;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1) !important;
+    background-color: hsl(var(--card)) !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3) !important;
     border-radius: 0.5rem !important;
     pointer-events: auto !important;
+    border: 1px solid hsl(var(--border)) !important;
   }
 
   /* Calendar fixes */
   .rdp-dropdown_month, 
   .rdp-dropdown_year {
     z-index: 9999 !important;
-    background-color: white !important;
+    background-color: hsl(var(--card)) !important;
   }
   
   /* Make popover content always visible */
@@ -85,6 +87,8 @@
     position: relative !important;
     pointer-events: auto !important;
     opacity: 1 !important;
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
   }
   
   /* Ensure calendar selection works properly */
@@ -104,13 +108,13 @@
   .SelectContent, 
   .select-content {
     z-index: 9999 !important;
-    background-color: white !important;
+    background-color: hsl(var(--card)) !important;
     pointer-events: auto !important;
   }
 }
 
 .glass-card {
-  @apply backdrop-blur-md bg-white/80 border border-white/20 shadow-lg;
+  @apply backdrop-blur-md bg-card/80 border border-border/20 shadow-lg;
 }
 
 .hover-scale {

@@ -29,10 +29,10 @@ const Layout = ({
   console.log('Current path in Layout:', location.pathname);
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#333230] to-[#2a2825]">
       {/* Header appears on all pages except messages page */}
       {!isMessagePage && (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border shadow-lg">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
@@ -43,7 +43,7 @@ const Layout = ({
                 <img 
                   src="/lovable-uploads/5d7793ad-e099-426f-84d1-18a8e00719e1.png" 
                   alt="Hotel Genius" 
-                  className={cn("hover:opacity-80 transition-opacity", isMobile ? "h-3" : "h-4")}
+                  className={cn("hover:opacity-80 transition-opacity filter brightness-110", isMobile ? "h-3" : "h-4")}
                 />
               </Link>
               
