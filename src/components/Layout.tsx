@@ -32,22 +32,27 @@ const Layout = ({
     <div className="min-h-screen bg-background">
       {/* Header appears on all pages except messages page */}
       {!isMessagePage && (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-xl">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-lg">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
+              {/* Left section - Menu */}
+              <div className="flex items-center min-w-0">
                 <MainMenu />
               </div>
 
-              <Link to="/" className="flex-1 flex justify-center items-center">
-                <img 
-                  src="/lovable-uploads/5d7793ad-e099-426f-84d1-18a8e00719e1.png" 
-                  alt="Hotel Genius" 
-                  className={cn("hover:opacity-80 transition-opacity filter brightness-110", isMobile ? "h-3" : "h-4")}
-                />
-              </Link>
+              {/* Center section - Logo */}
+              <div className="flex-1 flex justify-center items-center px-4">
+                <Link to="/" className="hover:opacity-80 transition-opacity">
+                  <img 
+                    src="/lovable-uploads/5d7793ad-e099-426f-84d1-18a8e00719e1.png" 
+                    alt="Hotel Genius" 
+                    className={cn("filter brightness-110", isMobile ? "h-3" : "h-4")}
+                  />
+                </Link>
+              </div>
               
-              <div className={cn("flex items-center gap-2 justify-end", isMobile ? "w-[100px]" : "w-[110px]")}>
+              {/* Right section - Notifications and User Menu */}
+              <div className={cn("flex items-center gap-2 justify-end min-w-0", isMobile ? "w-[100px]" : "w-[110px]")}>
                 <NotificationMenu />
                 <UserMenu />
               </div>
