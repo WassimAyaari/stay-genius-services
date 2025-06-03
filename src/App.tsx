@@ -17,7 +17,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeProvider attribute="class">
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="light" 
+          enableSystem={false}
+          forcedTheme={undefined}
+        >
           <AuthProvider>
             <Routes>
               <Route path="/*" element={<PublicRoutes />} />
