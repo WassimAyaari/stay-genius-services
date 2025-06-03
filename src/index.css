@@ -31,7 +31,7 @@
   }
 
   .dark {
-    /* Dark theme colors (when explicitly enabled) */
+    /* Dark theme colors */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -84,6 +84,7 @@
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
     background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1) !important;
     border-radius: 0.5rem !important;
     pointer-events: auto !important;
@@ -100,6 +101,7 @@
   .rdp-dropdown_year {
     z-index: 9999 !important;
     background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
   
   /* Make ALL popover content follow theme */
@@ -107,6 +109,7 @@
     z-index: 9999 !important;
     pointer-events: auto !important;
     background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
   
   /* Fix for month and year selection dropdowns */
@@ -117,7 +120,7 @@
     pointer-events: auto !important;
     opacity: 1 !important;
     background-color: hsl(var(--card)) !important;
-    color: hsl(var(--foreground)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
   
   /* Ensure calendar selection works properly */
@@ -125,12 +128,15 @@
     position: relative !important;
     z-index: 9999 !important;
     pointer-events: auto !important;
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
 
   /* Make calendar day buttons clickable */
   .rdp-button {
     pointer-events: auto !important;
     cursor: pointer !important;
+    color: hsl(var(--card-foreground)) !important;
   }
   
   /* Ensure ALL select components follow theme */
@@ -138,6 +144,7 @@
   .select-content {
     z-index: 9999 !important;
     background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
     pointer-events: auto !important;
   }
 
@@ -145,11 +152,13 @@
   [data-radix-dialog-content],
   [data-radix-dialog-overlay] {
     background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
 
   /* Force all dropdown menus to follow theme */
   [data-radix-dropdown-menu-content] {
     background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
     border: 1px solid hsl(var(--border)) !important;
   }
 
@@ -160,6 +169,45 @@
 
   .dark [data-radix-dialog-overlay] {
     background-color: rgba(0, 0, 0, 0.8) !important;
+  }
+
+  /* Force all buttons to follow theme */
+  button {
+    color: inherit !important;
+  }
+
+  /* Force all text elements to follow theme */
+  .dark * {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  /* Ensure search bars and inputs follow theme */
+  input,
+  textarea {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .dark input,
+  .dark textarea {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  /* Force service cards and all cards to follow theme */
+  .dark .bg-white {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  /* Ensure all badges follow theme */
+  .dark .bg-green-100,
+  .dark .bg-red-100,
+  .dark .bg-blue-100,
+  .dark .bg-yellow-100 {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--muted-foreground)) !important;
   }
 }
 

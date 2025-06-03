@@ -61,8 +61,8 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
           <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-full sm:max-w-full">
-        <div className="flex flex-col h-full">
+      <SheetContent side="left" className="p-0 w-full sm:max-w-full bg-card border-border">
+        <div className="flex flex-col h-full bg-card">
           <SheetHeader className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-b border-border">
             <div className="flex items-center gap-3">
               <img 
@@ -70,20 +70,20 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
                 alt="Logo" 
                 className="h-8 w-8 object-contain"
               />
-              <SheetTitle className="text-2xl text-foreground font-semibold">{t('nav.services')}</SheetTitle>
+              <SheetTitle className="text-2xl text-card-foreground font-semibold">{t('nav.services')}</SheetTitle>
             </div>
           </SheetHeader>
-          <ScrollArea className="flex-1 h-[calc(100vh-80px)]">
+          <ScrollArea className="flex-1 h-[calc(100vh-80px)] bg-card">
             <div className="grid gap-2 p-4">
               {menuItems.map((item) => (
                 <Button
                   key={item.path}
                   variant="ghost"
-                  className="w-full justify-start gap-3 p-4 rounded-xl hover:bg-primary/10 transition-colors"
+                  className="w-full justify-start gap-3 p-4 rounded-xl hover:bg-primary/10 transition-colors text-card-foreground"
                   onClick={() => handleNavigate(item.path)}
                 >
-                  <span className="text-foreground">{item.icon}</span>
-                  <span className="font-medium text-foreground">{item.label}</span>
+                  <span className="text-card-foreground">{item.icon}</span>
+                  <span className="font-medium text-card-foreground">{item.label}</span>
                 </Button>
               ))}
             </div>
