@@ -11,15 +11,15 @@ const MainServicesSection = () => {
   const isAdmin = location.pathname.includes('/admin');
   
   return (
-    <section className="px-6 mb-10">
+    <section className="px-4 sm:px-6 mb-8 sm:mb-10">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-secondary">{t('home.services.mainServicesTitle')}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-secondary">{t('home.services.mainServicesTitle')}</h2>
         {/* Admin button to edit About page */}
         {!isAdmin}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <ServiceCard 
-          icon={<Info className="w-6 h-6 text-primary" />} 
+          icon={<Info className="w-full h-full" />} 
           title={t('home.services.aboutUs')} 
           description={t('home.services.aboutUsDescription')} 
           actionText={t('common.viewAll')} 
@@ -28,7 +28,7 @@ const MainServicesSection = () => {
         />
         
         <ServiceCard 
-          icon={<UtensilsCrossed className="w-6 h-6 text-primary" />} 
+          icon={<UtensilsCrossed className="w-full h-full" />} 
           title={t('home.services.gastronomy')} 
           description={t('home.services.gastronomyDescription')} 
           actionText={t('common.reserveTable')} 
@@ -37,7 +37,7 @@ const MainServicesSection = () => {
         />
         
         <ServiceCard 
-          icon={<Phone className="w-6 h-6 text-primary" />} 
+          icon={<Phone className="w-full h-full" />} 
           title={t('home.services.concierge')} 
           description={t('home.services.conciergeDescription')} 
           actionText={t('common.contactNow')} 
@@ -46,7 +46,7 @@ const MainServicesSection = () => {
         />
         
         <ServiceCard 
-          icon={<Heart className="w-6 h-6 text-primary" />} 
+          icon={<Heart className="w-full h-full" />} 
           title={t('home.services.spaWellness')} 
           description={t('home.services.spaWellnessDescription')} 
           actionText={t('common.bookTreatment')} 
