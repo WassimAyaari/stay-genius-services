@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, Link } from 'react-router-dom';
@@ -43,7 +44,7 @@ const Layout = ({
                 <img 
                   src="/lovable-uploads/5d7793ad-e099-426f-84d1-18a8e00719e1.png" 
                   alt="Hotel Genius" 
-                  className={cn("hover:opacity-80 transition-opacity", isMobile ? "h-6" : "h-7")}
+                  className={cn("hover:opacity-80 transition-opacity", isMobile ? "h-4" : "h-5")}
                 />
               </Link>
               
