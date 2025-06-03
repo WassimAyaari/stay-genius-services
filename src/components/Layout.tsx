@@ -41,9 +41,11 @@ const Layout = ({
               </div>
 
               <Link to="/" className="flex-1 flex justify-center items-center">
-                <span className={cn("font-bold text-secondary hover:opacity-80 transition-opacity", isMobile ? "text-lg" : "text-xl")}>
-                  Hotel Genius
-                </span>
+                <img 
+                  src="/lovable-uploads/089069c0-6230-4163-86ae-2e5396822601.png" 
+                  alt="Hotel Genius" 
+                  className={cn("hover:opacity-80 transition-opacity", isMobile ? "h-8" : "h-10")}
+                />
               </Link>
               
               <div className={cn("flex items-center gap-2 justify-end", isMobile ? "w-[100px]" : "w-[110px]")}>
