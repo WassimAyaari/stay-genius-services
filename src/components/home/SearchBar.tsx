@@ -15,7 +15,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onOpen, className }) => (
       <Input
         type="search"
         placeholder="Search for services, activities, or amenities..."
-        className="w-full pl-12 pr-4 py-6 rounded-xl text-base bg-white shadow-lg border-none"
+        className="w-full pl-12 pr-4 py-6 rounded-xl text-base bg-card border-border/50 shadow-xl border text-foreground placeholder:text-muted-foreground"
         onClick={onOpen}
         onFocus={onOpen}
         readOnly

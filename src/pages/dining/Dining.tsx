@@ -33,24 +33,24 @@ const Dining = () => {
   return (
     <Layout>
       <div className="text-center mb-8 pt-6 md:pt-8">
-        <h1 className="text-4xl font-semibold text-secondary mb-4">{t('dining.title')}</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <h1 className="text-4xl font-semibold text-foreground mb-4">{t('dining.title')}</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
           {t('dining.subtitle')}
         </p>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
-          <div className="animate-pulse text-gray-400">{t('dining.loadingRestaurants')}</div>
+          <div className="animate-pulse text-muted-foreground">{t('dining.loadingRestaurants')}</div>
         </div>
       ) : !restaurants || restaurants.length === 0 ? (
         <div className="flex items-center justify-center py-8">
-          <div className="text-gray-400">{t('dining.noRestaurants')}</div>
+          <div className="text-muted-foreground">{t('dining.noRestaurants')}</div>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {restaurants.map(restaurant => (
-            <Card key={restaurant.id} className="overflow-hidden animate-fade-in">
+            <Card key={restaurant.id} className="overflow-hidden animate-fade-in bg-card border-border/50 shadow-lg hover:shadow-xl transition-shadow">
               <div className="relative">
                 <img 
                   src={restaurant.images[0]} 
@@ -60,27 +60,27 @@ const Dining = () => {
                 <div className="absolute top-2 right-2">
                   <span className={`
                     px-2 py-1 rounded-full text-xs font-medium
-                    ${restaurant.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                    ${restaurant.status === 'open' ? 'bg-green-900/80 text-green-200 border border-green-700' : 'bg-red-900/80 text-red-200 border border-red-700'}
                   `}>
                     {t(`common.${restaurant.status}`)}
                   </span>
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="text-xl font-semibold text-secondary mb-2">{restaurant.name}</h3>
-                <div className="flex items-center gap-2 text-gray-600 mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-2">{restaurant.name}</h3>
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
                   <UtensilsCrossed className="w-4 h-4" />
                   <span>{restaurant.cuisine}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-600 mb-2">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
                   <Clock className="w-4 h-4" />
                   <span>{restaurant.openHours}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-600 mb-4">
+                <div className="flex items-center gap-2 text-muted-foreground mb-4">
                   <MapPin className="w-4 h-4" />
                   <span>{restaurant.location}</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">{restaurant.description}</p>
+                <p className="text-sm text-muted-foreground mb-4">{restaurant.description}</p>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <Button 
                     onClick={() => handleBookTable(restaurant.id)} 
@@ -91,7 +91,7 @@ const Dining = () => {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full flex items-center justify-center gap-1" 
+                    className="w-full flex items-center justify-center gap-1 border-border/50 hover:bg-accent" 
                     onClick={() => navigate(`/dining/${restaurant.id}`)}
                   >
                     <BookText size={16} />
@@ -104,7 +104,7 @@ const Dining = () => {
                     <h4 className="text-sm font-semibold mb-1 text-primary">{t('dining.upcomingEvents')}</h4>
                     <ul className="space-y-1">
                       {getEventsForRestaurant(restaurant.id).map(event => (
-                        <li key={event.id} className="flex items-center gap-2 text-[15px]">
+                        <li key={event.id} className="flex items-center gap-2 text-[15px] text-muted-foreground">
                           <Calendar className="w-4 h-4 text-primary" />
                           <span>{event.title} — {event.date}{event.time ? `, ${event.time}` : ''}</span>
                         </li>

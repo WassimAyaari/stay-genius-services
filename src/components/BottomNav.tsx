@@ -60,7 +60,7 @@ const BottomNav = () => {
       icon: (
         <div className="relative">
           <MessageCircle className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full text-[8px] text-white flex items-center justify-center font-medium border border-white">
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full text-[8px] text-white flex items-center justify-center font-medium border border-card">
             2
           </span>
         </div>
@@ -90,7 +90,7 @@ const BottomNav = () => {
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-md border-t border-border shadow-lg z-50"
+          className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border/50 shadow-xl z-50"
         >
           <div className="flex justify-around items-center h-16">
             {navItems.map(item => (

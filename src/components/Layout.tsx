@@ -29,10 +29,10 @@ const Layout = ({
   console.log('Current path in Layout:', location.pathname);
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#333230] to-[#2a2825]">
+    <div className="min-h-screen bg-gradient-to-b from-[#333230] via-[#2a2825] to-[#1f1e1c]">
       {/* Header appears on all pages except messages page */}
       {!isMessagePage && (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border shadow-lg">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border/50 shadow-xl">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">

@@ -12,10 +12,10 @@ const HeroBanner = () => {
         alt="Hotel Exterior" 
         className="w-full h-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30" />
       <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
         <h1 className="text-3xl font-bold mb-2">{t('home.hero.stayGuideTitle')}</h1>
-        <p className="text-xl mb-6">{t('home.hero.stayGuideSubtitle')}</p>
+        <p className="text-xl mb-6 opacity-95">{t('home.hero.stayGuideSubtitle')}</p>
       </div>
     </div>
   );
