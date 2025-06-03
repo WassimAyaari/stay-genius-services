@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, BedDouble, Phone } from 'lucide-react';
+import { UtensilsCrossed, BedDouble, Phone, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -55,6 +55,18 @@ const BottomNav = () => {
       icon: <Phone className="h-5 w-5" />,
       label: t('bottomNav.request'),
       path: '/services'
+    },
+    {
+      icon: (
+        <div className="relative">
+          <MessageCircle className="h-5 w-5" />
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full text-[8px] text-white flex items-center justify-center font-medium border border-white">
+            2
+          </span>
+        </div>
+      ),
+      label: 'Messages',
+      path: '/messages'
     }
   ], [t]);
 
@@ -62,9 +74,13 @@ const BottomNav = () => {
   const handleNavigation = useCallback((path: string) => {
     if (path !== '#') {
       console.log(`Navigating to: ${path}`);
-      navigate(path);
+      if (path === '/messages') {
+        navigate(path, { state: { from: location.pathname } });
+      } else {
+        navigate(path);
+      }
     }
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   return (
     <AnimatePresence>

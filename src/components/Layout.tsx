@@ -6,7 +6,6 @@ import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import NotificationMenu from './NotificationMenu';
 import BottomNav from './BottomNav';
-import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -51,16 +50,6 @@ const Layout = ({
               <div className={cn("flex items-center gap-2 justify-end", isMobile ? "w-[100px]" : "w-[110px]")}>
                 <NotificationMenu />
                 <UserMenu />
-                <Link 
-                  to="/messages" 
-                  state={{ from: location.pathname }} 
-                  className="relative hover:bg-gray-100 p-2.5 rounded-full transition-colors"
-                >
-                  <MessageCircle className={cn(isMobile ? "h-4 w-4" : "h-5 w-5", "text-secondary")} />
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center font-medium border border-white">
-                    2
-                  </span>
-                </Link>
               </div>
             </div>
           </div>
