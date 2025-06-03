@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    /* Light theme colors */
+    /* Light theme colors (DEFAULT) */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -31,25 +31,25 @@
   }
 
   .dark {
-    /* Much darker theme colors */
-    --background: 0 0% 5%;
-    --foreground: 210 40% 95%;
-    --card: 0 0% 8%;
-    --card-foreground: 210 40% 95%;
-    --popover: 0 0% 8%;
-    --popover-foreground: 210 40% 95%;
+    /* Dark theme colors (when explicitly enabled) */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
     --primary: 187 100% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 210 40% 95%;
-    --muted: 0 0% 6%;
-    --muted-foreground: 215.4 16.3% 60%;
-    --accent: 0 0% 12%;
-    --accent-foreground: 210 40% 95%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 12%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
     --ring: 187 100% 36%;
   }
 
@@ -79,15 +79,20 @@
     @apply bg-primary;
   }
   
-  /* Ensure ALL dropdowns and select menus are dark */
+  /* Ensure ALL dropdowns and select menus follow theme */
   .radix-select-content,
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
     background-color: hsl(var(--card)) !important;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1) !important;
     border-radius: 0.5rem !important;
     pointer-events: auto !important;
     border: 1px solid hsl(var(--border)) !important;
+  }
+
+  .dark .radix-select-content,
+  .dark [data-radix-popper-content-wrapper] {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8) !important;
   }
 
   /* Calendar fixes */
@@ -97,7 +102,7 @@
     background-color: hsl(var(--card)) !important;
   }
   
-  /* Make ALL popover content dark */
+  /* Make ALL popover content follow theme */
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
     pointer-events: auto !important;
@@ -128,7 +133,7 @@
     cursor: pointer !important;
   }
   
-  /* Ensure ALL select components are dark */
+  /* Ensure ALL select components follow theme */
   .SelectContent, 
   .select-content {
     z-index: 9999 !important;
@@ -136,20 +141,24 @@
     pointer-events: auto !important;
   }
 
-  /* Force all dialogs and sheets to be dark */
+  /* Force all dialogs and sheets to follow theme */
   [data-radix-dialog-content],
   [data-radix-dialog-overlay] {
     background-color: hsl(var(--card)) !important;
   }
 
-  /* Force all dropdown menus to be dark */
+  /* Force all dropdown menus to follow theme */
   [data-radix-dropdown-menu-content] {
     background-color: hsl(var(--card)) !important;
     border: 1px solid hsl(var(--border)) !important;
   }
 
-  /* Ensure all modal overlays are dark */
+  /* Ensure all modal overlays are properly styled */
   [data-radix-dialog-overlay] {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .dark [data-radix-dialog-overlay] {
     background-color: rgba(0, 0, 0, 0.8) !important;
   }
 }
