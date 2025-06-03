@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User, UserRound, Languages, Check } from "lucide-react";
+import { LogOut, Settings, User, UserRound, Languages, Check, Moon, Sun } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import GuestStatusBadge from './GuestStatusBadge';
 import { logoutUser } from '@/features/auth/services/authService';
@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTheme } from 'next-themes';
 
 const UserMenu = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const UserMenu = () => {
   const { userData, isAuthenticated } = useAuth();
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
+  const { theme, setTheme } = useTheme();
 
   const changeLanguage = async (lng: string) => {
     console.log('Attempting to change language to:', lng);
@@ -31,6 +33,10 @@ const UserMenu = () => {
     } catch (error) {
       console.error('Error changing language:', error);
     }
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const handleLogout = async () => {
@@ -144,7 +150,7 @@ const UserMenu = () => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-zinc-100">
+      <DropdownMenuContent align="end" className="w-56 bg-card border-border">
         <DropdownMenuLabel className="flex flex-col gap-1">
           <span>{getFullName()}</span>
           <GuestStatusBadge />
@@ -165,7 +171,7 @@ const UserMenu = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           onClick={() => changeLanguage('en')}
-          className={i18n.language === 'en' ? 'bg-gray-200' : ''}
+          className={i18n.language === 'en' ? 'bg-accent' : ''}
         >
           <Languages className="mr-2 h-4 w-4" />
           <span>{t('common.english')}</span>
@@ -173,11 +179,25 @@ const UserMenu = () => {
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => changeLanguage('fr')}
-          className={i18n.language === 'fr' ? 'bg-gray-200' : ''}
+          className={i18n.language === 'fr' ? 'bg-accent' : ''}
         >
           <Languages className="mr-2 h-4 w-4" />
           <span>{t('common.french')}</span>
           {i18n.language === 'fr' && <Check className="ml-auto h-4 w-4" />}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={toggleTheme}>
+          {theme === 'dark' ? (
+            <>
+              <Sun className="mr-2 h-4 w-4" />
+              <span>Light Mode</span>
+            </>
+          ) : (
+            <>
+              <Moon className="mr-2 h-4 w-4" />
+              <span>Dark Mode</span>
+            </>
+          )}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>

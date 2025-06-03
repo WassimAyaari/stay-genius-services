@@ -53,9 +53,9 @@ const InfoItemSection = ({
 
   if (isEditing) {
     return (
-      <div className="border-t pt-4">
+      <div className="border-t pt-4 border-border">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-medium">{title}</h3>
+          <h3 className="font-medium text-foreground">{title}</h3>
           {!singleItem && (
             <Button 
               type="button" 
@@ -115,12 +115,12 @@ const InfoItemSection = ({
 
   return (
     <div className="mb-4">
-      <h3 className="font-medium mb-2">{title}</h3>
+      <h3 className="font-medium mb-2 text-foreground">{title}</h3>
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
         {items.map((item, index) => (
-          <div key={index} className="flex justify-between border-b pb-1">
-            <dt className="text-gray-600">{item.label}</dt>
-            <dd className="font-medium">{item.value}</dd>
+          <div key={index} className="flex justify-between border-b pb-1 border-border">
+            <dt className="text-muted-foreground">{item.label}</dt>
+            <dd className="font-medium text-foreground">{item.value}</dd>
           </div>
         ))}
       </dl>
