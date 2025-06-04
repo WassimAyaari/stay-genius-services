@@ -81,7 +81,6 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
         
         // Si l'utilisateur est authentifié, nettoyer les doublons potentiels
         if (session?.user?.id) {
-          // Assurons-nous d'utiliser la fonction importée depuis le bon chemin
           await cleanupDuplicateGuestRecords(session.user.id);
         }
         
@@ -102,19 +101,29 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
           return;
         }
         
-        // 4. TEMPORAIREMENT DÉSACTIVÉ: Vérification des droits administrateur
-        if (adminRequired) {
-          console.log('Accès admin requis, mais la vérification est temporairement désactivée');
-          // On considère que tous les utilisateurs ont les droits admin pour le moment
-          setAuthorized(true);
-          setLoading(false);
-          return;
+        // 4. Vérification des droits administrateur si requis
+        if (adminRequired && session?.user?.id) {
+          console.log('Vérification des droits admin requis');
           
-          /* CODE ORIGINAL (DÉSACTIVÉ)
           try {
-            const userData = JSON.parse(userDataString);
-            if (!userData.isAdmin) {
-              console.log('Accès admin requis, redirection vers la page d\'accueil');
+            const { data: isAdmin, error: adminError } = await supabase
+              .rpc('is_user_admin', { _user_id: session.user.id });
+
+            if (adminError) {
+              console.error('Erreur lors de la vérification admin:', adminError);
+              toast({
+                variant: "destructive",
+                title: "Erreur de vérification",
+                description: "Impossible de vérifier les droits d'accès"
+              });
+              navigate('/', { replace: true });
+              setAuthorized(false);
+              setLoading(false);
+              return;
+            }
+
+            if (!isAdmin) {
+              console.log('Utilisateur non-admin, redirection vers la page d\'accueil');
               toast({
                 variant: "destructive",
                 title: "Accès restreint",
@@ -125,6 +134,8 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
               setLoading(false);
               return;
             }
+
+            console.log('Droits admin confirmés');
           } catch (error) {
             console.error("Erreur lors de la vérification des droits admin:", error);
             navigate('/', { replace: true });
@@ -132,7 +143,6 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
             setLoading(false);
             return;
           }
-          */
         }
         
         try {

@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar, BellRing } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar, BellRing, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 
 interface MainMenuProps {
   buttonClassName?: string;
@@ -22,9 +23,10 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useAdminCheck();
 
-  // Ajout d'informations de débogage pour voir le chemin actuel
   console.log('Current path in MainMenu:', location.pathname);
+  console.log('Is admin:', isAdmin);
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: t('nav.home'), path: '/' },
@@ -39,6 +41,15 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
     { icon: <Map className="h-5 w-5" />, label: t('nav.hotelMap'), path: '/map' },
     { icon: <BedDouble className="h-5 w-5" />, label: t('nav.myRoom'), path: '/my-room' },
   ];
+
+  // Add admin menu item if user is admin
+  if (isAdmin) {
+    menuItems.push({
+      icon: <Settings className="h-5 w-5" />,
+      label: 'Admin Dashboard',
+      path: '/admin'
+    });
+  }
 
   const handleNavigate = (path: string) => {
     console.log(`Navigating to: ${path}`);
