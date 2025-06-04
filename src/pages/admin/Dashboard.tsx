@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +13,8 @@ import {
   Wrench,
   MessageSquare,
   Shield,
-  Wifi
+  Wifi,
+  MapPin
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -54,6 +54,13 @@ const AdminDashboard = () => {
       count: 9, 
       trend: "+2 this month", 
       path: "/admin/events" 
+    },
+    { 
+      title: "Destination", 
+      icon: <MapPin className="h-5 w-5 text-primary" />, 
+      count: null, 
+      trend: "Attractions & Activities", 
+      path: "/admin/destination-admin" 
     },
     { 
       title: "Messages", 
