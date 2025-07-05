@@ -32,7 +32,7 @@ export const ContactList: React.FC<ContactListProps> = ({
       <div className="px-4 py-3 border-b bg-card">
         <input 
           type="text" 
-          placeholder="Search messages..." 
+          placeholder="Search services..." 
           value={searchTerm} 
           onChange={(e) => setSearchTerm(e.target.value)} 
           className="w-full px-4 py-2 rounded-full bg-muted/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary" 
@@ -47,7 +47,7 @@ export const ContactList: React.FC<ContactListProps> = ({
             </div>
           ) : contacts.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No contacts found</p>
+              <p className="text-muted-foreground">No services available</p>
             </div>
           ) : (
             contacts.map(contact => (

@@ -63,7 +63,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               onSendMessage();
             }
           }}
-          placeholder="Type a message or use quick templates..." 
+          placeholder="What can we help you with today?" 
           className="resize-none min-h-0 h-10 py-2 px-4 rounded-full border-0 focus-visible:ring-1 bg-muted/50" 
         />
         

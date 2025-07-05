@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Briefcase } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { useMessaging } from '@/hooks/useMessaging';
 import { ContactList } from '@/components/messaging/ContactList';
 import { ChatView } from '@/components/messaging/ChatView';
@@ -25,13 +25,13 @@ const Messages = () => {
   // Add icons to contacts here to avoid circular dependencies
   const contactsWithIcons = filteredContacts.map(contact => ({
     ...contact,
-    icon: contact.id === '2' ? <Briefcase className="h-6 w-6 text-primary" /> : null
+    icon: contact.id === '2' ? <Bell className="h-6 w-6 text-primary" /> : null
   }));
 
   if (selectedContact) {
     const contactWithIcon = {
       ...selectedContact,
-      icon: selectedContact.id === '2' ? <Briefcase className="h-6 w-6 text-primary" /> : null
+      icon: selectedContact.id === '2' ? <Bell className="h-6 w-6 text-primary" /> : null
     };
     
     return (
