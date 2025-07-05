@@ -342,13 +342,21 @@
     "title": "Messages",
     "subtitle": "Chattez avec notre personnel",
     "newMessage": "Nouveau Message",
-    "typeMessage": "Tapez un message...",
+    "typeMessage": "Tapez un message ou utilisez les modèles rapides...",
     "send": "Envoyer",
     "online": "En ligne",
     "offline": "Hors ligne",
     "lastSeen": "Vu pour la dernière fois",
     "typing": "tape...",
-    "noMessages": "Aucun message pour le moment"
+    "noMessages": "Aucun message pour le moment",
+    "quickTemplates": "Modèles Rapides",
+    "templates": {
+      "roomRequests": "Demandes de Chambre",
+      "dining": "Restauration",
+      "general": "Général", 
+      "maintenance": "Maintenance",
+      "housekeeping": "Ménage"
+    }
   },
   "profile": {
     "title": "Mon Profil",

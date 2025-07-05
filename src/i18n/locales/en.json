@@ -363,13 +363,21 @@
     "title": "Messages",
     "subtitle": "Chat with our staff",
     "newMessage": "New Message",
-    "typeMessage": "Type a message...",
+    "typeMessage": "Type a message or use quick templates...",
     "send": "Send",
     "online": "Online",
     "offline": "Offline",
     "lastSeen": "Last seen",
     "typing": "typing...",
-    "noMessages": "No messages yet"
+    "noMessages": "No messages yet",
+    "quickTemplates": "Quick Templates",
+    "templates": {
+      "roomRequests": "Room Requests",
+      "dining": "Dining", 
+      "general": "General",
+      "maintenance": "Maintenance",
+      "housekeeping": "Housekeeping"
+    }
   },
   "profile": {
     "title": "My Profile",
