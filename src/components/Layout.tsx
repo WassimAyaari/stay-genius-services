@@ -46,9 +46,9 @@ const Layout = ({
               <div className="w-full flex justify-center items-center">
                 <Link to="/" className="hover:opacity-80 transition-opacity">
                   <img 
-                    src="/lovable-uploads/5d7793ad-e099-426f-84d1-18a8e00719e1.png" 
+                    src="/lovable-uploads/aab13959-5215-4313-87f8-c3012cdb27f0.png" 
                     alt="Hotel Genius" 
-                    className={cn("filter brightness-110", isMobile ? "h-3" : "h-4")}
+                    className={cn("filter brightness-110", isMobile ? "h-8" : "h-10")}
                   />
                 </Link>
               </div>
