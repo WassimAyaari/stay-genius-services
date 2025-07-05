@@ -3,6 +3,26 @@ import { Message, Contact } from '@/types/messaging';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Function to trigger AI response
+const triggerAIResponse = async (userMessage: string, userId: string | null, userName: string, roomNumber: string) => {
+  try {
+    const response = await supabase.functions.invoke('ai-chat-response', {
+      body: {
+        userMessage,
+        userId,
+        userName,
+        roomNumber
+      }
+    });
+    
+    if (response.error) {
+      console.error('Error calling AI chat function:', response.error);
+    }
+  } catch (error) {
+    console.error('Error triggering AI response:', error);
+  }
+};
+
 export const scrollToBottom = (messagesEndRef: React.RefObject<HTMLDivElement>) => {
   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 };
@@ -168,8 +188,13 @@ export const sendMessage = async (
       return;
     }
 
+    // Trigger AI response
+    await triggerAIResponse(inputMessage, userId, userName, roomNumber);
+    
     // After successful send, fetch updated messages to see if there are any responses
-    fetchMessagesFunction();
+    setTimeout(() => {
+      fetchMessagesFunction();
+    }, 1000); // Small delay to allow AI response to be processed
   } catch (error) {
     console.error("Error in sendMessage:", error);
     toast({
