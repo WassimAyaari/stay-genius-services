@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from './ui/scroll-area';
-import { useTheme } from 'next-themes';
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,18 +21,11 @@ const Layout = ({
 }: LayoutProps) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { setTheme, theme } = useTheme();
+  
   const isHomePage = location.pathname === '/';
   const isMessagePage = location.pathname === '/messages' || location.pathname.startsWith('/messages?');
   const isSpaManagerPage = location.pathname === '/admin/spa';
   const isMobile = useIsMobile();
-
-  // Ensure light theme is set as default on initial load
-  useEffect(() => {
-    if (!theme || theme === 'system') {
-      setTheme('light');
-    }
-  }, [theme, setTheme]);
 
   // For debugging, show current path
   console.log('Current path in Layout:', location.pathname);
