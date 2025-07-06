@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, ExternalLink } from 'lucide-react';
@@ -7,6 +8,7 @@ import Layout from '@/components/Layout';
 import { useShops } from '@/hooks/useShops';
 
 const Shops = () => {
+  const { t } = useTranslation();
   const { shops } = useShops();
   
   // Separate shops into two categories
@@ -25,15 +27,15 @@ const Shops = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
           <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
-            <h1 className="text-3xl font-bold mb-2">Hotel Shops</h1>
-            <p className="text-xl mb-6">Discover our exclusive shops</p>
+            <h1 className="text-3xl font-bold mb-2">{t('shopsPage.hotelShops.title')}</h1>
+            <p className="text-xl mb-6">{t('shopsPage.hotelShops.subtitle')}</p>
           </div>
         </div>
 
         <div className="space-y-4 mb-16">
           {hotelShops.length === 0 ? (
             <Card className="p-6 text-center text-gray-500">
-              No hotel shops available at the moment.
+              {t('shopsPage.hotelShops.noShops')}
             </Card>
           ) : (
             hotelShops.map((shop) => (
@@ -51,13 +53,13 @@ const Shops = () => {
                     <h3 className="font-semibold mb-1">{shop.name}</h3>
                     <div className="flex items-center text-sm text-gray-500 mb-1">
                       <MapPin className="h-3 w-3 mr-1" />
-                      <span>{shop.location || "Inside the hotel"}</span>
+                      <span>{shop.location || t('shopsPage.hotelShops.insideHotel')}</span>
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{shop.description}</p>
                     <div className="flex gap-2">
                       {shop.hours && (
                         <div className="text-xs text-gray-500">
-                          Hours: {shop.hours}
+                          {t('shopsPage.hotelShops.hours')}: {shop.hours}
                         </div>
                       )}
                     </div>
@@ -79,8 +81,8 @@ const Shops = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
-                <h1 className="text-3xl font-bold mb-2">Shopping Centers</h1>
-                <p className="text-xl mb-6">Discover the best shopping experiences near you</p>
+                <h1 className="text-3xl font-bold mb-2">{t('shopsPage.shoppingCenters.title')}</h1>
+                <p className="text-xl mb-6">{t('shopsPage.shoppingCenters.subtitle')}</p>
               </div>
             </div>
 
@@ -107,14 +109,14 @@ const Shops = () => {
                         {shop.location && (
                           <Button size="sm" variant="outline" className="text-xs" asChild>
                             <a href={`https://maps.google.com/?q=${encodeURIComponent(shop.location)}`} target="_blank" rel="noopener noreferrer">
-                              Directions
+                              {t('shopsPage.shoppingCenters.directions')}
                             </a>
                           </Button>
                         )}
                         {shop.contact_email && (
                           <Button size="sm" className="text-xs" asChild>
                             <a href={`mailto:${shop.contact_email}`}>
-                              Contact
+                              {t('shopsPage.shoppingCenters.contact')}
                             </a>
                           </Button>
                         )}

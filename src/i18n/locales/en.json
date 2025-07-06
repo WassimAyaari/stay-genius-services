@@ -442,5 +442,122 @@
     "download": "Download",
     "share": "Share",
     "print": "Print"
+  },
+  "activities": {
+    "title": "Things To Do",
+    "subtitle": "Discover activities and experiences",
+    "filters": {
+      "all": "All Activities",
+      "onSite": "On-Site Activities",
+      "local": "Local Attractions",
+      "guided": "Guided Tours",
+      "special": "Special Events"
+    },
+    "booking": {
+      "confirmed": "Booking Confirmed",
+      "success": "Your activity has been booked successfully!",
+      "failed": "Booking Failed",
+      "signInRequired": "Please sign in to book an activity"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "form": {
+      "title": "Send us a message",
+      "yourName": "Your Name",
+      "yourEmail": "Your Email",
+      "subject": "Subject",
+      "yourMessage": "Your Message",
+      "sendMessage": "Send Message"
+    },
+    "info": {
+      "phone": "Phone",
+      "phoneNumber": "+1 234 567 890",
+      "available247": "Available 24/7",
+      "email": "Email",
+      "primaryEmail": "info@staygenius.com",
+      "supportEmail": "support@staygenius.com",
+      "address": "Address",
+      "fullAddress": "123 Luxury Avenue\nParadise City, PC 12345\nUnited States"
+    }
+  },
+  "shopsPage": {
+    "hotelShops": {
+      "title": "Hotel Shops",
+      "subtitle": "Discover our exclusive shops",
+      "noShops": "No hotel shops available at the moment.",
+      "insideHotel": "Inside the hotel",
+      "hours": "Hours"
+    },
+    "shoppingCenters": {
+      "title": "Shopping Centers",
+      "subtitle": "Discover the best shopping experiences near you",
+      "directions": "Directions",
+      "contact": "Contact"
+    }
+  },
+  "destinationPage": {
+    "title": "Explore Our Destination",
+    "subtitle": "Discover the wonders of our city",
+    "discover": "Discover",
+    "attractions": {
+      "title": "Popular Attractions",
+      "defaultItems": {
+        "mosque": {
+          "name": "Grand Central Mosque",
+          "description": "Historic 16th-century mosque with stunning Islamic architecture.",
+          "distance": "800m away",
+          "hours": "Open 5 AM - 10 PM"
+        },
+        "theatre": {
+          "name": "Royal Opera Theatre", 
+          "description": "Elegant 19th-century theatre hosting world-class performances.",
+          "distance": "1.1 km away",
+          "hours": "Box office: 10 AM - 8 PM"
+        },
+        "bridge": {
+          "name": "Heritage Stone Bridge",
+          "description": "Medieval stone bridge with breathtaking waterfall views.",
+          "distance": "2.3 km away",
+          "hours": "Open 24 hours"
+        }
+      }
+    },
+    "activities": {
+      "title": "Things To Do",
+      "bookNow": "Book Now",
+      "defaultItems": {
+        "cityTour": {
+          "name": "City Tour",
+          "description": "Explore the city highlights with our guided tours.",
+          "action": "Book Tour"
+        },
+        "boatTrip": {
+          "name": "Boat Trip",
+          "description": "Scenic boat rides along the coast with snorkeling options.",
+          "action": "Book Trip"
+        }
+      }
+    },
+    "transportation": {
+      "title": "Getting Around",
+      "carRental": {
+        "title": "Car Rental",
+        "description": "Rental services available at the hotel. Reserve a car for your exploration.",
+        "bookCar": "Book a Car",
+        "visitWebsite": "Visit Website"
+      },
+      "publicTransport": {
+        "title": "Public Transportation",
+        "description": "Convenient and affordable public transport options for getting around the city.",
+        "viewSchedule": "View Schedule"
+      }
+    },
+    "categories": {
+      "nearby": "Nearby",
+      "landmarks": "Landmarks", 
+      "cafes": "Cafés",
+      "shopping": "Shopping"
+    }
   }
 }

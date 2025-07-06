@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const Destination = () => {
+  const { t } = useTranslation();
   // Fetch destination categories
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['destinationCategories'],
@@ -80,10 +82,10 @@ const Destination = () => {
 
   // Default to showing some UI even when there's no data yet
   const defaultCategories = [
-    { id: '1', name: 'Nearby', icon: '' },
-    { id: '2', name: 'Landmarks', icon: '' },
-    { id: '3', name: 'Cafés', icon: '' },
-    { id: '4', name: 'Shopping', icon: '' }
+    { id: '1', name: t('destinationPage.categories.nearby'), icon: '' },
+    { id: '2', name: t('destinationPage.categories.landmarks'), icon: '' },
+    { id: '3', name: t('destinationPage.categories.cafes'), icon: '' },
+    { id: '4', name: t('destinationPage.categories.shopping'), icon: '' }
   ];
 
   // Use dynamic categories if available, otherwise use defaults
@@ -101,14 +103,14 @@ const Destination = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
           <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
-            <h1 className="text-3xl font-bold mb-2">Explore Our Destination</h1>
-            <p className="text-xl mb-6">Discover the wonders of our city</p>
+            <h1 className="text-3xl font-bold mb-2">{t('destinationPage.title')}</h1>
+            <p className="text-xl mb-6">{t('destinationPage.subtitle')}</p>
           </div>
         </div>
 
         {/* Quick Access */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Discover</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">{t('destinationPage.discover')}</h2>
           <div className="grid grid-cols-4 gap-3">
             {isLoadingCategories ? (
               // Show skeleton loading state
@@ -124,7 +126,7 @@ const Destination = () => {
                   {category.icon ? (
                     <img src={category.icon} alt={category.name} className="h-6 w-6 mb-1" />
                   ) : (
-                    getCategoryIcon(category.name)
+                    getCategoryIcon(category.name, t)
                   )}
                   <span className="text-xs">{category.name}</span>
                 </Button>
@@ -135,7 +137,7 @@ const Destination = () => {
 
         {/* Recommended Places */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Popular Attractions</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">{t('destinationPage.attractions.title')}</h2>
           <div className="space-y-4">
             {isLoadingAttractions ? (
               // Loading state
@@ -194,14 +196,14 @@ const Destination = () => {
                     </div>
                     <div className="w-2/3 p-4 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">Grand Central Mosque</h3>
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Historic 16th-century mosque with stunning Islamic architecture.</p>
+                        <h3 className="font-semibold text-lg mb-2">{t('destinationPage.attractions.defaultItems.mosque.name')}</h3>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{t('destinationPage.attractions.defaultItems.mosque.description')}</p>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-1 text-primary" />
-                        <span className="font-medium">800m away</span>
+                        <span className="font-medium">{t('destinationPage.attractions.defaultItems.mosque.distance')}</span>
                         <span className="mx-2">•</span>
-                        <span>Open 5 AM - 10 PM</span>
+                        <span>{t('destinationPage.attractions.defaultItems.mosque.hours')}</span>
                       </div>
                     </div>
                   </div>
@@ -218,14 +220,14 @@ const Destination = () => {
                     </div>
                     <div className="w-2/3 p-4 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">Royal Opera Theatre</h3>
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Elegant 19th-century theatre hosting world-class performances.</p>
+                        <h3 className="font-semibold text-lg mb-2">{t('destinationPage.attractions.defaultItems.theatre.name')}</h3>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{t('destinationPage.attractions.defaultItems.theatre.description')}</p>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-1 text-primary" />
-                        <span className="font-medium">1.1 km away</span>
+                        <span className="font-medium">{t('destinationPage.attractions.defaultItems.theatre.distance')}</span>
                         <span className="mx-2">•</span>
-                        <span>Box office: 10 AM - 8 PM</span>
+                        <span>{t('destinationPage.attractions.defaultItems.theatre.hours')}</span>
                       </div>
                     </div>
                   </div>
@@ -242,14 +244,14 @@ const Destination = () => {
                     </div>
                     <div className="w-2/3 p-4 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">Heritage Stone Bridge</h3>
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Medieval stone bridge with breathtaking waterfall views.</p>
+                        <h3 className="font-semibold text-lg mb-2">{t('destinationPage.attractions.defaultItems.bridge.name')}</h3>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{t('destinationPage.attractions.defaultItems.bridge.description')}</p>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-1 text-primary" />
-                        <span className="font-medium">2.3 km away</span>
+                        <span className="font-medium">{t('destinationPage.attractions.defaultItems.bridge.distance')}</span>
                         <span className="mx-2">•</span>
-                        <span>Open 24 hours</span>
+                        <span>{t('destinationPage.attractions.defaultItems.bridge.hours')}</span>
                       </div>
                     </div>
                   </div>
@@ -261,7 +263,7 @@ const Destination = () => {
 
         {/* Activities Section */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Things To Do</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">{t('destinationPage.activities.title')}</h2>
           <div className="grid grid-cols-2 gap-4">
             {isLoadingActivities ? (
               // Loading state
@@ -291,7 +293,7 @@ const Destination = () => {
                   </div>
                   <div className="p-3">
                     <p className="text-sm text-gray-600 mb-3">{activity.description}</p>
-                    <Button size="sm" className="w-full">Book Now</Button>
+                    <Button size="sm" className="w-full">{t('destinationPage.activities.bookNow')}</Button>
                   </div>
                 </Card>
               ))
@@ -307,12 +309,12 @@ const Destination = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 p-3 text-white">
-                      <h3 className="font-semibold">City Tour</h3>
+                      <h3 className="font-semibold">{t('destinationPage.activities.defaultItems.cityTour.name')}</h3>
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-sm text-gray-600 mb-3">Explore the city highlights with our guided tours.</p>
-                    <Button size="sm" className="w-full">Book Tour</Button>
+                    <p className="text-sm text-gray-600 mb-3">{t('destinationPage.activities.defaultItems.cityTour.description')}</p>
+                    <Button size="sm" className="w-full">{t('destinationPage.activities.defaultItems.cityTour.action')}</Button>
                   </div>
                 </Card>
                 
@@ -325,12 +327,12 @@ const Destination = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 p-3 text-white">
-                      <h3 className="font-semibold">Boat Trip</h3>
+                      <h3 className="font-semibold">{t('destinationPage.activities.defaultItems.boatTrip.name')}</h3>
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-sm text-gray-600 mb-3">Scenic boat rides along the coast with snorkeling options.</p>
-                    <Button size="sm" className="w-full">Book Trip</Button>
+                    <p className="text-sm text-gray-600 mb-3">{t('destinationPage.activities.defaultItems.boatTrip.description')}</p>
+                    <Button size="sm" className="w-full">{t('destinationPage.activities.defaultItems.boatTrip.action')}</Button>
                   </div>
                 </Card>
               </>
@@ -340,7 +342,7 @@ const Destination = () => {
 
         {/* Transportation */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Getting Around</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">{t('destinationPage.transportation.title')}</h2>
           
           {/* Car Rental */}
           {isLoadingCarRentals ? (
@@ -370,10 +372,10 @@ const Destination = () => {
                         variant="outline" 
                         onClick={() => window.open(carRental.website, '_blank')}
                       >
-                        Visit Website
+                        {t('destinationPage.transportation.carRental.visitWebsite')}
                       </Button>
                     ) : (
-                      <Button size="sm" variant="outline">Book a Car</Button>
+                      <Button size="sm" variant="outline">{t('destinationPage.transportation.carRental.bookCar')}</Button>
                     )}
                   </div>
                 </div>
@@ -386,9 +388,9 @@ const Destination = () => {
                   <Car className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Car Rental</h3>
-                  <p className="text-sm text-gray-600 mb-2">Rental services available at the hotel. Reserve a car for your exploration.</p>
-                  <Button size="sm" variant="outline">Book a Car</Button>
+                  <h3 className="font-semibold mb-1">{t('destinationPage.transportation.carRental.title')}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{t('destinationPage.transportation.carRental.description')}</p>
+                  <Button size="sm" variant="outline">{t('destinationPage.transportation.carRental.bookCar')}</Button>
                 </div>
               </div>
             </Card>
@@ -422,10 +424,10 @@ const Destination = () => {
                         variant="outline" 
                         onClick={() => window.open(transport.website, '_blank')}
                       >
-                        Visit Website
+                        {t('destinationPage.transportation.carRental.visitWebsite')}
                       </Button>
                     ) : (
-                      <Button size="sm" variant="outline">View Options</Button>
+                      <Button size="sm" variant="outline">{t('destinationPage.transportation.publicTransport.viewSchedule')}</Button>
                     )}
                   </div>
                 </div>
@@ -438,9 +440,9 @@ const Destination = () => {
                   <Ticket className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Public Transportation</h3>
-                  <p className="text-sm text-gray-600 mb-2">Information about buses, trains, and other public transport options.</p>
-                  <Button size="sm" variant="outline">View Options</Button>
+                  <h3 className="font-semibold mb-1">{t('destinationPage.transportation.publicTransport.title')}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{t('destinationPage.transportation.publicTransport.description')}</p>
+                  <Button size="sm" variant="outline">{t('destinationPage.transportation.publicTransport.viewSchedule')}</Button>
                 </div>
               </div>
             </Card>
@@ -452,12 +454,12 @@ const Destination = () => {
 };
 
 // Helper function to get icons based on category name
-const getCategoryIcon = (name: string) => {
+const getCategoryIcon = (name: string, t: any) => {
   const iconMap: Record<string, React.ReactNode> = {
-    'Nearby': <Navigation className="h-6 w-6 mb-1" />,
-    'Landmarks': <Landmark className="h-6 w-6 mb-1" />,
-    'Cafés': <div className="h-6 w-6 mb-1 flex items-center justify-center">☕</div>,
-    'Shopping': <ShoppingBag className="h-6 w-6 mb-1" />,
+    [t('destinationPage.categories.nearby')]: <Navigation className="h-6 w-6 mb-1" />,
+    [t('destinationPage.categories.landmarks')]: <Landmark className="h-6 w-6 mb-1" />,
+    [t('destinationPage.categories.cafes')]: <div className="h-6 w-6 mb-1 flex items-center justify-center">☕</div>,
+    [t('destinationPage.categories.shopping')]: <ShoppingBag className="h-6 w-6 mb-1" />,
   };
   
   return iconMap[name] || <Navigation className="h-6 w-6 mb-1" />;

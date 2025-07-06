@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin } from 'lucide-react';
@@ -10,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Activities = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [activeFilter, setActiveFilter] = useState<string>('all');
 
@@ -106,16 +108,16 @@ const Activities = () => {
   const handleBookActivity = async (activityId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Please sign in to book an activity');
+      if (!user) throw new Error(t('activities.booking.signInRequired'));
 
       toast({
-        title: "Booking Confirmed",
-        description: "Your activity has been booked successfully!",
+        title: t('activities.booking.confirmed'),
+        description: t('activities.booking.success'),
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Booking Failed",
+        title: t('activities.booking.failed'),
         description: error.message,
       });
     }
@@ -124,8 +126,8 @@ const Activities = () => {
   return (
     <Layout>
       <div className="text-center mb-8 pt-6 md:pt-8">
-        <h1 className="text-4xl font-semibold text-secondary mb-4">Things To Do</h1>
-        <p className="text-gray-600">Discover activities and experiences</p>
+        <h1 className="text-4xl font-semibold text-secondary mb-4">{t('activities.title')}</h1>
+        <p className="text-gray-600">{t('activities.subtitle')}</p>
       </div>
 
       <div className="flex flex-wrap gap-4 mb-8 justify-center">
@@ -134,35 +136,35 @@ const Activities = () => {
           className={activeFilter === 'all' ? 'bg-primary' : ''}
           onClick={() => setActiveFilter('all')}
         >
-          All Activities
+          {t('activities.filters.all')}
         </Button>
         <Button 
           variant={activeFilter === 'on-site' ? 'default' : 'outline'} 
           className={activeFilter === 'on-site' ? 'bg-primary' : ''}
           onClick={() => setActiveFilter('on-site')}
         >
-          On-Site Activities
+          {t('activities.filters.onSite')}
         </Button>
         <Button 
           variant={activeFilter === 'local' ? 'default' : 'outline'} 
           className={activeFilter === 'local' ? 'bg-primary' : ''}
           onClick={() => setActiveFilter('local')}
         >
-          Local Attractions
+          {t('activities.filters.local')}
         </Button>
         <Button 
           variant={activeFilter === 'guided' ? 'default' : 'outline'} 
           className={activeFilter === 'guided' ? 'bg-primary' : ''}
           onClick={() => setActiveFilter('guided')}
         >
-          Guided Tours
+          {t('activities.filters.guided')}
         </Button>
         <Button 
           variant={activeFilter === 'special' ? 'default' : 'outline'} 
           className={activeFilter === 'special' ? 'bg-primary' : ''}
           onClick={() => setActiveFilter('special')}
         >
-          Special Events
+          {t('activities.filters.special')}
         </Button>
       </div>
 

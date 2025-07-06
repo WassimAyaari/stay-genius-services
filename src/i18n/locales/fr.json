@@ -422,6 +422,123 @@
     "share": "Partager",
     "print": "Imprimer"
   },
+  "activities": {
+    "title": "Activités",
+    "subtitle": "Découvrez des activités et expériences",
+    "filters": {
+      "all": "Toutes les Activités",
+      "onSite": "Activités Sur Place",
+      "local": "Attractions Locales",
+      "guided": "Visites Guidées",
+      "special": "Événements Spéciaux"
+    },
+    "booking": {
+      "confirmed": "Réservation Confirmée",
+      "success": "Votre activité a été réservée avec succès !",
+      "failed": "Échec de la Réservation",
+      "signInRequired": "Veuillez vous connecter pour réserver une activité"
+    }
+  },
+  "contact": {
+    "title": "Contactez-Nous",
+    "form": {
+      "title": "Envoyez-nous un message",
+      "yourName": "Votre Nom",
+      "yourEmail": "Votre Email",
+      "subject": "Sujet",
+      "yourMessage": "Votre Message",
+      "sendMessage": "Envoyer le Message"
+    },
+    "info": {
+      "phone": "Téléphone",
+      "phoneNumber": "+1 234 567 890",
+      "available247": "Disponible 24h/24 et 7j/7",
+      "email": "Email",
+      "primaryEmail": "info@staygenius.com",
+      "supportEmail": "support@staygenius.com",
+      "address": "Adresse",
+      "fullAddress": "123 Luxury Avenue\nParadise City, PC 12345\nÉtats-Unis"
+    }
+  },
+  "shopsPage": {
+    "hotelShops": {
+      "title": "Boutiques de l'Hôtel",
+      "subtitle": "Découvrez nos boutiques exclusives",
+      "noShops": "Aucune boutique d'hôtel disponible pour le moment.",
+      "insideHotel": "À l'intérieur de l'hôtel",
+      "hours": "Heures"
+    },
+    "shoppingCenters": {
+      "title": "Centres Commerciaux",
+      "subtitle": "Découvrez les meilleures expériences shopping près de vous",
+      "directions": "Itinéraire",
+      "contact": "Contact"
+    }
+  },
+  "destinationPage": {
+    "title": "Explorez Notre Destination",
+    "subtitle": "Découvrez les merveilles de notre ville",
+    "discover": "Découvrir",
+    "attractions": {
+      "title": "Attractions Populaires",
+      "defaultItems": {
+        "mosque": {
+          "name": "Grande Mosquée Centrale",
+          "description": "Mosquée historique du XVIe siècle avec une architecture islamique époustouflante.",
+          "distance": "À 800m",
+          "hours": "Ouvert de 5h à 22h"
+        },
+        "theatre": {
+          "name": "Théâtre Royal de l'Opéra",
+          "description": "Théâtre élégant du XIXe siècle accueillant des spectacles de classe mondiale.",
+          "distance": "À 1,1 km",
+          "hours": "Billetterie : 10h - 20h"
+        },
+        "bridge": {
+          "name": "Pont de Pierre Patrimonial",
+          "description": "Pont de pierre médiéval avec des vues époustouflantes sur la cascade.",
+          "distance": "À 2,3 km",
+          "hours": "Ouvert 24h/24"
+        }
+      }
+    },
+    "activities": {
+      "title": "Choses à Faire",
+      "bookNow": "Réserver Maintenant",
+      "defaultItems": {
+        "cityTour": {
+          "name": "Visite de la Ville",
+          "description": "Explorez les points forts de la ville avec nos visites guidées.",
+          "action": "Réserver la Visite"
+        },
+        "boatTrip": {
+          "name": "Excursion en Bateau",
+          "description": "Promenades en bateau pittoresques le long de la côte avec options de plongée.",
+          "action": "Réserver l'Excursion"
+        }
+      }
+    },
+    "transportation": {
+      "title": "Se Déplacer",
+      "carRental": {
+        "title": "Location de Voiture",
+        "description": "Services de location disponibles à l'hôtel. Réservez une voiture pour votre exploration.",
+        "bookCar": "Réserver une Voiture",
+        "visitWebsite": "Visiter le Site Web"
+      },
+      "publicTransport": {
+        "title": "Transport Public",
+        "description": "Options de transport public pratiques et abordables pour se déplacer dans la ville.",
+        "viewSchedule": "Voir les Horaires"
+      }
+    },
+    "categories": {
+      "nearby": "À Proximité",
+      "landmarks": "Monuments",
+      "cafes": "Cafés",
+      "shopping": "Shopping"
+    }
+  },
   "restaurants": {
     "cuisine": {
       "Italienne": "Italienne",
