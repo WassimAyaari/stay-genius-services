@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Paperclip, Send, MessageSquare } from 'lucide-react';
-import ChatTemplates from '@/components/admin/chat/ChatTemplates';
-import { ChatTemplate } from '@/hooks/useChatTemplates';
+import UserQuickTemplates from '@/components/messaging/UserQuickTemplates';
 
 interface MessageInputProps {
   inputMessage: string;
@@ -21,13 +20,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
   const [showTemplates, setShowTemplates] = useState(false);
   
-  const handleTemplateSelect = (template: ChatTemplate) => {
-    setInputMessage(template.message);
+  const handleTemplateSelect = (message: string) => {
+    setInputMessage(message);
     setShowTemplates(false);
   };
   return (
     <div className="border-t bg-card p-3 flex-shrink-0 relative">
-      <ChatTemplates 
+      <UserQuickTemplates 
         isOpen={showTemplates}
         onClose={() => setShowTemplates(false)}
         onSelectTemplate={handleTemplateSelect}
