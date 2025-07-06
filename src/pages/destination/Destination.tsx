@@ -163,16 +163,17 @@ const Destination = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-2/3 p-4">
-                      <h3 className="font-semibold mb-1">{attraction.name}</h3>
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>{attraction.distance}</span>
+                    <div className="w-2/3 p-4 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">{attraction.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{attraction.description}</p>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 mr-1 text-primary" />
+                        <span className="font-medium">{attraction.distance}</span>
                         <span className="mx-2">•</span>
                         <span>{attraction.opening_hours}</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{attraction.description}</p>
-                      <Button size="sm" variant="outline" className="text-xs">Get Directions</Button>
                     </div>
                   </div>
                 </Card>
@@ -189,16 +190,17 @@ const Destination = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-2/3 p-4">
-                      <h3 className="font-semibold mb-1">Grand Central Mosque</h3>
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>800m away</span>
+                    <div className="w-2/3 p-4 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">Grand Central Mosque</h3>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Historic 16th-century mosque featuring stunning Islamic architecture and peaceful gardens.</p>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 mr-1 text-primary" />
+                        <span className="font-medium">800m away</span>
                         <span className="mx-2">•</span>
                         <span>Open 5 AM - 10 PM</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">Historic 16th-century mosque featuring stunning Islamic architecture and peaceful gardens.</p>
-                      <Button size="sm" variant="outline" className="text-xs">Get Directions</Button>
                     </div>
                   </div>
                 </Card>
@@ -212,16 +214,17 @@ const Destination = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-2/3 p-4">
-                      <h3 className="font-semibold mb-1">Royal Opera Theatre</h3>
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>1.1 km away</span>
+                    <div className="w-2/3 p-4 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">Royal Opera Theatre</h3>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Elegant 19th-century theatre hosting world-class opera, ballet, and classical performances.</p>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 mr-1 text-primary" />
+                        <span className="font-medium">1.1 km away</span>
                         <span className="mx-2">•</span>
                         <span>Box office: 10 AM - 8 PM</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">Elegant 19th-century theatre hosting world-class opera, ballet, and classical performances.</p>
-                      <Button size="sm" variant="outline" className="text-xs">Get Directions</Button>
                     </div>
                   </div>
                 </Card>
@@ -235,16 +238,17 @@ const Destination = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-2/3 p-4">
-                      <h3 className="font-semibold mb-1">Heritage Stone Bridge</h3>
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>2.3 km away</span>
+                    <div className="w-2/3 p-4 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">Heritage Stone Bridge</h3>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Medieval stone bridge with breathtaking waterfall views and historic walking trails.</p>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 mr-1 text-primary" />
+                        <span className="font-medium">2.3 km away</span>
                         <span className="mx-2">•</span>
                         <span>Open 24 hours</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">Medieval stone bridge with breathtaking waterfall views and historic walking trails.</p>
-                      <Button size="sm" variant="outline" className="text-xs">Get Directions</Button>
                     </div>
                   </div>
                 </Card>
