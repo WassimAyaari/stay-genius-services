@@ -184,20 +184,20 @@ const Destination = () => {
                   <div className="flex">
                     <div className="w-1/3 h-32">
                       <img 
-                        src="https://images.unsplash.com/photo-1577979749830-f1d742b96791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80" 
-                        alt="Museum" 
+                        src="https://images.unsplash.com/photo-1466442929976-97f336a657be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2834&q=80" 
+                        alt="Historic Mosque" 
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="w-2/3 p-4">
-                      <h3 className="font-semibold mb-1">Art Museum</h3>
+                      <h3 className="font-semibold mb-1">Grand Central Mosque</h3>
                       <div className="flex items-center text-sm text-gray-500 mb-2">
                         <MapPin className="h-3 w-3 mr-1" />
-                        <span>1.2 km away</span>
+                        <span>800m away</span>
                         <span className="mx-2">•</span>
-                        <span>Open until 6 PM</span>
+                        <span>Open 5 AM - 10 PM</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">World-class art collection featuring both classical and contemporary works.</p>
+                      <p className="text-sm text-gray-600 mb-2">Historic 16th-century mosque featuring stunning Islamic architecture and peaceful gardens.</p>
                       <Button size="sm" variant="outline" className="text-xs">Get Directions</Button>
                     </div>
                   </div>
@@ -207,20 +207,43 @@ const Destination = () => {
                   <div className="flex">
                     <div className="w-1/3 h-32">
                       <img 
-                        src="https://images.unsplash.com/photo-1514565131-fce0801e5785?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80" 
-                        alt="Beach" 
+                        src="https://images.unsplash.com/photo-1492321936769-b49830bc1d1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2671&q=80" 
+                        alt="Historic Theatre" 
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="w-2/3 p-4">
-                      <h3 className="font-semibold mb-1">Golden Beach</h3>
+                      <h3 className="font-semibold mb-1">Royal Opera Theatre</h3>
                       <div className="flex items-center text-sm text-gray-500 mb-2">
                         <MapPin className="h-3 w-3 mr-1" />
-                        <span>3.5 km away</span>
+                        <span>1.1 km away</span>
+                        <span className="mx-2">•</span>
+                        <span>Box office: 10 AM - 8 PM</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">Elegant 19th-century theatre hosting world-class opera, ballet, and classical performances.</p>
+                      <Button size="sm" variant="outline" className="text-xs">Get Directions</Button>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="overflow-hidden">
+                  <div className="flex">
+                    <div className="w-1/3 h-32">
+                      <img 
+                        src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=4000&q=80" 
+                        alt="Scenic Bridge" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="w-2/3 p-4">
+                      <h3 className="font-semibold mb-1">Heritage Stone Bridge</h3>
+                      <div className="flex items-center text-sm text-gray-500 mb-2">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span>2.3 km away</span>
                         <span className="mx-2">•</span>
                         <span>Open 24 hours</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">Beautiful sandy beach with crystal clear waters and stunning sunset views.</p>
+                      <p className="text-sm text-gray-600 mb-2">Medieval stone bridge with breathtaking waterfall views and historic walking trails.</p>
                       <Button size="sm" variant="outline" className="text-xs">Get Directions</Button>
                     </div>
                   </div>
