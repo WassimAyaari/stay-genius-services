@@ -7,12 +7,15 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({ heroImage }: HeroSectionProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
-  // Log pour le débogage
+  // Debug logging for language and translations
   useEffect(() => {
+    console.log("HeroSection - Current language:", i18n.language);
+    console.log("HeroSection - Title translation:", t('feedback.hero.title'));
+    console.log("HeroSection - Subtitle translation:", t('feedback.hero.subtitle'));
     console.log("HeroSection rendered with image:", heroImage);
-  }, [heroImage]);
+  }, [heroImage, i18n.language, t]);
 
   return (
     <div className="relative mb-8 rounded-3xl overflow-hidden">
