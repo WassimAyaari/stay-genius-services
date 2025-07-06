@@ -40,7 +40,7 @@ const StatisticCard: React.FC<StatisticCardProps> = ({
 
   if (loading) {
     return (
-      <Card className="glass-card hover-scale">
+      <Card className="h-full hover:shadow-lg transition-shadow border-2 hover:border-primary/20 bg-card">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="h-4 w-20 bg-muted animate-pulse rounded"></div>
@@ -58,7 +58,7 @@ const StatisticCard: React.FC<StatisticCardProps> = ({
   }
 
   return (
-    <Card className="glass-card hover-scale border-l-4 border-l-primary">
+    <Card className="h-full hover:shadow-lg transition-shadow border-2 hover:border-primary/20 bg-card">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>

@@ -78,7 +78,7 @@ const AdminStatisticsOverview: React.FC = () => {
   return (
     <div className="space-y-6 mb-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-6 border border-primary/20">
+      <div className="bg-card rounded-lg p-6 border border-border hover:shadow-lg transition-shadow">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-card-foreground mb-2">Statistics Overview</h2>
@@ -122,7 +122,7 @@ const AdminStatisticsOverview: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-secondary/50 to-accent/30 rounded-lg p-4 border border-border/50">
+      <div className="bg-card rounded-lg p-4 border border-border hover:shadow-lg transition-shadow">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Last updated: {new Date().toLocaleTimeString()}</span>
           <div className="flex items-center space-x-2">
