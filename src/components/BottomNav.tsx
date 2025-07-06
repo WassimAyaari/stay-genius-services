@@ -18,11 +18,6 @@ const BottomNav = () => {
   // Log pour le débogage
   console.log('Current path in BottomNav:', location.pathname);
 
-  // Hide navbar on admin pages
-  if (location.pathname.startsWith('/admin')) {
-    return null;
-  }
-
   // Optimiser la gestion du scroll pour de meilleures performances
   const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY;
@@ -86,6 +81,11 @@ const BottomNav = () => {
       }
     }
   }, [navigate, location.pathname]);
+
+  // Hide navbar on admin pages
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <AnimatePresence>
