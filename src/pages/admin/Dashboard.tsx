@@ -18,6 +18,7 @@ import {
   Settings
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AdminStatisticsOverview from '@/components/admin/AdminStatisticsOverview';
 
 const AdminDashboard = () => {
   const adminSections = [
@@ -133,6 +134,9 @@ const AdminDashboard = () => {
       <div className="container py-8">
         <h1 className="text-2xl font-bold mb-2 text-card-foreground">Admin Dashboard</h1>
         <p className="text-muted-foreground mb-6">Manage all sections of your establishment</p>
+        
+        {/* Statistics Overview Section */}
+        <AdminStatisticsOverview />
         
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {adminSections.map((section, index) => (
