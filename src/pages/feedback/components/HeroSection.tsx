@@ -1,11 +1,14 @@
 
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface HeroSectionProps {
   heroImage: string;
 }
 
 const HeroSection = ({ heroImage }: HeroSectionProps) => {
+  const { t } = useTranslation();
+  
   // Log pour le débogage
   useEffect(() => {
     console.log("HeroSection rendered with image:", heroImage);
@@ -25,8 +28,8 @@ const HeroSection = ({ heroImage }: HeroSectionProps) => {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
       <div className="absolute inset-0 flex flex-col justify-center px-6 text-white">
-        <h1 className="text-3xl font-bold mb-2">Your Feedback Matters</h1>
-        <p className="text-xl mb-6">Help us improve your experience</p>
+        <h1 className="text-3xl font-bold mb-2">{t('feedback.hero.title')}</h1>
+        <p className="text-xl mb-6">{t('feedback.hero.subtitle')}</p>
       </div>
     </div>
   );

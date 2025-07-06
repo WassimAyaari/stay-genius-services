@@ -303,6 +303,10 @@
   "feedback": {
     "title": "Feedback",
     "subtitle": "Share your experience with us",
+    "hero": {
+      "title": "Your Feedback Matters",
+      "subtitle": "Help us improve your experience"
+    },
     "overallRating": "Overall Rating",
     "serviceRating": "Service Rating",
     "cleanlinessRating": "Cleanliness Rating",

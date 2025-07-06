@@ -282,6 +282,10 @@
   "feedback": {
     "title": "Commentaires",
     "subtitle": "Partagez votre expérience avec nous",
+    "hero": {
+      "title": "Vos Commentaires Comptent",
+      "subtitle": "Aidez-nous à améliorer votre expérience"
+    },
     "overallRating": "Note Globale",
     "serviceRating": "Note du Service",
     "cleanlinessRating": "Note de Propreté",
