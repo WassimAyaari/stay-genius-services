@@ -174,6 +174,72 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          duration_seconds: number | null
+          email: string | null
+          id: string
+          ip_address: string | null
+          started_at: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          started_at?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          started_at?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      demo_settings: {
+        Row: {
+          created_at: string | null
+          email_required: boolean | null
+          expiration_message: string | null
+          id: string
+          is_enabled: boolean | null
+          redirect_url: string | null
+          time_limit_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email_required?: boolean | null
+          expiration_message?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          redirect_url?: string | null
+          time_limit_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email_required?: boolean | null
+          expiration_message?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          redirect_url?: string | null
+          time_limit_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       destination_activities: {
         Row: {
           created_at: string | null

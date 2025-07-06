@@ -14,7 +14,8 @@ import {
   MessageSquare,
   Shield,
   Wifi,
-  MapPin
+  MapPin,
+  Settings
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -117,6 +118,13 @@ const AdminDashboard = () => {
       count: null, 
       trend: "", 
       path: "/admin/information-technology" 
+    },
+    { 
+      title: "Demo Settings", 
+      icon: <Settings className="h-5 w-5 text-primary" />, 
+      count: null, 
+      trend: "Manage demo limitations", 
+      path: "/admin/demo" 
     }
   ];
 

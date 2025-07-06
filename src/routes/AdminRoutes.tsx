@@ -20,6 +20,7 @@ import FeedbackManager from '@/pages/admin/FeedbackManager';
 import InformationTechnologyManager from '@/pages/admin/InformationTechnologyManager';
 import RestaurantEventsManager from '@/pages/admin/RestaurantEventsManager';
 import DestinationAdmin from '@/pages/admin/DestinationAdmin';
+import DemoManager from '@/pages/admin/DemoManager';
 
 const AdminRoutes = () => {
   return (
@@ -43,6 +44,7 @@ const AdminRoutes = () => {
         <Route path="information-technology" element={<InformationTechnologyManager />} />
         <Route path="restaurants/:id/events" element={<RestaurantEventsManager />} />
         <Route path="destination-admin" element={<DestinationAdmin />} />
+        <Route path="demo" element={<DemoManager />} />
       </Routes>
     </AuthGuard>
   );
