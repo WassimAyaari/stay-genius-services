@@ -292,7 +292,13 @@
     "submitFeedback": "Soumettre les Commentaires",
     "thankYou": "Merci pour vos commentaires !",
     "required": "Obligatoire",
-    "optional": "Optionnel"
+    "optional": "Optionnel",
+    "contact": {
+      "needAssistance": "Besoin d'Aide Immédiate ?",
+      "assistanceDescription": "Notre équipe est disponible 24h/24 et 7j/7 pour répondre à toutes vos préoccupations et questions.",
+      "callReception": "Appeler la Réception",
+      "liveChat": "Chat en Direct"
+    }
   },
   "about": {
     "title": "À Propos de Nous",

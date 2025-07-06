@@ -20,7 +20,7 @@ const HeroSection = ({ heroImage }: HeroSectionProps) => {
         onError={(e) => {
           console.error("Error loading image:", e);
           // Fallback à une image par défaut si celle-ci ne charge pas
-          e.currentTarget.src = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80";
+          e.currentTarget.src = "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80";
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
