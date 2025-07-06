@@ -155,24 +155,26 @@ const Destination = () => {
             ) : attractions && attractions.length > 0 ? (
               attractions.map((attraction) => (
                 <Card key={attraction.id} className="overflow-hidden">
-                  <div className="flex h-40">
+                  <div className="flex min-h-40">
                     <div className="w-1/3">
                       <img 
                         src={attraction.image} 
                         alt={attraction.name} 
-                        className="w-full h-full object-cover"
+                        className="w-full h-40 object-cover"
                       />
                     </div>
                     <div className="w-2/3 p-4 flex flex-col justify-between">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-semibold text-lg mb-2">{attraction.name}</h3>
                         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{attraction.description}</p>
                       </div>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4 mr-1 text-primary" />
-                        <span className="font-medium">{attraction.distance}</span>
-                        <span className="mx-2">•</span>
-                        <span>{attraction.opening_hours}</span>
+                      <div className="flex items-center text-sm text-muted-foreground flex-wrap gap-1">
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1 text-primary" />
+                          <span className="font-medium">{attraction.distance}</span>
+                        </div>
+                        <span className="mx-1">•</span>
+                        <span className="flex-shrink-0">{attraction.opening_hours}</span>
                       </div>
                     </div>
                   </div>
