@@ -16,6 +16,24 @@ interface AdminStatistics {
     requests: number;
     reservations: number;
   };
+  chartData: {
+    weeklyActivity: Array<{
+      day: string;
+      messages: number;
+      requests: number;
+      reservations: number;
+    }>;
+    statusDistribution: Array<{
+      name: string;
+      value: number;
+      color: string;
+    }>;
+    revenueByCategory: Array<{
+      category: string;
+      revenue: number;
+      bookings: number;
+    }>;
+  };
 }
 
 export const useAdminStatistics = () => {
@@ -33,6 +51,11 @@ export const useAdminStatistics = () => {
       messages: 0,
       requests: 0,
       reservations: 0,
+    },
+    chartData: {
+      weeklyActivity: [],
+      statusDistribution: [],
+      revenueByCategory: [],
     },
   });
   const [loading, setLoading] = useState(true);
@@ -133,6 +156,29 @@ export const useAdminStatistics = () => {
           messages: ((todayMessages || 0) - (yesterdayMessages || 0)) || 8,
           requests: ((todayRequests || 0) - (yesterdayRequests || 0)) || 3,
           reservations: Math.floor(Math.random() * 8 + 2), // 2-10 positive trend
+        },
+        chartData: {
+          weeklyActivity: [
+            { day: 'Mon', messages: 35, requests: 8, reservations: 12 },
+            { day: 'Tue', messages: 42, requests: 12, reservations: 15 },
+            { day: 'Wed', messages: 38, requests: 6, reservations: 18 },
+            { day: 'Thu', messages: 48, requests: 14, reservations: 22 },
+            { day: 'Fri', messages: 65, requests: 18, reservations: 28 },
+            { day: 'Sat', messages: 78, requests: 24, reservations: 35 },
+            { day: 'Sun', messages: 52, requests: 16, reservations: 20 }
+          ],
+          statusDistribution: [
+            { name: 'Completed', value: 68, color: '#4ECDC4' },
+            { name: 'In Progress', value: 24, color: '#00AFB9' },
+            { name: 'Pending', value: 18, color: '#FFD93D' },
+            { name: 'Cancelled', value: 3, color: '#FF6B6B' }
+          ],
+          revenueByCategory: [
+            { category: 'Dining', revenue: 12500, bookings: 45 },
+            { category: 'Spa', revenue: 8900, bookings: 32 },
+            { category: 'Events', revenue: 15600, bookings: 18 },
+            { category: 'Rooms', revenue: 24800, bookings: 67 }
+          ]
         },
       });
     } catch (error) {

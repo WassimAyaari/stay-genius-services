@@ -10,6 +10,9 @@ import {
   Star
 } from 'lucide-react';
 import StatisticCard from './StatisticCard';
+import ActivityChart from './charts/ActivityChart';
+import StatusChart from './charts/StatusChart';
+import RevenueChart from './charts/RevenueChart';
 import { useAdminStatistics } from '@/hooks/useAdminStatistics';
 
 const AdminStatisticsOverview: React.FC = () => {
@@ -119,6 +122,26 @@ const AdminStatisticsOverview: React.FC = () => {
             loading={loading}
           />
         ))}
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ActivityChart 
+          data={statistics.chartData.weeklyActivity} 
+          loading={loading} 
+        />
+        <StatusChart 
+          data={statistics.chartData.statusDistribution} 
+          loading={loading} 
+        />
+      </div>
+
+      {/* Revenue Chart */}
+      <div className="w-full">
+        <RevenueChart 
+          data={statistics.chartData.revenueByCategory} 
+          loading={loading} 
+        />
       </div>
 
       {/* Quick Actions */}
