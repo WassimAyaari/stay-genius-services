@@ -156,11 +156,11 @@ const Destination = () => {
               attractions.map((attraction) => (
                 <Card key={attraction.id} className="overflow-hidden">
                   <div className="flex min-h-40">
-                    <div className="w-1/3">
+                    <div className="w-1/3 h-full">
                       <img 
                         src={attraction.image} 
                         alt={attraction.name} 
-                        className="w-full h-40 object-cover"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="w-2/3 p-4 flex flex-col justify-between">
@@ -185,7 +185,7 @@ const Destination = () => {
               <>
                 <Card className="overflow-hidden">
                   <div className="flex h-40">
-                    <div className="w-1/3">
+                    <div className="w-1/3 h-full">
                       <img 
                         src="https://images.unsplash.com/photo-1466442929976-97f336a657be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2834&q=80" 
                         alt="Historic Mosque" 
@@ -209,7 +209,7 @@ const Destination = () => {
                 
                 <Card className="overflow-hidden">
                   <div className="flex h-40">
-                    <div className="w-1/3">
+                    <div className="w-1/3 h-full">
                       <img 
                         src="https://images.unsplash.com/photo-1492321936769-b49830bc1d1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2671&q=80" 
                         alt="Historic Theatre" 
@@ -233,7 +233,7 @@ const Destination = () => {
 
                 <Card className="overflow-hidden">
                   <div className="flex h-40">
-                    <div className="w-1/3">
+                    <div className="w-1/3 h-full">
                       <img 
                         src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=4000&q=80" 
                         alt="Scenic Bridge" 
