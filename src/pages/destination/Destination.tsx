@@ -193,7 +193,7 @@ const Destination = () => {
                     <div className="w-2/3 p-4 flex flex-col justify-between">
                       <div>
                         <h3 className="font-semibold text-lg mb-2">Grand Central Mosque</h3>
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Historic 16th-century mosque featuring stunning Islamic architecture and peaceful gardens.</p>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Historic 16th-century mosque with stunning Islamic architecture.</p>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-1 text-primary" />
@@ -217,7 +217,7 @@ const Destination = () => {
                     <div className="w-2/3 p-4 flex flex-col justify-between">
                       <div>
                         <h3 className="font-semibold text-lg mb-2">Royal Opera Theatre</h3>
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Elegant 19th-century theatre hosting world-class opera, ballet, and classical performances.</p>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Elegant 19th-century theatre hosting world-class performances.</p>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-1 text-primary" />
@@ -241,7 +241,7 @@ const Destination = () => {
                     <div className="w-2/3 p-4 flex flex-col justify-between">
                       <div>
                         <h3 className="font-semibold text-lg mb-2">Heritage Stone Bridge</h3>
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Medieval stone bridge with breathtaking waterfall views and historic walking trails.</p>
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">Medieval stone bridge with breathtaking waterfall views.</p>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-1 text-primary" />
