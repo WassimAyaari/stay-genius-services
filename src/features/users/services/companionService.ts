@@ -95,3 +95,26 @@ export const getCompanions = async (userId: string): Promise<CompanionData[]> =>
     return [];
   }
 };
+
+/**
+ * Supprime un accompagnateur spécifique
+ */
+export const deleteCompanion = async (companionId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('companions')
+      .delete()
+      .eq('id', companionId);
+    
+    if (error) {
+      console.error('Error deleting companion:', error);
+      throw error;
+    }
+    
+    console.log('Companion deleted successfully');
+    return true;
+  } catch (error) {
+    console.error('Error deleting companion:', error);
+    return false;
+  }
+};

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
-import { syncCompanions } from '@/features/users/services/companionService';
+import { syncCompanions, deleteCompanion } from '@/features/users/services/companionService';
 
 interface CompanionsListProps {
   companions: CompanionData[];
@@ -93,6 +93,40 @@ const CompanionsList = ({ companions, onAddCompanion }: CompanionsListProps) => 
     }
   };
 
+  const handleDeleteCompanion = async (companionId?: string) => {
+    if (!companionId) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer cet accompagnateur."
+      });
+      return;
+    }
+
+    try {
+      const success = await deleteCompanion(companionId);
+      
+      if (success) {
+        toast({
+          title: "Accompagnateur supprimé",
+          description: "L'accompagnateur a été supprimé avec succès."
+        });
+        
+        // Force reload the page to refresh the companions list
+        window.location.reload();
+      } else {
+        throw new Error("Failed to delete companion");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'accompagnateur:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer l'accompagnateur. Veuillez réessayer."
+      });
+    }
+  };
+
   const resetForm = () => {
     setNewCompanion({
       first_name: '',
@@ -113,11 +147,19 @@ const CompanionsList = ({ companions, onAddCompanion }: CompanionsListProps) => 
         {companions.length > 0 ? (
           <div className="divide-y">
             {companions.map((companion, index) => (
-              <div key={index} className="flex items-center justify-between p-4">
+              <div key={companion.id || index} className="flex items-center justify-between p-4">
                 <div>
                   <p className="font-medium">{companion.first_name || companion.firstName} {companion.last_name || companion.lastName}</p>
                   <p className="text-sm text-muted-foreground">{companion.relation}</p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteCompanion(companion.id)}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             ))}
           </div>
