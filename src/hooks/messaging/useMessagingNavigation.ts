@@ -23,13 +23,21 @@ export const useMessagingNavigation = ({
     const params = new URLSearchParams(location.search);
     const contactId = params.get('contact');
     
-    if (contactId) {
-      const contact = contactsData.find(c => c.id === contactId);
+    if (contactId && !selectedContact) {
+      // First try to find in contactsData
+      let contact = contactsData.find(c => c.id === contactId);
+      
+      // If not found and contactId is "2", use the default guest services contact
+      if (!contact && contactId === '2' && contactsData.length > 0) {
+        contact = contactsData.find(c => c.id === '2');
+      }
+      
       if (contact) {
+        console.log('Setting selected contact from URL:', contact.name);
         setSelectedContact(contact);
       }
     }
-  }, [location, contactsData, setSelectedContact]);
+  }, [location, contactsData, setSelectedContact, selectedContact]);
 
   // Update URL when selected contact changes
   useEffect(() => {

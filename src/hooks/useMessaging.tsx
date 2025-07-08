@@ -67,6 +67,7 @@ export function useMessaging() {
 
   // Initial fetch and polling
   useEffect(() => {
+    console.log('useMessaging: Initial setup, contactsData length:', contactsData.length);
     fetchMessages();
     
     // Set up a polling interval to fetch messages periodically
@@ -78,7 +79,8 @@ export function useMessaging() {
   }, [fetchMessages]);
 
   const handleSendMessage = () => {
-    if (selectedContact) {
+    console.log('Attempting to send message:', inputMessage, 'Selected contact:', selectedContact?.name);
+    if (selectedContact && inputMessage.trim()) {
       sendMessage(
         inputMessage,
         selectedContact,
@@ -91,6 +93,8 @@ export function useMessaging() {
         fetchMessages,
         toast
       );
+    } else {
+      console.log('Cannot send message - missing contact or empty message');
     }
   };
 

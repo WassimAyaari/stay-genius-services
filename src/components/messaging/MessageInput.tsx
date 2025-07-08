@@ -24,6 +24,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     setInputMessage(message);
     setShowTemplates(false);
   };
+  console.log('MessageInput rendering with inputMessage:', inputMessage);
+  
   return (
     <div className="border-t bg-card p-3 flex-shrink-0 relative">
       <UserQuickTemplates 

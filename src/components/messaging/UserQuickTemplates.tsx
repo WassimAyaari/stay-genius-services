@@ -48,7 +48,7 @@ const UserQuickTemplates = ({ onSelectTemplate, isOpen, onClose }: UserQuickTemp
   };
 
   return (
-    <div className="fixed bottom-20 left-2 right-2 bg-card border rounded-lg shadow-lg max-h-80 z-50">
+    <div className="absolute bottom-full left-0 right-0 mb-2 bg-card border rounded-lg shadow-lg max-h-80 z-50">
       <div className="flex items-center justify-between p-3 border-b">
         <h3 className="font-medium">Quick Questions</h3>
         <Button variant="ghost" size="sm" onClick={onClose}>
