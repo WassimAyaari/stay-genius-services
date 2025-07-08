@@ -15,12 +15,31 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const { userMessage, userId, userName, roomNumber } = await req.json()
 
-    // Generate AI response based on user message
-    let aiResponse = generateAIResponse(userMessage)
+    console.log('Processing message from:', userName, 'Room:', roomNumber, 'Message:', userMessage)
+
+    // Get conversation history for context
+    const conversationHistory = await getConversationHistory(supabase, userId)
+    
+    // Get hotel data for context
+    const hotelContext = await getHotelContext(supabase)
+    
+    // Generate AI response using ChatGPT
+    const aiResponse = await generateIntelligentResponse(
+      userMessage, 
+      userName, 
+      roomNumber, 
+      conversationHistory,
+      hotelContext,
+      openAIApiKey
+    )
+
+    // Process any service requests mentioned in the conversation
+    await processServiceRequest(supabase, userMessage, userId, userName, roomNumber)
 
     // Save AI response to database
     const { error } = await supabase
@@ -41,6 +60,8 @@ serve(async (req) => {
       throw error
     }
 
+    console.log('AI response generated and saved successfully')
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -65,62 +86,252 @@ serve(async (req) => {
   }
 })
 
-function generateAIResponse(userMessage: string): string {
-  const message = userMessage.toLowerCase()
+// Get conversation history for context
+async function getConversationHistory(supabase: any, userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select('text, sender, created_at')
+      .or(`user_id.eq.${userId},recipient_id.eq.${userId}`)
+      .order('created_at', { ascending: false })
+      .limit(10)
 
-  // Hotel service responses
-  if (message.includes('pillow') || message.includes('extra pillow')) {
-    return "Thank you for your request! I'll arrange for extra pillows to be delivered to your room within 15 minutes. Our housekeeping team will bring them right away. Is there anything else I can help you with?"
-  }
-  
-  if (message.includes('water') || message.includes('water bottle')) {
-    return "I'll arrange for complimentary water bottles to be delivered to your room right away. They should arrive within 10-15 minutes. We also have sparkling water available if you prefer!"
-  }
-  
-  if (message.includes('towel') || message.includes('extra towel')) {
-    return "We'll send fresh towels to your room immediately. Our housekeeping team will deliver them within 15 minutes. Would you like bath towels, hand towels, or both?"
-  }
-  
-  if (message.includes('temperature') || message.includes('hot') || message.includes('cold') || message.includes('ac') || message.includes('air conditioning')) {
-    return "I understand you're having issues with the room temperature. Our maintenance team will check your AC/heating system within 30 minutes. In the meantime, you can try adjusting the thermostat or let me know if you need immediate assistance."
-  }
-  
-  if (message.includes('room service') || message.includes('food') || message.includes('hungry')) {
-    return "Our room service is available 24/7! You can find the complete menu in your room directory, or I can send you a digital copy via email. Would you like me to recommend some popular items or help you place an order?"
-  }
-  
-  if (message.includes('restaurant') || message.includes('dining') || message.includes('reservation')) {
-    return "I'd be happy to help you make a restaurant reservation! We have several excellent dining options. Which restaurant interests you and what time would you prefer? I can check availability and make the reservation for you."
-  }
-  
-  if (message.includes('spa') || message.includes('massage') || message.includes('treatment')) {
-    return "Our spa offers a wide range of relaxing treatments! I can help you book a massage, facial, or other wellness services. What type of treatment are you interested in, and do you have a preferred time?"
-  }
-  
-  if (message.includes('housekeeping') || message.includes('cleaning') || message.includes('clean')) {
-    return "Our housekeeping team typically cleans rooms between 10 AM and 4 PM. Would you like to schedule a specific time, or do you need immediate cleaning service? I can arrange that for you right away."
-  }
-  
-  if (message.includes('maintenance') || message.includes('broken') || message.includes('not working') || message.includes('repair')) {
-    return "Thank you for reporting this issue. Our maintenance team has been notified and will address this within 1 hour. Could you please provide more details about the problem so we can bring the right tools?"
-  }
-  
-  if (message.includes('wifi') || message.includes('internet') || message.includes('password')) {
-    return "Our WiFi network is 'HotelGenius-Guest'. The password should be in your welcome packet, but I can provide it: 'Welcome2024!'. If you're still having connection issues, I can send our IT team to help."
-  }
-  
-  if (message.includes('checkout') || message.includes('check out') || message.includes('leaving')) {
-    return "Checkout time is 12:00 PM. If you need a late checkout, I can arrange that for you depending on availability. Would you like assistance with luggage or transportation to the airport?"
-  }
-  
-  if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
-    return "Hello! Welcome to Hotel Genius! I'm here to assist you with any requests during your stay. How may I help you today? Whether you need room service, housekeeping, reservations, or have any questions, I'm happy to help!"
-  }
-  
-  if (message.includes('thank you') || message.includes('thanks')) {
-    return "You're very welcome! Thank you for staying with us. We truly appreciate your business and hope you're enjoying your visit. Please don't hesitate to reach out if you need anything else during your stay!"
-  }
+    if (error) {
+      console.error('Error fetching conversation history:', error)
+      return []
+    }
 
-  // General fallback response
+    return data?.reverse() || []
+  } catch (error) {
+    console.error('Error in getConversationHistory:', error)
+    return []
+  }
+}
+
+// Get hotel context and data
+async function getHotelContext(supabase: any) {
+  try {
+    // Get restaurants
+    const { data: restaurants } = await supabase
+      .from('restaurants')
+      .select('name, description, cuisine, open_hours, location')
+      .eq('status', 'open')
+
+    // Get spa services
+    const { data: spaServices } = await supabase
+      .from('spa_services')
+      .select('name, description, duration, price, category')
+      .eq('status', 'available')
+      .limit(10)
+
+    // Get events
+    const { data: events } = await supabase
+      .from('events')
+      .select('title, description, date, time, location')
+      .gte('date', new Date().toISOString().split('T')[0])
+      .order('date', { ascending: true })
+      .limit(5)
+
+    // Get hotel config
+    const { data: hotelConfig } = await supabase
+      .from('hotel_config')
+      .select('name, contact_email, contact_phone')
+      .limit(1)
+      .maybeSingle()
+
+    return {
+      restaurants: restaurants || [],
+      spaServices: spaServices || [],
+      events: events || [],
+      hotel: hotelConfig || { name: 'Hotel Genius' }
+    }
+  } catch (error) {
+    console.error('Error getting hotel context:', error)
+    return {
+      restaurants: [],
+      spaServices: [],
+      events: [],
+      hotel: { name: 'Hotel Genius' }
+    }
+  }
+}
+
+// Generate intelligent response using ChatGPT
+async function generateIntelligentResponse(
+  userMessage: string,
+  userName: string,
+  roomNumber: string,
+  conversationHistory: any[],
+  hotelContext: any,
+  openAIApiKey: string
+): Promise<string> {
+  try {
+    const systemPrompt = createSystemPrompt(hotelContext)
+    const conversationContext = formatConversationHistory(conversationHistory)
+    
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'assistant', content: `Hello ${userName}! Welcome to ${hotelContext.hotel.name}. I'm your personal concierge assistant. How may I help make your stay exceptional today?` },
+      ...conversationContext,
+      { role: 'user', content: `Guest: ${userName} in Room ${roomNumber} says: "${userMessage}"` }
+    ]
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: messages,
+        max_tokens: 300,
+        temperature: 0.7,
+        presence_penalty: 0.6,
+        frequency_penalty: 0.3,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const aiResponse = data.choices[0]?.message?.content || getFallbackResponse()
+
+    console.log('Generated AI response:', aiResponse)
+    return aiResponse
+
+  } catch (error) {
+    console.error('Error generating intelligent response:', error)
+    return getFallbackResponse()
+  }
+}
+
+// Create comprehensive system prompt
+function createSystemPrompt(hotelContext: any): string {
+  const restaurantList = hotelContext.restaurants.map((r: any) => 
+    `${r.name} (${r.cuisine}) - ${r.open_hours} - ${r.location}`
+  ).join('\n')
+
+  const spaServicesList = hotelContext.spaServices.map((s: any) => 
+    `${s.name} (${s.duration}) - ${s.description} - $${s.price}`
+  ).join('\n')
+
+  const eventsList = hotelContext.events.map((e: any) => 
+    `${e.title} - ${e.date} at ${e.time} - ${e.location}`
+  ).join('\n')
+
+  return `You are the AI concierge for ${hotelContext.hotel.name}, a luxury hotel. You are helpful, professional, warm, and proactive.
+
+PERSONALITY:
+- Friendly and welcoming, yet professional
+- Proactive in suggesting relevant services
+- Knowledgeable about all hotel amenities
+- Empathetic to guest needs
+- Quick to offer solutions
+
+HOTEL INFORMATION:
+- Hotel Name: ${hotelContext.hotel.name}
+- Contact: ${hotelContext.hotel.contact_phone || 'Available at reception'}
+- WiFi: "HotelGenius-Guest" (Password: "Welcome2024!")
+- Check-out: 12:00 PM
+- Room service: Available 24/7
+
+RESTAURANTS:
+${restaurantList || 'Multiple dining options available - please contact reception for details'}
+
+SPA SERVICES:
+${spaServicesList || 'Full spa and wellness center available - please contact spa for bookings'}
+
+UPCOMING EVENTS:
+${eventsList || 'Various events and activities - check with concierge for current schedule'}
+
+IMPORTANT INSTRUCTIONS:
+1. Always address guests by name when possible
+2. Reference their room number naturally
+3. Be specific about timeframes for services
+4. Offer to take actions (book, arrange, order) rather than just providing information
+5. Ask follow-up questions to better assist
+6. If you can't help directly, always provide the next best step
+7. Keep responses conversational but concise (2-3 sentences typically)
+8. Always end with asking if there's anything else you can help with
+
+COMMON SERVICES:
+- Room service: Available 24/7
+- Housekeeping: Available during day hours, can arrange special timing
+- Maintenance: Report issues immediately, typical response within 1 hour
+- Late checkout: Can arrange based on availability
+- Restaurant reservations: Can check availability and book
+- Spa appointments: Can check schedule and make bookings
+- Local recommendations: Provide nearby attractions and services
+- Transportation: Can arrange airport transfers and local transport
+
+Remember: You're not just answering questions - you're actively helping guests have the best possible stay.`
+}
+
+// Format conversation history for context
+function formatConversationHistory(history: any[]): any[] {
+  return history.slice(-6).map((msg: any) => ({
+    role: msg.sender === 'user' ? 'user' : 'assistant',
+    content: msg.text
+  }))
+}
+
+// Process potential service requests
+async function processServiceRequest(
+  supabase: any,
+  userMessage: string,
+  userId: string,
+  userName: string,
+  roomNumber: string
+) {
+  try {
+    const message = userMessage.toLowerCase()
+    
+    // Detect service request keywords
+    const serviceKeywords = [
+      'need', 'want', 'can you', 'please', 'help', 'request', 'order',
+      'pillow', 'towel', 'water', 'clean', 'housekeeping', 'maintenance',
+      'broken', 'fix', 'repair', 'room service', 'food'
+    ]
+
+    const hasServiceRequest = serviceKeywords.some(keyword => message.includes(keyword))
+
+    if (hasServiceRequest) {
+      // Determine request type
+      let requestType = 'general'
+      if (message.includes('clean') || message.includes('housekeeping')) requestType = 'housekeeping'
+      else if (message.includes('food') || message.includes('room service')) requestType = 'room_service'
+      else if (message.includes('maintenance') || message.includes('broken') || message.includes('fix')) requestType = 'maintenance'
+      else if (message.includes('pillow') || message.includes('towel') || message.includes('water')) requestType = 'amenities'
+
+      // Create service request record
+      const { error } = await supabase
+        .from('service_requests')
+        .insert([{
+          guest_id: userId,
+          guest_name: userName,
+          room_number: roomNumber,
+          room_id: userId, // Using userId as room_id fallback
+          type: requestType,
+          description: userMessage,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        }])
+
+      if (error) {
+        console.error('Error creating service request:', error)
+      } else {
+        console.log('Service request created:', requestType)
+      }
+    }
+  } catch (error) {
+    console.error('Error processing service request:', error)
+  }
+}
+
+// Fallback response when AI fails
+function getFallbackResponse(): string {
   return "Thank you for contacting our concierge service! I'm here to help with any requests you may have during your stay. Whether you need room service, housekeeping, restaurant reservations, spa bookings, or any other assistance, please let me know how I can make your stay more comfortable!"
 }
