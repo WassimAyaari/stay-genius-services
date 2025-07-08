@@ -8,8 +8,6 @@ import HousekeepingManager from '@/pages/admin/HousekeepingManager';
 import MaintenanceManager from '@/pages/admin/MaintenanceManager';
 import ReservationManager from '@/pages/admin/ReservationManager';
 import RestaurantManager from '@/pages/admin/RestaurantManager';
-import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
-import RestaurantMenuManager from '@/pages/admin/RestaurantMenuManager';
 import SpaManager from '@/pages/admin/SpaManager';
 import EventsManager from '@/pages/admin/EventsManager';
 import ShopsManager from '@/pages/admin/ShopsManager';
@@ -32,8 +30,6 @@ const AdminRoutes = () => {
         <Route path="maintenance" element={<MaintenanceManager />} />
         <Route path="reservations" element={<ReservationManager />} />
         <Route path="restaurants" element={<RestaurantManager />} />
-        <Route path="restaurants/:id/reservations" element={<RestaurantReservationsManager />} />
-        <Route path="restaurant-menus" element={<RestaurantMenuManager />} />
         <Route path="spa" element={<SpaManager />} />
         <Route path="events" element={<EventsManager />} />
         <Route path="shops" element={<ShopsManager />} />

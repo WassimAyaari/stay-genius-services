@@ -30,13 +30,6 @@ const AdminDashboard = () => {
       path: "/admin/restaurants" 
     },
     { 
-      title: "Menus", 
-      icon: <FileText className="h-5 w-5 text-primary" />, 
-      count: 15, 
-      trend: "+3 this week", 
-      path: "/admin/restaurant-menus" 
-    },
-    { 
       title: "Shops", 
       icon: <Store className="h-5 w-5 text-primary" />, 
       count: 6, 

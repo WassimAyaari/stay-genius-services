@@ -1,15 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { RestaurantTable } from '@/components/admin/restaurants/RestaurantTable';
 import RestaurantFormDialog from '@/components/admin/restaurants/RestaurantFormDialog';
+import RestaurantBookingsTab from './restaurants/RestaurantBookingsTab';
+import RestaurantMenusTab from './restaurants/RestaurantMenusTab';
+import Layout from '@/components/Layout';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-// Add import for Dialog/EventForm
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import EventForm from '@/pages/admin/components/events/EventForm';
 import { useEvents } from '@/hooks/useEvents';
@@ -90,48 +93,98 @@ const RestaurantManager = () => {
     toast.success('Event created and linked to restaurant!');
   };
 
+  const refreshRestaurantData = () => {
+    queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+    queryClient.invalidateQueries({ queryKey: ['table-reservations'] });
+    queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Restaurant Management</h1>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Restaurant
-          </Button>
-        </div>
+    <Layout>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Restaurant Management</h1>
+        <p className="text-muted-foreground mt-1">
+          Manage restaurants, bookings, and menus
+        </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Restaurants</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading || isRefreshing ? (
-            <div className="flex justify-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <RestaurantTable 
-              restaurants={restaurants || []} 
-              onEdit={handleEditRestaurant}
-              onDelete={handleDeleteRestaurant}
-              onViewReservations={navigateToReservations}
-              onViewMenus={navigateToMenus}
-              onAddEvent={handleAddEvent}
-            />
-          )}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="restaurants" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="restaurants">Restaurants</TabsTrigger>
+          <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          <TabsTrigger value="menus">Menus</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="restaurants">
+          <Card>
+            <CardHeader>
+              <CardTitle>Restaurants</CardTitle>
+              <CardDescription>
+                Manage restaurant listings and information
+              </CardDescription>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+                <Button onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Restaurant
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading || isRefreshing ? (
+                <div className="flex justify-center py-8">
+                  <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <RestaurantTable 
+                  restaurants={restaurants || []} 
+                  onEdit={handleEditRestaurant}
+                  onDelete={handleDeleteRestaurant}
+                  onViewReservations={navigateToReservations}
+                  onViewMenus={navigateToMenus}
+                  onAddEvent={handleAddEvent}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="bookings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Restaurant Bookings</CardTitle>
+              <CardDescription>
+                Manage table reservations and their status
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RestaurantBookingsTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="menus">
+          <Card>
+            <CardHeader>
+              <CardTitle>Restaurant Menus</CardTitle>
+              <CardDescription>
+                Manage menu items for each restaurant
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RestaurantMenusTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <RestaurantFormDialog
         isOpen={isDialogOpen}
@@ -146,14 +199,13 @@ const RestaurantManager = () => {
             <DialogTitle>Add Event to Restaurant</DialogTitle>
           </DialogHeader>
           <EventForm
-            // Send restaurant_id so form is prefilled and locked
             initialData={{ restaurant_id: addEventRestaurantId }}
             onSubmit={handleEventSubmit}
             onCancel={() => setIsAddEventOpen(false)}
           />
         </DialogContent>
       </Dialog>
-    </div>
+    </Layout>
   );
 };
 
