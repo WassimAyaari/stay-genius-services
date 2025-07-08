@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface GuestInfoFieldsProps {
   form: UseFormReturn<any>;
@@ -13,15 +14,16 @@ interface GuestInfoFieldsProps {
 const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
   const roomNumber = form.watch('roomNumber');
   const guestName = form.watch('guestName');
+  const { t } = useTranslation();
   
   return (
     <>
       {!roomNumber && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Numéro de chambre requis</AlertTitle>
+          <AlertTitle>{t('forms.validation.roomNumberAlert')}</AlertTitle>
           <AlertDescription>
-            Veuillez indiquer votre numéro de chambre pour pouvoir effectuer une réservation.
+            {t('forms.validation.roomNumberAlertDesc')}
           </AlertDescription>
         </Alert>
       )}
@@ -30,13 +32,13 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="guestName"
-          rules={{ required: "Le nom est obligatoire" }}
+          rules={{ required: t('forms.validation.nameRequired') }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel>{t('forms.labels.name')}</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="Votre nom" 
+                  placeholder={t('forms.labels.namePlaceholder')} 
                   {...field}
                   className={!field.value ? "border-red-500 focus:ring-red-500" : ""}
                 />
@@ -51,9 +53,9 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
           name="guestEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('forms.labels.email')}</FormLabel>
               <FormControl>
-                <Input placeholder="votre@email.com" {...field} />
+                <Input placeholder={t('forms.labels.emailPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -67,9 +69,9 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
           name="guestPhone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Téléphone</FormLabel>
+              <FormLabel>{t('forms.labels.phone')}</FormLabel>
               <FormControl>
-                <Input placeholder="Votre numéro de téléphone" {...field} />
+                <Input placeholder={t('forms.labels.phonePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -79,13 +81,13 @@ const GuestInfoFields = ({ form }: GuestInfoFieldsProps) => {
         <FormField
           control={form.control}
           name="roomNumber"
-          rules={{ required: "Le numéro de chambre est obligatoire" }}
+          rules={{ required: t('forms.validation.roomNumberRequired') }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Numéro de chambre</FormLabel>
+              <FormLabel>{t('forms.labels.roomNumber')}</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="Votre numéro de chambre" 
+                  placeholder={t('forms.labels.roomNumberPlaceholder')} 
                   {...field} 
                   className={!field.value ? "border-red-500 focus:ring-red-500" : ""}
                 />

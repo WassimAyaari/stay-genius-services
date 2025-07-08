@@ -8,6 +8,7 @@ import BasicInfoFields from './form/BasicInfoFields';
 import DateFields from './form/DateFields';
 import AdditionalFields from './form/AdditionalFields';
 import PasswordField from './form/PasswordField';
+import { useTranslation } from 'react-i18next';
 
 const RegistrationForm: React.FC = () => {
   const { 
@@ -17,6 +18,7 @@ const RegistrationForm: React.FC = () => {
     registerForm, 
     handleRegister 
   } = useRegistrationForm();
+  const { t } = useTranslation();
 
   return (
     <Form {...registerForm}>
@@ -32,7 +34,7 @@ const RegistrationForm: React.FC = () => {
         />
         
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Inscription en cours...' : 'Accéder à l\'application'}
+          {loading ? t('auth.registering', 'Registering...') : t('auth.accessApp', 'Access Application')}
         </Button>
       </form>
     </Form>

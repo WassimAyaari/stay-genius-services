@@ -11,25 +11,27 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useEventReservations } from '@/hooks/useEventReservations';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { useTranslation } from 'react-i18next';
 
-const reservationSchema = z.object({
+// We'll create the schema dynamically to use translations
+const createReservationSchema = (t: any) => z.object({
   guestName: z.string().min(1, {
-    message: 'Le nom est requis'
+    message: t('forms.validation.nameRequired')
   }),
   guestEmail: z.string().email({
-    message: 'Email invalide'
+    message: t('forms.validation.emailInvalid')
   }).optional().or(z.literal('')),
   guestPhone: z.string().optional().or(z.literal('')),
   roomNumber: z.string().min(1, {
-    message: 'Le numéro de chambre est requis'
+    message: t('forms.validation.roomNumberRequired')
   }),
   guests: z.number().min(1, {
-    message: 'Le nombre de participants est requis'
+    message: t('forms.validation.participantsRequired')
   }),
   specialRequests: z.string().optional().or(z.literal(''))
 });
 
-type ReservationFormValues = z.infer<typeof reservationSchema>;
+type ReservationFormValues = z.infer<ReturnType<typeof createReservationSchema>>;
 
 export interface EventReservationFormProps {
   eventId: string;
@@ -44,7 +46,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
   eventId,
   eventDate,
   onSuccess,
-  buttonText = "Réserver",
+  buttonText,
   existingReservation,
   maxGuests = 10
 }) => {
@@ -58,10 +60,11 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
   const {
     userData
   } = useAuth();
+  const { t } = useTranslation();
   const isEditing = !!existingReservation;
 
   const form = useForm<ReservationFormValues>({
-    resolver: zodResolver(reservationSchema),
+    resolver: zodResolver(createReservationSchema(t)),
     defaultValues: existingReservation ? {
       guestName: existingReservation.guestName || '',
       guestEmail: existingReservation.guestEmail || '',
@@ -130,8 +133,8 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       };
       await createReservation(reservationData);
       toast({
-        title: "Demande de réservation envoyée",
-        description: "Votre demande de réservation a été enregistrée avec succès."
+        title: t('forms.messages.reservationSentTitle'),
+        description: t('forms.messages.reservationSentDesc')
       });
       if (onSuccess) {
         onSuccess();
@@ -141,8 +144,8 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
       console.error('Error submitting reservation:', error);
       toast({
         variant: 'destructive',
-        title: "Erreur",
-        description: error.message || "Une erreur s'est produite lors de l'envoi de la demande de réservation."
+        title: t('common.error'),
+        description: error.message || t('forms.messages.reservationError')
       });
     }
   };
@@ -157,7 +160,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
         
         <div className="form-field">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre de participants
+            {t('forms.labels.participants')}
           </label>
           <select 
             className="w-full p-2 border border-gray-300 rounded-md bg-zinc-100"
@@ -165,7 +168,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
           >
             {guestOptions.map(num => (
               <option key={num} value={num}>
-                {num} {num === 1 ? 'personne' : 'personnes'}
+                {num} {num === 1 ? t('forms.labels.person') : t('forms.labels.people')}
               </option>
             ))}
           </select>
@@ -179,7 +182,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
         <SpecialRequests form={form} />
         
         <Button type="submit" className="w-full" disabled={isCreating}>
-          {isCreating ? "Traitement en cours..." : buttonText}
+          {isCreating ? t('forms.buttons.processing') : (buttonText || t('forms.buttons.reserve'))}
         </Button>
       </form>
     </Form>;

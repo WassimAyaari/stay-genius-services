@@ -559,5 +559,44 @@
     "description": {
       "default": "Découvrez une cuisine d'exception avec des plats soigneusement préparés et un service impeccable."
     }
+  },
+  "forms": {
+    "validation": {
+      "dateRequired": "Veuillez sélectionner une date",
+      "roomNumberRequired": "Le numéro de chambre est requis",
+      "nameRequired": "Le nom est requis",
+      "emailInvalid": "Email invalide",
+      "participantsRequired": "Le nombre de participants est requis",
+      "roomNumberAlert": "Numéro de chambre requis",
+      "roomNumberAlertDesc": "Veuillez indiquer votre numéro de chambre pour pouvoir effectuer une réservation.",
+      "pleaseProvideRoomNumber": "Veuillez indiquer votre numéro de chambre",
+      "pleaseProvideName": "Veuillez indiquer votre nom"
+    },
+    "labels": {
+      "name": "Nom",
+      "namePlaceholder": "Votre nom",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "phone": "Téléphone",
+      "phonePlaceholder": "Votre numéro de téléphone",
+      "roomNumber": "Numéro de chambre",
+      "roomNumberPlaceholder": "Votre numéro de chambre",
+      "participants": "Nombre de participants",
+      "person": "personne",
+      "people": "personnes"
+    },
+    "buttons": {
+      "reserveTable": "Réserver une table",
+      "reserving": "Réservation en cours...",
+      "reserve": "Réserver",
+      "processing": "Traitement en cours..."
+    },
+    "messages": {
+      "reservationSentSuccess": "Demande de réservation envoyée avec succès",
+      "reservationSentTitle": "Demande de réservation envoyée",
+      "reservationSentDesc": "Votre demande de réservation a été enregistrée avec succès.",
+      "reservationError": "Erreur lors de l'envoi de la demande de réservation",
+      "reservationCreationError": "Erreur lors de la création de la réservation"
+    }
   }
 }

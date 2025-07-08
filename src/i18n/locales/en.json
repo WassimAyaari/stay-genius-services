@@ -443,6 +443,71 @@
     "share": "Share",
     "print": "Print"
   },
+  "forms": {
+    "validation": {
+      "dateRequired": "Please select a date",
+      "roomNumberRequired": "Room number is required",
+      "nameRequired": "Name is required",
+      "emailInvalid": "Invalid email",
+      "participantsRequired": "Number of participants is required",
+      "roomNumberAlert": "Room number required",
+      "roomNumberAlertDesc": "Please provide your room number to make a reservation.",
+      "pleaseProvideRoomNumber": "Please provide your room number",
+      "pleaseProvideName": "Please provide your name"
+    },
+    "labels": {
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "phone": "Phone",
+      "phonePlaceholder": "Your phone number",
+      "roomNumber": "Room Number",
+      "roomNumberPlaceholder": "Your room number",
+      "participants": "Number of participants",
+      "person": "person",
+      "people": "people"
+    },
+    "buttons": {
+      "reserveTable": "Reserve a Table",
+      "reserving": "Reserving...",
+      "reserve": "Reserve",
+      "processing": "Processing..."
+    },
+    "messages": {
+      "reservationSentSuccess": "Reservation request sent successfully",
+      "reservationSentTitle": "Reservation request sent",
+      "reservationSentDesc": "Your reservation request has been registered successfully.",
+      "reservationError": "Error sending reservation request",
+      "reservationCreationError": "Error creating reservation"
+    }
+  },
+  "auth": {
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to your account",
+    "authRequired": "Authentication Required",
+    "authRequiredDesc": "Please log in to access this page",
+    "register": "Register",
+    "registerTitle": "Create Account",
+    "registerSubtitle": "Join our hotel experience",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone Number",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember me",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "logoutSuccess": "Logout successful",
+    "logoutSuccessDesc": "You have been logged out successfully",
+    "logoutError": "Logout error",
+    "logoutErrorDesc": "An unexpected error occurred, attempting forced cleanup...",
+    "loginRedirectMessage": "Redirecting to login page from:",
+    "registering": "Registering...",
+    "accessApp": "Access Application"
+  },
   "activities": {
     "title": "Things To Do",
     "subtitle": "Discover activities and experiences",

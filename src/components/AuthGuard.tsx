@@ -4,6 +4,7 @@ import { useAuthGuard } from '@/features/auth/hooks/useAuthGuard';
 import LoadingSpinner from './auth/LoadingSpinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ const AuthGuard = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Public routes that should always be accessible
   const publicRoutes = [
@@ -53,11 +55,11 @@ const AuthGuard = ({
 
     // If not authorized and not on an auth page
     if (!isAuthPage() && !authorized && !loading) {
-      console.log('Redirection vers la page de connexion depuis:', location.pathname);
+      console.log(t('auth.loginRedirectMessage'), location.pathname);
       
       toast({
-        title: "Authentification requise",
-        description: "Veuillez vous connecter pour accéder à cette page",
+        title: t('auth.authRequired'),
+        description: t('auth.authRequiredDesc'),
         variant: "destructive"
       });
       

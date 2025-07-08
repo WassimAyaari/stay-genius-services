@@ -67,8 +67,8 @@ const UserMenu = () => {
 
       // 4. Notification à l'utilisateur
       toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès"
+        title: t('auth.logoutSuccess'),
+        description: t('auth.logoutSuccessDesc')
       });
 
       // 5. Forcer une redirection complète (pas seulement via React Router)
@@ -83,8 +83,8 @@ const UserMenu = () => {
       // Notification d'erreur
       toast({
         variant: "destructive",
-        title: "Erreur lors de la déconnexion",
-        description: "Une erreur inattendue est survenue, tentative de nettoyage forcé..."
+        title: t('auth.logoutError'),
+        description: t('auth.logoutErrorDesc')
       });
 
       // Tentative de nettoyage d'urgence et redirection forcée

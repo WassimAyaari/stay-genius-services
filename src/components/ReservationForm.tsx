@@ -13,11 +13,13 @@ import MenuSelection from '@/components/reservation/MenuSelection';
 import SpecialRequests from '@/components/reservation/SpecialRequests';
 import { ReservationFormProps, ReservationFormValues } from '@/components/reservation/types';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
-const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une table", existingReservation }: ReservationFormProps) => {
+const ReservationForm = ({ restaurantId, onSuccess, buttonText, existingReservation }: ReservationFormProps) => {
   const { createReservation, isCreating } = useTableReservations(restaurantId);
   const { menuItems, isLoading: isLoadingMenuItems } = useRestaurantMenus(restaurantId);
   const { userData } = useAuth();
+  const { t } = useTranslation();
   
   // Grouper les menus par catégorie pour l'affichage
   const menuCategories = React.useMemo(() => {
@@ -92,20 +94,20 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
     console.log('Form submission data:', data);
     
     if (!data.date) {
-      form.setError('date', { message: 'Veuillez sélectionner une date' });
+      form.setError('date', { message: t('forms.validation.dateRequired') });
       return;
     }
     
     // Validate the room number is present
     if (!data.roomNumber) {
-      form.setError('roomNumber', { message: 'Le numéro de chambre est requis' });
-      toast.error('Veuillez indiquer votre numéro de chambre');
+      form.setError('roomNumber', { message: t('forms.validation.roomNumberRequired') });
+      toast.error(t('forms.validation.pleaseProvideRoomNumber'));
       return;
     }
     
     if (!data.guestName) {
-      form.setError('guestName', { message: 'Le nom est requis' });
-      toast.error('Veuillez indiquer votre nom');
+      form.setError('guestName', { message: t('forms.validation.nameRequired') });
+      toast.error(t('forms.validation.pleaseProvideName'));
       return;
     }
     
@@ -128,13 +130,13 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
     createReservation(reservation, {
       onSuccess: () => {
         form.reset();
-        toast.success('Demande de réservation envoyée avec succès');
+        toast.success(t('forms.messages.reservationSentSuccess'));
         if (onSuccess) onSuccess();
       },
       onError: (error: any) => {
         console.error('Error creating reservation:', error);
-        const errorMessage = error.message || 'Erreur lors de la création de la réservation';
-        toast.error(`Erreur lors de l'envoi de la demande de réservation: ${errorMessage}`);
+        const errorMessage = error.message || t('forms.messages.reservationCreationError');
+        toast.error(`${t('forms.messages.reservationError')}: ${errorMessage}`);
       }
     });
   });
@@ -148,7 +150,7 @@ const ReservationForm = ({ restaurantId, onSuccess, buttonText = "Réserver une 
         <SpecialRequests form={form} />
         
         <Button type="submit" className="w-full" disabled={isCreating}>
-          {isCreating ? 'Réservation en cours...' : buttonText}
+          {isCreating ? t('forms.buttons.reserving') : (buttonText || t('forms.buttons.reserveTable'))}
         </Button>
       </form>
     </Form>
