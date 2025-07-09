@@ -49,7 +49,7 @@ serve(async (req) => {
         max_tokens: 300,
         functions: [{
           name: 'create_booking',
-          description: 'Create a booking when the guest provides complete details (type, date, time)',
+          description: 'Create a booking ONLY when you have ALL required information from the guest. Do not call this function unless you have complete details.',
           parameters: {
             type: 'object',
             properties: {
@@ -58,24 +58,28 @@ serve(async (req) => {
                 enum: ['spa', 'restaurant', 'event'],
                 description: 'Type of booking to create'
               },
+              service_name: {
+                type: 'string',
+                description: 'Name of specific service, restaurant, or event'
+              },
               date: {
                 type: 'string',
-                description: 'Booking date in YYYY-MM-DD format'
+                description: 'Booking date in YYYY-MM-DD format (required)'
               },
               time: {
                 type: 'string', 
-                description: 'Booking time in HH:MM format'
+                description: 'Booking time in HH:MM format (required for spa and restaurant)'
               },
               guests: {
                 type: 'number',
-                description: 'Number of guests (for restaurant/event bookings)'
+                description: 'Number of guests (required for restaurant/event bookings)'
               },
               special_requests: {
                 type: 'string',
                 description: 'Any special requests from the guest'
               }
             },
-            required: ['booking_type']
+            required: ['booking_type', 'date']
           }
         }],
         function_call: 'auto'
@@ -169,18 +173,18 @@ async function getHotelContext(supabase: any) {
   }
 }
 
-// Create enhanced system prompt
+// Create enhanced system prompt with comprehensive booking logic
 function createEnhancedSystemPrompt(userInfo: any, hotelContext: any, context: string) {
   const restaurantList = hotelContext.restaurants.map((r: any) => 
     `• ${r.name} (${r.cuisine}) - ${r.open_hours}`
   ).join('\n');
 
   const spaList = hotelContext.spaServices.map((s: any) => 
-    `• ${s.name} (${s.duration}) - ${s.description}`
+    `• ${s.name} (${s.duration}) - $${s.price} - ${s.description}`
   ).join('\n');
 
   const eventsList = hotelContext.events.map((e: any) => 
-    `• ${e.title} - ${e.date} at ${e.time}`
+    `• ${e.title} - ${e.date} at ${e.time || 'TBD'} (${e.location || 'Hotel venue'})`
   ).join('\n');
 
   return `🏨 You are the AI concierge for Hotel Genius! You're warm, enthusiastic, and genuinely excited to help guests have an amazing stay.
@@ -188,18 +192,37 @@ function createEnhancedSystemPrompt(userInfo: any, hotelContext: any, context: s
 👤 GUEST: ${userInfo?.name || 'Guest'} in Room ${userInfo?.roomNumber || 'Unknown'}
 💬 CONTEXT: ${context || 'New conversation'}
 
-🎯 BOOKING ASSISTANCE RULES:
-1. Be ENTHUSIASTIC and WARM - use emojis and exclamation points!
-2. For booking requests, ask these questions in order:
-   - "What type of booking?" (if unclear)
-   - "What date would you prefer? 📅"  
-   - "What time works best for you? ⏰"
-   - "How many guests? 👥" (for restaurants/events)
-   - "Any special requests? ✨"
+🎯 CRITICAL BOOKING RULES - FOLLOW THESE EXACTLY:
 
-3. ONLY call create_booking function when you have complete details (type, date, time)
-4. Be conversational - "Perfect! Let me book that for you!" before calling function
-5. Always offer additional help after completing requests
+For SPA BOOKINGS, you MUST collect in this EXACT order:
+1. First ask: "Which spa service would you like? Here are our available treatments:" (then list services)
+2. Then ask: "What date works for you? Please use YYYY-MM-DD format (e.g., 2024-01-15)"
+3. Then ask: "What time would you prefer? Please use HH:MM format (e.g., 14:30)"
+4. Ask: "Any special requests for your treatment?"
+5. ONLY THEN call create_booking with type="spa", date, time, service_name
+
+For RESTAURANT BOOKINGS, you MUST collect in this EXACT order:
+1. First ask: "Which restaurant would you like to book? Here are our options:" (then list restaurants)
+2. Then ask: "What date works for you? Please use YYYY-MM-DD format (e.g., 2024-01-15)"
+3. Then ask: "What time would you prefer? Please use HH:MM format (e.g., 19:30)"
+4. Then ask: "How many guests will be dining?"
+5. Ask: "Any special dietary requirements or requests?"
+6. ONLY THEN call create_booking with type="restaurant", date, time, guests, service_name
+
+For EVENT BOOKINGS, you MUST collect in this EXACT order:
+1. First ask: "Which event interests you? Here are our upcoming events:" (then list events)
+2. Then ask: "How many guests will be attending?"
+3. Ask: "Any special requests?"
+4. ONLY THEN call create_booking with type="event", date (from event), guests, service_name
+
+🚨 VALIDATION RULES:
+- Date MUST be in YYYY-MM-DD format and in the future
+- Time MUST be in HH:MM format (24-hour)
+- Guest count MUST be a reasonable number (1-20)
+- NEVER proceed with booking if ANY required field is missing
+- If user provides incomplete info, ask for the missing details specifically
+- ALWAYS confirm all details before creating the booking
+- NEVER make assumptions about missing data
 
 🍽️ RESTAURANTS:
 ${restaurantList || 'Multiple dining options available'}
@@ -210,97 +233,194 @@ ${spaList || 'Full wellness center with various treatments'}
 🎪 UPCOMING EVENTS:
 ${eventsList || 'Various activities and events'}
 
-💡 TONE: Be like an excited friend who works at the hotel! Use phrases like:
-- "I'd absolutely love to help you with that!"
-- "What a wonderful choice!"
-- "Perfect! Let me get that sorted for you!"
-- "How exciting!"
-- "I'm so happy to assist!"
+💡 CONVERSATION FLOW EXAMPLES:
+Guest: "I want to book spa"
+You: "Wonderful! I'd love to help you book a spa treatment! 🌟 Which service would you like? Here are our available treatments: [list services]"
 
-🚫 NEVER mention technical details or function calls to the guest.
-✅ ALWAYS be positive, helpful, and genuinely enthusiastic about helping!`;
+Guest: "Deep tissue massage"
+You: "Excellent choice! Deep tissue massage is one of our most popular treatments! 💆‍♀️ What date would you prefer? Please use YYYY-MM-DD format (e.g., 2024-01-15)"
+
+Guest: "2024-01-15"
+You: "Perfect! What time works best for you? Please use HH:MM format (e.g., 14:30)"
+
+Guest: "2:30 PM"
+You: "Great! So that's 14:30. Any special requests for your treatment?"
+
+Guest: "No thanks"
+You: "Wonderful! Let me book that deep tissue massage for you on 2024-01-15 at 14:30!" [THEN call function]
+
+🚫 NEVER mention technical details, function calls, or database errors to the guest.
+✅ ALWAYS be positive, helpful, and genuinely enthusiastic about helping!
+🎯 Remember: Ask questions ONE AT A TIME, wait for answers, then proceed to the next question.`;
 }
 
-// Create actual bookings
+// Create actual bookings with comprehensive validation
 async function createBooking(supabase: any, details: any, userInfo: any) {
   try {
+    console.log('🔍 Creating booking with details:', JSON.stringify(details, null, 2));
+    console.log('👤 User info:', JSON.stringify(userInfo, null, 2));
+
+    // Validate required user information
+    if (!userInfo?.name || !userInfo?.userId) {
+      console.error('❌ Missing user information');
+      return { success: false, message: 'User information is incomplete' };
+    }
+
+    // Validate required booking details
+    if (!details?.booking_type || !details?.date) {
+      console.error('❌ Missing required booking details:', details);
+      return { success: false, message: 'Booking details are incomplete' };
+    }
+
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(details.date)) {
+      console.error('❌ Invalid date format:', details.date);
+      return { success: false, message: 'Invalid date format. Please use YYYY-MM-DD' };
+    }
+
+    // Validate date is in the future
+    const bookingDate = new Date(details.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (bookingDate < today) {
+      console.error('❌ Date is in the past:', details.date);
+      return { success: false, message: 'Booking date must be in the future' };
+    }
+
+    // Validate time format for spa and restaurant bookings (HH:MM)
+    if ((details.booking_type === 'spa' || details.booking_type === 'restaurant')) {
+      if (!details.time) {
+        console.error('❌ Missing time for', details.booking_type, 'booking');
+        return { success: false, message: `Time is required for ${details.booking_type} bookings` };
+      }
+      
+      const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(details.time)) {
+        console.error('❌ Invalid time format:', details.time);
+        return { success: false, message: 'Invalid time format. Please use HH:MM (24-hour format)' };
+      }
+    }
+
+    // Validate guest count for restaurant and event bookings
+    if ((details.booking_type === 'restaurant' || details.booking_type === 'event')) {
+      if (!details.guests || details.guests < 1 || details.guests > 20) {
+        console.error('❌ Invalid guest count:', details.guests);
+        return { success: false, message: 'Guest count must be between 1 and 20' };
+      }
+    }
+
     const guestEmail = `${userInfo.name.toLowerCase().replace(/\s+/g, '.')}@hotel.com`;
     
     switch (details.booking_type) {
       case 'spa':
+        console.log('📝 Creating spa booking...');
+        const spaBookingData = {
+          guest_name: userInfo.name,
+          guest_email: guestEmail,
+          room_number: userInfo.roomNumber || 'N/A',
+          date: details.date,
+          time: details.time,
+          status: 'confirmed',
+          special_requests: details.special_requests || null,
+          user_id: userInfo.userId
+        };
+        
+        console.log('📊 Spa booking data:', spaBookingData);
         const { error: spaError } = await supabase
           .from('spa_bookings')
-          .insert({
-            guest_name: userInfo.name,
-            guest_email: guestEmail,
-            room_number: userInfo.roomNumber,
-            date: details.date,
-            time: details.time,
-            status: 'confirmed',
-            special_requests: details.special_requests,
-            user_id: userInfo.userId
-          });
+          .insert(spaBookingData);
 
-        if (spaError) throw spaError;
+        if (spaError) {
+          console.error('❌ Spa booking error:', spaError);
+          throw spaError;
+        }
         console.log('✅ Spa booking created successfully');
         return { success: true };
 
       case 'restaurant':
+        console.log('📝 Creating restaurant booking...');
+        const restBookingData = {
+          guest_name: userInfo.name,
+          guest_email: guestEmail,
+          room_number: userInfo.roomNumber || 'N/A',
+          date: details.date,
+          time: details.time,
+          guests: details.guests,
+          status: 'confirmed',
+          special_requests: details.special_requests || null,
+          user_id: userInfo.userId
+        };
+        
+        console.log('📊 Restaurant booking data:', restBookingData);
         const { error: restError } = await supabase
           .from('table_reservations')
-          .insert({
-            guest_name: userInfo.name,
-            guest_email: guestEmail,
-            room_number: userInfo.roomNumber,
-            date: details.date,
-            time: details.time,
-            guests: details.guests || 2,
-            status: 'confirmed',
-            special_requests: details.special_requests,
-            user_id: userInfo.userId
-          });
+          .insert(restBookingData);
 
-        if (restError) throw restError;
+        if (restError) {
+          console.error('❌ Restaurant booking error:', restError);
+          throw restError;
+        }
         console.log('✅ Restaurant booking created successfully');
         return { success: true };
 
       case 'event':
-        // Find event by title if provided
+        console.log('📝 Creating event booking...');
+        // Find event by service_name if provided
         let eventId = null;
-        if (details.event_title) {
+        if (details.service_name) {
           const { data: event } = await supabase
             .from('events')
-            .select('id')
-            .ilike('title', `%${details.event_title}%`)
+            .select('id, date')
+            .ilike('title', `%${details.service_name}%`)
             .limit(1)
             .maybeSingle();
-          eventId = event?.id;
+          
+          if (event) {
+            eventId = event.id;
+            // Use event's date if not provided
+            if (!details.date && event.date) {
+              details.date = event.date;
+            }
+          }
         }
 
+        const eventBookingData = {
+          event_id: eventId,
+          guest_name: userInfo.name,
+          guest_email: guestEmail,
+          room_number: userInfo.roomNumber || 'N/A',
+          date: details.date,
+          guests: details.guests,
+          status: 'confirmed',
+          special_requests: details.special_requests || null,
+          user_id: userInfo.userId
+        };
+        
+        console.log('📊 Event booking data:', eventBookingData);
         const { error: eventError } = await supabase
           .from('event_reservations')
-          .insert({
-            event_id: eventId,
-            guest_name: userInfo.name,
-            guest_email: guestEmail,
-            room_number: userInfo.roomNumber,
-            date: details.date,
-            guests: details.guests || 1,
-            status: 'confirmed',
-            special_requests: details.special_requests,
-            user_id: userInfo.userId
-          });
+          .insert(eventBookingData);
 
-        if (eventError) throw eventError;
+        if (eventError) {
+          console.error('❌ Event booking error:', eventError);
+          throw eventError;
+        }
         console.log('✅ Event booking created successfully');
         return { success: true };
 
       default:
+        console.error('❌ Unknown booking type:', details.booking_type);
         return { success: false, message: 'Unknown booking type' };
     }
   } catch (error) {
     console.error('❌ Booking creation error:', error);
-    return { success: false, message: 'Unable to complete booking at this time' };
+    console.error('❌ Error details:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    return { 
+      success: false, 
+      message: `Unable to complete booking: ${error.message || 'Unknown error'}` 
+    };
   }
 }
 
