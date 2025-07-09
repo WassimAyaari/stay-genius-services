@@ -21,7 +21,6 @@ function App() {
           <Routes>
             <Route path="/*" element={<PublicRoutes />} />
             <Route path="/profile/*" element={<AuthenticatedRoutes />} />
-            <Route path="/requests/*" element={<AuthenticatedRoutes />} />
             <Route path="/dining/reservations/*" element={<AuthenticatedRoutes />} />
             <Route path="/spa/booking/*" element={<AuthenticatedRoutes />} />
             <Route path="/events/*" element={<AuthenticatedRoutes />} />

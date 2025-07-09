@@ -27,17 +27,17 @@ export const RequestCancelDialog: React.FC<RequestCancelDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Annuler votre demande</DialogTitle>
+          <DialogTitle>Cancel Request</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir annuler cette demande de service ?
+            Are you sure you want to cancel this service request?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-2 sm:justify-end">
           <Button variant="outline" onClick={onClose}>
-            Non, garder ma demande
+            No, keep request
           </Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isLoading}>
-            {isLoading ? 'Annulation...' : 'Oui, annuler'}
+            {isLoading ? 'Cancelling...' : 'Yes, cancel'}
           </Button>
         </DialogFooter>
       </DialogContent>

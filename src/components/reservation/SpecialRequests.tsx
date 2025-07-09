@@ -15,16 +15,16 @@ const SpecialRequests = ({ form }: SpecialRequestsProps) => {
       name="specialRequests"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Demandes spéciales</FormLabel>
+          <FormLabel>Special Requests</FormLabel>
           <FormControl>
             <Textarea
-              placeholder="Demandes spéciales (allergies, occasion spéciale, etc.)"
+              placeholder="Special requests (allergies, special occasion, etc.)"
               className="resize-none"
               {...field}
             />
           </FormControl>
           <FormDescription>
-            Nous ferons de notre mieux pour répondre à vos demandes.
+            We'll do our best to accommodate your requests.
           </FormDescription>
           <FormMessage />
         </FormItem>

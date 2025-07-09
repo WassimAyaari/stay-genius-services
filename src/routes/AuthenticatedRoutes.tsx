@@ -15,7 +15,6 @@ const AuthenticatedRoutes = () => {
     <AuthGuard>
       <Routes>
         <Route path="/" element={<Profile />} />
-        <Route path="/requests" element={<MyRoom />} />
         <Route path="/requests/:id" element={<ServiceRequestDetails />} />
         <Route path="/dining/reservations/:id" element={<ReservationDetails />} />
         <Route path="/spa/booking/:id" element={<SpaBookingDetails />} />

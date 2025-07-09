@@ -167,9 +167,9 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
             <div className="flex justify-between items-center">
               <Button variant="outline" size="sm" onClick={handleCropCancel}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Annuler
+                Cancel
               </Button>
-              <h3 className="text-lg font-semibold">Ajuster l'image</h3>
+              <h3 className="text-lg font-semibold">Adjust Image</h3>
               <div className="w-[72px]"></div>
             </div>
             

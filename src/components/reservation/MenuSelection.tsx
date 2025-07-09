@@ -50,10 +50,10 @@ const MenuSelection = ({ form, menuCategories, isLoadingMenuItems }: MenuSelecti
               value={field.value || 'none'}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un menu" />
+                <SelectValue placeholder="Select a menu" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Sélectionner un menu</SelectItem>
+                <SelectItem value="none">Select a menu</SelectItem>
                 {menuCategories.map((category) => (
                   <React.Fragment key={category.category}>
                     {category.items.map((item) => (
