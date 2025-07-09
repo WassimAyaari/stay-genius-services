@@ -281,8 +281,8 @@ INTENT RECOGNITION:
    → Use create_booking_action function
    → Confirm with ✅ success message
 
-2. SERVICE REQUESTS ("need towels", "room service", "housekeeping")
-   → Create service_request action
+2. SERVICE REQUESTS ("need towels", "room service", "housekeeping", "too hot", "too cold", "temperature", "maintenance", "broken", "fix", "repair")
+   → Create service_request action immediately
    → Acknowledge request and provide timeline
 
 3. INFORMATION REQUESTS ("what time", "what's available", "tell me about")
@@ -521,7 +521,7 @@ async function createServiceRequest(supabase: any, details: any, userId: string,
       guest_name: userName,
       room_number: roomNumber,
       room_id: userId,
-      type: details.type || 'general',
+      type: details.type || determineServiceType(details.description || details.request || 'Guest service request'),
       description: details.description || details.request || 'Guest service request',
       status: 'pending',
       created_at: new Date().toISOString()
@@ -533,6 +533,27 @@ async function createServiceRequest(supabase: any, details: any, userId: string,
   
   console.log('Service request created:', data)
   return { requestId: data.id, type: details.type, description: details.description }
+}
+
+// Determine service request type based on description
+function determineServiceType(description: string): string {
+  const desc = description.toLowerCase()
+  
+  if (desc.includes('temperature') || desc.includes('hot') || desc.includes('cold') || desc.includes('heat') || desc.includes('air condition') || desc.includes('thermostat')) {
+    return 'maintenance'
+  } else if (desc.includes('clean') || desc.includes('housekeeping') || desc.includes('vacuum') || desc.includes('tidy')) {
+    return 'housekeeping'
+  } else if (desc.includes('food') || desc.includes('room service') || desc.includes('meal') || desc.includes('order')) {
+    return 'room_service'
+  } else if (desc.includes('pillow') || desc.includes('towel') || desc.includes('amenities') || desc.includes('soap') || desc.includes('shampoo')) {
+    return 'amenities'
+  } else if (desc.includes('broken') || desc.includes('fix') || desc.includes('repair') || desc.includes('maintenance')) {
+    return 'maintenance'
+  } else if (desc.includes('security') || desc.includes('safety') || desc.includes('noise') || desc.includes('disturbance')) {
+    return 'security'
+  } else {
+    return 'general'
+  }
 }
 
 // Enhance response with action confirmations
