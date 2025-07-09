@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { useServiceRequests } from '@/hooks/useServiceRequests';
+import { useServiceRequestDetail } from '@/hooks/useServiceRequestDetail';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,37 +16,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const ServiceRequestDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { 
-    data: serviceRequests = [], 
-    cancelRequest, 
-    isLoading: isLoadingRequests,
-    isError
-  } = useServiceRequests();
   
-  const [request, setRequest] = useState<ServiceRequest | null>(null);
+  // Use the dedicated hook for fetching single service request
+  const { 
+    data: request, 
+    isLoading: isLoadingRequest, 
+    error: requestError,
+    refetch: refetchRequest
+  } = useServiceRequestDetail(id);
+  
+  // Use the general hook only for the cancel functionality
+  const { cancelRequest } = useServiceRequests();
+  
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  
-  useEffect(() => {
-    if (!id) {
-      toast.error("Identifiant de demande manquant");
-      navigate('/notifications');
-      return;
-    }
-    
-    if (serviceRequests && serviceRequests.length > 0) {
-      const foundRequest = serviceRequests.find(r => r.id === id);
-      if (foundRequest) {
-        setRequest(foundRequest);
-      } else {
-        toast.error("Demande non trouvée");
-        navigate('/notifications');
-      }
-    } else if (!isLoadingRequests && !isError) {
-      toast.error("Aucune demande disponible");
-      navigate('/notifications');
-    }
-  }, [id, serviceRequests, navigate, isLoadingRequests, isError]);
+
+  // Debug logs
+  console.log('ServiceRequestDetails Debug:', {
+    id,
+    request,
+    isLoadingRequest,
+    requestError,
+    hasRequest: !!request
+  });
   
   const handleCancelRequest = async () => {
     if (!request) return;
@@ -56,12 +49,8 @@ const ServiceRequestDetails = () => {
       toast.success("Votre demande a été annulée");
       setIsCancelDialogOpen(false);
       
-      if (request) {
-        setRequest({
-          ...request,
-          status: 'cancelled'
-        });
-      }
+      // Refetch the request to get updated data
+      refetchRequest();
     } catch (error) {
       toast.error("Erreur lors de l'annulation de la demande");
       console.error("Erreur lors de l'annulation:", error);
@@ -115,7 +104,27 @@ const ServiceRequestDetails = () => {
     return "Service Request";
   };
   
-  if (isLoadingRequests) {
+  // Check for missing ID first
+  if (!id) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-center text-gray-500">Identifiant de demande manquant</p>
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <Button onClick={() => navigate('/notifications')}>
+                Retour aux notifications
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isLoadingRequest) {
     return (
       <Layout>
         <div className="container py-8 flex justify-center">
@@ -125,13 +134,20 @@ const ServiceRequestDetails = () => {
     );
   }
   
-  if (isError) {
+  if (requestError) {
     return (
       <Layout>
         <div className="container py-8">
           <Card>
             <CardContent className="pt-6">
-              <p className="text-center text-gray-500">Erreur lors du chargement des détails. Veuillez réessayer.</p>
+              <p className="text-center text-gray-500">
+                Erreur lors du chargement des détails: {requestError.message}
+              </p>
+              <div className="mt-4 text-center">
+                <Button variant="outline" onClick={() => refetchRequest()}>
+                  Réessayer
+                </Button>
+              </div>
             </CardContent>
             <CardFooter className="flex justify-center">
               <Button onClick={() => navigate('/notifications')}>

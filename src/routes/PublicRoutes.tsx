@@ -21,6 +21,7 @@ import Messages from '@/pages/messages/Messages';
 import Notifications from '@/pages/notifications/Notifications';
 import DebugInfo from '@/pages/debug/DebugInfo';
 import MyRoom from '@/pages/my-room/MyRoom';
+import ServiceRequestDetails from '@/pages/my-room/ServiceRequestDetails';
 import NotFound from '@/pages/NotFound';
 
 const PublicRoutes = () => {
@@ -44,6 +45,7 @@ const PublicRoutes = () => {
       <Route path="feedback" element={<Feedback />} />
       <Route path="messages" element={<Messages />} />
       <Route path="my-room" element={<MyRoom />} />
+      <Route path="my-room/requests/:id" element={<ServiceRequestDetails />} />
       <Route path="debug" element={<DebugInfo />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
