@@ -21,7 +21,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({ messages, messagesEn
   };
 
   return (
-    <ScrollArea className="flex-1 px-2 py-2">
+    <ScrollArea className="flex-1 px-4 py-2 md:px-2">
       <div className="space-y-3">
         {messages.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
