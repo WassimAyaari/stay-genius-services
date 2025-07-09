@@ -18,11 +18,7 @@ const Dining = () => {
   const { upcomingEvents } = useEvents();
 
   const handleBookTable = (restaurantId: string) => {
-    navigate(`/dining/${restaurantId}`, {
-      state: {
-        openBooking: true
-      }
-    });
+    navigate(`/dining/${restaurantId}?openBooking=true`);
   };
 
   // Helper: get next event for a restaurant

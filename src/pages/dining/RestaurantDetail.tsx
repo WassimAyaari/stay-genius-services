@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RestaurantMenu from './components/RestaurantMenu';
 import RestaurantInfo from './components/RestaurantInfo';
 import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
+import RestaurantBookingDialog from '@/features/dining/components/RestaurantBookingDialog';
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -26,7 +27,7 @@ const RestaurantDetail = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { upcomingEvents } = useEvents();
-  const [openBooking, setOpenBooking] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
   const { menuItems, isLoading: menuLoading } = useRestaurantMenus(restaurantId);
 
@@ -38,15 +39,21 @@ const RestaurantDetail = () => {
   });
 
   useEffect(() => {
-    if (location.state?.openBooking) {
-      setOpenBooking(true);
+    const urlParams = new URLSearchParams(location.search);
+    if (location.state?.openBooking || urlParams.get('openBooking') === 'true') {
+      setIsBookingOpen(true);
     }
-  }, [location.state]);
+  }, [location.state, location.search]);
 
   const handleBookTable = () => {
+    setIsBookingOpen(true);
+  };
+
+  const handleBookingSuccess = () => {
+    setIsBookingOpen(false);
     toast({
       title: "Success",
-      description: "Table reserved successfully!",
+      description: "Restaurant booking request sent successfully!",
     });
   };
 
@@ -158,6 +165,16 @@ const RestaurantDetail = () => {
               </Card>
             </section>
           </>
+        )}
+        
+        {/* Restaurant Booking Dialog */}
+        {isBookingOpen && restaurant && (
+          <RestaurantBookingDialog
+            isOpen={isBookingOpen}
+            onOpenChange={setIsBookingOpen}
+            restaurant={restaurant}
+            onSuccess={handleBookingSuccess}
+          />
         )}
       </div>
     </Layout>

@@ -14,21 +14,8 @@ const DiningSection = () => {
   const { featuredRestaurants, isFeaturedLoading } = useRestaurants();
 
   const handleBookTable = async (restaurantId: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Please sign in to book a table');
-
-      toast({
-        title: t('common.success'),
-        description: "Table reserved successfully!",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: t('common.error'),
-        description: error.message,
-      });
-    }
+    // Navigate to restaurant detail page with booking dialog open
+    window.location.href = `/dining/${restaurantId}?openBooking=true`;
   };
 
   if (isFeaturedLoading) {
