@@ -310,6 +310,27 @@ RESPONSE STYLE:
 Remember: You're a booking AGENT who takes REAL ACTIONS, not just an information provider!`
 }
 
+// Get guest information from database
+async function getGuestInfo(supabase: any, userId: string): Promise<any> {
+  try {
+    const { data: guest, error } = await supabase
+      .from('guests')
+      .select('email, phone, first_name, last_name')
+      .eq('user_id', userId)
+      .maybeSingle()
+    
+    if (error) {
+      console.error('Error fetching guest info:', error)
+      return null
+    }
+    
+    return guest
+  } catch (error) {
+    console.error('Error in getGuestInfo:', error)
+    return null
+  }
+}
+
 // Execute booking actions detected by AI
 async function executeBookingActions(
   supabase: any, 
@@ -320,23 +341,26 @@ async function executeBookingActions(
 ): Promise<any[]> {
   const executedActions = []
   
+  // Get guest information once for all bookings
+  const guestInfo = await getGuestInfo(supabase, userId)
+  
   for (const action of actions) {
     try {
       console.log('Executing action:', action)
       
       switch (action.action_type) {
         case 'restaurant_reservation':
-          const reservationResult = await createRestaurantReservation(supabase, action.details, userId, userName, roomNumber)
+          const reservationResult = await createRestaurantReservation(supabase, action.details, userId, userName, roomNumber, guestInfo)
           executedActions.push({ type: 'restaurant_reservation', success: true, result: reservationResult })
           break
           
         case 'spa_booking':
-          const spaResult = await createSpaBooking(supabase, action.details, userId, userName, roomNumber)
+          const spaResult = await createSpaBooking(supabase, action.details, userId, userName, roomNumber, guestInfo)
           executedActions.push({ type: 'spa_booking', success: true, result: spaResult })
           break
           
         case 'event_reservation':
-          const eventResult = await createEventReservation(supabase, action.details, userId, userName, roomNumber)
+          const eventResult = await createEventReservation(supabase, action.details, userId, userName, roomNumber, guestInfo)
           executedActions.push({ type: 'event_reservation', success: true, result: eventResult })
           break
           
@@ -358,7 +382,7 @@ async function executeBookingActions(
 }
 
 // Create restaurant reservation
-async function createRestaurantReservation(supabase: any, details: any, userId: string, userName: string, roomNumber: string) {
+async function createRestaurantReservation(supabase: any, details: any, userId: string, userName: string, roomNumber: string, guestInfo: any) {
   // Get default date/time if not provided
   const reservationDate = details.date || new Date().toISOString().split('T')[0]
   const reservationTime = details.time || '19:00:00'
@@ -386,6 +410,8 @@ async function createRestaurantReservation(supabase: any, details: any, userId: 
       time: reservationTime,
       guests: guests,
       guest_name: userName,
+      guest_email: guestInfo?.email || null,
+      guest_phone: guestInfo?.phone || null,
       room_number: roomNumber,
       special_requests: details.special_requests || null,
       status: 'confirmed',
@@ -401,7 +427,7 @@ async function createRestaurantReservation(supabase: any, details: any, userId: 
 }
 
 // Create spa booking
-async function createSpaBooking(supabase: any, details: any, userId: string, userName: string, roomNumber: string) {
+async function createSpaBooking(supabase: any, details: any, userId: string, userName: string, roomNumber: string, guestInfo: any) {
   const bookingDate = details.date || new Date().toISOString().split('T')[0]
   const bookingTime = details.time || '14:00'
   
@@ -418,6 +444,9 @@ async function createSpaBooking(supabase: any, details: any, userId: string, use
     serviceId = service?.id
   }
 
+  // Ensure guest_email is provided (required field)
+  const guestEmail = guestInfo?.email || details.guest_email || `guest${userId}@hotel.com`
+
   const { data, error } = await supabase
     .from('spa_bookings')
     .insert([{
@@ -426,6 +455,8 @@ async function createSpaBooking(supabase: any, details: any, userId: string, use
       date: bookingDate,
       time: bookingTime,
       guest_name: userName,
+      guest_email: guestEmail,
+      guest_phone: guestInfo?.phone || details.guest_phone || null,
       room_number: roomNumber,
       special_requests: details.special_requests || null,
       status: 'confirmed',
@@ -441,7 +472,7 @@ async function createSpaBooking(supabase: any, details: any, userId: string, use
 }
 
 // Create event reservation
-async function createEventReservation(supabase: any, details: any, userId: string, userName: string, roomNumber: string) {
+async function createEventReservation(supabase: any, details: any, userId: string, userName: string, roomNumber: string, guestInfo: any) {
   const guests = details.guests || 1
   
   // Find event ID if event name provided
@@ -465,6 +496,8 @@ async function createEventReservation(supabase: any, details: any, userId: strin
       date: details.date || new Date().toISOString().split('T')[0],
       guests: guests,
       guest_name: userName,
+      guest_email: guestInfo?.email || null,
+      guest_phone: guestInfo?.phone || null,
       room_number: roomNumber,
       special_requests: details.special_requests || null,
       status: 'confirmed',
