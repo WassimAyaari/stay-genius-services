@@ -188,7 +188,7 @@ async function generateIntelligentResponseWithActions(
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: messages,
-        max_tokens: 400,
+        max_tokens: 150,
         temperature: 0.7,
         presence_penalty: 0.6,
         frequency_penalty: 0.3,
@@ -263,51 +263,33 @@ function createAgentSystemPrompt(hotelContext: any): string {
     `${e.title} - ${e.date} at ${e.time} - ${e.location}`
   ).join('\n')
 
-  return `You are an intelligent AI concierge for ${hotelContext.hotel.name}. You understand context and guest intent perfectly.
+  return `You are a concise AI concierge for ${hotelContext.hotel.name}. 
 
-CORE INTELLIGENCE:
-- Distinguish between booking requests vs. service requests vs. information requests
-- Remember conversation context and recent bookings
-- Respond appropriately to each type of request
-- Be helpful but not pushy with bookings
-
-CONVERSATION MEMORY:
-- Remember what guests have already booked in this conversation
-- Don't repeat information unnecessarily
-- Build on previous interactions naturally
+RESPONSE RULES:
+- Keep ALL responses under 150 characters
+- Be brief and direct
+- Skip repeated greetings after first contact
+- Get straight to the point
 
 INTENT RECOGNITION:
 1. BOOKING REQUESTS ("book a table", "reserve spa", "sign up for event")
    → Use create_booking_action function
-   → Confirm with ✅ success message
+   → Confirm with ✅ message
 
 2. SERVICE REQUESTS ("need towels", "room service", "housekeeping", "too hot", "too cold", "temperature", "maintenance", "broken", "fix", "repair")
    → Create service_request action immediately
-   → Acknowledge request and provide timeline
+   → Brief acknowledgment only
 
-3. INFORMATION REQUESTS ("what time", "what's available", "tell me about")
-   → Provide helpful information
-   → Only offer booking if guest shows clear interest
+3. INFORMATION REQUESTS
+   → Provide essential info only
+   → No unnecessary details
 
 AVAILABLE SERVICES:
 RESTAURANTS: ${restaurantList || 'Multiple dining options'}
 SPA SERVICES: ${spaServicesList || 'Full wellness center'}
 UPCOMING EVENTS: ${eventsList || 'Various activities'}
 
-RESPONSE GUIDELINES:
-- Be conversational and natural
-- Don't overwhelm with options unless asked
-- Use structured cards only for actual booking choices
-- Keep confirmations clear: "✅ Booked [service] for [details]"
-- Ask ONE clarifying question at a time if needed
-
-SMART BOOKING:
-- Auto-fill guest information when available
-- Suggest reasonable defaults (today/tomorrow for dates, popular times)
-- Confirm before booking: "I'll book [X] for [time] - confirm?"
-- Process bookings immediately when confirmed
-
-Remember: You're an intelligent assistant who understands what guests really want!`
+BREVITY IS KEY: Short, helpful responses only!`
 }
 
 // Get guest information from database
@@ -578,7 +560,8 @@ async function enhanceResponseWithActions(
         case 'event_reservation':
           return `✅ Event registration confirmed${action.result.event ? ` for ${action.result.event}` : ''} for ${action.result.guests} guests`
         case 'service_request':
-          return `✅ Service request created - ${action.result.type} (Request #${action.result.requestId})`
+          const serviceName = getServiceTypeDisplayName(action.result.type)
+          return `✅ ${serviceName} submitted`
         default:
           return `✅ ${action.type} completed successfully`
       }
@@ -656,5 +639,18 @@ async function processServiceRequest(
 
 // Fallback response when AI fails
 function getFallbackResponse(): string {
-  return "Thank you for contacting our concierge service! I'm here to help with any requests you may have during your stay. Whether you need room service, housekeeping, restaurant reservations, spa bookings, or any other assistance, please let me know how I can make your stay more comfortable!"
+  return "I'm here to help! What can I assist you with?"
+}
+
+// Get service type display name
+function getServiceTypeDisplayName(type: string): string {
+  switch (type) {
+    case 'maintenance': return 'Maintenance Request';
+    case 'housekeeping': return 'Housekeeping Request';
+    case 'room_service': return 'Room Service Request';
+    case 'amenities': return 'Amenities Request';
+    case 'security': return 'Security Request';
+    case 'general': return 'Service Request';
+    default: return 'Service Request';
+  }
 }
