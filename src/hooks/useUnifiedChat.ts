@@ -10,9 +10,10 @@ interface UseUnifiedChatProps {
     roomNumber?: string;
   };
   isAdmin?: boolean;
+  conversationType?: 'concierge' | 'safety_ai';
 }
 
-export const useUnifiedChat = ({ userInfo, isAdmin = false }: UseUnifiedChatProps) => {
+export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = 'concierge' }: UseUnifiedChatProps) => {
   const [chatState, setChatState] = useState<ChatState>({
     conversation: null,
     messages: [],
@@ -31,7 +32,7 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false }: UseUnifiedChatProp
     if (userInfo?.name) {
       initializeConversation();
     }
-  }, [userInfo]);
+  }, [userInfo, conversationType]);
 
   // Real-time subscription for messages
   useEffect(() => {
@@ -98,13 +99,14 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false }: UseUnifiedChatProp
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return;
 
-      // Check for existing active conversation
+      // Check for existing active conversation of the same type
       const { data: existingConversation } = await supabase
         .from('conversations')
         .select('*')
         .eq('guest_id', user.user.id)
+        .eq('conversation_type', conversationType)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       let conversation = existingConversation;
 
@@ -118,7 +120,8 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false }: UseUnifiedChatProp
             guest_email: userInfo?.email || user.user.email,
             room_number: userInfo?.roomNumber,
             status: 'active',
-            current_handler: 'ai'
+            current_handler: 'ai',
+            conversation_type: conversationType
           })
           .select()
           .single();
@@ -126,14 +129,18 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false }: UseUnifiedChatProp
         if (error) throw error;
         conversation = newConversation;
 
-        // Send welcome message
+        // Send welcome message based on conversation type
+        const welcomeMessage = conversationType === 'safety_ai' 
+          ? `Hello ${userInfo?.name || 'there'}! I'm your AI Safety Assistant, available 24/7 for emergency and safety-related support. How can I help you stay safe today?`
+          : `Hello ${userInfo?.name || 'there'}! I'm your 24/7 virtual concierge. How can I assist you today? I can help with restaurant reservations, spa bookings, event information, and much more!`;
+
         await supabase
           .from('messages')
           .insert({
             conversation_id: conversation.id,
             sender_type: 'ai',
-            sender_name: 'AI Assistant',
-            content: `Hello ${userInfo?.name || 'there'}! I'm your 24/7 virtual concierge. How can I assist you today? I can help with restaurant reservations, spa bookings, event information, and much more!`,
+            sender_name: conversationType === 'safety_ai' ? 'AI Safety Assistant' : 'AI Concierge',
+            content: welcomeMessage,
             message_type: 'text'
           });
       }

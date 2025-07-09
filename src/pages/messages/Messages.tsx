@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UnifiedChatContainer } from '@/components/chat/UnifiedChatContainer';
 import { AdminChatDashboard } from '@/components/admin/chat/AdminChatDashboard';
+import { ChatSelectionScreen } from '@/components/chat/ChatSelectionScreen';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const Messages = () => {
   const [userInfo, setUserInfo] = useState<{
@@ -12,6 +15,7 @@ const Messages = () => {
   } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedChatType, setSelectedChatType] = useState<'concierge' | 'safety_ai' | null>(null);
 
   useEffect(() => {
     const checkUserAndRole = async () => {
@@ -75,7 +79,7 @@ const Messages = () => {
     return <AdminChatDashboard />;
   }
 
-  // Show unified chat for regular users
+  // Show chat selection or specific chat for regular users
   if (!userInfo) {
     return (
       <div className="fixed inset-0 bg-background flex items-center justify-center">
@@ -86,10 +90,35 @@ const Messages = () => {
     );
   }
 
+  // Show specific chat type if selected
+  if (selectedChatType) {
+    return (
+      <div className="fixed inset-0 bg-background">
+        {/* Back Button */}
+        <div className="absolute top-4 left-4 z-10">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setSelectedChatType(null)}
+            className="bg-background/80 backdrop-blur-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </div>
+        <UnifiedChatContainer 
+          userInfo={userInfo} 
+          conversationType={selectedChatType}
+        />
+      </div>
+    );
+  }
+
+  // Show chat selection screen
   return (
-    <div className="fixed inset-0 bg-background">
-      <UnifiedChatContainer userInfo={userInfo} />
-    </div>
+    <ChatSelectionScreen 
+      userInfo={userInfo}
+      onSelectChat={setSelectedChatType}
+    />
   );
 };
 

@@ -12,12 +12,14 @@ interface UnifiedChatContainerProps {
   };
   isAdmin?: boolean;
   className?: string;
+  conversationType?: 'concierge' | 'safety_ai';
 }
 
 export const UnifiedChatContainer: React.FC<UnifiedChatContainerProps> = ({
   userInfo,
   isAdmin = false,
-  className = ""
+  className = "",
+  conversationType = 'concierge'
 }) => {
   const {
     conversation,
@@ -32,7 +34,7 @@ export const UnifiedChatContainer: React.FC<UnifiedChatContainerProps> = ({
     takeOverConversation,
     messagesEndRef,
     inputRef
-  } = useUnifiedChat({ userInfo, isAdmin });
+  } = useUnifiedChat({ userInfo, isAdmin, conversationType });
 
   if (isLoading) {
     return (

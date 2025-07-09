@@ -181,6 +181,7 @@ export type Database = {
       conversations: {
         Row: {
           assigned_staff_id: string | null
+          conversation_type: string
           created_at: string
           current_handler: string
           guest_email: string | null
@@ -193,6 +194,7 @@ export type Database = {
         }
         Insert: {
           assigned_staff_id?: string | null
+          conversation_type?: string
           created_at?: string
           current_handler?: string
           guest_email?: string | null
@@ -205,6 +207,7 @@ export type Database = {
         }
         Update: {
           assigned_staff_id?: string | null
+          conversation_type?: string
           created_at?: string
           current_handler?: string
           guest_email?: string | null
