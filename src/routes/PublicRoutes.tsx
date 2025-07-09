@@ -41,7 +41,6 @@ const PublicRoutes = () => {
       <Route path="shops" element={<Shops />} />
       <Route path="feedback" element={<Feedback />} />
       <Route path="messages" element={<Messages />} />
-      <Route path="notifications" element={<Notifications />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

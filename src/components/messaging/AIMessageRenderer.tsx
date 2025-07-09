@@ -282,33 +282,6 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({ message, onQuickA
         }
       })}
       
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2 pt-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onQuickAction?.('show_restaurants')}
-        >
-          <Utensils className="h-3 w-3 mr-1" />
-          Restaurants
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onQuickAction?.('show_spa')}
-        >
-          <Sparkles className="h-3 w-3 mr-1" />
-          Spa
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onQuickAction?.('show_events')}
-        >
-          <Calendar className="h-3 w-3 mr-1" />
-          Events
-        </Button>
-      </div>
     </div>
   );
 };
