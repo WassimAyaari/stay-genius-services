@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Loader2, CheckCircle2, Timer, XCircle, Clock, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, CheckCircle2, Timer, XCircle, Clock, FileText, ArrowRight } from 'lucide-react';
 import { ServiceRequest } from '@/features/rooms/types';
 
 interface RequestHistoryProps {
@@ -25,7 +27,14 @@ const RequestHistory = ({ isLoading, requests }: RequestHistoryProps) => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-secondary mb-6">Recent Requests</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-secondary">Recent Requests</h2>
+        <Link to="/requests">
+          <Button variant="outline" size="sm">
+            View All <ArrowRight className="h-4 w-4 ml-1" />
+          </Button>
+        </Link>
+      </div>
       <Card className="rounded-2xl overflow-hidden">
         <div className="p-6 space-y-4">
           {isLoading ? (
