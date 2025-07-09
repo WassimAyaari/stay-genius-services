@@ -47,17 +47,17 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         
         // Show a toast notification for the service update
         const statusMap: Record<string, string> = {
-          'pending': 'est en attente',
-          'in_progress': 'est en cours de traitement',
-          'completed': 'a été complétée',
-          'cancelled': 'a été annulée'
+          'pending': 'is pending',
+          'in_progress': 'is in progress',
+          'completed': 'has been completed',
+          'cancelled': 'has been cancelled'
         };
         
         const status = payload.new.status;
         const message = statusMap[status] || 'a été mise à jour';
         
-        toast.info(`Mise à jour de demande`, {
-          description: `Votre demande de type ${payload.new.type} ${message}.`
+        toast.info(`Request Update`, {
+          description: `Your ${payload.new.type} request ${message}.`
         });
         
         // Refresh messages to show updated request status
@@ -80,9 +80,9 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         
         // Show a toast notification for the reservation update
         const statusMap: Record<string, string> = {
-          'pending': 'est en attente de confirmation',
-          'confirmed': 'a été confirmée',
-          'cancelled': 'a été annulée'
+          'pending': 'is pending confirmation',
+          'confirmed': 'has been confirmed',
+          'cancelled': 'has been cancelled'
         };
         
         const status = payload.new.status;
@@ -91,8 +91,8 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
         const time = payload.new.time;
         
-        toast.info(`Mise à jour de demande de réservation`, {
-          description: `Votre demande de réservation de table pour le ${date} à ${time} ${message}.`
+        toast.info(`Table Reservation Update`, {
+          description: `Your table reservation for ${date} at ${time} ${message}.`
         });
       })
       .subscribe();
@@ -112,9 +112,9 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         
         // Show a toast notification for the event reservation update
         const statusMap: Record<string, string> = {
-          'pending': 'est en attente de confirmation',
-          'confirmed': 'a été confirmée',
-          'cancelled': 'a été annulée'
+          'pending': 'is pending confirmation',
+          'confirmed': 'has been confirmed',
+          'cancelled': 'has been cancelled'
         };
         
         const status = payload.new.status;
@@ -122,8 +122,8 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
         
         const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
         
-        toast.info(`Mise à jour de réservation d'événement`, {
-          description: `Votre réservation d'événement pour le ${date} ${message}.`
+        toast.info(`Event Reservation Update`, {
+          description: `Your event reservation for ${date} ${message}.`
         });
       })
       .subscribe();
@@ -146,9 +146,9 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
           
           // Show a toast notification for the reservation update
           const statusMap: Record<string, string> = {
-            'pending': 'est en attente',
-            'confirmed': 'a été confirmée',
-            'cancelled': 'a été annulée'
+            'pending': 'is pending',
+            'confirmed': 'has been confirmed',
+            'cancelled': 'has been cancelled'
           };
           
           const status = payload.new.status;
@@ -157,8 +157,8 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
           const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
           const time = payload.new.time;
           
-          toast.info(`Mise à jour de réservation`, {
-            description: `Votre réservation de table pour le ${date} à ${time} ${message}.`
+          toast.info(`Table Reservation Update`, {
+            description: `Your table reservation for ${date} at ${time} ${message}.`
           });
         })
         .subscribe();

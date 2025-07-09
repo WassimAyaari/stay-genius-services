@@ -149,6 +149,7 @@ export const useChatMessages = (userInfo: UserInfo) => {
       status: 'sent'
     };
     setMessages([...messages, newMessage]);
+    const userMessage = inputMessage;
     setInputMessage('');
 
     let userId = localStorage.getItem('user_id');
@@ -171,7 +172,7 @@ export const useChatMessages = (userInfo: UserInfo) => {
           user_id: userId,
           user_name: userInfo.name,
           room_number: userInfo.roomNumber,
-          text: inputMessage,
+          text: userMessage,
           sender: 'user',
           status: 'sent',
           created_at: currentTime.toISOString()
@@ -186,19 +187,44 @@ export const useChatMessages = (userInfo: UserInfo) => {
         });
         return;
       }
+
+      // Call AI booking assistant for intelligent responses
+      try {
+        const { data: aiResponse } = await supabase.functions.invoke('ai-chat-booking', {
+          body: {
+            message: userMessage,
+            userInfo: {
+              userId,
+              name: userInfo.name,
+              roomNumber: userInfo.roomNumber
+            },
+            context: messages.map(m => `${m.sender}: ${m.text}`).join('\n')
+          }
+        });
+
+        if (aiResponse?.response) {
+          // AI response is already saved by the edge function
+          setTimeout(() => {
+            fetchMessages();
+          }, 1000);
+        }
+      } catch (aiError) {
+        console.error("AI response error:", aiError);
+        // Continue with basic keyword-based service request creation as fallback
+      }
       
-      if (inputMessage.toLowerCase().includes('request') || 
-          inputMessage.toLowerCase().includes('service') ||
-          inputMessage.toLowerCase().includes('clean') ||
-          inputMessage.toLowerCase().includes('laundry') ||
-          inputMessage.toLowerCase().includes('help') ||
-          inputMessage.toLowerCase().includes('need')) {
+      if (userMessage.toLowerCase().includes('request') || 
+          userMessage.toLowerCase().includes('service') ||
+          userMessage.toLowerCase().includes('clean') ||
+          userMessage.toLowerCase().includes('laundry') ||
+          userMessage.toLowerCase().includes('help') ||
+          userMessage.toLowerCase().includes('need')) {
         
         let requestType = 'general';
-        if (inputMessage.toLowerCase().includes('clean')) requestType = 'cleaning';
-        else if (inputMessage.toLowerCase().includes('laundry')) requestType = 'laundry';
-        else if (inputMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
-        else if (inputMessage.toLowerCase().includes('food') || inputMessage.toLowerCase().includes('meal')) requestType = 'food';
+        if (userMessage.toLowerCase().includes('clean')) requestType = 'cleaning';
+        else if (userMessage.toLowerCase().includes('laundry')) requestType = 'laundry';
+        else if (userMessage.toLowerCase().includes('maintenance')) requestType = 'maintenance';
+        else if (userMessage.toLowerCase().includes('food') || userMessage.toLowerCase().includes('meal')) requestType = 'food';
         
         // Get room_id or use userId as fallback
         const { data: roomData } = await supabase
@@ -216,7 +242,7 @@ export const useChatMessages = (userInfo: UserInfo) => {
           room_number: userInfo.roomNumber,
           room_id: roomId,
           type: requestType,
-          description: inputMessage,
+          description: userMessage,
           status: 'pending',
           created_at: currentTime.toISOString()
         });

@@ -284,6 +284,9 @@ const ServiceRequestDetails = () => {
             <Button variant="outline" onClick={() => navigate('/my-room')}>
               Back to My Room
             </Button>
+            <Button variant="outline" onClick={() => navigate('/requests')}>
+              View All Requests
+            </Button>
             
             {(isPending || isInProgress) && (
               <Button 

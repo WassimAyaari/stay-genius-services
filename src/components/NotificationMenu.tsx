@@ -61,21 +61,14 @@ const NotificationMenu = () => {
         <DropdownMenuLabel>Notifications ({notifications.length})</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <div className="max-h-80 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           <NotificationList 
-            notifications={notifications.slice(0, 5)} 
+            notifications={notifications.slice(0, 10)} 
             isAuthenticated={isAuthenticated} 
           />
         </div>
         
         <DropdownMenuSeparator />
-        <Link to="/notifications">
-          <DropdownMenuItem className="text-center cursor-pointer hover:bg-gray-100/70">
-            <span className="w-full text-center text-primary font-medium">
-              View all notifications
-            </span>
-          </DropdownMenuItem>
-        </Link>
         <Link to="/requests">
           <DropdownMenuItem className="text-center cursor-pointer hover:bg-gray-100/70">
             <span className="w-full text-center text-primary font-medium">

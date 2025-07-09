@@ -14,14 +14,14 @@ export const createSafeDate = (dateString: string | null | undefined): Date | nu
 // Format time safely to avoid errors with invalid dates
 export const formatTimeAgo = (date: Date | null | undefined): string => {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-    return 'récemment';
+    return 'recently';
   }
   
   try {
-    return formatDistanceToNow(date, { addSuffix: true, locale: fr });
+    return formatDistanceToNow(date, { addSuffix: true });
   } catch (error) {
     console.error('Error formatting date:', error, date);
-    return 'récemment';
+    return 'recently';
   }
 };
 
@@ -37,8 +37,8 @@ export const transformServiceRequests = (requests: any[]): NotificationItem[] =>
   return requests.map(request => ({
     id: request.id || `req-${Math.random().toString(36).substr(2, 9)}`,
     type: 'request',
-    title: 'Demande de service',
-    description: request.description || 'Service hôtelier',
+    title: 'Service Request',
+    description: request.description || 'Hotel service',
     icon: getServiceIcon(request.type),
     status: request.status || 'pending',
     time: createSafeDate(request.created_at) || new Date(),
@@ -58,8 +58,8 @@ export const transformTableReservations = (reservations: any[]): NotificationIte
   return reservations.map(reservation => ({
     id: reservation.id || `res-${Math.random().toString(36).substr(2, 9)}`,
     type: 'reservation',
-    title: 'Réservation de restaurant',
-    description: `${reservation.date} à ${reservation.time} - ${reservation.guests} personnes`,
+    title: 'Restaurant Reservation',
+    description: `${reservation.date} at ${reservation.time} - ${reservation.guests} guests`,
     icon: '🍽️',
     status: reservation.status || 'pending',
     time: createSafeDate(reservation.createdAt || reservation.created_at) || new Date(),
@@ -82,8 +82,8 @@ export const transformSpaBookings = (bookings: any[]): NotificationItem[] => {
   return bookings.map(booking => ({
     id: booking.id || `spa-${Math.random().toString(36).substr(2, 9)}`,
     type: 'spa_booking',
-    title: 'Réservation de spa',
-    description: `${booking.date} à ${booking.time}`,
+    title: 'Spa Reservation',
+    description: `${booking.date} at ${booking.time}`,
     icon: '💆',
     status: booking.status || 'pending',
     time: createSafeDate(booking.created_at) || new Date(),
@@ -105,8 +105,8 @@ export const transformEventReservations = (reservations: any[]): NotificationIte
   return reservations.map(reservation => ({
     id: reservation.id || `event-${Math.random().toString(36).substr(2, 9)}`,
     type: 'event_reservation',
-    title: 'Réservation d\'événement',
-    description: `${reservation.date} - ${reservation.guests} personne(s)`,
+    title: 'Event Reservation',
+    description: `${reservation.date} - ${reservation.guests} guest(s)`,
     icon: '📅',
     status: reservation.status || 'pending',
     time: createSafeDate(reservation.createdAt || reservation.created_at) || new Date(),

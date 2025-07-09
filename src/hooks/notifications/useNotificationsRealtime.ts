@@ -260,16 +260,16 @@ const setupEventReservationListenerByEmail = (
 const handleReservationStatusChange = (payload: any) => {
   if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
     const statusMap: Record<string, string> = {
-      'pending': 'est en attente',
-      'confirmed': 'a été confirmée',
-      'cancelled': 'a été annulée'
+      'pending': 'is pending',
+      'confirmed': 'has been confirmed',
+      'cancelled': 'has been cancelled'
     };
     
     const status = payload.new.status;
-    const message = statusMap[status] || 'a été mise à jour';
+    const message = statusMap[status] || 'has been updated';
     
-    toast.info(`Mise à jour de réservation`, {
-      description: `Votre réservation de table ${message}.`
+    toast.info(`Reservation Update`, {
+      description: `Your table reservation ${message}.`
     });
   }
 };
@@ -280,18 +280,18 @@ const handleReservationStatusChange = (payload: any) => {
 const handleServiceStatusChange = (payload: any) => {
   if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
     const statusMap: Record<string, string> = {
-      'pending': 'est en attente',
-      'on_hold': 'est mise en attente',
-      'in_progress': 'est en cours de traitement',
-      'completed': 'a été complétée',
-      'cancelled': 'a été annulée'
+      'pending': 'is pending',
+      'on_hold': 'is on hold',
+      'in_progress': 'is in progress',
+      'completed': 'has been completed',
+      'cancelled': 'has been cancelled'
     };
     
     const status = payload.new.status;
-    const message = statusMap[status] || 'a été mise à jour';
+    const message = statusMap[status] || 'has been updated';
     
-    toast.info(`Mise à jour de demande`, {
-      description: `Votre demande de service ${message}.`
+    toast.info(`Service Request Update`, {
+      description: `Your service request ${message}.`
     });
   }
 };
@@ -302,17 +302,17 @@ const handleServiceStatusChange = (payload: any) => {
 const handleSpaBookingStatusChange = (payload: any) => {
   if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
     const statusMap: Record<string, string> = {
-      'pending': 'est en attente',
-      'confirmed': 'a été confirmée',
-      'cancelled': 'a été annulée',
-      'completed': 'a été complétée'
+      'pending': 'is pending',
+      'confirmed': 'has been confirmed',
+      'cancelled': 'has been cancelled',
+      'completed': 'has been completed'
     };
     
     const status = payload.new.status;
-    const message = statusMap[status] || 'a été mise à jour';
+    const message = statusMap[status] || 'has been updated';
     
-    toast.info(`Mise à jour de réservation spa`, {
-      description: `Votre réservation de spa ${message}.`
+    toast.info(`Spa Reservation Update`, {
+      description: `Your spa reservation ${message}.`
     });
   }
 };
@@ -323,16 +323,16 @@ const handleSpaBookingStatusChange = (payload: any) => {
 const handleEventReservationStatusChange = (payload: any) => {
   if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
     const statusMap: Record<string, string> = {
-      'pending': 'est en attente',
-      'confirmed': 'a été confirmée',
-      'cancelled': 'a été annulée'
+      'pending': 'is pending',
+      'confirmed': 'has been confirmed',
+      'cancelled': 'has been cancelled'
     };
     
     const status = payload.new.status;
-    const message = statusMap[status] || 'a été mise à jour';
+    const message = statusMap[status] || 'has been updated';
     
-    toast.info(`Mise à jour de réservation d'événement`, {
-      description: `Votre réservation d'événement ${message}.`
+    toast.info(`Event Reservation Update`, {
+      description: `Your event reservation ${message}.`
     });
   }
 };
