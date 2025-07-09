@@ -521,8 +521,8 @@ async function createServiceRequest(supabase: any, details: any, userId: string,
       guest_name: userName,
       room_number: roomNumber,
       room_id: userId,
-      type: details.type || determineServiceType(details.description || details.request || 'Guest service request'),
-      description: details.description || details.request || 'Guest service request',
+      type: details?.type || determineServiceType(details?.description || details?.request || 'Guest service request'),
+      description: details?.description || details?.request || 'Guest service request',
       status: 'pending',
       created_at: new Date().toISOString()
     }])
@@ -532,7 +532,7 @@ async function createServiceRequest(supabase: any, details: any, userId: string,
   if (error) throw error
   
   console.log('Service request created:', data)
-  return { requestId: data.id, type: details.type, description: details.description }
+  return { requestId: data.id, type: details?.type, description: details?.description }
 }
 
 // Determine service request type based on description
