@@ -23,9 +23,15 @@ const CustomRequestForm = ({
   const handleCustomRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customRequest.trim() || !room) return;
+    
+    console.log('Submitting custom request:', { room, customRequest });
+    
     try {
       const userInfo = getUserInfo();
-      await requestService(room.id, 'custom', customRequest, undefined, undefined);
+      console.log('User info for request:', userInfo);
+      
+      const result = await requestService(room.id, 'custom', customRequest, undefined, undefined);
+      console.log('Request service result:', result);
       setCustomRequest('');
       toast({
         title: "Custom Request Sent",

@@ -23,6 +23,14 @@ const MyRoom = () => {
     refetch: refetchRequests 
   } = useServiceRequests();
 
+  console.log('MyRoom debug:', { 
+    roomNumber, 
+    room, 
+    serviceRequestsCount: serviceRequests.length,
+    isLoadingRequests,
+    serviceRequests: serviceRequests.slice(0, 2) // Show first 2 for debugging
+  });
+
   // Show loading indicator only if essential data is not available
   if (isLoading) {
     return (
