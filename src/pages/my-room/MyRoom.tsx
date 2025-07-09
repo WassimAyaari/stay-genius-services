@@ -36,22 +36,26 @@ const MyRoom = () => {
 
   return (
     <Layout>
-      <WelcomeBanner room={room} />
-      
-      <CustomRequestForm 
-        room={room} 
-        onRequestSuccess={refetchRequests} 
-      />
+      <div className="container mx-auto px-4 py-8">
+        <WelcomeBanner room={room} />
+        
+        <div className="space-y-8">
+          <CustomRequestForm 
+            room={room} 
+            onRequestSuccess={refetchRequests} 
+          />
 
-      <ServicesGrid 
-        room={room} 
-        onRequestSuccess={refetchRequests} 
-      />
+          <ServicesGrid 
+            room={room} 
+            onRequestSuccess={refetchRequests} 
+          />
 
-      <RequestHistory 
-        isLoading={isLoadingRequests}
-        requests={serviceRequests}
-      />
+          <RequestHistory 
+            isLoading={isLoadingRequests}
+            requests={serviceRequests}
+          />
+        </div>
+      </div>
     </Layout>
   );
 };
