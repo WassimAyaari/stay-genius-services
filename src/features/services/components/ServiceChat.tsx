@@ -18,6 +18,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
     inputMessage,
     setInputMessage,
     messages,
+    isAiTyping,
     messagesEndRef,
     handleSendMessage,
     handleMessageSubmit,
@@ -183,7 +184,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col h-screen">
       <ChatHeader userInfo={userInfo} onClose={handleCloseChat} />
-      <MessageList messages={messages} messagesEndRef={messagesEndRef} />
+      <MessageList messages={messages} messagesEndRef={messagesEndRef} isAiTyping={isAiTyping} />
       <MessageInput
         inputMessage={inputMessage}
         setInputMessage={setInputMessage}

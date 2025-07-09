@@ -20,6 +20,7 @@ interface UserInfo {
 export const useChatMessages = (userInfo: UserInfo) => {
   const [inputMessage, setInputMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isAiTyping, setIsAiTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -189,6 +190,7 @@ export const useChatMessages = (userInfo: UserInfo) => {
       }
 
       // Call AI booking assistant for intelligent responses
+      setIsAiTyping(true);
       try {
         const { data: aiResponse } = await supabase.functions.invoke('ai-chat-booking', {
           body: {
@@ -206,10 +208,14 @@ export const useChatMessages = (userInfo: UserInfo) => {
           // AI response is already saved by the edge function
           setTimeout(() => {
             fetchMessages();
+            setIsAiTyping(false);
           }, 1000);
+        } else {
+          setIsAiTyping(false);
         }
       } catch (aiError) {
         console.error("AI response error:", aiError);
+        setIsAiTyping(false);
         // Continue with basic keyword-based service request creation as fallback
       }
       
@@ -272,6 +278,7 @@ export const useChatMessages = (userInfo: UserInfo) => {
     inputMessage,
     setInputMessage,
     messages,
+    isAiTyping,
     messagesEndRef,
     handleSendMessage,
     handleMessageSubmit,

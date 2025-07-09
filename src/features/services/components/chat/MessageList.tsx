@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ChatMessage from './ChatMessage';
+import TypingIndicator from './TypingIndicator';
 
 interface Message {
   id: string;
@@ -17,9 +18,10 @@ interface Message {
 interface MessageListProps {
   messages: Message[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  isAiTyping?: boolean;
 }
 
-const MessageList = ({ messages, messagesEndRef }: MessageListProps) => {
+const MessageList = ({ messages, messagesEndRef, isAiTyping = false }: MessageListProps) => {
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -38,6 +40,7 @@ const MessageList = ({ messages, messagesEndRef }: MessageListProps) => {
             <ChatMessage key={message.id} message={message} />
           ))
         )}
+        {isAiTyping && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
     </ScrollArea>
