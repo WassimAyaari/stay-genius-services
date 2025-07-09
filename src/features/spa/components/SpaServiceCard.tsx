@@ -18,7 +18,7 @@ const SpaServiceCard = ({
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <div className="h-40 bg-gray-200">
         <img 
-          src={service.image || "/lovable-uploads/258c9e20-d4c8-4fa5-8ea3-09165620dc0d.png"} 
+          src={service.image || "/lovable-uploads/3c659231-2940-4890-99b3-5080c513de7f.png"} 
           alt={service.name} 
           className="w-full h-full object-cover"
         />
