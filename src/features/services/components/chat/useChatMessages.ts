@@ -193,23 +193,18 @@ export const useChatMessages = (userInfo: UserInfo) => {
       setIsAiTyping(true);
       try {
         console.log('Calling AI chat booking function with:', {
-          message: userMessage,
-          userInfo: {
-            userId,
-            name: userInfo.name,
-            roomNumber: userInfo.roomNumber
-          }
+          userMessage: userMessage,
+          userId,
+          userName: userInfo.name,
+          roomNumber: userInfo.roomNumber
         });
 
         const { data: aiResponse, error: aiCallError } = await supabase.functions.invoke('ai-chat-booking', {
           body: {
-            message: userMessage,
-            userInfo: {
-              userId,
-              name: userInfo.name,
-              roomNumber: userInfo.roomNumber
-            },
-            context: messages.map(m => `${m.sender}: ${m.text}`).join('\n')
+            userMessage: userMessage,
+            userId,
+            userName: userInfo.name,
+            roomNumber: userInfo.roomNumber
           }
         });
 
@@ -217,11 +212,38 @@ export const useChatMessages = (userInfo: UserInfo) => {
         console.log('AI Call Error:', aiCallError);
 
         if (aiResponse?.response) {
-          // AI response is already saved by the edge function
-          setTimeout(() => {
-            fetchMessages();
-            setIsAiTyping(false);
-          }, 1000);
+          // Add AI response to chat messages
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: aiResponse.response,
+            time: new Date().toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            sender: 'staff'
+          };
+
+          // Save AI response to database
+          await supabase.from('chat_messages').insert([{
+            user_id: userId,
+            user_name: 'AI Assistant',
+            room_number: userInfo.roomNumber,
+            text: aiResponse.response,
+            sender: 'staff',
+            status: 'delivered',
+            created_at: new Date().toISOString()
+          }]);
+
+          setMessages(prev => [...prev, aiMessage]);
+          setIsAiTyping(false);
+
+          // Show booking confirmation if there was a successful booking
+          if (aiResponse.booking?.success) {
+            toast({
+              title: "Booking Confirmed",
+              description: aiResponse.booking.message,
+            });
+          }
         } else {
           setIsAiTyping(false);
           console.warn('No AI response received');
@@ -229,7 +251,17 @@ export const useChatMessages = (userInfo: UserInfo) => {
       } catch (aiError) {
         console.error("AI response error:", aiError);
         setIsAiTyping(false);
-        // Continue with basic keyword-based service request creation as fallback
+        // Add fallback response
+        const fallbackMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "I apologize, but I'm having trouble processing your request right now. Our staff will respond to you shortly.",
+          time: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          sender: 'staff'
+        };
+        setMessages(prev => [...prev, fallbackMessage]);
       }
       
       if (userMessage.toLowerCase().includes('request') || 
@@ -287,6 +319,52 @@ export const useChatMessages = (userInfo: UserInfo) => {
     handleSendMessage();
   };
 
+  const resetChat = async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+
+    try {
+      // Delete all chat messages for this user
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .or(`user_id.eq.${userId},recipient_id.eq.${userId}`);
+
+      if (error) {
+        console.error('Error resetting chat:', error);
+        toast({
+          title: "Error",
+          description: "Failed to reset chat. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Clear local messages and show welcome message
+      setMessages([{
+        id: '1',
+        text: `Welcome to Hotel Genius, ${userInfo.name}! How may I assist you today?`,
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        sender: 'staff'
+      }]);
+
+      toast({
+        title: "Chat Reset",
+        description: "Your chat history has been cleared.",
+      });
+    } catch (error) {
+      console.error('Error in resetChat:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     inputMessage,
     setInputMessage,
@@ -295,6 +373,7 @@ export const useChatMessages = (userInfo: UserInfo) => {
     messagesEndRef,
     handleSendMessage,
     handleMessageSubmit,
-    fetchMessages, // Add the fetchMessages function to the returned object
+    fetchMessages,
+    resetChat,
   };
 };

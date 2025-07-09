@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 // Function to trigger AI response
 const triggerAIResponse = async (userMessage: string, userId: string | null, userName: string, roomNumber: string) => {
   try {
-    const response = await supabase.functions.invoke('ai-chat-response', {
+    const response = await supabase.functions.invoke('ai-chat-booking', {
       body: {
         userMessage,
         userId,
@@ -17,6 +17,17 @@ const triggerAIResponse = async (userMessage: string, userId: string | null, use
     
     if (response.error) {
       console.error('Error calling AI chat function:', response.error);
+    } else if (response.data?.response) {
+      // Save AI response to database
+      await supabase.from('chat_messages').insert([{
+        user_id: userId,
+        user_name: 'AI Assistant',
+        room_number: roomNumber,
+        text: response.data.response,
+        sender: 'staff',
+        status: 'delivered',
+        created_at: new Date().toISOString()
+      }]);
     }
   } catch (error) {
     console.error('Error triggering AI response:', error);

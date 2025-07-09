@@ -23,6 +23,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
     handleSendMessage,
     handleMessageSubmit,
     fetchMessages,
+    resetChat,
   } = useChatMessages(userInfo);
 
   // Setup realtime message updates
@@ -183,7 +184,7 @@ const ServiceChat = ({ isChatOpen, setIsChatOpen, userInfo }: ServiceChatProps) 
 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col h-screen">
-      <ChatHeader userInfo={userInfo} onClose={handleCloseChat} />
+      <ChatHeader userInfo={userInfo} onClose={handleCloseChat} onReset={resetChat} />
       <MessageList messages={messages} messagesEndRef={messagesEndRef} isAiTyping={isAiTyping} />
       <MessageInput
         inputMessage={inputMessage}

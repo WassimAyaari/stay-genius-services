@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, RotateCcw } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface ChatHeaderProps {
   userInfo: { name: string; roomNumber: string };
   onClose: () => void;
+  onReset?: () => void;
 }
 
-const ChatHeader = ({ userInfo, onClose }: ChatHeaderProps) => {
+const ChatHeader = ({ userInfo, onClose, onReset }: ChatHeaderProps) => {
   return (
     <div className="h-16 border-b flex items-center px-4 justify-between bg-background">
       <div className="flex items-center gap-3">
@@ -25,9 +26,16 @@ const ChatHeader = ({ userInfo, onClose }: ChatHeaderProps) => {
           </p>
         </div>
       </div>
-      <Button variant="ghost" size="icon" onClick={onClose}>
-        <X className="h-5 w-5" />
-      </Button>
+      <div className="flex items-center gap-2">
+        {onReset && (
+          <Button variant="ghost" size="icon" onClick={onReset} title="Reset Chat">
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        )}
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
     </div>
   );
 };
