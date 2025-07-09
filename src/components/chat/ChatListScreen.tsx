@@ -71,7 +71,7 @@ export const ChatListScreen: React.FC<ChatListScreenProps> = ({
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-foreground truncate">AI Assistant</h3>
+              <h3 className="font-medium text-foreground truncate">System Assistant</h3>
               <span className="text-xs text-muted-foreground">now</span>
             </div>
             <div className="flex items-center justify-between mt-1">
@@ -79,7 +79,7 @@ export const ChatListScreen: React.FC<ChatListScreenProps> = ({
                 Instant help, can connect to staff
               </p>
               <Badge variant="outline" className="ml-2 text-xs">
-                AI Support
+                System Support
               </Badge>
             </div>
           </div>
