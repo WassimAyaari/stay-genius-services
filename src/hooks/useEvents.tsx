@@ -41,8 +41,16 @@ export const useEvents = (filterBySpaFacility = false) => {
   const upcomingEvents = useMemo(() => {
     const today = startOfDay(new Date());
     return (events || []).filter(event => {
-      const eventDate = startOfDay(new Date(event.date));
-      return !isBefore(eventDate, today);
+      // Include daily recurring events (always upcoming)
+      if (event.recurrence_type === 'daily') {
+        return true;
+      }
+      // For one-time events, check if the date is today or in the future
+      if (event.date) {
+        const eventDate = startOfDay(new Date(event.date));
+        return !isBefore(eventDate, today);
+      }
+      return false;
     });
   }, [events]);
 

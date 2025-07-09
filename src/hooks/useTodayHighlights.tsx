@@ -13,15 +13,15 @@ export const useTodayHighlights = () => {
       setLoading(true);
       const today = format(new Date(), 'yyyy-MM-dd');
       
+      // Fetch events for today (one-time events with today's date OR daily recurring events)
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .eq('date', today)
+        .or(`and(date.eq.${today},recurrence_type.eq.once),recurrence_type.eq.daily`)
         .order('time', { ascending: true });
 
       if (error) throw error;
       
-      // Ajouter un délai pour les tests (à retirer en production)
       setTodayEvents(data as Event[]);
     } catch (error) {
       console.error('Error fetching today events:', error);
