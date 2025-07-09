@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UnifiedChatContainer } from '@/components/chat/UnifiedChatContainer';
 import { AdminChatDashboard } from '@/components/admin/chat/AdminChatDashboard';
-import { ChatSelectionScreen } from '@/components/chat/ChatSelectionScreen';
+import { ChatListScreen } from '@/components/chat/ChatListScreen';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -113,9 +113,9 @@ const Messages = () => {
     );
   }
 
-  // Show chat selection screen
+  // Show chat list screen
   return (
-    <ChatSelectionScreen 
+    <ChatListScreen 
       userInfo={userInfo}
       onSelectChat={setSelectedChatType}
     />
