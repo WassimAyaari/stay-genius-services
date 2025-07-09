@@ -22,6 +22,27 @@ const Messages = () => {
     setSelectedContact
   } = useMessaging();
   
+  const handleQuickAction = (action: string, data?: any) => {
+    switch (action) {
+      case 'quick_book':
+        // Set a message for quick booking
+        const bookingMessage = `I want to book ${data.type === 'restaurant' ? 'a table at ' + data.item.name : data.type === 'spa' ? data.item.name + ' spa service' : 'an event'}`;
+        setInputMessage(bookingMessage);
+        break;
+      case 'show_restaurants':
+        setInputMessage('Show me available restaurants');
+        break;
+      case 'show_spa':
+        setInputMessage('Show me spa services');
+        break;
+      case 'show_events':
+        setInputMessage('Show me upcoming events');
+        break;
+      default:
+        break;
+    }
+  };
+  
   // Add icons to contacts here to avoid circular dependencies
   const contactsWithIcons = filteredContacts.map(contact => ({
     ...contact,
@@ -43,6 +64,7 @@ const Messages = () => {
         onGoBack={handleGoBack}
         messagesEndRef={messagesEndRef}
         inputRef={inputRef}
+        onQuickAction={handleQuickAction}
       />
     );
   }

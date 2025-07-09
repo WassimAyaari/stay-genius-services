@@ -3,13 +3,15 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Message } from '@/types/messaging';
+import AIMessageRenderer from './AIMessageRenderer';
 
 interface MessagesListProps {
   messages: Message[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  onQuickAction?: (action: string, data?: any) => void;
 }
 
-export const MessagesList: React.FC<MessagesListProps> = ({ messages, messagesEndRef }) => {
+export const MessagesList: React.FC<MessagesListProps> = ({ messages, messagesEndRef, onQuickAction }) => {
   const formatTime = (timeString: string) => {
     if (!isNaN(Date.parse(timeString))) {
       const date = new Date(timeString);
@@ -34,35 +36,37 @@ export const MessagesList: React.FC<MessagesListProps> = ({ messages, messagesEn
                 message.sender === 'user' ? "justify-end" : "justify-start"
               )}
             >
-              <div 
-                className={cn(
-                  "max-w-[80%] px-4 py-2 rounded-2xl mb-1", 
-                  message.sender === 'user' 
-                    ? "bg-primary text-primary-foreground rounded-tr-none" 
-                    : "bg-muted rounded-tl-none"
-                )}
-              >
-                <p className="text-sm">{message.text}</p>
+              {message.sender === 'user' ? (
                 <div 
-                  className={cn(
-                    "flex items-center justify-end gap-1 mt-1", 
-                    message.sender === 'user' 
-                      ? "text-primary-foreground/80" 
-                      : "text-muted-foreground"
-                  )}
+                  className="max-w-[80%] px-4 py-2 rounded-2xl mb-1 bg-primary text-primary-foreground rounded-tr-none"
                 >
-                  <span className="text-[10px]">
-                    {formatTime(message.time)}
-                  </span>
-                  {message.sender === 'user' && message.status && (
-                    <span className="text-[10px] ml-1">
-                      {message.status === 'read' && '✓✓'}
-                      {message.status === 'delivered' && '✓✓'}
-                      {message.status === 'sent' && '✓'}
+                  <p className="text-sm">{message.text}</p>
+                  <div className="flex items-center justify-end gap-1 mt-1 text-primary-foreground/80">
+                    <span className="text-[10px]">
+                      {formatTime(message.time)}
                     </span>
-                  )}
+                    {message.status && (
+                      <span className="text-[10px] ml-1">
+                        {message.status === 'read' && '✓✓'}
+                        {message.status === 'delivered' && '✓✓'}
+                        {message.status === 'sent' && '✓'}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="max-w-[85%] space-y-2">
+                  <AIMessageRenderer 
+                    message={message.text} 
+                    onQuickAction={onQuickAction}
+                  />
+                  <div className="flex justify-end">
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatTime(message.time)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           ))
         )}

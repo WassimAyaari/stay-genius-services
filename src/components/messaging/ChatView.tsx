@@ -13,6 +13,7 @@ interface ChatViewProps {
   onGoBack: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   inputRef: React.RefObject<HTMLTextAreaElement>;
+  onQuickAction?: (action: string, data?: any) => void;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({
@@ -22,12 +23,17 @@ export const ChatView: React.FC<ChatViewProps> = ({
   onSendMessage,
   onGoBack,
   messagesEndRef,
-  inputRef
+  inputRef,
+  onQuickAction
 }) => {
   return (
     <div className="fixed inset-0 bg-background flex flex-col h-screen w-screen">
       <ChatHeader contact={contact} onGoBack={onGoBack} />
-      <MessagesList messages={contact.messages} messagesEndRef={messagesEndRef} />
+      <MessagesList 
+        messages={contact.messages} 
+        messagesEndRef={messagesEndRef} 
+        onQuickAction={onQuickAction}
+      />
       <MessageInput 
         inputMessage={inputMessage} 
         setInputMessage={setInputMessage} 
