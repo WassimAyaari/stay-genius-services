@@ -41,8 +41,27 @@ const CustomRequestForm = ({
       });
     }
   };
-  return <form onSubmit={handleCustomRequest} className="mb-8">
-      
-    </form>;
+  return (
+    <div className="mb-8">
+      <h2 className="text-2xl font-bold text-secondary mb-6">Custom Request</h2>
+      <form onSubmit={handleCustomRequest} className="space-y-4">
+        <div>
+          <Input
+            placeholder="Describe your request..."
+            value={customRequest}
+            onChange={(e) => setCustomRequest(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        <Button 
+          type="submit" 
+          disabled={!customRequest.trim() || !room}
+          className="w-full sm:w-auto"
+        >
+          Submit Request
+        </Button>
+      </form>
+    </div>
+  );
 };
 export default CustomRequestForm;
