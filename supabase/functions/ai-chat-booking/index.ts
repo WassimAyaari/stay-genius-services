@@ -78,8 +78,8 @@ Respond naturally and conversationally with a warm, helpful tone. If the guest w
     const aiResponse = data.choices[0].message.content;
 
     // Detect if this is a booking confirmation and try to create the booking
-    const bookingKeywords = ['spa', 'restaurant', 'table', 'massage', 'treatment', 'event'];
-    const confirmationKeywords = ['book', 'reserve', 'confirm', 'yes', 'proceed'];
+    const bookingKeywords = ['spa', 'restaurant', 'table', 'massage', 'treatment', 'event', 'book', 'reserve'];
+    const confirmationKeywords = ['confirm', 'yes', 'proceed', 'please', 'want', 'would like'];
     
     const hasBookingKeyword = bookingKeywords.some(keyword => 
       message.toLowerCase().includes(keyword)
@@ -88,19 +88,25 @@ Respond naturally and conversationally with a warm, helpful tone. If the guest w
       message.toLowerCase().includes(keyword)
     );
 
+    console.log('Message analysis:', {
+      message,
+      hasBookingKeyword,
+      hasConfirmation,
+      userInfo: userInfo?.userId ? 'present' : 'missing'
+    });
+
     // Try to extract booking details and create actual bookings
     if (hasBookingKeyword && hasConfirmation && userInfo?.userId) {
       try {
+        console.log('Booking detected for user:', userInfo.userId, 'Message:', message);
+        
         // Check if this looks like a spa booking
         if (message.toLowerCase().includes('spa') || message.toLowerCase().includes('massage') || message.toLowerCase().includes('treatment')) {
           console.log('Attempting to create spa booking...');
           
-          // For demo purposes, create a basic spa booking
-          // In production, you'd parse the message for date/time details
           const { error: spaError } = await supabase
             .from('spa_bookings')
             .insert([{
-              user_id: userInfo.userId,
               guest_name: userInfo.name,
               guest_email: `${userInfo.name.toLowerCase().replace(' ', '.')}@hotel.com`,
               room_number: userInfo.roomNumber,
@@ -125,7 +131,6 @@ Respond naturally and conversationally with a warm, helpful tone. If the guest w
           const { error: tableError } = await supabase
             .from('table_reservations')
             .insert([{
-              user_id: userInfo.userId,
               guest_name: userInfo.name,
               guest_email: `${userInfo.name.toLowerCase().replace(' ', '.')}@hotel.com`,
               room_number: userInfo.roomNumber,

@@ -192,7 +192,16 @@ export const useChatMessages = (userInfo: UserInfo) => {
       // Call AI booking assistant for intelligent responses
       setIsAiTyping(true);
       try {
-        const { data: aiResponse } = await supabase.functions.invoke('ai-chat-booking', {
+        console.log('Calling AI chat booking function with:', {
+          message: userMessage,
+          userInfo: {
+            userId,
+            name: userInfo.name,
+            roomNumber: userInfo.roomNumber
+          }
+        });
+
+        const { data: aiResponse, error: aiCallError } = await supabase.functions.invoke('ai-chat-booking', {
           body: {
             message: userMessage,
             userInfo: {
@@ -204,6 +213,9 @@ export const useChatMessages = (userInfo: UserInfo) => {
           }
         });
 
+        console.log('AI Response:', aiResponse);
+        console.log('AI Call Error:', aiCallError);
+
         if (aiResponse?.response) {
           // AI response is already saved by the edge function
           setTimeout(() => {
@@ -212,6 +224,7 @@ export const useChatMessages = (userInfo: UserInfo) => {
           }, 1000);
         } else {
           setIsAiTyping(false);
+          console.warn('No AI response received');
         }
       } catch (aiError) {
         console.error("AI response error:", aiError);
