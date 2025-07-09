@@ -28,8 +28,8 @@ serve(async (req) => {
     // Get hotel data for context
     const hotelContext = await getHotelContext(supabase)
     
-    // Generate AI response using ChatGPT
-    const aiResponse = await generateIntelligentResponse(
+    // Generate AI response using ChatGPT and detect actions needed
+    const { response: aiResponse, actions } = await generateIntelligentResponseWithActions(
       userMessage, 
       userName, 
       roomNumber, 
@@ -38,8 +38,11 @@ serve(async (req) => {
       openAIApiKey
     )
 
-    // Process any service requests mentioned in the conversation
-    await processServiceRequest(supabase, userMessage, userId, userName, roomNumber)
+    // Execute detected actions (bookings, reservations, service requests)
+    const executedActions = await executeBookingActions(supabase, actions, userId, userName, roomNumber)
+    
+    // Add action confirmations to the response
+    const finalResponse = await enhanceResponseWithActions(aiResponse, executedActions, openAIApiKey)
 
     // Save AI response to database
     const { error } = await supabase
@@ -49,7 +52,7 @@ serve(async (req) => {
         recipient_id: userId,
         user_name: 'Hotel Concierge',
         room_number: '',
-        text: aiResponse,
+        text: finalResponse,
         sender: 'staff',
         status: 'sent',
         created_at: new Date().toISOString()
@@ -156,17 +159,17 @@ async function getHotelContext(supabase: any) {
   }
 }
 
-// Generate intelligent response using ChatGPT
-async function generateIntelligentResponse(
+// Generate intelligent response with action detection using ChatGPT
+async function generateIntelligentResponseWithActions(
   userMessage: string,
   userName: string,
   roomNumber: string,
   conversationHistory: any[],
   hotelContext: any,
   openAIApiKey: string
-): Promise<string> {
+): Promise<{ response: string; actions: any[] }> {
   try {
-    const systemPrompt = createSystemPrompt(hotelContext)
+    const systemPrompt = createAgentSystemPrompt(hotelContext)
     const conversationContext = formatConversationHistory(conversationHistory)
     
     const messages = [
@@ -185,10 +188,32 @@ async function generateIntelligentResponse(
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: messages,
-        max_tokens: 300,
+        max_tokens: 400,
         temperature: 0.7,
         presence_penalty: 0.6,
         frequency_penalty: 0.3,
+        functions: [
+          {
+            name: 'create_booking_action',
+            description: 'Create a booking or service request based on guest request',
+            parameters: {
+              type: 'object',
+              properties: {
+                action_type: {
+                  type: 'string',
+                  enum: ['restaurant_reservation', 'spa_booking', 'event_reservation', 'service_request'],
+                  description: 'Type of action to create'
+                },
+                details: {
+                  type: 'object',
+                  description: 'Details specific to the action type'
+                }
+              },
+              required: ['action_type', 'details']
+            }
+          }
+        ],
+        function_call: 'auto'
       }),
     })
 
@@ -197,19 +222,35 @@ async function generateIntelligentResponse(
     }
 
     const data = await response.json()
-    const aiResponse = data.choices[0]?.message?.content || getFallbackResponse()
+    const choice = data.choices[0]
+    
+    let aiResponse = choice?.message?.content || getFallbackResponse()
+    let actions: any[] = []
+
+    // Check if AI wants to call a function
+    if (choice?.message?.function_call) {
+      try {
+        const functionArgs = JSON.parse(choice.message.function_call.arguments)
+        actions.push(functionArgs)
+        console.log('AI detected action:', functionArgs)
+      } catch (error) {
+        console.error('Error parsing function call:', error)
+      }
+    }
 
     console.log('Generated AI response:', aiResponse)
-    return aiResponse
+    console.log('Detected actions:', actions)
+    
+    return { response: aiResponse, actions }
 
   } catch (error) {
     console.error('Error generating intelligent response:', error)
-    return getFallbackResponse()
+    return { response: getFallbackResponse(), actions: [] }
   }
 }
 
-// Create comprehensive system prompt
-function createSystemPrompt(hotelContext: any): string {
+// Create agent system prompt for booking actions
+function createAgentSystemPrompt(hotelContext: any): string {
   const restaurantList = hotelContext.restaurants.map((r: any) => 
     `${r.name} (${r.cuisine}) - ${r.open_hours} - ${r.location}`
   ).join('\n')
@@ -222,52 +263,280 @@ function createSystemPrompt(hotelContext: any): string {
     `${e.title} - ${e.date} at ${e.time} - ${e.location}`
   ).join('\n')
 
-  return `You are the AI concierge for ${hotelContext.hotel.name}, a luxury hotel. You are helpful, professional, warm, and proactive.
+  return `You are an AI booking agent for ${hotelContext.hotel.name}. You can ACTUALLY CREATE BOOKINGS AND RESERVATIONS, not just provide information.
 
 PERSONALITY:
-- Friendly and welcoming, yet professional
-- Proactive in suggesting relevant services
-- Knowledgeable about all hotel amenities
-- Empathetic to guest needs
-- Quick to offer solutions
+- Professional yet warm and helpful
+- Proactive in making bookings and arrangements
+- Always confirm actions you're taking
+- Ask for any missing details needed to complete bookings
 
-HOTEL INFORMATION:
-- Hotel Name: ${hotelContext.hotel.name}
-- Contact: ${hotelContext.hotel.contact_phone || 'Available at reception'}
-- WiFi: "HotelGenius-Guest" (Password: "Welcome2024!")
-- Check-out: 12:00 PM
-- Room service: Available 24/7
+YOUR BOOKING POWERS:
+- Create restaurant reservations instantly
+- Book spa services and treatments
+- Register guests for events
+- Create service requests for housekeeping, maintenance, room service
+- All bookings are REAL and will be processed immediately
 
-RESTAURANTS:
-${restaurantList || 'Multiple dining options available - please contact reception for details'}
+AVAILABLE RESTAURANTS:
+${restaurantList || 'Multiple dining options available'}
 
-SPA SERVICES:
-${spaServicesList || 'Full spa and wellness center available - please contact spa for bookings'}
+AVAILABLE SPA SERVICES:
+${spaServicesList || 'Full spa and wellness center available'}
 
 UPCOMING EVENTS:
-${eventsList || 'Various events and activities - check with concierge for current schedule'}
+${eventsList || 'Various events and activities available'}
 
-IMPORTANT INSTRUCTIONS:
-1. Always address guests by name when possible
-2. Reference their room number naturally
-3. Be specific about timeframes for services
-4. Offer to take actions (book, arrange, order) rather than just providing information
-5. Ask follow-up questions to better assist
-6. If you can't help directly, always provide the next best step
-7. Keep responses conversational but concise (2-3 sentences typically)
-8. Always end with asking if there's anything else you can help with
+BOOKING GUIDELINES:
+1. When guest requests a reservation/booking, USE THE FUNCTION to create it
+2. Always confirm what you're booking: "I'm booking X for you at Y time"
+3. Ask for missing details if needed (time, date, number of guests, service type)
+4. Use reasonable defaults when appropriate (next available time, standard duration)
+5. Confirm successful bookings: "✅ Booked! Your [service] is confirmed for [details]"
 
-COMMON SERVICES:
-- Room service: Available 24/7
-- Housekeeping: Available during day hours, can arrange special timing
-- Maintenance: Report issues immediately, typical response within 1 hour
-- Late checkout: Can arrange based on availability
-- Restaurant reservations: Can check availability and book
-- Spa appointments: Can check schedule and make bookings
-- Local recommendations: Provide nearby attractions and services
-- Transportation: Can arrange airport transfers and local transport
+FUNCTION USAGE:
+- Use create_booking_action for ANY booking request
+- Restaurant reservation: action_type="restaurant_reservation", details={restaurant, date, time, guests}
+- Spa booking: action_type="spa_booking", details={service, date, time, duration}
+- Event registration: action_type="event_reservation", details={event, date, guests}
+- Service request: action_type="service_request", details={type, description, priority}
 
-Remember: You're not just answering questions - you're actively helping guests have the best possible stay.`
+RESPONSE STYLE:
+- Be conversational but efficient
+- Always mention you're taking action, not just providing info
+- Use confirmation language: "I'm booking...", "I'll arrange...", "I'm creating..."
+- End with next steps or asking if they need anything else
+
+Remember: You're a booking AGENT who takes REAL ACTIONS, not just an information provider!`
+}
+
+// Execute booking actions detected by AI
+async function executeBookingActions(
+  supabase: any, 
+  actions: any[], 
+  userId: string, 
+  userName: string, 
+  roomNumber: string
+): Promise<any[]> {
+  const executedActions = []
+  
+  for (const action of actions) {
+    try {
+      console.log('Executing action:', action)
+      
+      switch (action.action_type) {
+        case 'restaurant_reservation':
+          const reservationResult = await createRestaurantReservation(supabase, action.details, userId, userName, roomNumber)
+          executedActions.push({ type: 'restaurant_reservation', success: true, result: reservationResult })
+          break
+          
+        case 'spa_booking':
+          const spaResult = await createSpaBooking(supabase, action.details, userId, userName, roomNumber)
+          executedActions.push({ type: 'spa_booking', success: true, result: spaResult })
+          break
+          
+        case 'event_reservation':
+          const eventResult = await createEventReservation(supabase, action.details, userId, userName, roomNumber)
+          executedActions.push({ type: 'event_reservation', success: true, result: eventResult })
+          break
+          
+        case 'service_request':
+          const serviceResult = await createServiceRequest(supabase, action.details, userId, userName, roomNumber)
+          executedActions.push({ type: 'service_request', success: true, result: serviceResult })
+          break
+          
+        default:
+          console.log('Unknown action type:', action.action_type)
+      }
+    } catch (error) {
+      console.error('Error executing action:', error)
+      executedActions.push({ type: action.action_type, success: false, error: error.message })
+    }
+  }
+  
+  return executedActions
+}
+
+// Create restaurant reservation
+async function createRestaurantReservation(supabase: any, details: any, userId: string, userName: string, roomNumber: string) {
+  // Get default date/time if not provided
+  const reservationDate = details.date || new Date().toISOString().split('T')[0]
+  const reservationTime = details.time || '19:00:00'
+  const guests = details.guests || 2
+  
+  // Find restaurant ID if restaurant name provided
+  let restaurantId = details.restaurant_id
+  if (!restaurantId && details.restaurant) {
+    const { data: restaurant } = await supabase
+      .from('restaurants')
+      .select('id')
+      .ilike('name', `%${details.restaurant}%`)
+      .limit(1)
+      .maybeSingle()
+    
+    restaurantId = restaurant?.id
+  }
+
+  const { data, error } = await supabase
+    .from('table_reservations')
+    .insert([{
+      restaurant_id: restaurantId,
+      user_id: userId,
+      date: reservationDate,
+      time: reservationTime,
+      guests: guests,
+      guest_name: userName,
+      room_number: roomNumber,
+      special_requests: details.special_requests || null,
+      status: 'confirmed',
+      created_at: new Date().toISOString()
+    }])
+    .select()
+    .single()
+
+  if (error) throw error
+  
+  console.log('Restaurant reservation created:', data)
+  return { reservationId: data.id, date: reservationDate, time: reservationTime, guests }
+}
+
+// Create spa booking
+async function createSpaBooking(supabase: any, details: any, userId: string, userName: string, roomNumber: string) {
+  const bookingDate = details.date || new Date().toISOString().split('T')[0]
+  const bookingTime = details.time || '14:00'
+  
+  // Find service ID if service name provided
+  let serviceId = details.service_id
+  if (!serviceId && details.service) {
+    const { data: service } = await supabase
+      .from('spa_services')
+      .select('id')
+      .ilike('name', `%${details.service}%`)
+      .limit(1)
+      .maybeSingle()
+    
+    serviceId = service?.id
+  }
+
+  const { data, error } = await supabase
+    .from('spa_bookings')
+    .insert([{
+      service_id: serviceId,
+      user_id: userId,
+      date: bookingDate,
+      time: bookingTime,
+      guest_name: userName,
+      room_number: roomNumber,
+      special_requests: details.special_requests || null,
+      status: 'confirmed',
+      created_at: new Date().toISOString()
+    }])
+    .select()
+    .single()
+
+  if (error) throw error
+  
+  console.log('Spa booking created:', data)
+  return { bookingId: data.id, date: bookingDate, time: bookingTime, service: details.service }
+}
+
+// Create event reservation
+async function createEventReservation(supabase: any, details: any, userId: string, userName: string, roomNumber: string) {
+  const guests = details.guests || 1
+  
+  // Find event ID if event name provided
+  let eventId = details.event_id
+  if (!eventId && details.event) {
+    const { data: event } = await supabase
+      .from('events')
+      .select('id, date')
+      .ilike('title', `%${details.event}%`)
+      .limit(1)
+      .maybeSingle()
+    
+    eventId = event?.id
+  }
+
+  const { data, error } = await supabase
+    .from('event_reservations')
+    .insert([{
+      event_id: eventId,
+      user_id: userId,
+      date: details.date || new Date().toISOString().split('T')[0],
+      guests: guests,
+      guest_name: userName,
+      room_number: roomNumber,
+      special_requests: details.special_requests || null,
+      status: 'confirmed',
+      created_at: new Date().toISOString()
+    }])
+    .select()
+    .single()
+
+  if (error) throw error
+  
+  console.log('Event reservation created:', data)
+  return { reservationId: data.id, event: details.event, guests }
+}
+
+// Create service request
+async function createServiceRequest(supabase: any, details: any, userId: string, userName: string, roomNumber: string) {
+  const { data, error } = await supabase
+    .from('service_requests')
+    .insert([{
+      guest_id: userId,
+      guest_name: userName,
+      room_number: roomNumber,
+      room_id: userId,
+      type: details.type || 'general',
+      description: details.description || details.request || 'Guest service request',
+      status: 'pending',
+      created_at: new Date().toISOString()
+    }])
+    .select()
+    .single()
+
+  if (error) throw error
+  
+  console.log('Service request created:', data)
+  return { requestId: data.id, type: details.type, description: details.description }
+}
+
+// Enhance response with action confirmations
+async function enhanceResponseWithActions(
+  originalResponse: string, 
+  executedActions: any[], 
+  openAIApiKey: string
+): Promise<string> {
+  if (executedActions.length === 0) {
+    return originalResponse
+  }
+
+  try {
+    const actionSummary = executedActions.map(action => {
+      if (!action.success) return `❌ ${action.type} failed: ${action.error}`
+      
+      switch (action.type) {
+        case 'restaurant_reservation':
+          return `✅ Restaurant reservation confirmed for ${action.result.date} at ${action.result.time} for ${action.result.guests} guests`
+        case 'spa_booking':
+          return `✅ Spa appointment booked for ${action.result.date} at ${action.result.time}${action.result.service ? ` - ${action.result.service}` : ''}`
+        case 'event_reservation':
+          return `✅ Event registration confirmed${action.result.event ? ` for ${action.result.event}` : ''} for ${action.result.guests} guests`
+        case 'service_request':
+          return `✅ Service request created - ${action.result.type} (Request #${action.result.requestId})`
+        default:
+          return `✅ ${action.type} completed successfully`
+      }
+    }).join('\n')
+
+    // Add action confirmations to the response
+    return `${originalResponse}\n\n${actionSummary}`
+    
+  } catch (error) {
+    console.error('Error enhancing response with actions:', error)
+    return originalResponse
+  }
 }
 
 // Format conversation history for context
