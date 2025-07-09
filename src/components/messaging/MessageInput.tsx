@@ -1,83 +1,33 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Paperclip, Send, MessageSquare } from 'lucide-react';
-import UserQuickTemplates from '@/components/messaging/UserQuickTemplates';
+import { VoiceMessageInput } from '@/components/voice/VoiceMessageInput';
 
 interface MessageInputProps {
   inputMessage: string;
   setInputMessage: (value: string) => void;
   onSendMessage: () => void;
   inputRef: React.RefObject<HTMLTextAreaElement>;
+  userInfo?: {
+    name: string;
+    email?: string;
+    roomNumber?: string;
+  };
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
   inputMessage,
   setInputMessage,
   onSendMessage,
-  inputRef
+  inputRef,
+  userInfo
 }) => {
-  const [showTemplates, setShowTemplates] = useState(false);
-  
-  const handleTemplateSelect = (message: string) => {
-    setInputMessage(message);
-    setShowTemplates(false);
-  };
-  console.log('MessageInput rendering with inputMessage:', inputMessage);
-  
   return (
-    <div className="border-t bg-card p-3 flex-shrink-0 relative">
-      <UserQuickTemplates 
-        isOpen={showTemplates}
-        onClose={() => setShowTemplates(false)}
-        onSelectTemplate={handleTemplateSelect}
-      />
-      
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="rounded-full h-10 w-10 flex-shrink-0"
-          type="button"
-        >
-          <Paperclip className="h-5 w-5" />
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full h-10 w-10 flex-shrink-0"
-          onClick={() => setShowTemplates(!showTemplates)}
-          type="button"
-        >
-          <MessageSquare className="h-5 w-5" />
-        </Button>
-        
-        <Textarea 
-          ref={inputRef}
-          value={inputMessage} 
-          onChange={(e) => setInputMessage(e.target.value)} 
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              onSendMessage();
-            }
-          }}
-          placeholder="Ask me anything" 
-          className="resize-none min-h-0 h-10 py-2 px-4 rounded-full border-0 focus-visible:ring-1 bg-muted/50" 
-        />
-        
-        <Button 
-          type="button"
-          size="icon" 
-          onClick={onSendMessage} 
-          className="rounded-full h-10 w-10 flex-shrink-0" 
-          disabled={!inputMessage.trim()}
-        >
-          <Send className="h-5 w-5" />
-        </Button>
-      </div>
-    </div>
+    <VoiceMessageInput
+      inputMessage={inputMessage}
+      setInputMessage={setInputMessage}
+      onSendMessage={onSendMessage}
+      inputRef={inputRef}
+      userInfo={userInfo}
+    />
   );
 };

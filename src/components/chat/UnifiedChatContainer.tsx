@@ -72,6 +72,7 @@ export const UnifiedChatContainer: React.FC<UnifiedChatContainerProps> = ({
         inputRef={inputRef}
         currentHandler={currentHandler as 'ai' | 'human'}
         isTyping={isTyping}
+        userInfo={userInfo}
       />
     </div>
   );
