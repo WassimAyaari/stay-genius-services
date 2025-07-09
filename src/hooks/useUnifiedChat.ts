@@ -120,7 +120,7 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = '
             guest_email: userInfo?.email || user.user.email,
             room_number: userInfo?.roomNumber,
             status: 'active',
-            current_handler: 'ai',
+            current_handler: conversationType === 'concierge' ? 'human' : 'ai',
             conversation_type: conversationType
           })
           .select()
@@ -131,15 +131,15 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = '
 
         // Send welcome message based on conversation type
         const welcomeMessage = conversationType === 'safety_ai' 
-          ? `Hello ${userInfo?.name || 'there'}! I'm your AI Safety Assistant, available 24/7 for emergency and safety-related support. How can I help you stay safe today?`
-          : `Hello ${userInfo?.name || 'there'}! I'm your 24/7 virtual concierge. How can I assist you today? I can help with restaurant reservations, spa bookings, event information, and much more!`;
+          ? `Hello ${userInfo?.name || 'there'}! I'm your AI Assistant. I can help with bookings, hotel information, and much more. If you need human assistance, I can connect you to our staff. How can I help you today?`
+          : `Hello ${userInfo?.name || 'there'}! Welcome to our Hotel Team chat. Our staff will assist you directly with any questions or requests you may have.`;
 
         await supabase
           .from('messages')
           .insert({
             conversation_id: conversation.id,
-            sender_type: 'ai',
-            sender_name: conversationType === 'safety_ai' ? 'AI Safety Assistant' : 'AI Concierge',
+            sender_type: conversationType === 'concierge' ? 'staff' : 'ai',
+            sender_name: conversationType === 'safety_ai' ? 'AI Assistant' : 'Hotel Team',
             content: welcomeMessage,
             message_type: 'text'
           });
@@ -196,8 +196,8 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = '
           message_type: 'text'
         });
 
-      // If current handler is AI, send to AI
-      if (chatState.currentHandler === 'ai' && !isAdmin) {
+      // If current handler is AI and conversation type is safety_ai, send to AI
+      if (chatState.currentHandler === 'ai' && !isAdmin && chatState.conversation.conversation_type === 'safety_ai') {
         await sendToAI(messageContent);
       }
 

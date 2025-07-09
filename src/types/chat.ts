@@ -6,6 +6,7 @@ export interface Conversation {
   room_number: string | null;
   status: string;
   current_handler: string;
+  conversation_type: string;
   assigned_staff_id: string | null;
   created_at: string;
   updated_at: string;
