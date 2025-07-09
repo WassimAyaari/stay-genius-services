@@ -6,8 +6,9 @@ export interface Event {
   category: 'event' | 'promo';
   is_featured: boolean;
   location?: string;
-  date: string;
+  date?: string;
   time?: string;
+  recurrence_type?: 'once' | 'daily' | 'weekly' | 'monthly';
   created_at: string;
   updated_at: string;
   capacity?: number;

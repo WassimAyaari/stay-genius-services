@@ -16,50 +16,55 @@ interface DateTimeFieldsProps {
 }
 
 export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({ form }) => {
+  const recurrenceType = form.watch('recurrence_type');
+  const isOneTimeEvent = recurrenceType === 'once';
+  
   return (
     <>
-      <FormField 
-        control={form.control} 
-        name="date" 
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full pl-3 text-left font-normal flex justify-between items-center",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? format(new Date(field.value), 'dd MMMM yyyy') : <span>Select a date</span>}
-                    <CalendarIcon className="ml-auto h-4 w-4" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        )} 
-      />
+      {isOneTimeEvent && (
+        <FormField 
+          control={form.control} 
+          name="date" 
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal flex justify-between items-center",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? format(new Date(field.value), 'dd MMMM yyyy') : <span>Select a date</span>}
+                      <CalendarIcon className="ml-auto h-4 w-4" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )} 
+        />
+      )}
       
       <FormField 
         control={form.control} 
         name="time" 
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Time (optional)</FormLabel>
+            <FormLabel>Time {isOneTimeEvent ? '(optional)' : ''}</FormLabel>
             <FormControl>
               <Input type="time" {...field} />
             </FormControl>
@@ -67,6 +72,12 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({ form }) => {
           </FormItem>
         )} 
       />
+      
+      {!isOneTimeEvent && (
+        <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+          This event will repeat {recurrenceType} and doesn't require a specific date.
+        </div>
+      )}
     </>
   );
 };

@@ -357,12 +357,13 @@ export type Database = {
           capacity: number | null
           category: string
           created_at: string
-          date: string
+          date: string | null
           description: string
           id: string
           image: string
           is_featured: boolean | null
           location: string | null
+          recurrence_type: string | null
           restaurant_id: string | null
           spa_facility_id: string | null
           time: string | null
@@ -373,12 +374,13 @@ export type Database = {
           capacity?: number | null
           category: string
           created_at?: string
-          date: string
+          date?: string | null
           description: string
           id?: string
           image: string
           is_featured?: boolean | null
           location?: string | null
+          recurrence_type?: string | null
           restaurant_id?: string | null
           spa_facility_id?: string | null
           time?: string | null
@@ -389,12 +391,13 @@ export type Database = {
           capacity?: number | null
           category?: string
           created_at?: string
-          date?: string
+          date?: string | null
           description?: string
           id?: string
           image?: string
           is_featured?: boolean | null
           location?: string | null
+          recurrence_type?: string | null
           restaurant_id?: string | null
           spa_facility_id?: string | null
           time?: string | null

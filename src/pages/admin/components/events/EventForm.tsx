@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { eventSchema, EventFormValues } from './form/EventFormSchema';
 import { BasicInfoFields } from './form/BasicInfoFields';
 import { CategoryField } from './form/CategoryField';
+import { RecurrenceField } from './form/RecurrenceField';
 import { DateTimeFields } from './form/DateTimeFields';
 import { LocationAndFeaturedFields } from './form/LocationAndFeaturedFields';
 import { useRestaurants } from '@/hooks/useRestaurants';
@@ -40,7 +41,8 @@ const EventForm: React.FC<EventFormProps> = ({
       category: initialData.category || 'event',
       is_featured: initialData.is_featured || false,
       location: initialData.location || '',
-      date: initialData.date || format(new Date(), 'yyyy-MM-dd'),
+      recurrence_type: initialData.recurrence_type || 'once',
+      date: initialData.date || (initialData.recurrence_type === 'once' ? format(new Date(), 'yyyy-MM-dd') : ''),
       time: initialData.time || '',
       restaurant_id: initialData.restaurant_id ?? null,
       spa_facility_id: initialData.spa_facility_id ?? null
@@ -51,6 +53,7 @@ const EventForm: React.FC<EventFormProps> = ({
       category: 'event',
       is_featured: false,
       location: '',
+      recurrence_type: 'once',
       date: format(new Date(), 'yyyy-MM-dd'),
       time: '',
       restaurant_id: null,
@@ -114,6 +117,7 @@ const EventForm: React.FC<EventFormProps> = ({
             )}
             
             <CategoryField form={form} />
+            <RecurrenceField form={form} />
             <DateTimeFields form={form} />
             <LocationAndFeaturedFields form={form} />
             

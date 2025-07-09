@@ -38,7 +38,12 @@ export const EventBookingCard = ({ event }: EventBookingCardProps) => {
             <div className="space-y-2">
               <div className="flex items-center text-sm text-gray-600">
                 <Calendar className="h-4 w-4 mr-2 text-primary" />
-                <span>{format(new Date(event.date), 'dd MMMM yyyy')}</span>
+                <span>
+                  {event.recurrence_type === 'daily' ? 'Available Daily' :
+                   event.recurrence_type === 'weekly' ? 'Available Weekly' :
+                   event.recurrence_type === 'monthly' ? 'Available Monthly' :
+                   event.date ? format(new Date(event.date), 'dd MMMM yyyy') : 'Date TBD'}
+                </span>
               </div>
               {event.time && (
                 <div className="flex items-center text-sm text-gray-600">
