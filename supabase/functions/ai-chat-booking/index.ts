@@ -104,18 +104,21 @@ Respond naturally and conversationally with a warm, helpful tone. If the guest w
         if (message.toLowerCase().includes('spa') || message.toLowerCase().includes('massage') || message.toLowerCase().includes('treatment')) {
           console.log('Attempting to create spa booking...');
           
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const bookingDate = tomorrow.toISOString().split('T')[0];
+          
           const { error: spaError } = await supabase
             .from('spa_bookings')
-            .insert([{
+            .insert({
               guest_name: userInfo.name,
               guest_email: `${userInfo.name.toLowerCase().replace(' ', '.')}@hotel.com`,
               room_number: userInfo.roomNumber,
-              date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Tomorrow
+              date: bookingDate,
               time: '14:00',
               status: 'pending',
-              special_requests: message,
-              created_at: new Date().toISOString()
-            }]);
+              special_requests: message
+            });
 
           if (!spaError) {
             console.log('Spa booking created successfully');
@@ -128,19 +131,22 @@ Respond naturally and conversationally with a warm, helpful tone. If the guest w
         if (message.toLowerCase().includes('restaurant') || message.toLowerCase().includes('table') || message.toLowerCase().includes('dining')) {
           console.log('Attempting to create restaurant booking...');
           
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const bookingDate = tomorrow.toISOString().split('T')[0];
+          
           const { error: tableError } = await supabase
             .from('table_reservations')
-            .insert([{
+            .insert({
               guest_name: userInfo.name,
               guest_email: `${userInfo.name.toLowerCase().replace(' ', '.')}@hotel.com`,
               room_number: userInfo.roomNumber,
-              date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Tomorrow
+              date: bookingDate,
               time: '19:00',
               guests: 2,
               status: 'pending',
-              special_requests: message,
-              created_at: new Date().toISOString()
-            }]);
+              special_requests: message
+            });
 
           if (!tableError) {
             console.log('Restaurant booking created successfully');
