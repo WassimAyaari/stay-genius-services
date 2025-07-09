@@ -17,6 +17,8 @@ export const useServiceRequests = () => {
   const isAdminSection = location.pathname.includes('/admin');
 
   const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
+    console.log('fetchServiceRequests called with:', { userId, userRoomNumber, isAdminSection });
+    
     if (!userId && !userRoomNumber && !isAdminSection) {
       console.log('No authenticated user or user_id in localStorage, returning empty service requests');
       return [];
