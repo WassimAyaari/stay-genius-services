@@ -45,8 +45,26 @@ Available spa services: ${JSON.stringify(spaServices.data)}
 Upcoming events: ${JSON.stringify(events.data)}
 Hotel information: ${JSON.stringify(hotelInfo.data)}
 
+IMPORTANT BOOKING RULES:
+- NEVER call a booking function unless you have ALL required information
+- If a guest wants to book something but hasn't provided a date, time, or number of guests, ASK for these details first
+- Always confirm booking details before proceeding
+- Use today's date as reference: ${new Date().toISOString().split('T')[0]}
+- For restaurants, you need: restaurant name/ID, date, time, and number of guests
+- For spa services, you need: service name/ID, date, and time
+- For events, you need: event name/ID, date, and number of guests
+
 When making bookings, always confirm details with the guest and provide booking confirmation.
-Be friendly, professional, and proactive in offering assistance.`;
+Be friendly, professional, and proactive in offering assistance.
+
+If a guest says something like "I want to book a restaurant" without providing details, respond with something like:
+"I'd be happy to help you book a restaurant! I can see we have several excellent options available. Could you please tell me:
+- Which restaurant interests you? 
+- What date would you like to dine?
+- What time would you prefer?
+- How many guests will be dining?"
+
+Only call the booking function when you have all the required information.`;
 
     const tools = [
       {
@@ -208,6 +226,11 @@ Be friendly, professional, and proactive in offering assistance.`;
 
 async function bookRestaurant(args: any, userId: string, userName: string, roomNumber: string) {
   try {
+    // Validate required parameters
+    if (!args.restaurant_id || !args.date || !args.time || !args.guests) {
+      throw new Error(`Missing required booking information. Need: restaurant_id, date, time, guests. Got: ${JSON.stringify(args)}`);
+    }
+
     const { data, error } = await supabase
       .from('table_reservations')
       .insert({
@@ -228,7 +251,7 @@ async function bookRestaurant(args: any, userId: string, userName: string, roomN
 
     return {
       success: true,
-      message: `Restaurant reservation confirmed`,
+      message: `Restaurant reservation confirmed for ${args.date} at ${args.time} for ${args.guests} guests`,
       reservation_id: data.id,
       details: {
         date: args.date,
@@ -247,6 +270,11 @@ async function bookRestaurant(args: any, userId: string, userName: string, roomN
 
 async function bookSpaService(args: any, userId: string, userName: string, roomNumber: string) {
   try {
+    // Validate required parameters
+    if (!args.service_id || !args.date || !args.time) {
+      throw new Error(`Missing required booking information. Need: service_id, date, time. Got: ${JSON.stringify(args)}`);
+    }
+
     const { data, error } = await supabase
       .from('spa_bookings')
       .insert({
@@ -267,7 +295,7 @@ async function bookSpaService(args: any, userId: string, userName: string, roomN
 
     return {
       success: true,
-      message: `Spa service booking confirmed`,
+      message: `Spa service booking confirmed for ${args.date} at ${args.time}`,
       booking_id: data.id,
       details: {
         date: args.date,
@@ -285,6 +313,11 @@ async function bookSpaService(args: any, userId: string, userName: string, roomN
 
 async function bookEvent(args: any, userId: string, userName: string, roomNumber: string) {
   try {
+    // Validate required parameters  
+    if (!args.event_id || !args.date || !args.guests) {
+      throw new Error(`Missing required booking information. Need: event_id, date, guests. Got: ${JSON.stringify(args)}`);
+    }
+
     const { data, error } = await supabase
       .from('event_reservations')
       .insert({
@@ -304,7 +337,7 @@ async function bookEvent(args: any, userId: string, userName: string, roomNumber
 
     return {
       success: true,
-      message: `Event registration confirmed`,
+      message: `Event registration confirmed for ${args.date} for ${args.guests} guests`,
       reservation_id: data.id,
       details: {
         date: args.date,
