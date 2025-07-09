@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useEvents } from '@/hooks/useEvents';
 import { useToast } from '@/hooks/use-toast';
+import RestaurantBookingDialog from '@/features/dining/components/RestaurantBookingDialog';
+import { Restaurant } from '@/features/dining/types';
 
 const Dining = () => {
   const { t } = useTranslation();
@@ -16,9 +18,26 @@ const Dining = () => {
   const { toast } = useToast();
   const { restaurants, isLoading } = useRestaurants();
   const { upcomingEvents } = useEvents();
+  
+  // Booking dialog state
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
 
   const handleBookTable = (restaurantId: string) => {
-    navigate(`/dining/${restaurantId}?openBooking=true`);
+    const restaurant = restaurants?.find(r => r.id === restaurantId);
+    if (restaurant) {
+      setSelectedRestaurant(restaurant);
+      setIsBookingOpen(true);
+    }
+  };
+
+  const handleBookingSuccess = () => {
+    setIsBookingOpen(false);
+    setSelectedRestaurant(null);
+    toast({
+      title: "Success",
+      description: "Restaurant booking request sent successfully!",
+    });
   };
 
   // Helper: get next event for a restaurant
@@ -112,6 +131,16 @@ const Dining = () => {
             </Card>
           ))}
         </div>
+      )}
+      
+      {/* Restaurant Booking Dialog */}
+      {isBookingOpen && selectedRestaurant && (
+        <RestaurantBookingDialog
+          isOpen={isBookingOpen}
+          onOpenChange={setIsBookingOpen}
+          restaurant={selectedRestaurant}
+          onSuccess={handleBookingSuccess}
+        />
       )}
     </Layout>
   );
