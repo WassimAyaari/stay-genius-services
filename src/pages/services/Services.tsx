@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRoom } from '@/hooks/useRoom';
 import { v4 as uuidv4 } from 'uuid';
 import ServiceCard from '@/features/services/components/ServiceCard';
-import ServiceChat from '@/features/services/components/ServiceChat';
+import { UnifiedChatContainer } from '@/components/chat/UnifiedChatContainer';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import CommandSearch from '@/pages/my-room/components/CommandSearch';
 
@@ -150,11 +150,11 @@ const Services = () => {
         </div>
       </div>
 
-      <ServiceChat 
-        isChatOpen={isChatOpen}
-        setIsChatOpen={setIsChatOpen}
-        userInfo={userInfo}
-      />
+      {isChatOpen && (
+        <div className="fixed inset-0 z-50">
+          <UnifiedChatContainer userInfo={userInfo} />
+        </div>
+      )}
     </Layout>
   );
 };

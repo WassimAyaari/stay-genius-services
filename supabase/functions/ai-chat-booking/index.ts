@@ -19,19 +19,45 @@ serve(async (req) => {
   }
 
   try {
-    const { userMessage, userId, userName, roomNumber } = await req.json();
+    const { message, userId, userName, roomNumber, conversationId } = await req.json();
     
-    console.log('AI Chat Request:', { userMessage, userId, userName, roomNumber });
+    console.log('AI Chat Request:', { message, userId, userName, roomNumber, conversationId });
 
-    // Get hotel data for AI context
-    const [restaurants, spaServices, events, hotelInfo] = await Promise.all([
-      supabase.from('restaurants').select('*').eq('status', 'open'),
-      supabase.from('spa_services').select('*, spa_facilities(*)').eq('status', 'available'),
-      supabase.from('events').select('*').gte('date', new Date().toISOString().split('T')[0]),
-      supabase.from('hotel_about').select('*').eq('status', 'active').single()
-    ]);
+    if (!message || !userId || !userName) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    const systemPrompt = `You are a helpful hotel concierge AI assistant for ${hotelInfo.data?.title || 'Hotel Genius'}. 
+    const response = await sendChatMessage(message, userId, userName, roomNumber, conversationId);
+
+    return new Response(JSON.stringify(response), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error in AI chat function:', error);
+    return new Response(JSON.stringify({ 
+      error: 'Sorry, I encountered an error. Please try again.',
+      details: error.message 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
+
+async function sendChatMessage(message: string, userId: string, userName: string, roomNumber: string, conversationId?: string) {
+  // Get hotel data for AI context
+  const [restaurants, spaServices, events, hotelInfo] = await Promise.all([
+    supabase.from('restaurants').select('*').eq('status', 'open'),
+    supabase.from('spa_services').select('*, spa_facilities(*)').eq('status', 'available'),
+    supabase.from('events').select('*').gte('date', new Date().toISOString().split('T')[0]),
+    supabase.from('hotel_about').select('*').eq('status', 'active').single()
+  ]);
+
+  const systemPrompt = `You are a helpful hotel concierge AI assistant for ${hotelInfo.data?.title || 'Hotel Genius'}. 
 You can help guests with:
 - Information about hotel facilities, restaurants, spa services, and events
 - Making reservations for restaurants, spa services, and events
@@ -66,69 +92,121 @@ If a guest says something like "I want to book a restaurant" without providing d
 
 Only call the booking function when you have all the required information.`;
 
-    const tools = [
-      {
-        type: "function",
-        name: "book_restaurant",
-        description: "Book a table at a restaurant",
-        parameters: {
-          type: "object",
-          properties: {
-            restaurant_id: { type: "string" },
-            date: { type: "string", format: "date" },
-            time: { type: "string" },
-            guests: { type: "number" },
-            special_requests: { type: "string" }
-          },
-          required: ["restaurant_id", "date", "time", "guests"]
-        }
-      },
-      {
-        type: "function",
-        name: "book_spa_service",
-        description: "Book a spa service",
-        parameters: {
-          type: "object",
-          properties: {
-            service_id: { type: "string" },
-            date: { type: "string", format: "date" },
-            time: { type: "string" },
-            special_requests: { type: "string" }
-          },
-          required: ["service_id", "date", "time"]
-        }
-      },
-      {
-        type: "function",
-        name: "book_event",
-        description: "Register for an event",
-        parameters: {
-          type: "object",
-          properties: {
-            event_id: { type: "string" },
-            date: { type: "string", format: "date" },
-            guests: { type: "number" },
-            special_requests: { type: "string" }
-          },
-          required: ["event_id", "date", "guests"]
-        }
-      },
-      {
-        type: "function",
-        name: "create_service_request",
-        description: "Create a general service request",
-        parameters: {
-          type: "object",
-          properties: {
-            type: { type: "string" },
-            description: { type: "string" }
-          },
-          required: ["type", "description"]
-        }
+  const tools = [
+    {
+      type: "function",
+      name: "book_restaurant",
+      description: "Book a table at a restaurant",
+      parameters: {
+        type: "object",
+        properties: {
+          restaurant_id: { type: "string" },
+          date: { type: "string", format: "date" },
+          time: { type: "string" },
+          guests: { type: "number" },
+          special_requests: { type: "string" }
+        },
+        required: ["restaurant_id", "date", "time", "guests"]
       }
-    ];
+    },
+    {
+      type: "function",
+      name: "book_spa_service",
+      description: "Book a spa service",
+      parameters: {
+        type: "object",
+        properties: {
+          service_id: { type: "string" },
+          date: { type: "string", format: "date" },
+          time: { type: "string" },
+          special_requests: { type: "string" }
+        },
+        required: ["service_id", "date", "time"]
+      }
+    },
+    {
+      type: "function",
+      name: "book_event",
+      description: "Register for an event",
+      parameters: {
+        type: "object",
+        properties: {
+          event_id: { type: "string" },
+          date: { type: "string", format: "date" },
+          guests: { type: "number" },
+          special_requests: { type: "string" }
+        },
+        required: ["event_id", "date", "guests"]
+      }
+    },
+    {
+      type: "function",
+      name: "create_service_request",
+      description: "Create a general service request",
+      parameters: {
+        type: "object",
+        properties: {
+          type: { type: "string" },
+          description: { type: "string" }
+        },
+        required: ["type", "description"]
+      }
+    }
+  ];
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message }
+      ],
+      tools: tools,
+      tool_choice: "auto",
+      temperature: 0.7,
+      max_tokens: 1000
+    }),
+  });
+
+  const data = await response.json();
+  console.log('OpenAI Response:', data);
+
+  let aiResponse = data.choices[0].message.content;
+
+  if (data.choices[0].message.tool_calls) {
+    // Handle function calls
+    const toolCall = data.choices[0].message.tool_calls[0];
+    const functionName = toolCall.function.name;
+    const functionArgs = JSON.parse(toolCall.function.arguments);
+    
+    console.log('Function call:', functionName, functionArgs);
+
+    let bookingResult;
+    
+    switch (functionName) {
+      case 'book_restaurant':
+        bookingResult = await bookRestaurant(functionArgs, userId, userName, roomNumber);
+        break;
+      case 'book_spa_service':
+        bookingResult = await bookSpaService(functionArgs, userId, userName, roomNumber);
+        break;
+      case 'book_event':
+        bookingResult = await bookEvent(functionArgs, userId, userName, roomNumber);
+        break;
+      case 'create_service_request':
+        bookingResult = await createServiceRequest(functionArgs, userId, userName, roomNumber);
+        break;
+      default:
+        bookingResult = { success: false, message: 'Unknown function' };
+    }
+
+    // Generate follow-up response based on booking result
+    const followUpResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
@@ -138,91 +216,34 @@ Only call the booking function when you have all the required information.`;
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage }
+          { role: 'user', content: message },
+          { role: 'assistant', content: data.choices[0].message.content, tool_calls: data.choices[0].message.tool_calls },
+          { role: 'tool', tool_call_id: toolCall.id, content: JSON.stringify(bookingResult) }
         ],
-        tools: tools,
-        tool_choice: "auto",
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 500
       }),
     });
 
-    const data = await response.json();
-    console.log('OpenAI Response:', data);
-
-    if (data.choices[0].message.tool_calls) {
-      // Handle function calls
-      const toolCall = data.choices[0].message.tool_calls[0];
-      const functionName = toolCall.function.name;
-      const functionArgs = JSON.parse(toolCall.function.arguments);
-      
-      console.log('Function call:', functionName, functionArgs);
-
-      let bookingResult;
-      
-      switch (functionName) {
-        case 'book_restaurant':
-          bookingResult = await bookRestaurant(functionArgs, userId, userName, roomNumber);
-          break;
-        case 'book_spa_service':
-          bookingResult = await bookSpaService(functionArgs, userId, userName, roomNumber);
-          break;
-        case 'book_event':
-          bookingResult = await bookEvent(functionArgs, userId, userName, roomNumber);
-          break;
-        case 'create_service_request':
-          bookingResult = await createServiceRequest(functionArgs, userId, userName, roomNumber);
-          break;
-        default:
-          bookingResult = { success: false, message: 'Unknown function' };
-      }
-
-      // Generate follow-up response based on booking result
-      const followUpResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userMessage },
-            { role: 'assistant', content: data.choices[0].message.content, tool_calls: data.choices[0].message.tool_calls },
-            { role: 'tool', tool_call_id: toolCall.id, content: JSON.stringify(bookingResult) }
-          ],
-          temperature: 0.7,
-          max_tokens: 500
-        }),
-      });
-
-      const followUpData = await followUpResponse.json();
-      return new Response(JSON.stringify({ 
-        response: followUpData.choices[0].message.content,
-        booking: bookingResult
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify({ 
-      response: data.choices[0].message.content 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
-  } catch (error) {
-    console.error('Error in AI chat function:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Sorry, I encountered an error. Please try again.',
-      details: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    const followUpData = await followUpResponse.json();
+    aiResponse = followUpData.choices[0].message.content;
   }
-});
+
+  // Insert AI response to the new messages table (only if conversationId is provided)
+  if (conversationId) {
+    await supabase
+      .from('messages')
+      .insert({
+        conversation_id: conversationId,
+        sender_type: 'ai',
+        sender_name: 'AI Assistant',
+        content: aiResponse,
+        message_type: 'text'
+      });
+  }
+
+  return { response: aiResponse };
+}
 
 async function bookRestaurant(args: any, userId: string, userName: string, roomNumber: string) {
   try {

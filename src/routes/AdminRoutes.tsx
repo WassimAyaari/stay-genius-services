@@ -12,7 +12,7 @@ import SpaManager from '@/pages/admin/SpaManager';
 import EventsManager from '@/pages/admin/EventsManager';
 import ShopsManager from '@/pages/admin/ShopsManager';
 import DestinationManager from '@/pages/admin/DestinationManager';
-import ChatMessages from '@/pages/admin/ChatMessages';
+import { AdminChatDashboard } from '@/components/admin/chat/AdminChatDashboard';
 import AboutEditor from '@/pages/admin/AboutEditor';
 import FeedbackManager from '@/pages/admin/FeedbackManager';
 import InformationTechnologyManager from '@/pages/admin/InformationTechnologyManager';
@@ -34,7 +34,7 @@ const AdminRoutes = () => {
         <Route path="events" element={<EventsManager />} />
         <Route path="shops" element={<ShopsManager />} />
         <Route path="destination" element={<DestinationManager />} />
-        <Route path="chat" element={<ChatMessages />} />
+        <Route path="chat" element={<AdminChatDashboard />} />
         <Route path="about" element={<AboutEditor />} />
         <Route path="feedback" element={<FeedbackManager />} />
         <Route path="information-technology" element={<InformationTechnologyManager />} />

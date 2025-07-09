@@ -74,44 +74,43 @@ export type Database = {
         }
         Relationships: []
       }
-      chat_messages: {
+      chat_routing: {
         Row: {
-          created_at: string | null
+          conversation_id: string
+          created_at: string
+          from_handler: string
           id: string
-          recipient_id: string | null
-          room_number: string
-          sender: string
-          status: string
-          text: string
-          updated_at: string | null
-          user_id: string
-          user_name: string
+          reason: string | null
+          staff_id: string | null
+          to_handler: string
         }
         Insert: {
-          created_at?: string | null
+          conversation_id: string
+          created_at?: string
+          from_handler: string
           id?: string
-          recipient_id?: string | null
-          room_number: string
-          sender: string
-          status?: string
-          text: string
-          updated_at?: string | null
-          user_id: string
-          user_name: string
+          reason?: string | null
+          staff_id?: string | null
+          to_handler: string
         }
         Update: {
-          created_at?: string | null
+          conversation_id?: string
+          created_at?: string
+          from_handler?: string
           id?: string
-          recipient_id?: string | null
-          room_number?: string
-          sender?: string
-          status?: string
-          text?: string
-          updated_at?: string | null
-          user_id?: string
-          user_name?: string
+          reason?: string | null
+          staff_id?: string | null
+          to_handler?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chat_routing_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_templates: {
         Row: {
@@ -176,6 +175,45 @@ export type Database = {
           relation?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          assigned_staff_id: string | null
+          created_at: string
+          current_handler: string
+          guest_email: string | null
+          guest_id: string | null
+          guest_name: string
+          id: string
+          room_number: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_staff_id?: string | null
+          created_at?: string
+          current_handler?: string
+          guest_email?: string | null
+          guest_id?: string | null
+          guest_name: string
+          id?: string
+          room_number?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_staff_id?: string | null
+          created_at?: string
+          current_handler?: string
+          guest_email?: string | null
+          guest_id?: string | null
+          guest_name?: string
+          id?: string
+          room_number?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -674,6 +712,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          message_type: string
+          metadata: Json | null
+          sender_id: string | null
+          sender_name: string
+          sender_type: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_name: string
+          sender_type: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_name?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_transport: {
         Row: {
