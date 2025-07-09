@@ -17,17 +17,11 @@ const SpaServiceCard = ({
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <div className="h-40 bg-gray-200">
-        {service.image ? (
-          <img 
-            src={service.image} 
-            alt={service.name} 
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-            <span>No image</span>
-          </div>
-        )}
+        <img 
+          src={service.image || "/lovable-uploads/57f94ab0-9957-4a75-9529-ecdad2e93b0b.png"} 
+          alt={service.name} 
+          className="w-full h-full object-cover"
+        />
       </div>
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-2">
