@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { CheckCircle2, XCircle, Clock, Loader2, FileText, Ban } from 'lucide-react';
 import { toast } from 'sonner';
 import { ServiceRequest } from '@/features/rooms/types';
@@ -46,14 +45,14 @@ const ServiceRequestDetails = () => {
     setIsUpdating(true);
     try {
       await cancelRequest(request.id);
-      toast.success("Votre demande a été annulée");
+      toast.success("Your request has been cancelled");
       setIsCancelDialogOpen(false);
       
       // Refetch the request to get updated data
       refetchRequest();
     } catch (error) {
-      toast.error("Erreur lors de l'annulation de la demande");
-      console.error("Erreur lors de l'annulation:", error);
+      toast.error("Error cancelling the request");
+      console.error("Error cancelling:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -78,10 +77,10 @@ const ServiceRequestDetails = () => {
     if (!request) return "";
     
     switch (request.status) {
-      case 'completed': return "Complétée";
-      case 'in_progress': return "En cours";
-      case 'cancelled': return "Annulée";
-      default: return "En attente";
+      case 'completed': return "Completed";
+      case 'in_progress': return "In Progress";
+      case 'cancelled': return "Cancelled";
+      default: return "Pending";
     }
   };
   
@@ -111,11 +110,11 @@ const ServiceRequestDetails = () => {
         <div className="container py-8">
           <Card>
             <CardContent className="pt-6">
-              <p className="text-center text-gray-500">Identifiant de demande manquant</p>
+              <p className="text-center text-gray-500">Request ID is missing</p>
             </CardContent>
             <CardFooter className="flex justify-center">
               <Button onClick={() => navigate('/notifications')}>
-                Retour aux notifications
+                Back to notifications
               </Button>
             </CardFooter>
           </Card>
@@ -141,17 +140,17 @@ const ServiceRequestDetails = () => {
           <Card>
             <CardContent className="pt-6">
               <p className="text-center text-gray-500">
-                Erreur lors du chargement des détails: {requestError.message}
+                Error loading details: {requestError.message}
               </p>
               <div className="mt-4 text-center">
                 <Button variant="outline" onClick={() => refetchRequest()}>
-                  Réessayer
+                  Retry
                 </Button>
               </div>
             </CardContent>
             <CardFooter className="flex justify-center">
               <Button onClick={() => navigate('/notifications')}>
-                Retour aux notifications
+                Back to notifications
               </Button>
             </CardFooter>
           </Card>
@@ -166,11 +165,11 @@ const ServiceRequestDetails = () => {
         <div className="container py-8">
           <Card>
             <CardContent className="pt-6">
-              <p className="text-center text-gray-500">Impossible de trouver les détails de cette demande.</p>
+              <p className="text-center text-gray-500">Unable to find the details of this request.</p>
             </CardContent>
             <CardFooter className="flex justify-center">
               <Button onClick={() => navigate('/notifications')}>
-                Retour aux notifications
+                Back to notifications
               </Button>
             </CardFooter>
           </Card>
@@ -188,7 +187,7 @@ const ServiceRequestDetails = () => {
   return (
     <Layout>
       <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-6">Détails de votre demande</h1>
+        <h1 className="text-2xl font-bold mb-6">Your Request Details</h1>
         
         <Card className="mb-6">
           <CardHeader className="pb-2">
@@ -211,7 +210,7 @@ const ServiceRequestDetails = () => {
             )}
             
             <div className="text-sm text-gray-500">
-              Demande créée {formatDistanceToNow(creationDate, { addSuffix: true, locale: fr })}
+              Request created {formatDistanceToNow(creationDate, { addSuffix: true })}
             </div>
             
             <div className="pt-4">
@@ -222,9 +221,9 @@ const ServiceRequestDetails = () => {
                       <Clock className="h-5 w-5 text-yellow-400" />
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">Demande en attente</h3>
+                      <h3 className="text-sm font-medium text-yellow-800">Request Pending</h3>
                       <div className="mt-2 text-sm text-yellow-700">
-                        <p>Votre demande est en cours de traitement. Notre équipe s'en occupera dans les plus brefs délais.</p>
+                        <p>Your request is being processed. Our team will handle it as soon as possible.</p>
                       </div>
                     </div>
                   </div>
@@ -238,9 +237,9 @@ const ServiceRequestDetails = () => {
                       <Loader2 className="h-5 w-5 text-blue-400 animate-spin" />
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-blue-800">Demande en cours</h3>
+                      <h3 className="text-sm font-medium text-blue-800">Request In Progress</h3>
                       <div className="mt-2 text-sm text-blue-700">
-                        <p>Notre équipe est en train de traiter votre demande.</p>
+                        <p>Our team is currently handling your request.</p>
                       </div>
                     </div>
                   </div>
@@ -254,9 +253,9 @@ const ServiceRequestDetails = () => {
                       <CheckCircle2 className="h-5 w-5 text-green-400" />
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-green-800">Demande complétée</h3>
+                      <h3 className="text-sm font-medium text-green-800">Request Completed</h3>
                       <div className="mt-2 text-sm text-green-700">
-                        <p>Votre demande a été traitée avec succès.</p>
+                        <p>Your request has been successfully processed.</p>
                       </div>
                     </div>
                   </div>
@@ -270,9 +269,9 @@ const ServiceRequestDetails = () => {
                       <XCircle className="h-5 w-5 text-red-400" />
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800">Demande annulée</h3>
+                      <h3 className="text-sm font-medium text-red-800">Request Cancelled</h3>
                       <div className="mt-2 text-sm text-red-700">
-                        <p>Cette demande a été annulée.</p>
+                        <p>This request has been cancelled.</p>
                       </div>
                     </div>
                   </div>
@@ -283,7 +282,7 @@ const ServiceRequestDetails = () => {
           
           <CardFooter className="pt-2 flex gap-3">
             <Button variant="outline" onClick={() => navigate('/my-room')}>
-              Retour à ma chambre
+              Back to My Room
             </Button>
             
             {(isPending || isInProgress) && (
@@ -293,7 +292,7 @@ const ServiceRequestDetails = () => {
                 onClick={() => setIsCancelDialogOpen(true)}
               >
                 <Ban className="h-4 w-4" />
-                Annuler
+                Cancel
               </Button>
             )}
           </CardFooter>
@@ -303,17 +302,17 @@ const ServiceRequestDetails = () => {
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Annuler votre demande</DialogTitle>
+            <DialogTitle>Cancel your request</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir annuler cette demande de {getTypeText().toLowerCase()} ?
+              Are you sure you want to cancel this {getTypeText().toLowerCase()} request?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 sm:justify-end">
             <Button variant="outline" onClick={() => setIsCancelDialogOpen(false)}>
-              Non, garder ma demande
+              No, keep my request
             </Button>
             <Button variant="destructive" onClick={handleCancelRequest} disabled={isUpdating}>
-              {isUpdating ? 'Annulation...' : 'Oui, annuler'}
+              {isUpdating ? 'Cancelling...' : 'Yes, cancel'}
             </Button>
           </DialogFooter>
         </DialogContent>
