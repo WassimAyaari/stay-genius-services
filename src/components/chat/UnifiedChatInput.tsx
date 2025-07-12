@@ -27,13 +27,13 @@ interface ConciergeMessageInputProps {
   isTyping: boolean;
 }
 
-const ConciergeMessageInput: React.FC<ConciergeMessageInputProps> = ({
+const ConciergeMessageInput = ({
   inputMessage,
   setInputMessage,
   onSendMessage,
   inputRef,
   isTyping
-}) => {
+}: ConciergeMessageInputProps) => {
   const [showTemplates, setShowTemplates] = useState(false);
 
   const handleTemplateSelect = (message: string) => {
