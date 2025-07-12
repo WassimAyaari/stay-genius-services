@@ -47,7 +47,7 @@ export const UnifiedChatHeader: React.FC<UnifiedChatHeaderProps> = ({
         
         <div>
           <h3 className="font-semibold text-sm">
-            {isAIHandling ? 'AI Assistant' : 'Human Staff'}
+            {isAIHandling ? 'AI Assistant' : 'Concierge'}
           </h3>
           <p className="text-xs text-muted-foreground">
             {isAIHandling ? '24/7 Available' : 'Live Support'}

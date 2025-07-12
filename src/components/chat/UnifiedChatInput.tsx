@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, MessageSquare, Paperclip } from 'lucide-react';
 import { VoiceMessageInput } from '@/components/voice/VoiceMessageInput';
+import UserQuickTemplates from '@/components/messaging/UserQuickTemplates';
 
 interface UnifiedChatInputProps {
   inputMessage: string;
@@ -18,6 +19,87 @@ interface UnifiedChatInputProps {
   };
 }
 
+interface ConciergeMessageInputProps {
+  inputMessage: string;
+  setInputMessage: (message: string) => void;
+  onSendMessage: () => void;
+  inputRef: React.RefObject<HTMLTextAreaElement>;
+  isTyping: boolean;
+}
+
+const ConciergeMessageInput: React.FC<ConciergeMessageInputProps> = ({
+  inputMessage,
+  setInputMessage,
+  onSendMessage,
+  inputRef,
+  isTyping
+}) => {
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  const handleTemplateSelect = (message: string) => {
+    setInputMessage(message);
+    setShowTemplates(false);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSendMessage();
+    }
+  };
+
+  return (
+    <div className="border-t bg-card p-3 flex-shrink-0 relative">
+      <UserQuickTemplates 
+        isOpen={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
+      
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-full h-10 w-10 flex-shrink-0"
+          type="button"
+        >
+          <Paperclip className="h-5 w-5" />
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full h-10 w-10 flex-shrink-0"
+          onClick={() => setShowTemplates(!showTemplates)}
+          type="button"
+        >
+          <MessageSquare className="h-5 w-5" />
+        </Button>
+        
+        <Textarea 
+          ref={inputRef}
+          value={inputMessage} 
+          onChange={(e) => setInputMessage(e.target.value)} 
+          onKeyDown={handleKeyPress}
+          placeholder="Type your message to concierge..." 
+          className="resize-none min-h-0 h-10 py-2 px-4 rounded-full border-0 focus-visible:ring-1 bg-muted/50" 
+          disabled={isTyping}
+        />
+        
+        <Button 
+          type="button"
+          size="icon" 
+          onClick={onSendMessage} 
+          className="rounded-full h-10 w-10 flex-shrink-0" 
+          disabled={!inputMessage.trim() || isTyping}
+        >
+          <Send className="h-5 w-5" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
   inputMessage,
   setInputMessage,
@@ -27,13 +109,6 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
   isTyping,
   userInfo
 }) => {
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      onSendMessage();
-    }
-  };
-
   const isAIHandling = currentHandler === 'ai';
 
   return (
@@ -47,7 +122,7 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
         ) : (
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <User className="h-3 w-3" />
-            <span>Human staff available</span>
+            <span>Front desk team available</span>
           </div>
         )}
       </div>
@@ -61,27 +136,13 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
           userInfo={userInfo}
         />
       ) : (
-        <div className="border-t bg-card p-3">
-          <div className="flex space-x-2">
-            <Textarea
-              ref={inputRef}
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message to staff..."
-              className="flex-1 min-h-[40px] max-h-[120px] resize-none"
-              disabled={isTyping}
-            />
-            <Button 
-              onClick={onSendMessage}
-              disabled={!inputMessage.trim() || isTyping}
-              size="icon"
-              className="h-10 w-10 shrink-0"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <ConciergeMessageInput
+          inputMessage={inputMessage}
+          setInputMessage={setInputMessage}
+          onSendMessage={onSendMessage}
+          inputRef={inputRef}
+          isTyping={isTyping}
+        />
       )}
     </div>
   );
