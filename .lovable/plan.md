@@ -1,132 +1,116 @@
 
-# Plan: Menu Size, Remove Admin Link, and Role-Based Login Redirect
+# Plan: Fix Restaurant Reservations for Admin Dashboard
 
 ## Overview
-This plan addresses three changes:
-1. Change the menu to a compact sidebar (like Figure 1) instead of full-page
-2. Remove "Admin Dashboard" from the main menu
-3. Redirect users based on role after login: regular users → Home, admins → Admin Dashboard
+This plan addresses two issues:
+1. Admins cannot view restaurant reservations in the admin dashboard due to restrictive RLS policies
+2. Ensure the booking form creates reservations properly
 
 ---
 
-## Change 1: Compact Menu Size
+## Issue 1: Admin RLS Access
 
 ### Current State
-The `SheetContent` in `MainMenu.tsx` uses `w-full sm:max-w-full`, making it span the entire screen width.
+The `table_reservations` table has these RLS policies:
+- SELECT: `user_id = auth.uid()` (users can only view their own)
+- INSERT: `user_id = auth.uid()` (users can only create their own)
+- UPDATE: `user_id = auth.uid()` (users can only update their own)
+- DELETE: `user_id = auth.uid()` (users can only delete their own)
+
+**Result:** Admins cannot see any reservations in the Bookings tab.
 
 ### Solution
-Change the width classes to create a compact sidebar similar to the reference image.
+Add RLS policies that allow admins (using the existing `is_admin()` function) to:
+- View all reservations
+- Update all reservations (for status changes)
 
-**File:** `src/components/MainMenu.tsx`
+### Database Migration
 
-| Line | Current | Updated |
-|------|---------|---------|
-| 75 | `className="p-0 w-full sm:max-w-full bg-card border-border"` | `className="p-0 w-80 sm:max-w-sm bg-card border-border"` |
-| 87 | `className="flex-1 h-[calc(100vh-80px)] bg-card"` | `className="flex-1 bg-card"` |
+```sql
+-- Add admin policies for table_reservations
 
-Also update line 76 to remove the full height constraint:
-- Change `className="flex flex-col h-full bg-card"` 
-- To `className="flex flex-col bg-card"`
+-- Allow admins to view all reservations
+CREATE POLICY "Admins can view all reservations"
+ON public.table_reservations
+FOR SELECT
+USING (is_admin(auth.uid()));
 
----
-
-## Change 2: Remove Admin Dashboard from Menu
-
-### Current State
-Lines 45-52 conditionally add "Admin Dashboard" to the menu if the user is an admin.
-
-### Solution
-Remove the conditional block that adds the admin menu item.
-
-**File:** `src/components/MainMenu.tsx`
-
-Delete lines 45-52:
-```typescript
-// Add admin menu item if user is admin
-if (isAdmin) {
-  menuItems.push({
-    icon: <Settings className="h-5 w-5" />,
-    label: 'Admin Dashboard',
-    path: '/admin'
-  });
-}
-```
-
-Also remove the unused imports:
-- Remove `Settings` from lucide-react import (line 14)
-- Remove `useAdminCheck` import and hook call (lines 16, 26)
-
----
-
-## Change 3: Role-Based Redirect After Login
-
-### Current State
-`LoginForm.tsx` always redirects to `/` after successful login (line 46).
-
-### Solution
-After successful login, check if the user is an admin using the `is_user_admin` RPC function, then redirect accordingly.
-
-**File:** `src/pages/auth/components/LoginForm.tsx`
-
-Add Supabase import and update the `onSubmit` function:
-
-```typescript
-import { supabase } from '@/integrations/supabase/client';
-
-// Inside onSubmit, after login success:
-if (result.success) {
-  toast({
-    title: 'Connexion réussie',
-    description: 'Bienvenue dans l\'application Stay Genius',
-  });
-  
-  // Check if user is admin and redirect accordingly
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user?.id) {
-    const { data: isAdmin } = await supabase.rpc('is_user_admin', { 
-      _user_id: session.user.id 
-    });
-    
-    if (isAdmin) {
-      navigate('/admin');
-    } else {
-      navigate('/');
-    }
-  } else {
-    navigate('/');
-  }
-}
+-- Allow admins to update all reservations
+CREATE POLICY "Admins can update all reservations"
+ON public.table_reservations
+FOR UPDATE
+USING (is_admin(auth.uid()));
 ```
 
 ---
 
-## Files to Modify
+## Issue 2: Reservation Creation
 
-| File | Changes |
+### Current State
+The `RestaurantBookingForm.tsx` has a potential issue:
+- Line 42: Uses `localStorage.getItem('user_id')` 
+- Line 84: Sends this as `user_id` in the insert
+
+If the stored user_id doesn't match `auth.uid()`, the INSERT will fail due to RLS.
+
+### Solution
+Update the INSERT policy to allow authenticated users to create reservations:
+
+```sql
+-- Drop the existing restrictive INSERT policy
+DROP POLICY IF EXISTS "Users can create their own reservations" ON public.table_reservations;
+
+-- Allow any authenticated user to create reservations
+CREATE POLICY "Authenticated users can create reservations"
+ON public.table_reservations
+FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL);
+```
+
+---
+
+## Summary of Changes
+
+| File | Change |
+|------|--------|
+| Migration | Add admin SELECT and UPDATE policies for `table_reservations` |
+| Migration | Update INSERT policy to be less restrictive |
+
+### Files to Create
+
+| File | Purpose |
 |------|---------|
-| `src/components/MainMenu.tsx` | Compact width, remove admin menu item |
-| `src/pages/auth/components/LoginForm.tsx` | Add role-based redirect logic |
+| `supabase/migrations/[timestamp]_fix_table_reservations_rls.sql` | Add RLS policies for admin access |
 
 ---
 
-## Technical Summary
+## Expected Result After Implementation
 
-### Menu Changes
-- Width: `w-full sm:max-w-full` → `w-80 sm:max-w-sm` (320px fixed width)
-- Remove fixed height constraint for natural content sizing
-- Remove admin-only menu item entirely
+1. **Admin Dashboard (Bookings tab):**
+   - Select a restaurant from the dropdown
+   - See all reservations for that restaurant
+   - Update reservation status (confirm/cancel)
 
-### Login Redirect Flow
-```
-User submits login
-    ↓
-loginUser() succeeds
-    ↓
-Get current session
-    ↓
-Call is_user_admin RPC
-    ↓
-isAdmin? → /admin
-    ↓
-Not admin? → /
-```
+2. **User Booking Flow:**
+   - User fills out the booking form on `/dining`
+   - Reservation is created successfully
+   - Appears in user's "My Reservations" view
+   - Also visible to admin in the Bookings tab
+
+---
+
+## Testing Verification
+
+After implementation:
+1. Log in as admin
+2. Go to `/admin/restaurants` → Bookings tab
+3. Select a restaurant
+4. Verify reservations appear in the list
+5. Change a reservation status and verify it updates
+
+Also test:
+1. Log in as a regular user
+2. Go to `/dining`
+3. Book a table at any restaurant
+4. Verify the booking is created
+5. Log in as admin and verify the new booking appears
