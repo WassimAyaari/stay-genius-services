@@ -1,119 +1,47 @@
 
+# Plan: Redirect All Notifications to /requests
 
-# Plan: Connect User Service Requests to Admin Dashboard
+## Overview
+Change the notification click behavior so that clicking on any notification redirects the user to the `/requests` page instead of individual detail pages.
 
-## Current State Analysis
+## Current Behavior
+The `NotificationItem` component uses a `getDirectLink()` function that returns different routes based on notification type:
+- `spa_booking` → `/spa/booking/${id}`
+- `reservation` → `/dining/reservations/${id}`
+- `request` → `/my-room/requests/${id}`
+- `event_reservation` → `/events/${id}`
+- default → link prop or `/notifications`
 
-After thorough investigation, I found:
+## Implementation
 
-1. **User-side submission WORKS**: When a user selects a service (Security, Maintenance, IT, Housekeeping) from the search dialog, it correctly calls `requestService()` which inserts into the `service_requests` table with:
-   - `category_id` (the category of the request)
-   - `request_item_id` (the specific item selected)
-   - `guest_id`, `guest_name`, `room_number`
-   - `description`, `type`, `status`
+### File to Modify
+`src/components/notifications/NotificationItem.tsx`
 
-2. **Admin-side viewing WORKS**: The admin pages (SecurityManager, MaintenanceManager, HousekeepingManager, InformationTechnologyManager) fetch requests using `useRequestsData` hook and filter by `category_id`.
+### Change
+Update the `getDirectLink()` function to always return `/requests`:
 
-3. **Data is being stored**: Verified in the database - the most recent request from today shows proper data with category linkage.
+```typescript
+// Before (lines 31-44)
+function getDirectLink() {
+  switch (type) {
+    case 'spa_booking': 
+      return `/spa/booking/${id}`;
+    case 'reservation': 
+      return `/dining/reservations/${id}`;
+    case 'request': 
+      return `/my-room/requests/${id}`;
+    case 'event_reservation':
+      return `/events/${id}`;
+    default: 
+      return link || '/notifications';
+  }
+}
 
-## Issue Identified
-
-The query in `useServiceRequests` uses `select('*')` which doesn't fetch the related `request_items` data. This means the admin tables show the description instead of the item name when available.
-
-## Implementation Steps
-
-### Step 1: Update useServiceRequests to Include Related Data
-
-**File: `src/hooks/useServiceRequests.tsx`**
-
-Update the Supabase query to include the `request_items` relationship:
-
-| Change | Current | Updated |
-|--------|---------|---------|
-| Line 33 | `.select('*')` | `.select('*, request_items(*)')` |
-| Line 50 | `.select('*')` | `.select('*, request_items(*)')` |
-| Line 69 | `.select('*')` | `.select('*, request_items(*)')` |
-
-This ensures that when a request has a `request_item_id`, the related item data (name, description) is fetched along with the request.
-
-### Step 2: Verify Real-time Updates
-
-The `useRequestsData` hook already has real-time subscriptions set up that will trigger a refetch when requests are created or updated. This means admins will see new requests appear automatically without manual refresh.
-
-## Technical Details
-
-### Request Flow Diagram
-
-```text
-USER SIDE                                    ADMIN SIDE
-┌─────────────────────────┐                 ┌──────────────────────────┐
-│  /services page         │                 │  /admin/maintenance      │
-│  ┌─────────────────┐    │                 │  /admin/housekeeping     │
-│  │ CommandSearch   │    │                 │  /admin/security         │
-│  │ (SearchDialog)  │    │                 │  /admin/information-tech │
-│  └────────┬────────┘    │                 └───────────┬──────────────┘
-│           │             │                             │
-│           ▼             │                             ▼
-│  ┌─────────────────┐    │                 ┌──────────────────────────┐
-│  │ ConfirmDialog   │    │                 │  useRequestsData()       │
-│  └────────┬────────┘    │                 │  (calls useServiceReq)   │
-│           │             │                 └───────────┬──────────────┘
-│           ▼             │                             │
-│  ┌─────────────────┐    │                             ▼
-│  │ requestService()│    │                 ┌──────────────────────────┐
-│  │ (roomService.ts)│    │                 │  Filter by category_id   │
-│  └────────┬────────┘    │                 │  Display in table        │
-│           │             │                 └──────────────────────────┘
-└───────────┼─────────────┘                             ▲
-            │                                           │
-            ▼                                           │
-┌─────────────────────────────────────────────────────────┐
-│                     SUPABASE DATABASE                    │
-│                                                          │
-│   service_requests table                                 │
-│   ┌────────────────────────────────────────────────┐    │
-│   │ id, guest_id, room_id, room_number, guest_name │    │
-│   │ type, description, status, category_id         │    │
-│   │ request_item_id, created_at, updated_at        │    │
-│   └────────────────────────────────────────────────┘    │
-│                        │                                 │
-│                        │ FK                              │
-│                        ▼                                 │
-│   request_items table                                    │
-│   ┌────────────────────────────────────────────────┐    │
-│   │ id, name, description, category_id, is_active  │    │
-│   └────────────────────────────────────────────────┘    │
-│                                                          │
-│   Real-time subscription ────────────────────────────────┼──▶ Admin refetch
-└──────────────────────────────────────────────────────────┘
+// After
+function getDirectLink() {
+  return '/requests';
+}
 ```
 
-### Category Mapping
-
-| Category | ID | Admin Page |
-|----------|-----|------------|
-| Housekeeping | `7beb3ccf-bbcf-4405-a397-6b6c636c955b` | `/admin/housekeeping` |
-| Information Technology | `2f96741e-3e04-4117-8d37-e94795e37a68` | `/admin/information-technology` |
-| Maintenance | `621e423a-413f-4e8f-b471-bbd64e9c8c44` | `/admin/maintenance` |
-| Security | `44b20203-fcc1-4cfc-88d9-30ef32b2f326` | `/admin/security` |
-
-### Files to Modify
-
-| File | Change |
-|------|--------|
-| `src/hooks/useServiceRequests.tsx` | Add `request_items(*)` to select queries |
-
-## Testing Verification
-
-After implementation:
-1. Go to `/services` as a user
-2. Search and select a service item (e.g., "A/C noise" from Maintenance)
-3. Confirm the request
-4. Go to `/admin/maintenance` as admin
-5. The request should appear in the "Requests" tab with:
-   - Room number
-   - Guest name
-   - Request item name (not just description)
-   - Date
-   - Status with action buttons
-
+## Result
+After this change, clicking on any notification in the notification menu will navigate the user to the `/requests` page where they can see all their service requests with filtering and search capabilities.
