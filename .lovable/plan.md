@@ -1,47 +1,100 @@
 
-# Plan: Fix Admin RLS Policies for Restaurant Reservations
+# Plan: Fix Restaurant Reservations Display in Admin Dashboard
 
-## Problem Identified
-The RLS policies created for `table_reservations` use the wrong admin check function:
+## Problem Analysis
 
-- **Currently using:** `is_admin(auth.uid())` - checks `auth.users.raw_app_meta_data->>'is_admin' = 'true'`
-- **Should use:** `is_user_admin(auth.uid())` - checks the `user_roles` table where admin roles are actually stored
+Two issues are preventing restaurant reservations from displaying in the admin dashboard:
 
-The user ammna.jmal@gmail.com has admin role in `user_roles` table but not in `raw_app_meta_data`, so the RLS policies are blocking their access.
+### Issue 1: Missing Route
+The URL `/admin/restaurants/:id` has no registered route, causing a blank page when navigating to individual restaurant pages.
+
+### Issue 2: Query Function Selection Bug
+The `useTableReservationsCore` hook selects the wrong query function. When the admin selects a restaurant in the Bookings tab, the hook still calls `fetchUserReservations` (filtering by user_id/email) instead of `fetchRestaurantReservations` (filtering by restaurant_id).
+
+The console logs confirm this:
+- Actual: "Fetching reservations for user ID: ..."
+- Expected: "Fetching reservations for restaurant ID: ..."
+
+---
 
 ## Solution
-Update the RLS policies to use the correct function that checks the `user_roles` table.
 
-## Database Migration
+### Fix 1: Register Missing Route
 
-Drop the incorrect policies and create new ones with the correct function:
+**File:** `src/routes/AdminRoutes.tsx`
 
-```sql
--- Drop incorrect policies
-DROP POLICY IF EXISTS "Admins can view all reservations" ON public.table_reservations;
-DROP POLICY IF EXISTS "Admins can update all reservations" ON public.table_reservations;
+Add import for `RestaurantReservationsManager` and register the route.
 
--- Create correct policies using is_user_admin
-CREATE POLICY "Admins can view all reservations"
-ON public.table_reservations
-FOR SELECT
-USING (is_user_admin(auth.uid()));
+```typescript
+import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
 
-CREATE POLICY "Admins can update all reservations"
-ON public.table_reservations
-FOR UPDATE
-USING (is_user_admin(auth.uid()));
+// Add inside Routes:
+<Route path="restaurants/:id/reservations" element={<RestaurantReservationsManager />} />
 ```
+
+---
+
+### Fix 2: Fix Query Function Logic
+
+**File:** `src/hooks/reservations/useTableReservationsCore.tsx`
+
+The issue is that `isRestaurantSpecific` is computed once, but needs to be reactive. Change the queryFn to be computed dynamically within the useQuery call:
+
+Current (broken):
+```typescript
+const isRestaurantSpecific = !!restaurantId && restaurantId !== ':id';
+const { fetchUserReservations, fetchRestaurantReservations } = useReservationsFetching(...);
+
+const { data: reservations } = useQuery({
+  queryKey: ['tableReservations', userId, userEmail, restaurantId],
+  queryFn: isRestaurantSpecific ? fetchRestaurantReservations : fetchUserReservations,
+  ...
+});
+```
+
+Fixed:
+```typescript
+const { data: reservations } = useQuery({
+  queryKey: ['tableReservations', userId, userEmail, restaurantId],
+  queryFn: async () => {
+    const shouldFetchByRestaurant = !!restaurantId && restaurantId !== ':id';
+    if (shouldFetchByRestaurant) {
+      return fetchRestaurantReservations();
+    }
+    return fetchUserReservations();
+  },
+  ...
+});
+```
+
+This ensures the decision is made at query execution time, not at hook initialization time.
+
+---
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/routes/AdminRoutes.tsx` | Add route for `restaurants/:id/reservations` |
+| `src/hooks/reservations/useTableReservationsCore.tsx` | Fix queryFn to evaluate restaurant filtering dynamically |
+
+---
 
 ## Expected Result
 
-After this fix:
-1. Admins (users with 'admin' role in `user_roles` table) can see all reservations in the Bookings tab
-2. Admins can update reservation status (confirm/cancel)
-3. Regular users continue to only see their own reservations
+After implementing these fixes:
+
+1. **Bookings Tab**: When admin selects a restaurant, reservations for that restaurant will appear
+2. **Individual Restaurant Page**: URL `/admin/restaurants/:id/reservations` will display that restaurant's reservations
+3. **Status Updates**: Admin can confirm or cancel reservations
+
+---
 
 ## Testing Steps
-1. Log in as admin (ammna.jmal@gmail.com)
-2. Go to Admin Panel → Restaurants → Bookings tab
-3. Select a restaurant (e.g., Allegria)
-4. Verify reservations appear in the list
+
+1. Log in as admin
+2. Go to Admin Panel, then F&B, then Restaurants
+3. Click on the Bookings tab
+4. Select a restaurant from the dropdown (e.g., "Allegria")
+5. Verify reservations appear in the grid
+6. Try updating a reservation status (confirm/cancel)
