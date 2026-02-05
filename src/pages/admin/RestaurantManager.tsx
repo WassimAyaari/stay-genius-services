@@ -10,7 +10,6 @@ import { RestaurantTable } from '@/components/admin/restaurants/RestaurantTable'
 import RestaurantFormDialog from '@/components/admin/restaurants/RestaurantFormDialog';
 import RestaurantBookingsTab from './restaurants/RestaurantBookingsTab';
 import RestaurantMenusTab from './restaurants/RestaurantMenusTab';
-import Layout from '@/components/Layout';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -100,7 +99,7 @@ const RestaurantManager = () => {
   };
 
   return (
-    <Layout>
+    <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Restaurant Management</h1>
         <p className="text-muted-foreground mt-1">
@@ -205,7 +204,7 @@ const RestaurantManager = () => {
           />
         </DialogContent>
       </Dialog>
-    </Layout>
+    </div>
   );
 };
 

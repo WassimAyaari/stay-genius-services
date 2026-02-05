@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import Layout from '@/components/Layout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRequestCategories, useCreateRequestItem } from '@/hooks/useRequestCategories';
 import { RequestItem } from '@/features/rooms/types';
@@ -61,45 +60,43 @@ const SecurityManager = () => {
   };
   
   return (
-    <Layout>
-      <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-6">Security Management</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Security Management</h1>
+      
+      <Tabs defaultValue="items" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="items">Items</TabsTrigger>
+          <TabsTrigger value="requests">Requests</TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="items" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="items">Items</TabsTrigger>
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="items">
-            <SecurityItemsTab 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              openAddItemDialog={() => setIsAddItemDialogOpen(true)}
-              openEditDialog={openEditDialog}
-              createSecurityCategory={createSecurityCategory}
-            />
-          </TabsContent>
-          
-          <TabsContent value="requests">
-            <SecurityRequestsTab categoryIds={categoryIds} />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value="items">
+          <SecurityItemsTab 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            openAddItemDialog={() => setIsAddItemDialogOpen(true)}
+            openEditDialog={openEditDialog}
+            createSecurityCategory={createSecurityCategory}
+          />
+        </TabsContent>
         
-        {/* Dialogs */}
-        <AddItemDialog
-          isOpen={isAddItemDialogOpen}
-          onOpenChange={setIsAddItemDialogOpen}
-          categoryId={securityCategory?.id || ''}
-        />
-        
-        <EditItemDialog
-          isOpen={isEditItemDialogOpen}
-          onOpenChange={setIsEditItemDialogOpen}
-          item={editingItem}
-        />
-      </div>
-    </Layout>
+        <TabsContent value="requests">
+          <SecurityRequestsTab categoryIds={categoryIds} />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Dialogs */}
+      <AddItemDialog
+        isOpen={isAddItemDialogOpen}
+        onOpenChange={setIsAddItemDialogOpen}
+        categoryId={securityCategory?.id || ''}
+      />
+      
+      <EditItemDialog
+        isOpen={isEditItemDialogOpen}
+        onOpenChange={setIsEditItemDialogOpen}
+        item={editingItem}
+      />
+    </div>
   );
 };
 

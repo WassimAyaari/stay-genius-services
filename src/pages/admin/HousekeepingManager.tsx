@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Layout from '@/components/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -143,60 +142,58 @@ const HousekeepingManager = () => {
   };
   
   return (
-    <Layout>
-      <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-6">Housekeeping Management</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Housekeeping Management</h1>
+      
+      <Tabs defaultValue="items" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="items">Items</TabsTrigger>
+          <TabsTrigger value="requests">
+            Requests
+            {housekeepingRequests.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {housekeepingRequests.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="items" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="items">Items</TabsTrigger>
-            <TabsTrigger value="requests">
-              Requests
-              {housekeepingRequests.length > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {housekeepingRequests.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="items">
-            <HousekeepingItemsTab 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              openAddItemDialog={() => setIsAddItemDialogOpen(true)}
-              openEditDialog={openEditDialog}
-            />
-          </TabsContent>
-          
-          <TabsContent value="requests">
-            <HousekeepingRequestsTab
-              requestsSearchTerm={requestsSearchTerm}
-              setRequestsSearchTerm={setRequestsSearchTerm}
-              handleUpdateRequestStatus={handleUpdateRequestStatus}
-            />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value="items">
+          <HousekeepingItemsTab 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            openAddItemDialog={() => setIsAddItemDialogOpen(true)}
+            openEditDialog={openEditDialog}
+          />
+        </TabsContent>
         
-        {/* Add Item Dialog */}
-        <AddItemDialog
-          isOpen={isAddItemDialogOpen}
-          onOpenChange={setIsAddItemDialogOpen}
-          newItem={newItem}
-          setNewItem={setNewItem}
-          onAdd={handleAddItem}
-        />
-        
-        {/* Edit Item Dialog */}
-        <EditItemDialog
-          isOpen={isEditItemDialogOpen}
-          onOpenChange={setIsEditItemDialogOpen}
-          editingItem={editingItem}
-          setEditingItem={setEditingItem}
-          onUpdate={handleUpdateItem}
-        />
-      </div>
-    </Layout>
+        <TabsContent value="requests">
+          <HousekeepingRequestsTab
+            requestsSearchTerm={requestsSearchTerm}
+            setRequestsSearchTerm={setRequestsSearchTerm}
+            handleUpdateRequestStatus={handleUpdateRequestStatus}
+          />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Add Item Dialog */}
+      <AddItemDialog
+        isOpen={isAddItemDialogOpen}
+        onOpenChange={setIsAddItemDialogOpen}
+        newItem={newItem}
+        setNewItem={setNewItem}
+        onAdd={handleAddItem}
+      />
+      
+      {/* Edit Item Dialog */}
+      <EditItemDialog
+        isOpen={isEditItemDialogOpen}
+        onOpenChange={setIsEditItemDialogOpen}
+        editingItem={editingItem}
+        setEditingItem={setEditingItem}
+        onUpdate={handleUpdateItem}
+      />
+    </div>
   );
 };
 

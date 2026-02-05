@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import Layout from '@/components/Layout';
 import { PlusCircle, Trash2, Edit, Pencil, Save, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -140,52 +139,109 @@ const MaintenanceManager = () => {
   };
   
   return (
-    <Layout>
-      <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-6">Maintenance & Technical Items Management</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Maintenance & Technical Items Management</h1>
+      
+      <Tabs defaultValue="items" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="items">Items</TabsTrigger>
+          <TabsTrigger value="requests">Requests</TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="items" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="items">Items</TabsTrigger>
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="items">
-            <MaintenanceItemsTab 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              openAddItemDialog={() => setIsAddItemDialogOpen(true)}
-              openEditDialog={openEditDialog}
-              categoryIds={categoryIds}
-              getCategoryName={(categoryId) => {
-                const category = categories.find(cat => cat.id === categoryId);
-                return category?.name || 'Unknown';
-              }}
-            />
-          </TabsContent>
-          
-          <TabsContent value="requests">
-            <MaintenanceRequestsTab categoryIds={categoryIds} />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value="items">
+          <MaintenanceItemsTab 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            openAddItemDialog={() => setIsAddItemDialogOpen(true)}
+            openEditDialog={openEditDialog}
+            categoryIds={categoryIds}
+            getCategoryName={(categoryId) => {
+              const category = categories.find(cat => cat.id === categoryId);
+              return category?.name || 'Unknown';
+            }}
+          />
+        </TabsContent>
         
-        {/* Add Item Dialog */}
-        <Dialog open={isAddItemDialogOpen} onOpenChange={setIsAddItemDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Maintenance/Technical Item</DialogTitle>
-            </DialogHeader>
+        <TabsContent value="requests">
+          <MaintenanceRequestsTab categoryIds={categoryIds} />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Add Item Dialog */}
+      <Dialog open={isAddItemDialogOpen} onOpenChange={setIsAddItemDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Maintenance/Technical Item</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="category" className="text-sm font-medium">Category</label>
+              <select 
+                id="category"
+                value={newItem.category_id}
+                onChange={(e) => setNewItem({...newItem, category_id: e.target.value})}
+                className="px-3 py-2 border rounded-md"
+              >
+                <option value="">Select Category</option>
+                {maintenanceCategory && (
+                  <option value={maintenanceCategory.id}>Maintenance</option>
+                )}
+                {technicalCategory && (
+                  <option value={technicalCategory.id}>Technical</option>
+                )}
+              </select>
+            </div>
             
+            <div className="grid gap-2">
+              <label htmlFor="name" className="text-sm font-medium">Name</label>
+              <Input
+                id="name"
+                value={newItem.name}
+                onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                placeholder="Air Conditioning Issue"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <label htmlFor="description" className="text-sm font-medium">Description</label>
+              <Input
+                id="description"
+                value={newItem.description || ''}
+                onChange={(e) => setNewItem({...newItem, description: e.target.value})}
+                placeholder="Report a problem with the room's air conditioning"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleAddItem} disabled={createItem.isPending}>
+              {createItem.isPending ? 'Adding...' : 'Add Item'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Item Dialog */}
+      <Dialog open={isEditItemDialogOpen} onOpenChange={setIsEditItemDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Maintenance/Technical Item</DialogTitle>
+          </DialogHeader>
+          
+          {editingItem && (
             <div className="space-y-4 py-4">
               <div className="grid gap-2">
-                <label htmlFor="category" className="text-sm font-medium">Category</label>
+                <label htmlFor="edit-category" className="text-sm font-medium">Category</label>
                 <select 
-                  id="category"
-                  value={newItem.category_id}
-                  onChange={(e) => setNewItem({...newItem, category_id: e.target.value})}
+                  id="edit-category"
+                  value={editingItem.category_id}
+                  onChange={(e) => setEditingItem({...editingItem, category_id: e.target.value})}
                   className="px-3 py-2 border rounded-md"
                 >
-                  <option value="">Select Category</option>
                   {maintenanceCategory && (
                     <option value={maintenanceCategory.id}>Maintenance</option>
                   )}
@@ -196,106 +252,47 @@ const MaintenanceManager = () => {
               </div>
               
               <div className="grid gap-2">
-                <label htmlFor="name" className="text-sm font-medium">Name</label>
+                <label htmlFor="edit-name" className="text-sm font-medium">Name</label>
                 <Input
-                  id="name"
-                  value={newItem.name}
-                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                  placeholder="Air Conditioning Issue"
+                  id="edit-name"
+                  value={editingItem.name}
+                  onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
                 />
               </div>
               
               <div className="grid gap-2">
-                <label htmlFor="description" className="text-sm font-medium">Description</label>
+                <label htmlFor="edit-description" className="text-sm font-medium">Description</label>
                 <Input
-                  id="description"
-                  value={newItem.description || ''}
-                  onChange={(e) => setNewItem({...newItem, description: e.target.value})}
-                  placeholder="Report a problem with the room's air conditioning"
+                  id="edit-description"
+                  value={editingItem.description || ''}
+                  onChange={(e) => setEditingItem({...editingItem, description: e.target.value})}
                 />
               </div>
-            </div>
-            
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button onClick={handleAddItem} disabled={createItem.isPending}>
-                {createItem.isPending ? 'Adding...' : 'Add Item'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Edit Item Dialog */}
-        <Dialog open={isEditItemDialogOpen} onOpenChange={setIsEditItemDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Maintenance/Technical Item</DialogTitle>
-            </DialogHeader>
-            
-            {editingItem && (
-              <div className="space-y-4 py-4">
-                <div className="grid gap-2">
-                  <label htmlFor="edit-category" className="text-sm font-medium">Category</label>
-                  <select 
-                    id="edit-category"
-                    value={editingItem.category_id}
-                    onChange={(e) => setEditingItem({...editingItem, category_id: e.target.value})}
-                    className="px-3 py-2 border rounded-md"
-                  >
-                    {maintenanceCategory && (
-                      <option value={maintenanceCategory.id}>Maintenance</option>
-                    )}
-                    {technicalCategory && (
-                      <option value={technicalCategory.id}>Technical</option>
-                    )}
-                  </select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <label htmlFor="edit-name" className="text-sm font-medium">Name</label>
-                  <Input
-                    id="edit-name"
-                    value={editingItem.name}
-                    onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
-                  />
-                </div>
-                
-                <div className="grid gap-2">
-                  <label htmlFor="edit-description" className="text-sm font-medium">Description</label>
-                  <Input
-                    id="edit-description"
-                    value={editingItem.description || ''}
-                    onChange={(e) => setEditingItem({...editingItem, description: e.target.value})}
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    checked={editingItem.is_active}
-                    onChange={(e) => setEditingItem({...editingItem, is_active: e.target.checked})}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  <label htmlFor="is_active" className="text-sm font-medium">Active</label>
-                </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={editingItem.is_active}
+                  onChange={(e) => setEditingItem({...editingItem, is_active: e.target.checked})}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <label htmlFor="is_active" className="text-sm font-medium">Active</label>
               </div>
-            )}
-            
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button onClick={handleUpdateItem} disabled={updateItem.isPending}>
-                {updateItem.isPending ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </Layout>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleUpdateItem} disabled={updateItem.isPending}>
+              {updateItem.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
