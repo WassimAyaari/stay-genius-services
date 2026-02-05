@@ -27,20 +27,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   link,
   data
 }) => {
-  // Get direct link based on notification type
+  // Get direct link - all notifications redirect to /requests
   function getDirectLink() {
-    switch (type) {
-      case 'spa_booking': 
-        return `/spa/booking/${id}`;
-      case 'reservation': 
-        return `/dining/reservations/${id}`;
-      case 'request': 
-        return `/my-room/requests/${id}`;
-      case 'event_reservation':
-        return `/events/${id}`;
-      default: 
-        return link || '/notifications';
-    }
+    return '/requests';
   }
 
   // Get color based on notification status
