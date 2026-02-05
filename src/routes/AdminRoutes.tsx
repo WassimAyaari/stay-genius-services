@@ -18,6 +18,7 @@ import AboutEditor from '@/pages/admin/AboutEditor';
 import FeedbackManager from '@/pages/admin/FeedbackManager';
 import InformationTechnologyManager from '@/pages/admin/InformationTechnologyManager';
 import RestaurantEventsManager from '@/pages/admin/RestaurantEventsManager';
+import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
 import DestinationAdmin from '@/pages/admin/DestinationAdmin';
 import DemoManager from '@/pages/admin/DemoManager';
 
@@ -41,6 +42,7 @@ const AdminRoutes = () => {
           <Route path="feedback" element={<FeedbackManager />} />
           <Route path="information-technology" element={<InformationTechnologyManager />} />
           <Route path="restaurants/:id/events" element={<RestaurantEventsManager />} />
+          <Route path="restaurants/:id/reservations" element={<RestaurantReservationsManager />} />
           <Route path="destination-admin" element={<DestinationAdmin />} />
           <Route path="demo" element={<DemoManager />} />
         </Routes>
