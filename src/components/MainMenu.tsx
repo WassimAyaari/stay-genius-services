@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -11,9 +11,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar, BellRing, Settings } from 'lucide-react';
+import { BedDouble, UtensilsCrossed, Heart, Compass, Phone, ShoppingBag, Map, Home, Info, Calendar, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAdminCheck } from '@/hooks/useAdminCheck';
 
 interface MainMenuProps {
   buttonClassName?: string;
@@ -23,10 +22,8 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin } = useAdminCheck();
 
   console.log('Current path in MainMenu:', location.pathname);
-  console.log('Is admin:', isAdmin);
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: t('nav.home'), path: '/' },
@@ -41,15 +38,6 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
     { icon: <Map className="h-5 w-5" />, label: t('nav.hotelMap'), path: '/map' },
     { icon: <BedDouble className="h-5 w-5" />, label: t('nav.myRoom'), path: '/my-room' },
   ];
-
-  // Add admin menu item if user is admin
-  if (isAdmin) {
-    menuItems.push({
-      icon: <Settings className="h-5 w-5" />,
-      label: 'Admin Dashboard',
-      path: '/admin'
-    });
-  }
 
   const handleNavigate = (path: string) => {
     console.log(`Navigating to: ${path}`);
@@ -72,8 +60,8 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
           <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-full sm:max-w-full bg-card border-border">
-        <div className="flex flex-col h-full bg-card">
+      <SheetContent side="left" className="p-0 w-80 sm:max-w-sm bg-card border-border">
+        <div className="flex flex-col bg-card">
           <SheetHeader className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-b border-border">
             <div className="flex items-center gap-3">
               <img 
@@ -84,7 +72,7 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
               <SheetTitle className="text-2xl text-card-foreground font-semibold">{t('nav.services')}</SheetTitle>
             </div>
           </SheetHeader>
-          <ScrollArea className="flex-1 h-[calc(100vh-80px)] bg-card">
+          <ScrollArea className="flex-1 bg-card">
             <div className="grid gap-2 p-4">
               {menuItems.map((item) => (
                 <Button
