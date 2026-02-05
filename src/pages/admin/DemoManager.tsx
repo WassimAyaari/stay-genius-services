@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,21 +134,17 @@ const DemoManager = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="container py-8">
-          <div className="text-center">Loading demo settings...</div>
-        </div>
-      </Layout>
+      <div className="p-6">
+        <div className="text-center">Loading demo settings...</div>
+      </div>
     );
   }
 
   if (!settings) {
     return (
-      <Layout>
-        <div className="container py-8">
-          <div className="text-center text-red-500">Failed to load demo settings</div>
-        </div>
-      </Layout>
+      <div className="p-6">
+        <div className="text-center text-destructive">Failed to load demo settings</div>
+      </div>
     );
   }
 
@@ -160,178 +155,176 @@ const DemoManager = () => {
   const totalEmails = new Set(sessions.filter(s => s.email).map(s => s.email)).size;
 
   return (
-    <Layout>
-      <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-2 text-card-foreground">Demo Settings</h1>
-        <p className="text-muted-foreground mb-6">Manage demo limitations and view analytics</p>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-2 text-card-foreground">Demo Settings</h1>
+      <p className="text-muted-foreground mb-6">Manage demo limitations and view analytics</p>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Demo Settings */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Demo Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Demo Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="demo-enabled">Enable Demo Mode</Label>
+              <Switch
+                id="demo-enabled"
+                checked={settings.is_enabled}
+                onCheckedChange={(checked) => 
+                  setSettings({ ...settings, is_enabled: checked })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Time Limit (minutes)</Label>
+              <div className="px-3">
+                <Slider
+                  value={[settings.time_limit_minutes]}
+                  onValueChange={(value) => 
+                    setSettings({ ...settings, time_limit_minutes: value[0] })
+                  }
+                  max={30}
+                  min={1}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                  <span>1 min</span>
+                  <span>{settings.time_limit_minutes} minutes</span>
+                  <span>30 min</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="redirect-url">Redirect URL</Label>
+              <Input
+                id="redirect-url"
+                value={settings.redirect_url}
+                onChange={(e) => 
+                  setSettings({ ...settings, redirect_url: e.target.value })
+                }
+                placeholder="https://hotelgenius.app"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Label htmlFor="email-required">Require Email</Label>
+              <Switch
+                id="email-required"
+                checked={settings.email_required}
+                onCheckedChange={(checked) => 
+                  setSettings({ ...settings, email_required: checked })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expiration-message">Expiration Message</Label>
+              <Textarea
+                id="expiration-message"
+                value={settings.expiration_message}
+                onChange={(e) => 
+                  setSettings({ ...settings, expiration_message: e.target.value })
+                }
+                rows={3}
+              />
+            </div>
+
+            <Button 
+              onClick={saveDemoSettings} 
+              disabled={saving}
+              className="w-full"
+            >
+              {saving ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Analytics */}
+        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Demo Configuration
+                <Users className="h-5 w-5" />
+                Demo Analytics
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="demo-enabled">Enable Demo Mode</Label>
-                <Switch
-                  id="demo-enabled"
-                  checked={settings.is_enabled}
-                  onCheckedChange={(checked) => 
-                    setSettings({ ...settings, is_enabled: checked })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Time Limit (minutes)</Label>
-                <div className="px-3">
-                  <Slider
-                    value={[settings.time_limit_minutes]}
-                    onValueChange={(value) => 
-                      setSettings({ ...settings, time_limit_minutes: value[0] })
-                    }
-                    max={30}
-                    min={1}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                    <span>1 min</span>
-                    <span>{settings.time_limit_minutes} minutes</span>
-                    <span>30 min</span>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-card-foreground">{todaysSessions.length}</div>
+                  <div className="text-sm text-muted-foreground">Today's Sessions</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-card-foreground">{totalEmails}</div>
+                  <div className="text-sm text-muted-foreground">Total Emails</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-card-foreground">{sessions.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Sessions</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-card-foreground">
+                    {Math.round((sessions.filter(s => s.completed_at).length / sessions.length) * 100) || 0}%
                   </div>
+                  <div className="text-sm text-muted-foreground">Completion Rate</div>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="redirect-url">Redirect URL</Label>
-                <Input
-                  id="redirect-url"
-                  value={settings.redirect_url}
-                  onChange={(e) => 
-                    setSettings({ ...settings, redirect_url: e.target.value })
-                  }
-                  placeholder="https://hotelgenius.app"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="email-required">Require Email</Label>
-                <Switch
-                  id="email-required"
-                  checked={settings.email_required}
-                  onCheckedChange={(checked) => 
-                    setSettings({ ...settings, email_required: checked })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="expiration-message">Expiration Message</Label>
-                <Textarea
-                  id="expiration-message"
-                  value={settings.expiration_message}
-                  onChange={(e) => 
-                    setSettings({ ...settings, expiration_message: e.target.value })
-                  }
-                  rows={3}
-                />
-              </div>
-
+              
               <Button 
-                onClick={saveDemoSettings} 
-                disabled={saving}
-                className="w-full"
+                onClick={exportEmails} 
+                variant="outline" 
+                className="w-full mt-4"
+                disabled={totalEmails === 0}
               >
-                {saving ? 'Saving...' : 'Save Settings'}
+                <Download className="h-4 w-4 mr-2" />
+                Export Emails ({totalEmails})
               </Button>
             </CardContent>
           </Card>
 
-          {/* Analytics */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Demo Analytics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-card-foreground">{todaysSessions.length}</div>
-                    <div className="text-sm text-muted-foreground">Today's Sessions</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-card-foreground">{totalEmails}</div>
-                    <div className="text-sm text-muted-foreground">Total Emails</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-card-foreground">{sessions.length}</div>
-                    <div className="text-sm text-muted-foreground">Total Sessions</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-card-foreground">
-                      {Math.round((sessions.filter(s => s.completed_at).length / sessions.length) * 100) || 0}%
-                    </div>
-                    <div className="text-sm text-muted-foreground">Completion Rate</div>
-                  </div>
-                </div>
-                
-                <Button 
-                  onClick={exportEmails} 
-                  variant="outline" 
-                  className="w-full mt-4"
-                  disabled={totalEmails === 0}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Emails ({totalEmails})
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Recent Sessions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {sessions.slice(0, 10).map((session) => (
-                    <div key={session.id} className="flex justify-between items-center p-2 border rounded">
-                      <div>
-                        <div className="font-medium">{session.email || 'Anonymous'}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(session.started_at).toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="text-sm">
-                        {session.duration_seconds 
-                          ? `${Math.floor(session.duration_seconds / 60)}m ${session.duration_seconds % 60}s`
-                          : 'In Progress'
-                        }
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Recent Sessions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {sessions.slice(0, 10).map((session) => (
+                  <div key={session.id} className="flex justify-between items-center p-2 border rounded">
+                    <div>
+                      <div className="font-medium">{session.email || 'Anonymous'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(session.started_at).toLocaleString()}
                       </div>
                     </div>
-                  ))}
-                  {sessions.length === 0 && (
-                    <div className="text-center text-muted-foreground py-4">
-                      No demo sessions yet
+                    <div className="text-sm">
+                      {session.duration_seconds 
+                        ? `${Math.floor(session.duration_seconds / 60)}m ${session.duration_seconds % 60}s`
+                        : 'In Progress'
+                      }
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  </div>
+                ))}
+                {sessions.length === 0 && (
+                  <div className="text-center text-muted-foreground py-4">
+                    No demo sessions yet
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

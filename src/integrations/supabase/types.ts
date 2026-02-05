@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1479,6 +1479,12 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
         }
+        SetofOptions: {
+          from: "*"
+          to: "guests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_user_hotels: {
         Args: { user_id: string }
@@ -1488,60 +1494,54 @@ export type Database = {
         }[]
       }
       has_hotel_role: {
-        Args: { user_id: string; hotel_id: string; required_role: string }
+        Args: { hotel_id: string; required_role: string; user_id: string }
         Returns: boolean
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
-      insert_guest_from_registration: {
-        Args:
-          | {
-              user_id: string
-              first_name: string
-              last_name: string
-              email: string
-              room_number: string
-              nationality?: string
+      insert_guest_from_registration:
+        | {
+            Args: {
               birth_date?: string
               check_in_date?: string
               check_out_date?: string
+              email: string
+              first_name: string
+              last_name: string
+              nationality?: string
+              room_number: string
+              user_id: string
             }
-          | {
-              user_id: string
-              first_name: string
-              last_name: string
-              email: string
-              room_number: string
-              nationality?: string
+            Returns: string
+          }
+        | {
+            Args: {
               birth_date?: string
               check_in_date?: string
               check_out_date?: string
+              email: string
+              first_name: string
+              last_name: string
+              nationality?: string
               phone?: string
               profile_image?: string
+              room_number: string
+              user_id: string
             }
-        Returns: string
-      }
-      is_admin: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
+            Returns: string
+          }
+      is_admin: { Args: { user_id: string }; Returns: boolean }
       is_hotel_admin: {
-        Args: { user_id: string; hotel_id: string }
+        Args: { hotel_id: string; user_id: string }
         Returns: boolean
       }
-      is_super_admin: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_user_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_super_admin: { Args: { user_id: string }; Returns: boolean }
+      is_user_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

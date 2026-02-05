@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import SpaFacilitiesTab from './spa/SpaFacilitiesTab';
 import SpaServicesTab from './spa/SpaServicesTab';
 import SpaBookingsTab from './spa/SpaBookingsTab';
-import Layout from '@/components/Layout';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function SpaManager() {
@@ -22,7 +21,7 @@ export default function SpaManager() {
   }, []);
 
   return (
-    <Layout>
+    <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Gestion du Spa</h1>
         <p className="text-muted-foreground mt-1">
@@ -79,6 +78,6 @@ export default function SpaManager() {
           </Card>
         </TabsContent>
       </Tabs>
-    </Layout>
+    </div>
   );
 }

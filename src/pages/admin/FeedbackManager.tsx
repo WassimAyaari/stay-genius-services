@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -92,92 +91,90 @@ const FeedbackManager = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-8">
-        <h1 className="text-2xl font-bold mb-2">Gestion des Feedbacks</h1>
-        <p className="text-muted-foreground mb-6">Gérez les avis et personnalisez la page de feedback</p>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-2">Gestion des Feedbacks</h1>
+      <p className="text-muted-foreground mb-6">Gérez les avis et personnalisez la page de feedback</p>
+      
+      <Tabs defaultValue="reviews" onValueChange={setActiveTab} value={activeTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="reviews" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            <span>Avis clients</span>
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className="flex items-center gap-2">
+            <Image className="h-4 w-4" />
+            <span>Apparence</span>
+          </TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="reviews" onValueChange={setActiveTab} value={activeTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="reviews" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              <span>Avis clients</span>
-            </TabsTrigger>
-            <TabsTrigger value="appearance" className="flex items-center gap-2">
-              <Image className="h-4 w-4" />
-              <span>Apparence</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="reviews" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Avis récents</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoadingFeedback ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : feedbacks.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">Aucun avis pour le moment.</p>
-                ) : (
-                  <ScrollArea className="h-[450px] pr-4">
-                    <div className="space-y-4">
-                      {feedbacks.map((feedback) => (
-                        <Card key={feedback.id} className="p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-semibold">{feedback.guest_name}</h3>
-                              <p className="text-sm text-muted-foreground">{feedback.guest_email}</p>
-                            </div>
-                            <div className="flex items-center">
-                              {renderStars(feedback.rating)}
-                            </div>
-                          </div>
-                          <p className="text-sm mb-2">{feedback.comment}</p>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-muted-foreground">
-                              {formatDate(feedback.created_at)}
-                            </span>
-                            <Button variant="ghost" size="sm">
-                              Répondre
-                            </Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="appearance">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Image d'en-tête</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <ImageUpload 
-                    id="hero-image" 
-                    value={heroImage} 
-                    onChange={setHeroImage} 
-                    className="max-w-2xl mx-auto"
-                  />
-                  <div className="flex justify-end">
-                    <Button onClick={handleImageUpdate} disabled={loading}>
-                      {loading ? 'Mise à jour...' : 'Mettre à jour l\'image'}
-                    </Button>
-                  </div>
+        <TabsContent value="reviews" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Avis récents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoadingFeedback ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </Layout>
+              ) : feedbacks.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">Aucun avis pour le moment.</p>
+              ) : (
+                <ScrollArea className="h-[450px] pr-4">
+                  <div className="space-y-4">
+                    {feedbacks.map((feedback) => (
+                      <Card key={feedback.id} className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-semibold">{feedback.guest_name}</h3>
+                            <p className="text-sm text-muted-foreground">{feedback.guest_email}</p>
+                          </div>
+                          <div className="flex items-center">
+                            {renderStars(feedback.rating)}
+                          </div>
+                        </div>
+                        <p className="text-sm mb-2">{feedback.comment}</p>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-muted-foreground">
+                            {formatDate(feedback.created_at)}
+                          </span>
+                          <Button variant="ghost" size="sm">
+                            Répondre
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="appearance">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Image d'en-tête</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <ImageUpload 
+                  id="hero-image" 
+                  value={heroImage} 
+                  onChange={setHeroImage} 
+                  className="max-w-2xl mx-auto"
+                />
+                <div className="flex justify-end">
+                  <Button onClick={handleImageUpdate} disabled={loading}>
+                    {loading ? 'Mise à jour...' : 'Mettre à jour l\'image'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
