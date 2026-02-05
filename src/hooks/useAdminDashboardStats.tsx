@@ -15,6 +15,7 @@ export interface AdminDashboardStats {
     completed: number;
   };
   guestSatisfaction: number;
+  feedbackCount: number;
   conversationsCount: number;
   todayActivity: {
     newReservations: number;
@@ -92,6 +93,7 @@ const fetchDashboardStats = async (): Promise<AdminDashboardStats> => {
       completed: completedCount
     },
     guestSatisfaction: Math.round(avgRating * 10) / 10,
+    feedbackCount: ratings.length,
     conversationsCount: conversationsResult.count || 0,
     todayActivity: {
       newReservations: todayReservationsResult.count || 0,

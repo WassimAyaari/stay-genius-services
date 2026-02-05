@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { NavLink } from '@/components/NavLink';
+import { useTranslation } from 'react-i18next';
 import {
   Sidebar,
   SidebarContent,
@@ -17,12 +18,22 @@ import {
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   Users,
-  BedDouble,
   ConciergeBell,
   Utensils,
   Sparkles,
@@ -39,6 +50,8 @@ import {
   Shield,
   MessageCircle,
   Settings,
+  ChevronDown,
+  Globe,
 } from 'lucide-react';
 
 interface NavItem {
@@ -51,51 +64,78 @@ interface NavItem {
 interface NavSection {
   label: string;
   items: NavItem[];
+  defaultOpen?: boolean;
 }
 
 const navigationSections: NavSection[] = [
   {
-    label: 'Front Office',
+    label: 'Overview',
     items: [
       { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-      { title: 'Guests', url: '/admin/guests', icon: Users, disabled: true },
-      { title: 'Rooms', url: '/admin/rooms', icon: BedDouble, disabled: true },
-      { title: 'Reception', url: '/admin/reception', icon: ConciergeBell, disabled: true },
     ],
+    defaultOpen: true,
+  },
+  {
+    label: 'Guest Management',
+    items: [
+      { title: 'Guests', url: '/admin/guests', icon: Users, disabled: true },
+      { title: 'Chat Manager', url: '/admin/chat', icon: MessageCircle },
+      { title: 'Feedback', url: '/admin/feedback', icon: MessageSquare },
+    ],
+    defaultOpen: true,
   },
   {
     label: 'Services',
     items: [
+      { title: 'Housekeeping', url: '/admin/housekeeping', icon: Trash2 },
+      { title: 'Maintenance', url: '/admin/maintenance', icon: Wrench },
+      { title: 'Security', url: '/admin/security', icon: Shield },
+      { title: 'IT Support', url: '/admin/information-technology', icon: Wifi },
+    ],
+    defaultOpen: false,
+  },
+  {
+    label: 'F&B',
+    items: [
       { title: 'Restaurants', url: '/admin/restaurants', icon: Utensils },
+    ],
+    defaultOpen: false,
+  },
+  {
+    label: 'Wellness',
+    items: [
       { title: 'Spa', url: '/admin/spa', icon: Sparkles },
+    ],
+    defaultOpen: false,
+  },
+  {
+    label: 'Entertainment',
+    items: [
       { title: 'Events', url: '/admin/events', icon: PartyPopper },
       { title: 'Shops', url: '/admin/shops', icon: Store },
     ],
+    defaultOpen: false,
   },
   {
-    label: 'Operations',
-    items: [
-      { title: 'Security', url: '/admin/security', icon: Shield },
-      { title: 'Housekeeping', url: '/admin/housekeeping', icon: Trash2 },
-      { title: 'Maintenance', url: '/admin/maintenance', icon: Wrench },
-      { title: 'IT Support', url: '/admin/information-technology', icon: Wifi },
-    ],
-  },
-  {
-    label: 'Content',
+    label: 'Hotel Info',
     items: [
       { title: 'Destinations', url: '/admin/destination-admin', icon: MapPin },
       { title: 'About Editor', url: '/admin/about', icon: FileText },
-      { title: 'Feedback', url: '/admin/feedback', icon: MessageSquare },
-      { title: 'Messages', url: '/admin/chat', icon: MessageCircle },
     ],
+    defaultOpen: false,
   },
   {
-    label: 'Settings',
+    label: 'Administration',
     items: [
       { title: 'Demo Settings', url: '/admin/demo', icon: Settings },
     ],
+    defaultOpen: false,
   },
+];
+
+const languages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
 ];
 
 export const AdminSidebar: React.FC = () => {
@@ -103,11 +143,26 @@ export const AdminSidebar: React.FC = () => {
   const navigate = useNavigate();
   const { user, userData } = useAuth();
   const { state } = useSidebar();
+  const { i18n } = useTranslation();
   const isCollapsed = state === 'collapsed';
+  
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    navigationSections.forEach((section) => {
+      initial[section.label] = section.defaultOpen ?? false;
+    });
+    return initial;
+  });
+
+  const currentLanguage = languages.find((l) => l.code === i18n.language) || languages[0];
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
+  };
+
+  const handleLanguageChange = (langCode: string) => {
+    i18n.changeLanguage(langCode);
   };
 
   const isActive = (url: string) => {
@@ -117,11 +172,22 @@ export const AdminSidebar: React.FC = () => {
     return location.pathname.startsWith(url);
   };
 
-  const userInitials = userData 
+  const isSectionActive = (section: NavSection) => {
+    return section.items.some((item) => isActive(item.url));
+  };
+
+  const toggleSection = (label: string) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
+  const userInitials = userData
     ? `${userData.first_name?.[0] || ''}${userData.last_name?.[0] || ''}`.toUpperCase()
     : user?.email?.[0]?.toUpperCase() || 'A';
 
-  const userName = userData 
+  const userName = userData
     ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim()
     : user?.email || 'Admin';
 
@@ -141,42 +207,98 @@ export const AdminSidebar: React.FC = () => {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        {navigationSections.map((section) => (
-          <SidebarGroup key={section.label}>
-            <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {section.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.url)}
-                      tooltip={item.title}
-                      disabled={item.disabled}
-                    >
-                      {item.disabled ? (
-                        <span className="flex items-center gap-2 opacity-50 cursor-not-allowed">
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </span>
-                      ) : (
-                        <NavLink to={item.url} end={item.url === '/admin'}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </NavLink>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+      <SidebarContent className="px-2">
+        {navigationSections.map((section) => {
+          const sectionActive = isSectionActive(section);
+          const isOpen = openSections[section.label] || sectionActive;
+
+          return (
+            <Collapsible
+              key={section.label}
+              open={isOpen}
+              onOpenChange={() => toggleSection(section.label)}
+            >
+              <SidebarGroup className="py-0">
+                <CollapsibleTrigger asChild>
+                  <SidebarGroupLabel className="flex w-full cursor-pointer items-center justify-between py-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60 hover:text-sidebar-foreground">
+                    <span>{section.label}</span>
+                    {!isCollapsed && (
+                      <ChevronDown
+                        className={`h-3 w-3 transition-transform duration-200 ${
+                          isOpen ? 'rotate-0' : '-rotate-90'
+                        }`}
+                      />
+                    )}
+                  </SidebarGroupLabel>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {section.items.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.url)}
+                            tooltip={item.title}
+                            disabled={item.disabled}
+                            className="rounded-lg"
+                          >
+                            {item.disabled ? (
+                              <span className="flex items-center gap-2 opacity-50 cursor-not-allowed px-2 py-1.5">
+                                <item.icon className="h-4 w-4" />
+                                <span>{item.title}</span>
+                              </span>
+                            ) : (
+                              <NavLink to={item.url} end={item.url === '/admin'}>
+                                <item.icon className="h-4 w-4" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            )}
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          );
+        })}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarSeparator className="mx-0" />
+        
+        {/* Language Selector */}
+        {!isCollapsed && (
+          <div className="px-2 py-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2 px-2 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                >
+                  <Globe className="h-4 w-4" />
+                  <span>{currentLanguage.flag} {currentLanguage.name}</span>
+                  <ChevronDown className="ml-auto h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-40">
+                {languages.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className="cursor-pointer"
+                  >
+                    <span className="mr-2">{lang.flag}</span>
+                    {lang.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
         <div className="flex items-center gap-3 px-2 py-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={userData?.profile_image || undefined} />

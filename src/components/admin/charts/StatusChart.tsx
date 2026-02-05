@@ -1,6 +1,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PieChart as PieChartIcon } from 'lucide-react';
 
 interface StatusChartProps {
   data: Array<{
@@ -12,14 +13,19 @@ interface StatusChartProps {
 }
 
 const StatusChart: React.FC<StatusChartProps> = ({ data, loading }) => {
+  const hasData = data && data.length > 0 && data.some(item => item.value > 0);
+
   if (loading) {
     return (
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle>Request Status Distribution</CardTitle>
+      <Card className="h-full bg-card border shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base font-semibold">
+            <PieChartIcon className="h-4 w-4 text-primary" />
+            Request Status Distribution
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="h-[250px] flex items-center justify-center">
             <div className="animate-pulse text-muted-foreground">Loading chart...</div>
           </div>
         </CardContent>
@@ -28,43 +34,57 @@ const StatusChart: React.FC<StatusChartProps> = ({ data, loading }) => {
   }
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-card-foreground">Request Status Distribution</CardTitle>
+    <Card className="h-full bg-card border shadow-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-card-foreground">
+          <PieChartIcon className="h-4 w-4 text-primary" />
+          Request Status Distribution
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  color: 'hsl(var(--card-foreground))'
-                }}
-              />
-              <Legend 
-                wrapperStyle={{
-                  color: 'hsl(var(--card-foreground))',
-                  fontSize: '12px'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="h-[250px]">
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--card-foreground))',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{
+                    fontSize: '12px',
+                  }}
+                  formatter={(value) => (
+                    <span className="text-card-foreground">{value}</span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center text-center">
+              <PieChartIcon className="mb-3 h-12 w-12 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">No service requests</p>
+              <p className="text-xs text-muted-foreground/70">Data will appear when requests are created</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -12,22 +12,41 @@ import {
   Utensils,
   Sparkles,
   Calendar,
-  TrendingUp,
   Clock,
-  MessageSquare
 } from 'lucide-react';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import StatisticCard from '@/components/admin/StatisticCard';
+import ActivityChart from '@/components/admin/charts/ActivityChart';
+import StatusChart from '@/components/admin/charts/StatusChart';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const AdminDashboard = () => {
   const { data: stats, isLoading, error } = useAdminDashboardStats();
 
+  // Sample data for charts - in production, this would come from the API
+  const activityData = [
+    { day: 'Mon', visitors: 120 },
+    { day: 'Tue', visitors: 150 },
+    { day: 'Wed', visitors: 180 },
+    { day: 'Thu', visitors: 140 },
+    { day: 'Fri', visitors: 200 },
+    { day: 'Sat', visitors: 280 },
+    { day: 'Sun', visitors: 220 },
+  ];
+
+  const statusData = stats?.serviceRequests.total 
+    ? [
+        { name: 'Pending', value: stats.serviceRequests.pending, color: '#f59e0b' },
+        { name: 'In Progress', value: Math.max(0, stats.serviceRequests.total - stats.serviceRequests.pending - stats.serviceRequests.completed), color: '#3b82f6' },
+        { name: 'Completed', value: stats.serviceRequests.completed, color: '#22c55e' },
+      ]
+    : [];
+
   if (error) {
     return (
-      <div className="container py-8">
+      <div className="flex-1 p-6">
         <div className="text-center text-destructive">
-          <p>Erreur lors du chargement des statistiques</p>
+          <p>Error loading statistics</p>
         </div>
       </div>
     );
@@ -38,7 +57,7 @@ const AdminDashboard = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard Overview</h1>
-        <p className="text-muted-foreground">Real-time statistics and insights for your hotel</p>
+        <p className="text-muted-foreground">Real-time statistics and hotel management insights</p>
       </div>
 
       {/* Stats Row 1 - Main metrics */}
@@ -47,34 +66,36 @@ const AdminDashboard = () => {
           title="Total Reservations"
           value={stats?.totalReservations ?? 0}
           icon={CalendarCheck}
-          trend={stats?.todayActivity.newReservations}
-          suffix=""
-          color="primary"
+          subtitle={`${stats?.todayActivity.newReservations ?? 0} today`}
+          subtitleColor="default"
+          iconColor="amber"
           loading={isLoading}
         />
         <StatisticCard
           title="Messages"
           value={stats?.messagesCount ?? 0}
           icon={MessageCircle}
-          trend={stats?.todayActivity.newMessages}
-          suffix=""
-          color="info"
+          subtitle={`${stats?.todayActivity.unansweredMessages ?? 0} unanswered`}
+          subtitleColor={stats?.todayActivity.unansweredMessages ? 'danger' : 'default'}
+          iconColor="emerald"
           loading={isLoading}
         />
         <StatisticCard
           title="Current Guests"
           value={stats?.currentGuests ?? 0}
           icon={Users}
-          suffix=""
-          color="success"
+          subtitle="staying now"
+          subtitleColor="default"
+          iconColor="pink"
           loading={isLoading}
         />
         <StatisticCard
           title="Active Events"
           value={stats?.activeEvents ?? 0}
           icon={PartyPopper}
-          suffix=""
-          color="warning"
+          subtitle={`${stats?.eventReservations ?? 0} total`}
+          subtitleColor="success"
+          iconColor="purple"
           loading={isLoading}
         />
       </div>
@@ -86,15 +107,17 @@ const AdminDashboard = () => {
           value={stats?.serviceRequests.total ?? 0}
           icon={ClipboardList}
           subtitle={`${stats?.serviceRequests.pending ?? 0} pending`}
-          color="warning"
+          subtitleColor={stats?.serviceRequests.pending ? 'warning' : 'default'}
+          iconColor="yellow"
           loading={isLoading}
         />
         <StatisticCard
           title="Completed Services"
           value={stats?.serviceRequests.completed ?? 0}
           icon={CheckCircle2}
-          suffix=""
-          color="success"
+          subtitle="this month"
+          subtitleColor="success"
+          iconColor="green"
           loading={isLoading}
         />
         <StatisticCard
@@ -102,15 +125,18 @@ const AdminDashboard = () => {
           value={stats?.guestSatisfaction ?? 0}
           icon={Star}
           suffix="/5"
-          color="warning"
+          subtitle={`${stats?.feedbackCount ?? 0} reviews`}
+          subtitleColor="success"
+          iconColor="amber"
           loading={isLoading}
         />
         <StatisticCard
           title="AI Conversations"
           value={stats?.conversationsCount ?? 0}
           icon={Bot}
-          subtitle={`${stats?.todayActivity.unansweredMessages ?? 0} unanswered`}
-          color="info"
+          subtitle="total chats"
+          subtitleColor="default"
+          iconColor="blue"
           loading={isLoading}
         />
       </div>
@@ -118,11 +144,10 @@ const AdminDashboard = () => {
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Reservations Breakdown */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <CalendarCheck className="h-4 w-4 text-primary" />
-              Reservations Breakdown
+        <Card className="bg-card border shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold text-card-foreground">
+              Reservations
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -136,24 +161,24 @@ const AdminDashboard = () => {
               <>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Utensils className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Table Reservations</span>
-                  </div>
-                  <span className="font-medium">{stats?.tableReservations ?? 0}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">Spa Bookings</span>
                   </div>
-                  <span className="font-medium">{stats?.spaBookings ?? 0}</span>
+                  <span className="font-semibold">{stats?.spaBookings ?? 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Utensils className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Table Reservations</span>
+                  </div>
+                  <span className="font-semibold">{stats?.tableReservations ?? 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">Event Reservations</span>
                   </div>
-                  <span className="font-medium">{stats?.eventReservations ?? 0}</span>
+                  <span className="font-semibold">{stats?.eventReservations ?? 0}</span>
                 </div>
               </>
             )}
@@ -161,10 +186,9 @@ const AdminDashboard = () => {
         </Card>
 
         {/* Today's Activity */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
+        <Card className="bg-card border shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold text-card-foreground">
               Today's Activity
             </CardTitle>
           </CardHeader>
@@ -182,21 +206,21 @@ const AdminDashboard = () => {
                     <CalendarCheck className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">New Reservations</span>
                   </div>
-                  <span className="font-medium text-green-600">+{stats?.todayActivity.newReservations ?? 0}</span>
+                  <span className="font-semibold">{stats?.todayActivity.newReservations ?? 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <MessageCircle className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">New Messages</span>
                   </div>
-                  <span className="font-medium text-blue-600">+{stats?.todayActivity.newMessages ?? 0}</span>
+                  <span className="font-semibold">{stats?.todayActivity.newMessages ?? 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">Unanswered</span>
                   </div>
-                  <span className="font-medium text-orange-600">{stats?.todayActivity.unansweredMessages ?? 0}</span>
+                  <span className="font-semibold text-orange-600">{stats?.todayActivity.unansweredMessages ?? 0}</span>
                 </div>
               </>
             )}
@@ -204,10 +228,9 @@ const AdminDashboard = () => {
         </Card>
 
         {/* Service Status */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-primary" />
+        <Card className="bg-card border shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold text-card-foreground">
               Service Status
             </CardTitle>
           </CardHeader>
@@ -225,21 +248,21 @@ const AdminDashboard = () => {
                     <Clock className="h-4 w-4 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Pending</span>
                   </div>
-                  <span className="font-medium text-orange-600">{stats?.serviceRequests.pending ?? 0}</span>
+                  <span className="font-semibold text-orange-600">{stats?.serviceRequests.pending ?? 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
                     <span className="text-sm text-muted-foreground">Completed</span>
                   </div>
-                  <span className="font-medium text-green-600">{stats?.serviceRequests.completed ?? 0}</span>
+                  <span className="font-semibold text-green-600">{stats?.serviceRequests.completed ?? 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
+                    <Star className="h-4 w-4 text-amber-500" />
                     <span className="text-sm text-muted-foreground">Avg. Rating</span>
                   </div>
-                  <span className="font-medium">{stats?.guestSatisfaction ?? 0}/5</span>
+                  <span className="font-semibold">{stats?.guestSatisfaction ?? 0}/5</span>
                 </div>
               </>
             )}
@@ -247,28 +270,14 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Quick Stats Footer */}
-      <Card className="bg-muted/30">
-        <CardContent className="py-4">
-          <div className="flex flex-wrap items-center justify-center gap-8 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span className="text-muted-foreground">System Status:</span>
-              <span className="font-medium text-green-600">Operational</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">AI Assistant:</span>
-              <span className="font-medium text-blue-600">Active</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Last Updated:</span>
-              <span className="font-medium">Just now</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Charts Section */}
+      <div>
+        <h2 className="mb-4 text-lg font-semibold text-foreground">Request Status Overview</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ActivityChart data={activityData} loading={isLoading} />
+          <StatusChart data={statusData} loading={isLoading} />
+        </div>
+      </div>
     </div>
   );
 };
