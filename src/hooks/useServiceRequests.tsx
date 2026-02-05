@@ -30,7 +30,7 @@ export const useServiceRequests = () => {
       
       const { data, error } = await supabase
         .from('service_requests')
-        .select('*')
+        .select('*, request_items(*)')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -47,7 +47,7 @@ export const useServiceRequests = () => {
         
         const { data, error } = await supabase
           .from('service_requests')
-          .select('*')
+          .select('*, request_items(*)')
           .eq('room_number', userRoomNumber)
           .order('created_at', { ascending: false });
 
@@ -66,7 +66,7 @@ export const useServiceRequests = () => {
         
         const { data, error } = await supabase
           .from('service_requests')
-          .select('*')
+          .select('*, request_items(*)')
           .eq('guest_id', userId)
           .order('created_at', { ascending: false });
 
