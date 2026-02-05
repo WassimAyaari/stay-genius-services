@@ -1,13 +1,12 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TrendingUp } from 'lucide-react';
 
 interface ActivityChartProps {
   data: Array<{
     day: string;
-    messages: number;
-    requests: number;
-    reservations: number;
+    visitors: number;
   }>;
   loading?: boolean;
 }
@@ -15,12 +14,15 @@ interface ActivityChartProps {
 const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) => {
   if (loading) {
     return (
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle>Weekly Activity Trends</CardTitle>
+      <Card className="h-full bg-card border shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base font-semibold">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            Monthly Visitors
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="h-[250px] flex items-center justify-center">
             <div className="animate-pulse text-muted-foreground">Loading chart...</div>
           </div>
         </CardContent>
@@ -29,22 +31,29 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) => {
   }
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-card-foreground">Weekly Activity Trends</CardTitle>
+    <Card className="h-full bg-card border shadow-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-card-foreground">
+          <TrendingUp className="h-4 w-4 text-primary" />
+          Monthly Visitors
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
+        <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+            <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" vertical={false} />
               <XAxis 
                 dataKey="day" 
                 tick={{ fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
                 className="text-muted-foreground"
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
                 className="text-muted-foreground"
               />
               <Tooltip 
@@ -52,32 +61,19 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) => {
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
-                  color: 'hsl(var(--card-foreground))'
+                  color: 'hsl(var(--card-foreground))',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                 }}
+                labelStyle={{ fontWeight: 600 }}
               />
               <Line 
                 type="monotone" 
-                dataKey="messages" 
-                stroke="#00AFB9" 
+                dataKey="visitors" 
+                stroke="hsl(var(--primary))" 
                 strokeWidth={2}
-                name="Messages"
-                dot={{ fill: '#00AFB9' }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="requests" 
-                stroke="#FF6B6B" 
-                strokeWidth={2}
-                name="Requests"
-                dot={{ fill: '#FF6B6B' }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="reservations" 
-                stroke="#4ECDC4" 
-                strokeWidth={2}
-                name="Reservations"
-                dot={{ fill: '#4ECDC4' }}
+                name="Visitors"
+                dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
               />
             </LineChart>
           </ResponsiveContainer>
