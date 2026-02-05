@@ -1,186 +1,225 @@
 
 
-# Admin Dashboard Redesign Plan
+# Dashboard Design Improvement Plan
 
 ## Overview
-Transform the current admin dashboard from a simple card grid layout to a professional sidebar-based layout matching the reference design. This will include a persistent sidebar navigation and a comprehensive dashboard with real-time statistics.
+Improve the admin dashboard to match the reference design with a smoother, more polished interface. The changes focus on visual refinement, better organized sidebar navigation, enhanced statistics cards, and proper chart integration.
 
-## Current State
-- Admin dashboard uses the standard `Layout` component (header + bottom nav)
-- Navigation is done through cards that link to different admin sections
-- No sidebar navigation exists for admin routes
-- Chart components already exist (`ActivityChart`, `StatusChart`, `RevenueChart`)
-- `StatisticCard` component exists for displaying statistics
+## Key Differences Identified
 
-## Proposed Architecture
+| Current | Reference Design |
+|---------|------------------|
+| Header with breadcrumbs | No header bar - cleaner look |
+| Basic sidebar categories | Better organized categories (Overview, Guest Management, Services, F&B, Wellness, etc.) |
+| Icons in small colored squares | Icons in larger colored circles on RIGHT side |
+| Trend arrows for subtitles | Text-based subtitles with color coding |
+| No charts on dashboard | Monthly Visitors chart + Request Status Distribution chart |
+| No language selector | Language selector in footer |
 
-```text
-+------------------+----------------------------------------+
-|   Admin Panel    |        Dashboard Overview              |
-|   Hotel Mgmt     |   Real-time statistics and insights    |
-+------------------+----------------------------------------+
-| FRONT OFFICE     |  [Stats Cards Row 1 - 4 cards]         |
-|  > Dashboard     |  Total Reservations | Messages |       |
-|  > Guests        |  Current Guests | Active Events        |
-|  > Rooms         +----------------------------------------+
-|  > Reception     |  [Stats Cards Row 2 - 4 cards]         |
-+------------------+  Service Requests | Completed |        |
-| SERVICES         |  Guest Satisfaction | AI Chats         |
-|  > Restaurants   +----------------------------------------+
-|  > Spa           |  [3-Column Summary Cards]              |
-|  > Events        |  Reservations | Today's Activity |     |
-|  > Shops         |  Service Status                        |
-+------------------+----------------------------------------+
-| OPERATIONS       |  [Charts Section - 2 columns]          |
-|  > Housekeeping  |  Monthly Visitors | Status Pie Chart   |
-|  > Maintenance   |  (Line Chart)     | (Donut Chart)      |
-|  > IT Support    |                                        |
-+------------------+----------------------------------------+
-| CONTENT          |                                        |
-|  > Destinations  |                                        |
-|  > About Editor  |                                        |
-|  > Feedback      |                                        |
-+------------------+----------------------------------------+
-| [User Profile]   |                                        |
-| [Logout Button]  |                                        |
-+------------------+----------------------------------------+
-```
+---
 
 ## Implementation Steps
 
-### Phase 1: Create Admin Layout Components
+### Phase 1: Update AdminLayout
 
-1. **Create `AdminLayout` Component** (`src/components/admin/AdminLayout.tsx`)
-   - New layout specifically for admin pages
-   - Uses `SidebarProvider` from shadcn/ui
-   - Contains the admin sidebar and main content area
-   - Replaces the standard `Layout` for all admin routes
+**File: `src/components/admin/AdminLayout.tsx`**
 
-2. **Create `AdminSidebar` Component** (`src/components/admin/AdminSidebar.tsx`)
-   - Persistent left sidebar with grouped navigation
-   - Categories: Front Office, Services, Operations, Content
-   - Active route highlighting using `useLocation`
-   - User profile display at the bottom with logout button
-   - Collapsible on mobile (sheet drawer)
-   - Logo and hotel name at top
+- Remove the header bar with breadcrumbs for a cleaner look (matching reference)
+- Keep just the sidebar trigger button floating or integrated into sidebar
+- Let the dashboard content take full vertical space
 
-### Phase 2: Create Dashboard Statistics Hook
+### Phase 2: Reorganize Sidebar Navigation
 
-3. **Create `useAdminDashboardStats` Hook** (`src/hooks/useAdminDashboardStats.tsx`)
-   - Fetches real-time statistics from Supabase:
-     - Total reservations (table_reservations + spa_bookings + event_reservations)
-     - Messages count (from messages table)
-     - Current guests (from guests table with active check-in)
-     - Active events (from events table)
-     - Service requests (from service_requests table)
-     - Guest feedback satisfaction score
-     - Conversation count
-   - Includes loading states
-   - Uses React Query for caching
+**File: `src/components/admin/AdminSidebar.tsx`**
 
-### Phase 3: Redesign Dashboard Page
+Reorganize categories to match reference design:
 
-4. **Update `Dashboard.tsx`** (`src/pages/admin/Dashboard.tsx`)
-   - Use new `AdminLayout` instead of `Layout`
-   - Implement statistics cards matching the reference:
-     - Row 1: Total Reservations, Messages, Current Guests, Active Events
-     - Row 2: Service Requests, Completed Services, Guest Satisfaction, AI Conversations
-   - Add summary sections:
-     - Reservations Breakdown (spa, table, event counts)
-     - Today's Activity (new reservations, messages, unanswered)
-     - Service Status (pending, completed, average rating)
-   - Include charts section:
-     - Monthly Visitors line chart
-     - Request Status Distribution pie chart
+```text
+OVERVIEW
+  - Dashboard
 
-### Phase 4: Update All Admin Pages
+GUEST MANAGEMENT  
+  - Guests
+  - Chat Manager
+  - Feedback
 
-5. **Update Admin Routes to use AdminLayout**
-   - Modify `AdminRoutes.tsx` to wrap routes with `AdminLayout`
-   - Update individual admin pages to remove `Layout` wrapper
-   - All admin pages will share the sidebar navigation
+SERVICES
+  - Housekeeping
+  - Maintenance
+  - Security
+  - IT Support
 
-### Phase 5: Enhance StatisticCard Component
+F&B (Food & Beverage)
+  - Restaurants
 
-6. **Enhance `StatisticCard.tsx`** (`src/components/admin/StatisticCard.tsx`)
-   - Add support for colored trend indicators (green for positive, red for negative)
-   - Add text-based subtitles (e.g., "0 today", "10 pending")
-   - Support different icon background colors matching the reference
+WELLNESS
+  - Spa
+
+ENTERTAINMENT
+  - Events
+  - Shops
+
+HOTEL INFO
+  - Destinations
+  - About Editor
+
+ADMINISTRATION
+  - Demo Settings
+```
+
+Additional improvements:
+- Add collapsible groups with chevron icons
+- Add language selector dropdown in footer (before logout)
+- Improve active state styling
+
+### Phase 3: Redesign StatisticCard Component
+
+**File: `src/components/admin/StatisticCard.tsx`**
+
+Changes:
+- Move icon to RIGHT side in a LARGER colored circle (40x40px instead of 32x32px)
+- Icon circle should use distinct background colors:
+  - Primary: Orange/Yellow (`bg-amber-100`)
+  - Info: Green/Teal (`bg-emerald-100`)
+  - Success: Pink/Red (`bg-pink-100`)
+  - Warning: Yellow (`bg-yellow-100`)
+- Add `subtitleColor` prop for colored subtitle text
+- Remove trend arrows, use simple text subtitles
+- Value and subtitle on LEFT, icon on RIGHT
+- Cleaner card styling with less shadow
+
+### Phase 4: Update Dashboard Layout
+
+**File: `src/pages/admin/Dashboard.tsx`**
+
+Changes:
+- Update header text: "Dashboard Overview" + "Real-time statistics and hotel management insights"
+- Update StatisticCard props with new subtitle colors:
+  - "12 today" in muted text
+  - "0 unanswered" in red text
+  - "staying now" in muted text
+  - "7 total" in green text
+  - "0 pending" in orange text
+  - "this month" in green text
+  - "3 reviews" in green text
+  - "total chats" in muted text
+- Remove icons from Summary Card headers (just text titles)
+- Add "Request Status Overview" section with two charts:
+  - Monthly Visitors line chart (single line, blue)
+  - Request Status Distribution pie chart with empty state
+
+### Phase 5: Create/Update Chart Components
+
+**Update: `src/components/admin/charts/ActivityChart.tsx`**
+- Rename to "Monthly Visitors"
+- Use single blue line instead of multiple colored lines
+- Add TrendingUp icon in header
+- Smoother line with dot markers
+
+**Update: `src/components/admin/charts/StatusChart.tsx`**
+- Add empty state: "No service requests - Data will appear when requests are created"
+- Center the empty state message when no data
+
+### Phase 6: Add Language Selector
+
+**File: `src/components/admin/AdminSidebar.tsx`**
+- Add language dropdown before logout button
+- Show flag icon + language name (e.g., "US English")
+- Dropdown with available languages
 
 ---
 
 ## Technical Details
 
-### Files to Create
-| File | Purpose |
-|------|---------|
-| `src/components/admin/AdminLayout.tsx` | Main layout wrapper for admin section |
-| `src/components/admin/AdminSidebar.tsx` | Sidebar navigation component |
-| `src/hooks/useAdminDashboardStats.tsx` | Dashboard statistics data hook |
+### StatisticCard New Props
 
-### Files to Modify
+```typescript
+interface StatisticCardProps {
+  title: string;
+  value: number | string;
+  icon: LucideIcon;
+  subtitle?: string;
+  subtitleColor?: 'default' | 'success' | 'warning' | 'danger' | 'info';
+  suffix?: string;
+  iconColor?: 'amber' | 'emerald' | 'pink' | 'yellow' | 'blue' | 'purple';
+  loading?: boolean;
+}
+```
+
+### Icon Color Mapping
+
+| Type | Background | Icon Color |
+|------|------------|------------|
+| Reservations | `bg-amber-100` | `text-amber-600` |
+| Messages | `bg-emerald-100` | `text-emerald-600` |
+| Guests | `bg-pink-100` | `text-pink-600` |
+| Events | `bg-purple-100` | `text-purple-600` |
+| Service Requests | `bg-yellow-100` | `text-yellow-600` |
+| Completed | `bg-green-100` | `text-green-600` |
+| Satisfaction | `bg-amber-100` | `text-amber-600` |
+| AI Chats | `bg-blue-100` | `text-blue-600` |
+
+### Subtitle Color Classes
+
+```typescript
+const subtitleColors = {
+  default: 'text-muted-foreground',
+  success: 'text-green-600',
+  warning: 'text-orange-600',
+  danger: 'text-red-600',
+  info: 'text-blue-600',
+};
+```
+
+---
+
+## Files to Modify
+
 | File | Changes |
 |------|---------|
-| `src/pages/admin/Dashboard.tsx` | Complete redesign with new layout and stats |
-| `src/components/admin/StatisticCard.tsx` | Add colored trend and subtitle support |
-| `src/routes/AdminRoutes.tsx` | Wrap with AdminLayout |
-| All other admin pages | Remove Layout wrapper |
+| `src/components/admin/AdminLayout.tsx` | Remove header bar with breadcrumbs |
+| `src/components/admin/AdminSidebar.tsx` | Reorganize categories, add collapsible groups, language selector |
+| `src/components/admin/StatisticCard.tsx` | Redesign with icon on right, larger circles, colored subtitles |
+| `src/pages/admin/Dashboard.tsx` | Update layout, add charts section, new subtitle colors |
+| `src/components/admin/charts/ActivityChart.tsx` | Rename to Monthly Visitors, single blue line |
+| `src/components/admin/charts/StatusChart.tsx` | Add empty state message |
 
-### Sidebar Navigation Structure
+---
+
+## Visual Summary
+
 ```text
-Front Office:
-  - Dashboard (/admin)
-  - Guests (placeholder for future)
-  - Rooms (placeholder for future)
-  - Reception (placeholder for future)
-
-Services:
-  - Restaurants (/admin/restaurants)
-  - Spa (/admin/spa)
-  - Events (/admin/events)
-  - Shops (/admin/shops)
-
-Operations:
-  - Housekeeping (/admin/housekeeping)
-  - Maintenance (/admin/maintenance)
-  - IT Support (/admin/information-technology)
-
-Content:
-  - Destinations (/admin/destination-admin)
-  - About Editor (/admin/about)
-  - Feedback (/admin/feedback)
++------------------+------------------------------------------------+
+|   Admin Panel    |  Dashboard Overview                            |
+|   Hotel Mgmt     |  Real-time statistics and hotel management...  |
++------------------+------------------------------------------------+
+| OVERVIEW      v  |  +------------+ +------------+ +------------+ +------------+
+|   Dashboard      |  | Total Res. | | Messages   | | Curr Guest | | Active Ev  |
+| GUEST MGMT    v  |  | 12         | | 158        | | 0          | | 3          |
+|   Guests         |  | 0 today [O]| | 0 unans[O] | | staying [O]| | 7 total [O]|
+|   Chat Manager   |  +------------+ +------------+ +------------+ +------------+
+|   Feedback       |  +------------+ +------------+ +------------+ +------------+
+| SERVICES      v  |  | Svc Reqs   | | Completed  | | Guest Sat  | | AI Chats   |
+|   Housekeeping   |  | 0          | | 0          | | 4.3/5      | | 123        |
+|   Maintenance    |  | 0 pend [O] | | this mo[O] | | 3 revs [O] | | total  [O] |
+|   Security       |  +------------+ +------------+ +------------+ +------------+
+|   IT Support     |                                                             |
+| F&B           v  |  +-----------------+ +-----------------+ +-----------------+
+|   Restaurants    |  | Reservations    | | Today's Activity| | Service Status  |
+| WELLNESS      v  |  | Spa Book    0   | | New Res      0  | | Pending      0  |
+|   Spa            |  | Table Res   0   | | New Msg      0  | | Completed    0  |
+| ENTERTAINMENT v  |  | Event Res  12   | | Unanswered   0  | | Avg Rating 4.3  |
+|   Events         |  +-----------------+ +-----------------+ +-----------------+
+|   Shops          |                                                             |
+| HOTEL INFO    v  |  Request Status Overview                                   |
+|   Destinations   |  +---------------------------+ +---------------------------+
+|   About Editor   |  | Monthly Visitors          | | Request Status Dist.      |
+| ADMIN         v  |  |  [Line Chart]             | |  No service requests      |
+|   Demo Settings  |  |                           | |  Data will appear when... |
++------------------+  +---------------------------+ +---------------------------+
+| [Avatar] User    |
+| US English    v  |
+| [Logout]         |
++------------------+
 ```
-
-### Database Queries for Statistics
-```sql
--- Total Reservations (sum of all reservation types)
-SELECT COUNT(*) FROM table_reservations
-SELECT COUNT(*) FROM spa_bookings
-SELECT COUNT(*) FROM event_reservations
-
--- Messages
-SELECT COUNT(*) FROM messages
-
--- Current Guests
-SELECT COUNT(*) FROM guests WHERE check_out_date >= CURRENT_DATE
-
--- Active Events
-SELECT COUNT(*) FROM events WHERE date >= CURRENT_DATE
-
--- Service Requests
-SELECT COUNT(*), status FROM service_requests GROUP BY status
-
--- Guest Satisfaction
-SELECT AVG(rating) FROM guest_feedback
-
--- Conversations (AI Chats)
-SELECT COUNT(*) FROM conversations
-```
-
-### Component Dependencies
-- Uses existing shadcn/ui `Sidebar` components
-- Uses existing `recharts` for charts
-- Uses existing `StatisticCard` with enhancements
-- Uses `useAuth` for user profile in sidebar
-- Uses `react-router-dom` for navigation and active state
 
