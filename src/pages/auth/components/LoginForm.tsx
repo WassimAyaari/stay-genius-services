@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { loginUser } from '@/features/auth/services/authService';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Adresse email invalide' }),
@@ -43,7 +44,22 @@ const LoginForm: React.FC = () => {
           title: 'Connexion réussie',
           description: 'Bienvenue dans l\'application Stay Genius',
         });
-        navigate('/');
+        
+        // Check if user is admin and redirect accordingly
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          const { data: isAdmin } = await supabase.rpc('is_user_admin', { 
+            _user_id: session.user.id 
+          });
+          
+          if (isAdmin) {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        } else {
+          navigate('/');
+        }
       } else {
         console.error('Échec de la connexion:', result.error);
         toast({
