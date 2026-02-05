@@ -22,7 +22,14 @@ export const useTableReservationsCore = (restaurantId?: string) => {
   // Query for fetching reservations (either user's or restaurant's)
   const { data: reservations, isLoading, error, refetch } = useQuery({
     queryKey: ['tableReservations', userId, userEmail, restaurantId],
-    queryFn: isRestaurantSpecific ? fetchRestaurantReservations : fetchUserReservations,
+    queryFn: async () => {
+      // Evaluate at query execution time, not hook initialization
+      const shouldFetchByRestaurant = !!restaurantId && restaurantId !== ':id';
+      if (shouldFetchByRestaurant) {
+        return fetchRestaurantReservations();
+      }
+      return fetchUserReservations();
+    },
     enabled: true,
     staleTime: 1000 * 60, // 1 minute
     refetchOnWindowFocus: true,
