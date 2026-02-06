@@ -38,15 +38,15 @@ const RestaurantInfo = ({
           onClick={onBookingClick} 
           className="flex-1"
         >
-          Réserver une table
+          Book a Table
         </Button>
-        {onViewMenuClick && (  // Conditionally render View Menu button
+        {onViewMenuClick && (
           <Button 
             onClick={onViewMenuClick} 
             variant="outline" 
             className="flex-1"
           >
-            Voir le menu
+            View Menu
           </Button>
         )}
       </div>

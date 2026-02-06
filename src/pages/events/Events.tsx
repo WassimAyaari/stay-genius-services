@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
 import { format } from 'date-fns';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 const Events = () => {
   const { t } = useTranslation();
@@ -18,10 +19,13 @@ const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const { toast } = useToast();
+  const { requireAuth } = useRequireAuth();
 
   const handleBookEvent = (event: Event) => {
-    setSelectedEvent(event);
-    setIsBookingOpen(true);
+    requireAuth(() => {
+      setSelectedEvent(event);
+      setIsBookingOpen(true);
+    });
   };
 
   const handleReservationSuccess = () => {
@@ -124,7 +128,7 @@ const Events = () => {
                     {event.capacity && (
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Users className="h-4 w-4 mr-2 text-primary" />
-                        <span>{event.capacity} places</span>
+                        <span>{event.capacity} spots available</span>
                       </div>
                     )}
                   </div>

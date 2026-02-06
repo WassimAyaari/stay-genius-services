@@ -6,6 +6,7 @@ import { Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { Event } from '@/types/event';
 import { format } from 'date-fns';
 import EventBookingDialog from './EventBookingDialog';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 interface EventBookingCardProps {
   event: Event;
@@ -13,9 +14,12 @@ interface EventBookingCardProps {
 
 export const EventBookingCard = ({ event }: EventBookingCardProps) => {
   const [isBookingOpen, setIsBookingOpen] = React.useState(false);
+  const { requireAuth } = useRequireAuth();
 
   const handleBookEvent = () => {
-    setIsBookingOpen(true);
+    requireAuth(() => {
+      setIsBookingOpen(true);
+    });
   };
 
   const handleBookingSuccess = () => {
@@ -60,14 +64,14 @@ export const EventBookingCard = ({ event }: EventBookingCardProps) => {
               {event.capacity && (
                 <div className="flex items-center text-sm text-gray-600">
                   <Users className="h-4 w-4 mr-2 text-primary" />
-                  <span>{event.capacity} places disponibles</span>
+                  <span>{event.capacity} spots available</span>
                 </div>
               )}
             </div>
           </div>
           <p className="text-gray-600 mb-4">{event.description}</p>
           <Button onClick={handleBookEvent}>
-            Réserver l'événement
+            Book Event
           </Button>
         </div>
       </div>

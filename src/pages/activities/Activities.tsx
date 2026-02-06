@@ -8,11 +8,12 @@ import Layout from '@/components/Layout';
 import { Activity } from '@/features/activities/types';
 import ActivityCard from '@/features/activities/components/ActivityCard';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 const Activities = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { requireAuth } = useRequireAuth();
   const [activeFilter, setActiveFilter] = useState<string>('all');
 
   const activities: Activity[] = [
@@ -105,22 +106,13 @@ const Activities = () => {
         }
       });
 
-  const handleBookActivity = async (activityId: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error(t('activities.booking.signInRequired'));
-
+  const handleBookActivity = (activityId: string) => {
+    requireAuth(() => {
       toast({
         title: t('activities.booking.confirmed'),
         description: t('activities.booking.success'),
       });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: t('activities.booking.failed'),
-        description: error.message,
-      });
-    }
+    });
   };
 
   return (

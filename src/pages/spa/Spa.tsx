@@ -9,9 +9,11 @@ import { useSpaServices } from '@/hooks/useSpaServices';
 import BookingDialog from '@/features/spa/components/SpaBookingDialog';
 import SpaSection from '@/features/spa/components/SpaSection';
 import SpaEventsSection from '@/features/spa/components/SpaEventsSection';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 const Spa = () => {
   const { t } = useTranslation();
+  const { requireAuth } = useRequireAuth();
   const {
     featuredServices,
     isLoading
@@ -20,8 +22,10 @@ const Spa = () => {
   const [selectedService, setSelectedService] = useState<string | null>(null);
 
   const handleBookTreatment = (serviceId: string) => {
-    setSelectedService(serviceId);
-    setIsBookingOpen(true);
+    requireAuth(() => {
+      setSelectedService(serviceId);
+      setIsBookingOpen(true);
+    });
   };
 
   const handleBookingSuccess = () => {
