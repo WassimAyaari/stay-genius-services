@@ -27,7 +27,7 @@ const MainMenu = ({ buttonClassName }: MainMenuProps = {}) => {
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: t('nav.home'), path: '/' },
-    { icon: <BellRing className="h-5 w-5" />, label: t('nav.notifications'), path: '/notifications' },
+    { icon: <BellRing className="h-5 w-5" />, label: t('nav.notifications'), path: '/requests' },
     { icon: <Info className="h-5 w-5" />, label: t('nav.about'), path: '/about' },
     { icon: <UtensilsCrossed className="h-5 w-5" />, label: t('nav.gastronomy'), path: '/dining' },
     { icon: <Heart className="h-5 w-5" />, label: t('nav.spa'), path: '/spa' },
