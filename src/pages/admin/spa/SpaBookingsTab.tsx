@@ -7,9 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RefreshCw, Calendar, Clock, User, Phone, Mail, MapPin, FileText, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
-import { useSpaServices } from '@/hooks/useSpaServices';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,7 +49,7 @@ export default function SpaBookingsTab() {
         setServiceNames(servicesMap);
       } catch (error) {
         console.error('Error loading service names:', error);
-        toast.error('Erreur lors du chargement des noms de services');
+        toast.error('Error loading service names');
       } finally {
         setIsLoadingServices(false);
       }
@@ -62,9 +61,9 @@ export default function SpaBookingsTab() {
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
       await updateBookingStatus({ id: bookingId, status: newStatus });
-      toast.success('Statut mis à jour avec succès');
+      toast.success('Status updated successfully');
     } catch (error) {
-      toast.error('Erreur lors de la mise à jour du statut');
+      toast.error('Error updating status');
       console.error('Error updating status:', error);
     }
   };
@@ -72,9 +71,9 @@ export default function SpaBookingsTab() {
   const handleCancelBooking = async (bookingId: string) => {
     try {
       await updateBookingStatus({ id: bookingId, status: 'cancelled' });
-      toast.success('Réservation annulée avec succès');
+      toast.success('Booking cancelled successfully');
     } catch (error) {
-      toast.error('Erreur lors de l\'annulation de la réservation');
+      toast.error('Error cancelling booking');
       console.error('Error canceling booking:', error);
     }
   };
@@ -105,24 +104,24 @@ export default function SpaBookingsTab() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return 'En attente';
-      case 'confirmed': return 'Confirmée';
-      case 'cancelled': return 'Annulée';
-      case 'completed': return 'Terminée';
+      case 'pending': return 'Pending';
+      case 'confirmed': return 'Confirmed';
+      case 'cancelled': return 'Cancelled';
+      case 'completed': return 'Completed';
       default: return status;
     }
   };
 
   const renderBookingCard = (booking: SpaBooking & { spa_services?: { name: string } }) => {
     const bookingDate = new Date(booking.date);
-    const formattedDate = format(bookingDate, 'EEEE d MMMM yyyy', { locale: fr });
-    const serviceName = serviceNames[booking.service_id] || booking.spa_services?.name || 'Service inconnu';
+    const formattedDate = format(bookingDate, 'EEEE, MMMM d, yyyy', { locale: enUS });
+    const serviceName = serviceNames[booking.service_id] || booking.spa_services?.name || 'Unknown service';
     
     return (
       <Card key={booking.id} className="mb-4">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div>
-            <CardTitle className="text-lg">Réservation #{booking.id.substring(0, 8)}</CardTitle>
+            <CardTitle className="text-lg">Booking #{booking.id.substring(0, 8)}</CardTitle>
             <div className="text-sm text-muted-foreground mt-1">{serviceName}</div>
           </div>
           <Badge className={getStatusBadgeColor(booking.status)}>
@@ -159,7 +158,7 @@ export default function SpaBookingsTab() {
               {booking.room_number && (
                 <div className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">Chambre {booking.room_number}</span>
+                  <span className="text-sm">Room {booking.room_number}</span>
                 </div>
               )}
             </div>
@@ -169,7 +168,7 @@ export default function SpaBookingsTab() {
             <div className="mt-4">
               <div className="flex items-center mb-2">
                 <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-sm font-medium">Demandes spéciales</span>
+                <span className="text-sm font-medium">Special requests</span>
               </div>
               <p className="text-sm text-muted-foreground">{booking.special_requests}</p>
             </div>
@@ -178,19 +177,19 @@ export default function SpaBookingsTab() {
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {booking.status !== 'cancelled' && booking.status !== 'completed' && (
               <>
-                <Label className="text-sm mr-2">Statut:</Label>
+                <Label className="text-sm mr-2">Status:</Label>
                 <Select
                   defaultValue={booking.status}
                   onValueChange={(value) => handleStatusChange(booking.id, value)}
                 >
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sélectionner le statut" />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">En attente</SelectItem>
-                    <SelectItem value="confirmed">Confirmée</SelectItem>
-                    <SelectItem value="completed">Terminée</SelectItem>
-                    <SelectItem value="cancelled">Annulée</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
               </>
@@ -203,7 +202,7 @@ export default function SpaBookingsTab() {
                 onClick={() => handleCancelBooking(booking.id)}
                 className="ml-auto"
               >
-                Annuler
+                Cancel
               </Button>
             )}
           </div>
@@ -215,25 +214,25 @@ export default function SpaBookingsTab() {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Réservations Spa</h2>
+        <h2 className="text-2xl font-bold">Spa Bookings</h2>
         <Button
           variant="outline"
           onClick={() => refetch()}
           className="flex items-center"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
-          Actualiser
+          Refresh
         </Button>
       </div>
       
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="search" className="text-sm">Recherche</Label>
+          <Label htmlFor="search" className="text-sm">Search</Label>
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               id="search"
-              placeholder="Nom, email, chambre..."
+              placeholder="Name, email, room..."
               className="pl-9"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -242,20 +241,20 @@ export default function SpaBookingsTab() {
         </div>
         
         <div>
-          <Label htmlFor="status-filter" className="text-sm">Statut</Label>
+          <Label htmlFor="status-filter" className="text-sm">Status</Label>
           <Select
             value={statusFilter}
             onValueChange={setStatusFilter}
           >
             <SelectTrigger id="status-filter">
-              <SelectValue placeholder="Tous les statuts" />
+              <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="pending">En attente</SelectItem>
-              <SelectItem value="confirmed">Confirmées</SelectItem>
-              <SelectItem value="completed">Terminées</SelectItem>
-              <SelectItem value="cancelled">Annulées</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -273,11 +272,11 @@ export default function SpaBookingsTab() {
       
       {isLoading || isLoadingServices ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Chargement des réservations...</p>
+          <p className="text-muted-foreground">Loading bookings...</p>
         </div>
       ) : filteredBookings.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Aucune réservation trouvée</p>
+          <p className="text-muted-foreground">No bookings found</p>
         </div>
       ) : (
         <div>

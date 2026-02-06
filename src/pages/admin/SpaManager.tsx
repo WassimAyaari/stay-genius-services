@@ -23,25 +23,25 @@ export default function SpaManager() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Gestion du Spa</h1>
+        <h1 className="text-3xl font-bold">Spa Management</h1>
         <p className="text-muted-foreground mt-1">
-          Gérez les installations, services et réservations du spa
+          Manage spa facilities, services and bookings
         </p>
       </div>
 
       <Tabs defaultValue="bookings" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="bookings">Réservations</TabsTrigger>
-          <TabsTrigger value="facilities">Installations</TabsTrigger>
+          <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          <TabsTrigger value="facilities">Facilities</TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
         </TabsList>
         
         <TabsContent value="bookings">
           <Card>
             <CardHeader>
-              <CardTitle>Réservations</CardTitle>
+              <CardTitle>Bookings</CardTitle>
               <CardDescription>
-                Gérez les réservations de spa et leurs statuts
+                Manage spa bookings and their status
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -53,9 +53,9 @@ export default function SpaManager() {
         <TabsContent value="facilities">
           <Card>
             <CardHeader>
-              <CardTitle>Installations</CardTitle>
+              <CardTitle>Facilities</CardTitle>
               <CardDescription>
-                Gérez les différentes installations de spa
+                Manage the different spa facilities
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -69,7 +69,7 @@ export default function SpaManager() {
             <CardHeader>
               <CardTitle>Services</CardTitle>
               <CardDescription>
-                Gérez les services offerts dans chaque installation
+                Manage services offered in each facility
               </CardDescription>
             </CardHeader>
             <CardContent>
