@@ -10,6 +10,7 @@ import RestaurantDetail from '@/pages/dining/RestaurantDetail';
 import Spa from '@/pages/spa/Spa';
 import Activities from '@/pages/activities/Activities';
 import Events from '@/pages/events/Events';
+import EventDetail from '@/pages/events/EventDetail';
 import Destination from '@/pages/destination/Destination';
 import HotelMap from '@/pages/map/HotelMap';
 import About from '@/pages/about/About';
@@ -37,6 +38,7 @@ const PublicRoutes = () => {
       <Route path="spa" element={<Spa />} />
       <Route path="activities" element={<Activities />} />
       <Route path="events" element={<Events />} />
+      <Route path="events/:id" element={<EventDetail />} />
       <Route path="destination" element={<Destination />} />
       <Route path="map" element={<HotelMap />} />
       <Route path="about" element={<About />} />
