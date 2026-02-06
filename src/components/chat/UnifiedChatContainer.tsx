@@ -13,13 +13,15 @@ interface UnifiedChatContainerProps {
   isAdmin?: boolean;
   className?: string;
   conversationType?: 'concierge' | 'safety_ai';
+  conversationId?: string; // Load specific conversation by ID (for admin)
 }
 
 export const UnifiedChatContainer: React.FC<UnifiedChatContainerProps> = ({
   userInfo,
   isAdmin = false,
   className = "",
-  conversationType = 'concierge'
+  conversationType = 'concierge',
+  conversationId
 }) => {
   const {
     conversation,
@@ -34,7 +36,7 @@ export const UnifiedChatContainer: React.FC<UnifiedChatContainerProps> = ({
     takeOverConversation,
     messagesEndRef,
     inputRef
-  } = useUnifiedChat({ userInfo, isAdmin, conversationType });
+  } = useUnifiedChat({ userInfo, isAdmin, conversationType, conversationId });
 
   if (isLoading) {
     return (

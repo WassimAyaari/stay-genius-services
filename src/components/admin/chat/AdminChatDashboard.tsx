@@ -117,13 +117,14 @@ export const AdminChatDashboard: React.FC = () => {
         </div>
         
         <div className="flex-1">
-          <UnifiedChatContainer
+        <UnifiedChatContainer
             userInfo={{
               name: 'Admin',
               email: 'admin@hotel.com'
             }}
             isAdmin={true}
             className="h-full"
+            conversationId={selectedConversation.id}
           />
         </div>
       </div>
