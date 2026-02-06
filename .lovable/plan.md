@@ -1,223 +1,174 @@
 
 
-# Plan: Fix Notification Badge Not Incrementing on Admin Status Updates
+# Plan: Improve Messages Interface with Navbar Display
 
-## Problem Identified
+## Problem Analysis
 
-When an admin confirms a restaurant booking, the user's notification badge doesn't increment. Based on my investigation, I found **two root causes**:
+Looking at the current `/messages` page, there are two issues:
 
-### Root Cause 1: Unstable Callback Reference
-
-The `setHasNewNotifications` function in `useNotificationsState.ts` is **not memoized with `useCallback`**:
-
-```typescript
-// Current (PROBLEMATIC)
-setHasNewNotifications: (value: boolean) => {
-  if (value) incrementCount();
-  else markAsSeen();
-}
-```
-
-This creates a new function reference on every render. Since this function is passed to `useNotificationsRealtime` and included in its dependency array, the realtime subscriptions are constantly being torn down and recreated. During this churn, updates may be missed.
-
-### Root Cause 2: Polling Fallback Doesn't Increment Badge
-
-The polling fallback only refetches data but doesn't detect status changes to increment the notification counter. It should compare the `updated_at` timestamps to detect changes that occurred since last poll.
-
----
+1. **No header/navbar displayed** - The `Layout.tsx` component explicitly hides the header and bottom nav on the messages page (`!isMessagePage`)
+2. **Basic chat list design** - The `ChatListScreen.tsx` uses a simple list without visual enhancement compared to other pages
 
 ## Solution Overview
 
 | Step | Action |
 |------|--------|
-| 1 | Memoize `setHasNewNotifications` with `useCallback` in `useNotificationsState.ts` |
-| 2 | Pass `incrementCount` directly instead of `setHasNewNotifications` for clearer intent |
-| 3 | Update polling fallback to detect new updates and increment counter |
+| 1 | Modify `Layout.tsx` to show the header and bottom navbar on the messages list (but keep them hidden during active chat) |
+| 2 | Update `Messages.tsx` to use the Layout wrapper for the list view |
+| 3 | Enhance `ChatListScreen.tsx` with improved card-based design, matching the hotel's premium look |
 
 ---
 
-## File Changes
+## Implementation Details
 
-### 1. Fix `useNotificationsState.ts` - Memoize the callback
+### Step 1: Update Messages.tsx to Use Layout for List View
+
+Currently, the messages page bypasses the Layout completely. We'll:
+- Wrap the `ChatListScreen` with `<Layout>` so the header and bottom nav appear
+- Keep the full-screen chat view (when a chat is selected) without Layout for immersive experience
 
 ```typescript
-import { useState, useCallback } from 'react';
-
-const STORAGE_KEY = 'lastSeenNotificationsAt';
-
-export const useNotificationsState = () => {
-  const [newNotificationCount, setNewNotificationCount] = useState(0);
-  const [lastSeenAt, setLastSeenAt] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEY) || new Date(0).toISOString();
-  });
-
-  const incrementCount = useCallback(() => {
-    setNewNotificationCount(prev => prev + 1);
-  }, []);
-
-  const markAsSeen = useCallback(() => {
-    const now = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, now);
-    setLastSeenAt(now);
-    setNewNotificationCount(0);
-  }, []);
-
-  // FIXED: Memoize with useCallback
-  const setHasNewNotifications = useCallback((value: boolean) => {
-    if (value) {
-      setNewNotificationCount(prev => prev + 1);
-    } else {
-      const now = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, now);
-      setLastSeenAt(now);
-      setNewNotificationCount(0);
-    }
-  }, []);
-
-  return {
-    newNotificationCount,
-    lastSeenAt,
-    incrementCount,
-    markAsSeen,
-    hasNewNotifications: newNotificationCount > 0,
-    setHasNewNotifications
-  };
-};
+// Show chat list screen with Layout wrapper
+return (
+  <Layout>
+    <ChatListScreen 
+      userInfo={userInfo}
+      onSelectChat={setSelectedChatType}
+    />
+  </Layout>
+);
 ```
 
-### 2. Update `useNotificationsRealtime.ts` - Add better logging and ensure handlers work
+### Step 2: Modify Layout.tsx Logic
 
-Add more detailed logging to diagnose if the realtime events are being received:
+Update the condition so the navbar appears on `/messages` when viewing the list, but hides when in an active chat (which uses fixed positioning):
 
 ```typescript
-// In each handler callback
-(payload) => {
-  console.log('[NOTIFICATION REALTIME] Reservation update received:', {
-    eventType: payload.eventType,
-    oldStatus: payload.old?.status,
-    newStatus: payload.new?.status,
-    userId: payload.new?.user_id
-  });
-  
-  setHasNewNotifications(true);
-  refetchReservations();
-  handleReservationStatusChange(payload);
-}
+// The chat list will now be inside Layout, 
+// only the active chat view uses fixed inset-0
+// No changes needed to Layout.tsx if we wrap ChatListScreen properly
 ```
 
-### 3. Update Polling to Detect Status Changes
+### Step 3: Enhance ChatListScreen.tsx Design
 
-Modify the polling fallback to track last poll timestamp and detect if any items were updated:
+Transform the basic list into an improved, more visually appealing interface:
 
-```typescript
-useEffect(() => {
-  if (!userId && !userEmail && !userRoomNumber) return;
-  
-  let pollInterval = 5000;
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  let isMounted = true;
-  let lastPollTimestamp = new Date().toISOString();
-  
-  const checkForUpdates = async () => {
-    try {
-      // Check for reservation updates since last poll
-      const { count: reservationUpdates } = await supabase
-        .from('table_reservations')
-        .select('*', { count: 'exact', head: true })
-        .or(`user_id.eq.${userId},guest_email.eq.${userEmail}`)
-        .gt('updated_at', lastPollTimestamp)
-        .neq('status', 'pending'); // Only count status changes
-      
-      if (reservationUpdates && reservationUpdates > 0) {
-        setHasNewNotifications(true);
-      }
-      
-      // Similar checks for spa_bookings, service_requests, event_reservations
-      
-      lastPollTimestamp = new Date().toISOString();
-    } catch (error) {
-      console.error('Polling check error:', error);
-    }
-  };
-  
-  const poll = async () => {
-    if (!isMounted) return;
+**Before (current)**:
+- Plain white background
+- Simple list items with minimal styling
+- Basic padding and spacing
+
+**After (improved)**:
+- Beautiful page header with gradient background
+- Card-based chat options with subtle shadows and hover effects
+- Modern icons with colored backgrounds
+- Status indicators with better visual hierarchy
+- Smooth animations on hover
+- Better typography and spacing
+
+```tsx
+// New enhanced design structure
+<div className="pb-24">
+  {/* Hero Header */}
+  <div className="bg-gradient-to-br from-primary/5 to-primary/10 px-4 py-8 mb-6">
+    <h1 className="text-3xl font-bold text-foreground">Messages</h1>
+    <p className="text-muted-foreground mt-2">
+      Connect with our team or AI assistant
+    </p>
+  </div>
+
+  {/* Chat Options as Cards */}
+  <div className="px-4 space-y-4">
+    <Card className="hover:shadow-lg transition-all cursor-pointer border-border/50">
+      <div className="flex items-center gap-4 p-5">
+        <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+          <User className="h-7 w-7 text-primary" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-lg">Hotel Team</h3>
+          <p className="text-sm text-muted-foreground">
+            Connect directly with our staff
+          </p>
+        </div>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      </div>
+    </Card>
     
-    await checkForUpdates();
-    await refetchAll();
-    
-    pollInterval = Math.min(pollInterval * 1.5, 30000);
-    
-    if (isMounted) {
-      timeoutId = setTimeout(poll, pollInterval);
-    }
-  };
-  
-  timeoutId = setTimeout(poll, pollInterval);
-  
-  return () => {
-    isMounted = false;
-    if (timeoutId) clearTimeout(timeoutId);
-  };
-}, [userId, userEmail, userRoomNumber, ...]);
+    {/* Similar card for AI Assistant */}
+  </div>
+</div>
 ```
 
 ---
 
-## Data Flow After Fix
+## Files to Modify
 
+| File | Changes |
+|------|---------|
+| `src/pages/messages/Messages.tsx` | Wrap `ChatListScreen` with `<Layout>` component |
+| `src/components/chat/ChatListScreen.tsx` | Enhanced card-based design with better styling |
+
+---
+
+## Visual Comparison
+
+### Current Design
 ```text
-Admin confirms reservation
-         |
-         v
-Supabase UPDATE executed
-         |
-         v
-Realtime broadcast (table_reservations)
-         |
-         v
-User's subscription receives event
-         |
-         v
-setHasNewNotifications(true) called
-         |
-         v
-setNewNotificationCount(prev => prev + 1)
-         |
-         v
-Badge shows: 1
+┌─────────────────────────┐
+│ (no header)             │
+├─────────────────────────┤
+│ Chats                   │
+│                         │
+│ ┌─────────────────────┐ │
+│ │ 🟢 Hotel Team       │ │
+│ │ Connect directly... │ │
+│ └─────────────────────┘ │
+│                         │
+│ ┌─────────────────────┐ │
+│ │ 🔵 AI Assistant     │ │
+│ │ Instant AI help...  │ │
+│ └─────────────────────┘ │
+│                         │
+│ (no bottom nav)         │
+└─────────────────────────┘
+```
 
----
-
-If Realtime fails, Polling catches it:
-         |
-         v
-Poll detects updated_at > lastPollTimestamp
-         |
-         v
-setHasNewNotifications(true) called
-         |
-         v
-Badge increments
+### New Design
+```text
+┌─────────────────────────┐
+│ ☰  [Hotel Logo]   🔔 👤 │  <-- Header with navbar
+├─────────────────────────┤
+│ ╔═══════════════════════╗
+│ ║    Messages           ║
+│ ║ Connect with our team ║
+│ ╚═══════════════════════╝
+│                         │
+│ ┌───────────────────────┐
+│ │  ●                    │
+│ │ [👤] Hotel Team     > │
+│ │      Connect directly │
+│ │      with our staff   │
+│ └───────────────────────┘
+│                         │
+│ ┌───────────────────────┐
+│ │  ●                    │
+│ │ [🤖] AI Assistant   > │
+│ │      Instant AI help  │
+│ └───────────────────────┘
+│                         │
+├─────────────────────────┤
+│ 🍴  🛏️  📞  💬          │  <-- Bottom nav
+└─────────────────────────┘
 ```
 
 ---
 
-## Summary of Changes
+## Summary
 
-| File | Change |
-|------|--------|
-| `src/hooks/notifications/useNotificationsState.ts` | Memoize `setHasNewNotifications` with `useCallback` to prevent subscription churn |
-| `src/hooks/notifications/useNotificationsRealtime.ts` | Add enhanced logging + update polling to detect status changes |
-
----
-
-## Expected Results
-
-After implementation:
-1. Realtime subscriptions remain stable (no constant re-subscription)
-2. When admin confirms a booking, the realtime event is received and badge increments
-3. Toast notification shows "Your table reservation has been confirmed"
-4. Even if realtime fails, polling will catch the update and increment the badge
-5. Opening the notification dropdown still resets the badge to 0
+This update will:
+1. Display the header with logo, menu, notifications, and user menu
+2. Show the bottom navigation bar for easy access to other sections
+3. Enhance the chat list with a premium card-based design
+4. Maintain the immersive full-screen experience when inside an active chat
+5. Match the visual quality of other pages in the application
 
