@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 /**
- * Hook to set up realtime listeners for notifications
+ * Hook to set up realtime listeners for notifications with polling fallback
  */
 export const useNotificationsRealtime = (
   userId: string | null | undefined,
@@ -15,6 +15,51 @@ export const useNotificationsRealtime = (
   refetchEventReservations: () => void,
   setHasNewNotifications: (value: boolean) => void
 ) => {
+  const pollIntervalRef = useRef(5000); // Start at 5 seconds
+  
+  // Memoized refetch all function
+  const refetchAll = useCallback(async () => {
+    try {
+      await Promise.all([
+        refetchReservations(),
+        refetchServices(),
+        refetchSpaBookings(),
+        refetchEventReservations()
+      ]);
+    } catch (error) {
+      console.error('Notification polling error:', error);
+    }
+  }, [refetchReservations, refetchServices, refetchSpaBookings, refetchEventReservations]);
+
+  // Polling fallback with exponential backoff
+  useEffect(() => {
+    if (!userId && !userEmail && !userRoomNumber) return;
+    
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let isMounted = true;
+    
+    const poll = async () => {
+      if (!isMounted) return;
+      
+      await refetchAll();
+      
+      // Gradually increase interval (max 30 seconds)
+      pollIntervalRef.current = Math.min(pollIntervalRef.current * 1.5, 30000);
+      
+      if (isMounted) {
+        timeoutId = setTimeout(poll, pollIntervalRef.current);
+      }
+    };
+    
+    // Start polling after initial delay
+    timeoutId = setTimeout(poll, pollIntervalRef.current);
+    
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [userId, userEmail, userRoomNumber, refetchAll]);
+
   // Set up real-time listeners for notifications
   useEffect(() => {
     if (!userId && !userEmail && !userRoomNumber) {
