@@ -20,18 +20,19 @@ const NotificationMenu = () => {
     unreadCount, 
     isAuthenticated,
     hasNewNotifications, 
-    setHasNewNotifications,
+    markAsSeen,
     refetchServices,
     refetchReservations,
     refetchSpaBookings,
     refetchEventReservations
   } = useNotifications();
 
-  // Reset the "new notifications" indicator when the menu is opened
+  // Reset the badge to 0 when the menu is opened
   // and refresh notifications data to ensure we have the latest data
   const handleOpenChange = useCallback((open: boolean) => {
     if (open) {
-      setHasNewNotifications(false);
+      // Mark notifications as seen - this resets the badge to 0
+      markAsSeen();
       
       // Refresh all notifications data when menu opens
       Promise.all([
@@ -43,7 +44,7 @@ const NotificationMenu = () => {
         console.error('Failed to refresh notifications:', err);
       });
     }
-  }, [setHasNewNotifications, refetchServices, refetchReservations, refetchSpaBookings, refetchEventReservations]);
+  }, [markAsSeen, refetchServices, refetchReservations, refetchSpaBookings, refetchEventReservations]);
 
   return (
     <DropdownMenu modal={false} onOpenChange={handleOpenChange}>

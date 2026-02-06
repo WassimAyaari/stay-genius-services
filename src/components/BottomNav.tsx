@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { UtensilsCrossed, BedDouble, Phone, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useMessageBadge } from '@/hooks/useMessageBadge';
 
 const BottomNav = () => {
   const { t } = useTranslation();
@@ -13,6 +14,7 @@ const BottomNav = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const isMobile = useIsMobile();
+  const { unreadCount } = useMessageBadge();
 
   const isAdminPage = location.pathname.startsWith('/admin');
 
@@ -58,15 +60,17 @@ const BottomNav = () => {
       icon: (
         <div className="relative">
           <MessageCircle className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full text-[8px] text-white flex items-center justify-center font-medium border border-card">
-            2
-          </span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full text-[8px] text-white flex items-center justify-center font-medium border border-card">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </div>
       ),
       label: 'Messages',
       path: '/messages'
     }
-  ], [t]);
+  ], [t, unreadCount]);
 
   // Optimiser la fonction de navigation
   const handleNavigation = useCallback((path: string) => {

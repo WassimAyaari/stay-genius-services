@@ -8,7 +8,7 @@ import { NotificationItem } from '@/types/notification';
 import { useNotificationsState } from './notifications/useNotificationsState';
 import { useNotificationsRealtime } from './notifications/useNotificationsRealtime';
 import { combineAndSortNotifications } from './notifications/notificationUtils';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export const useNotifications = () => {
   const { user, userData } = useAuth();
@@ -22,8 +22,14 @@ export const useNotifications = () => {
   const { bookings: spaBookings = [], refetch: refetchSpaBookings } = useSpaBookings();
   const { reservations: eventReservations = [], refetch: refetchEventReservations } = useEventReservations();
   
-  // Get notification state management
-  const { hasNewNotifications, setHasNewNotifications } = useNotificationsState();
+  // Get notification state management with timestamp tracking
+  const { 
+    hasNewNotifications, 
+    setHasNewNotifications,
+    newNotificationCount,
+    lastSeenAt,
+    markAsSeen 
+  } = useNotificationsState();
   
   // Store email in localStorage for future reference
   useEffect(() => {
@@ -67,10 +73,20 @@ export const useNotifications = () => {
     eventReservations
   );
 
-  // Count unread notifications
-  const unreadCount = notifications.filter(n => 
-    n.status === 'pending' || n.status === 'in_progress' || n.status === 'confirmed'
-  ).length;
+  // Count unread notifications (those created after lastSeenAt)
+  const unreadCount = useMemo(() => {
+    // If we have a counter from realtime events, use that
+    if (newNotificationCount > 0) {
+      return newNotificationCount;
+    }
+    // Otherwise count notifications updated after lastSeenAt
+    const lastSeenDate = new Date(lastSeenAt);
+    return notifications.filter(n => {
+      const notificationDate = n.time instanceof Date ? n.time : new Date(n.time);
+      return notificationDate > lastSeenDate && 
+        (n.status === 'pending' || n.status === 'in_progress' || n.status === 'confirmed');
+    }).length;
+  }, [notifications, lastSeenAt, newNotificationCount]);
 
   const isAuthenticated = Boolean(userId);
 
@@ -80,6 +96,7 @@ export const useNotifications = () => {
     isAuthenticated,
     hasNewNotifications,
     setHasNewNotifications,
+    markAsSeen,
     refetchServices,
     refetchReservations,
     refetchSpaBookings,
