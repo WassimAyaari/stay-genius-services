@@ -1,63 +1,98 @@
 
-# Plan: Redesign Events Page Like Gastronomy
+# Plan: Fix Spa Bookings Display and Translate Admin Dashboard to English
 
 ## Problem Summary
 
-Two issues are preventing the events from displaying:
+There are **two issues** preventing spa reservations from appearing in the admin dashboard:
 
-1. **Date filtering**: All events in the database have dates in 2025, but the current date is February 2026. The `upcomingEvents` filter excludes past events, resulting in an empty list.
+### Issue 1: RLS Policy Uses Wrong Admin Check
+The `spa_bookings` table has an RLS policy that uses the `is_admin(auth.uid())` function. However, this function checks for `raw_app_meta_data->>'is_admin' = 'true'` in `auth.users`, but **no users have this field set**.
 
-2. **UI design**: The current Events page has a complex structure with Stories, Carousels, multiple sections, etc. You want a simpler design like the Gastronomy (Dining) page: clean cards with event info and a "Book" button.
+The actual admin roles are stored in the `user_roles` table with `role = 'admin'`. The admin account `ammna.jmal@gmail.com` has an entry in `user_roles` but not in `raw_app_meta_data`.
+
+**Current `is_admin` function:**
+```sql
+SELECT EXISTS (
+  SELECT 1 FROM auth.users
+  WHERE id = user_id
+  AND raw_app_meta_data->>'is_admin' = 'true'  -- Never true for any user
+);
+```
+
+**Result:** The admin cannot see all bookings because the RLS policy check fails.
+
+### Issue 2: Admin Dashboard Text in French
+The `SpaBookingsTab.tsx` and `SpaManager.tsx` components have hardcoded French text that is not using the i18n translation system. Examples:
+- "Gestion du Spa" should be "Spa Management"
+- "Réservations Spa" should be "Spa Bookings"
+- "En attente" should be "Pending"
+- "Actualiser" should be "Refresh"
 
 ---
 
 ## Solution
 
-### Part 1: Use All Events (Not Just Upcoming)
+### Part 1: Fix the `is_admin` Database Function
 
-Modify the Events page to use `events` instead of `upcomingEvents` from the hook. This will show all events from the database regardless of date.
+Update the `is_admin(user_id)` function to check the `user_roles` table instead of `raw_app_meta_data`:
 
-**File:** `src/pages/events/Events.tsx`
-
-Change from:
-```typescript
-const { upcomingEvents: events, loading } = useEvents();
+```sql
+CREATE OR REPLACE FUNCTION public.is_admin(user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles
+    WHERE user_id = $1
+    AND role = 'admin'
+  );
+$$;
 ```
 
-To:
-```typescript
-const { events, loading } = useEvents();
-```
+This aligns the function with the `is_user_admin` and `has_role` functions that already use the `user_roles` table.
 
----
+### Part 2: Translate Admin Spa Dashboard to English
 
-### Part 2: Redesign Events Page Like Gastronomy
+Update these files to replace hardcoded French text with English:
 
-Create a simplified Events page following the Gastronomy design pattern:
+**File: `src/pages/admin/SpaManager.tsx`**
+| French | English |
+|--------|---------|
+| Gestion du Spa | Spa Management |
+| Gérez les installations, services et réservations du spa | Manage spa facilities, services and bookings |
+| Réservations | Bookings |
+| Installations | Facilities |
+| Services | Services |
+| Gérez les réservations de spa et leurs statuts | Manage spa bookings and their status |
+| Gérez les différentes installations de spa | Manage the different spa facilities |
+| Gérez les services offerts dans chaque installation | Manage services offered in each facility |
 
-**New structure:**
-- Header with title and description
-- Grid of event cards (3 columns on desktop, 2 on tablet, 1 on mobile)
-- Each card shows: image, title, date/time, location, description, "Book" button
-
-**File:** `src/pages/events/Events.tsx`
-
-```text
-Layout
-+-----------------------------------------------+
-|  Events & Promotions (title)                  |
-|  Discover our special events (subtitle)       |
-+-----------------------------------------------+
-|  +--------+  +--------+  +--------+           |
-|  | Image  |  | Image  |  | Image  |           |
-|  | Title  |  | Title  |  | Title  |           |
-|  | Date   |  | Date   |  | Date   |           |
-|  | Time   |  | Time   |  | Time   |           |
-|  | Loc    |  | Loc    |  | Loc    |           |
-|  | [Book] |  | [Book] |  | [Book] |           |
-|  +--------+  +--------+  +--------+           |
-+-----------------------------------------------+
-```
+**File: `src/pages/admin/spa/SpaBookingsTab.tsx`**
+| French | English |
+|--------|---------|
+| Réservations Spa | Spa Bookings |
+| Actualiser | Refresh |
+| Recherche | Search |
+| Nom, email, chambre... | Name, email, room... |
+| Statut | Status |
+| Tous les statuts | All statuses |
+| En attente | Pending |
+| Confirmées | Confirmed |
+| Terminées | Completed |
+| Annulées | Cancelled |
+| Date | Date |
+| Réservation # | Booking # |
+| Service inconnu | Unknown service |
+| Chambre | Room |
+| Demandes spéciales | Special requests |
+| Annuler | Cancel |
+| Chargement des réservations... | Loading bookings... |
+| Aucune réservation trouvée | No bookings found |
+| Statut mis à jour avec succès | Status updated successfully |
+| Erreur lors de la mise à jour du statut | Error updating status |
+| Réservation annulée avec succès | Booking cancelled successfully |
+| Sélectionner le statut | Select status |
 
 ---
 
@@ -65,36 +100,56 @@ Layout
 
 | File | Change |
 |------|--------|
-| `src/pages/events/Events.tsx` | Complete redesign to match Gastronomy page style |
+| SQL Migration | Create new migration to update `is_admin` function |
+| `src/pages/admin/SpaManager.tsx` | Replace French text with English |
+| `src/pages/admin/spa/SpaBookingsTab.tsx` | Replace French text with English |
 
 ---
 
-## Implementation Details
+## Technical Details
 
-The new Events page will:
+### Why the RLS Policy Fails
 
-1. **Remove complex components**: No more Stories, StoryCarousel, PromotionList, NewsletterSection, EventHeader
-2. **Use simple card grid**: Like Gastronomy, display events in a responsive grid
-3. **Show all events**: Use `events` instead of `upcomingEvents`
-4. **Each card contains**:
-   - Event image
-   - Event title
-   - Date and time (with icons)
-   - Location (with icon)
-   - Capacity (with icon)
-   - Description
-   - "Book" button that opens the booking dialog
-   - "View Details" button (optional)
+The current data flow:
+```text
+Admin logs in (ammna.jmal@gmail.com)
+    ↓
+Admin opens Spa Manager → SpaBookingsTab
+    ↓
+useBookingsFetch() calls supabase.from('spa_bookings').select(*)
+    ↓
+RLS Policy "Admins can manage all bookings" evaluates is_admin(auth.uid())
+    ↓
+is_admin() checks: raw_app_meta_data->>'is_admin' = 'true'
+    ↓
+Returns FALSE (field not set for any user)
+    ↓
+Policy falls back to "Users can view their own bookings" 
+    ↓
+Only shows bookings where user_id = auth.uid()
+    ↓
+Returns EMPTY (booking was made by different user)
+```
 
-5. **Handle empty state**: Show a friendly message if no events exist
-6. **Loading state**: Show skeleton cards while loading
+After the fix:
+```text
+is_admin() checks: EXISTS in user_roles WHERE role = 'admin'
+    ↓
+Returns TRUE (user has admin role)
+    ↓
+All bookings are returned ✓
+```
+
+### Translation Approach
+
+Since the admin dashboard has hardcoded French text rather than using the i18n system, and you want English, I will directly replace the French strings with English equivalents. This is simpler than adding i18n keys for admin-only pages.
 
 ---
 
 ## Expected Result
 
-After this change:
-1. The Events page will display all events from the database in a clean card grid
-2. Each event shows its details (image, title, date, time, location)
-3. Users can click "Book" to open the booking dialog for any event
-4. The design matches the Gastronomy page style - clean and simple
+After implementing these changes:
+1. The admin dashboard will show ALL spa bookings, not just the admin's own bookings
+2. The admin can confirm, complete, or cancel any booking
+3. All text on the Spa Manager page will be in English
+4. The new booking you created will be visible in the admin panel
