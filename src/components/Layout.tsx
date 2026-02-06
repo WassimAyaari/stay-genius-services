@@ -1,12 +1,11 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, Link } from 'react-router-dom';
 import MainMenu from './MainMenu';
 import UserMenu from './UserMenu';
 import NotificationMenu from './NotificationMenu';
 import BottomNav from './BottomNav';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from './ui/scroll-area';
@@ -66,25 +65,14 @@ const Layout = ({
       <main className={cn("container mx-auto px-[9px]", !isMessagePage && "pt-16 pb-24", isSpaManagerPage && "h-screen flex flex-col")}>
         {isSpaManagerPage ? (
           <ScrollArea className="flex-1 overflow-y-auto">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="py-4"
-            >
+            <div className="py-4">
               {children}
-            </motion.div>
+            </div>
           </ScrollArea>
         ) : (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
+          <div>
             {children}
-          </motion.div>
+          </div>
         )}
       </main>
 
