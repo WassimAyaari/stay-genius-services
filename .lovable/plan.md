@@ -1,71 +1,114 @@
 
 
-# Plan: Implement Smart Notification Badge System
+# Plan: Fix Real-Time Notifications for Booking Status Updates
 
-## Overview
+## Problem Analysis
 
-This plan implements a proper notification badge system with two key behaviors:
-1. **Request/Booking Notifications**: Badge resets to 0 when the notification dropdown is opened
-2. **Message Notifications**: Badge increments when staff replies and resets when Messages page is opened
+When an admin confirms a spa booking, the user doesn't receive a real-time notification. After investigation, I found **two root causes**:
 
----
+### Root Cause 1: Missing Realtime Publication
 
-## Current State Analysis
+The Supabase realtime publication is missing key tables. Currently published:
 
-| Component | Current Behavior | Issue |
-|-----------|------------------|-------|
-| Notification dropdown | Badge shows count of "pending/in_progress/confirmed" items | Doesn't track when user last viewed notifications |
-| Messages icon in BottomNav | Hardcoded badge showing "2" | Not connected to real unread message count |
-| Realtime updates | Sets `hasNewNotifications: true` on changes | Counter doesn't increment, just flags "new available" |
+| Table | Published |
+|-------|-----------|
+| `event_reservations` | Yes |
+| `conversations` | Yes |
+| `messages` | Yes |
+| `chat_routing` | Yes |
+| **`spa_bookings`** | **NO** |
+| **`table_reservations`** | **NO** |
+| **`service_requests`** | **NO** |
 
----
+Without these tables in the realtime publication, Supabase doesn't broadcast changes to connected clients.
 
-## Solution Architecture
+### Root Cause 2: No Polling Fallback
 
-Create a local storage-based "last seen" tracking system for both notification types:
-
-```text
-Notification Badge Logic
--------------------------
-
-User opens dropdown
-       |
-       v
-Save current timestamp as "lastSeenNotificationsAt"
-       |
-       v
-Badge count = notifications created AFTER lastSeenNotificationsAt
+Unlike the message system (which now has a polling fallback), the notification system relies 100% on realtime subscriptions. If realtime fails for any reason, updates are missed.
 
 ---
 
-Message Badge Logic  
--------------------
+## Solution Overview
 
-Staff sends message
-       |
-       v
-Message is stored with created_at timestamp
-       |
-       v
-Badge count = messages from staff AFTER lastSeenMessagesAt
+| Step | Action |
+|------|--------|
+| 1 | Add missing tables to Supabase realtime publication via migration |
+| 2 | Add polling fallback to useNotificationsRealtime for reliability |
+| 3 | Fix the increment counter function connection |
 
-User opens Messages page
-       |
-       v
-Save current timestamp as "lastSeenMessagesAt"
-       |
-       v
-Badge resets to 0
+---
+
+## Implementation Details
+
+### Step 1: Database Migration - Enable Realtime for Notification Tables
+
+Create a migration to add the missing tables to the realtime publication:
+
+```sql
+-- Add notification-related tables to realtime publication
+ALTER PUBLICATION supabase_realtime ADD TABLE spa_bookings;
+ALTER PUBLICATION supabase_realtime ADD TABLE table_reservations;
+ALTER PUBLICATION supabase_realtime ADD TABLE service_requests;
 ```
 
----
+### Step 2: Add Polling Fallback to Notifications
 
-## Files to Create
+Add an exponential backoff polling mechanism in `useNotificationsRealtime.ts` as a safety net:
 
-| File | Purpose |
-|------|---------|
-| `src/hooks/useNotificationBadge.ts` | Track "last seen" timestamp for notifications and calculate unread count |
-| `src/hooks/useMessageBadge.ts` | Track "last seen" timestamp for messages and calculate unread count |
+```typescript
+// Add polling fallback with exponential backoff
+useEffect(() => {
+  if (!userId && !userEmail && !userRoomNumber) return;
+  
+  let pollInterval = 5000; // Start at 5 seconds
+  let timeoutId: NodeJS.Timeout | null = null;
+  
+  const poll = async () => {
+    try {
+      // Refetch all data
+      await Promise.all([
+        refetchReservations(),
+        refetchServices(),
+        refetchSpaBookings(),
+        refetchEventReservations()
+      ]);
+      
+      // Gradually increase interval (max 30 seconds)
+      pollInterval = Math.min(pollInterval * 1.5, 30000);
+    } catch (error) {
+      console.error('Notification polling error:', error);
+    } finally {
+      timeoutId = setTimeout(poll, pollInterval);
+    }
+  };
+  
+  timeoutId = setTimeout(poll, pollInterval);
+  
+  return () => {
+    if (timeoutId) clearTimeout(timeoutId);
+  };
+}, [userId, userEmail, userRoomNumber, ...refetch functions]);
+```
+
+### Step 3: Update Realtime Handlers to Properly Increment Counter
+
+Currently, `setHasNewNotifications(true)` calls `incrementCount()` which is correct, but we should also ensure the toast is shown. Update the handlers to be more explicit:
+
+```typescript
+// In each listener callback
+(payload) => {
+  console.log('Notification update received:', payload);
+  
+  // Increment notification count
+  setHasNewNotifications(true);
+  
+  // Refetch the data
+  refetchData();
+  
+  // Show toast for status updates
+  handleStatusChange(payload);
+}
+```
 
 ---
 
@@ -73,336 +116,62 @@ Badge resets to 0
 
 | File | Changes |
 |------|---------|
-| `src/hooks/notifications/useNotificationsState.ts` | Add lastSeenAt tracking and new notification count based on timestamp |
-| `src/hooks/useNotifications.ts` | Use timestamp-based unread counting |
-| `src/components/NotificationMenu.tsx` | Update lastSeenAt when dropdown opens |
-| `src/components/BottomNav.tsx` | Use real unread message count from new hook |
-| `src/pages/messages/Messages.tsx` | Reset message badge when page loads |
-| `src/hooks/notifications/useNotificationsRealtime.ts` | Increment counter instead of just flagging |
+| `supabase/migrations/[new].sql` | Add spa_bookings, table_reservations, service_requests to realtime publication |
+| `src/hooks/notifications/useNotificationsRealtime.ts` | Add polling fallback with exponential backoff |
 
 ---
 
-## Technical Implementation Details
+## Technical Details
 
-### Step 1: Create useNotificationBadge hook
-
-This hook will:
-- Store `lastSeenNotificationsAt` timestamp in localStorage
-- Calculate unread count as notifications created after that timestamp
-- Provide a function to mark notifications as "seen" (updates timestamp)
-
-```typescript
-// src/hooks/useNotificationBadge.ts
-import { useState, useEffect, useCallback } from 'react';
-
-const STORAGE_KEY = 'lastSeenNotificationsAt';
-
-export const useNotificationBadge = () => {
-  const [lastSeenAt, setLastSeenAt] = useState<Date>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? new Date(stored) : new Date(0); // Epoch if never seen
-  });
-
-  const markAsSeen = useCallback(() => {
-    const now = new Date();
-    localStorage.setItem(STORAGE_KEY, now.toISOString());
-    setLastSeenAt(now);
-  }, []);
-
-  const getUnseenCount = useCallback((notifications: { time: Date }[]) => {
-    return notifications.filter(n => n.time > lastSeenAt).length;
-  }, [lastSeenAt]);
-
-  return { lastSeenAt, markAsSeen, getUnseenCount };
-};
-```
-
-### Step 2: Create useMessageBadge hook
-
-This hook will:
-- Store `lastSeenMessagesAt` timestamp in localStorage
-- Query for messages from staff/AI after that timestamp
-- Provide real-time updates via Supabase subscription
-
-```typescript
-// src/hooks/useMessageBadge.ts
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-
-const STORAGE_KEY = 'lastSeenMessagesAt';
-
-export const useMessageBadge = () => {
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [lastSeenAt, setLastSeenAt] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEY) || new Date(0).toISOString();
-  });
-
-  // Fetch unread message count
-  const fetchUnreadCount = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    // Get conversations for this user
-    const { data: conversations } = await supabase
-      .from('conversations')
-      .select('id')
-      .eq('guest_id', user.id);
-
-    if (!conversations?.length) {
-      setUnreadCount(0);
-      return;
-    }
-
-    // Count messages from staff/AI after lastSeenAt
-    const { count } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .in('conversation_id', conversations.map(c => c.id))
-      .in('sender_type', ['staff', 'ai'])
-      .gt('created_at', lastSeenAt);
-
-    setUnreadCount(count || 0);
-  }, [lastSeenAt]);
-
-  // Mark messages as seen
-  const markAsSeen = useCallback(() => {
-    const now = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, now);
-    setLastSeenAt(now);
-    setUnreadCount(0);
-  }, []);
-
-  // Initial fetch and realtime subscription
-  useEffect(() => {
-    fetchUnreadCount();
-
-    // Subscribe to new messages
-    const channel = supabase
-      .channel('message-badge-updates')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages'
-      }, (payload) => {
-        if (payload.new.sender_type === 'staff' || payload.new.sender_type === 'ai') {
-          setUnreadCount(prev => prev + 1);
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchUnreadCount]);
-
-  return { unreadCount, markAsSeen, refetch: fetchUnreadCount };
-};
-```
-
-### Step 3: Update useNotificationsState
-
-Add counter-based tracking that increments on new notifications:
-
-```typescript
-// src/hooks/notifications/useNotificationsState.ts
-import { useState, useCallback, useEffect } from 'react';
-
-const STORAGE_KEY = 'lastSeenNotificationsAt';
-
-export const useNotificationsState = () => {
-  const [newNotificationCount, setNewNotificationCount] = useState(0);
-  const [lastSeenAt, setLastSeenAt] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEY) || new Date(0).toISOString();
-  });
-
-  const incrementCount = useCallback(() => {
-    setNewNotificationCount(prev => prev + 1);
-  }, []);
-
-  const markAsSeen = useCallback(() => {
-    const now = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, now);
-    setLastSeenAt(now);
-    setNewNotificationCount(0);
-  }, []);
-
-  return {
-    newNotificationCount,
-    lastSeenAt,
-    incrementCount,
-    markAsSeen,
-    // Legacy support
-    hasNewNotifications: newNotificationCount > 0,
-    setHasNewNotifications: (value: boolean) => {
-      if (value) incrementCount();
-      else markAsSeen();
-    }
-  };
-};
-```
-
-### Step 4: Update NotificationMenu
-
-Call `markAsSeen` when dropdown opens:
-
-```typescript
-// In handleOpenChange callback
-const handleOpenChange = useCallback((open: boolean) => {
-  if (open) {
-    markAsSeen(); // Reset badge to 0
-    // ... existing refresh logic
-  }
-}, [markAsSeen, ...]);
-```
-
-### Step 5: Update BottomNav
-
-Replace hardcoded "2" with real unread count:
-
-```typescript
-// Import and use the hook
-import { useMessageBadge } from '@/hooks/useMessageBadge';
-
-const BottomNav = () => {
-  const { unreadCount } = useMessageBadge();
-  
-  // In navItems
-  {
-    icon: (
-      <div className="relative">
-        <MessageCircle className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full text-[8px] text-white flex items-center justify-center font-medium border border-card">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </div>
-    ),
-    label: 'Messages',
-    path: '/messages'
-  }
-};
-```
-
-### Step 6: Update Messages page
-
-Mark messages as seen when the page loads:
-
-```typescript
-// In Messages.tsx
-import { useMessageBadge } from '@/hooks/useMessageBadge';
-
-const Messages = () => {
-  const { markAsSeen } = useMessageBadge();
-  
-  // Mark as seen when component mounts
-  useEffect(() => {
-    markAsSeen();
-  }, [markAsSeen]);
-  
-  // ... rest of component
-};
-```
-
-### Step 7: Update Realtime handlers
-
-Increment counter instead of just setting boolean flag:
-
-```typescript
-// In useNotificationsRealtime.ts
-// Replace: setHasNewNotifications(true)
-// With: incrementNewNotificationCount() 
-```
-
----
-
-## Data Flow Diagram
+### How Realtime Works
 
 ```text
-Admin changes request status
-       |
-       v
-Supabase Realtime triggers
-       |
-       v
-useNotificationsRealtime receives event
-       |
-       v
-incrementCount() called
-       |
-       v
-Badge shows: previousCount + 1
+Admin updates spa_booking status
+        │
+        ▼
+PostgreSQL UPDATE executed
+        │
+        ▼
+Supabase checks supabase_realtime publication
+        │
+        ├── spa_bookings NOT in publication ──► No broadcast (CURRENT)
+        │
+        └── spa_bookings IN publication ──► Broadcast to subscribers (AFTER FIX)
+                                                     │
+                                                     ▼
+                                           User receives update
+                                                     │
+                                                     ▼
+                                           incrementCount() called
+                                                     │
+                                                     ▼
+                                           Badge shows +1
+```
 
----
+### Polling Fallback Flow
 
-User opens notification dropdown
-       |
-       v
-handleOpenChange(true) called
-       |
-       v
-markAsSeen() called
-       |
-       v
-- Saves current timestamp to localStorage
-- Sets count to 0
-       |
-       v
-Badge shows: 0
-
----
-
-Staff sends message
-       |
-       v
-Supabase Realtime triggers INSERT
-       |
-       v
-useMessageBadge detects sender_type='staff'
-       |
-       v
-setUnreadCount(prev => prev + 1)
-       |
-       v
-Message badge shows: previousCount + 1
-
----
-
-User opens Messages page
-       |
-       v
-useEffect calls markAsSeen()
-       |
-       v
-- Saves current timestamp to localStorage
-- Sets count to 0
-       |
-       v
-Message badge shows: 0
+```text
+Initial poll after 5 seconds
+        │
+        ▼
+Refetch all notification data
+        │
+        ├── New data found ──► Already in state via realtime
+        │                       Poll again in 7.5s (increases)
+        │
+        └── No new data ──► Poll again in 7.5s
+                            │
+                            ▼
+                      Max poll interval: 30 seconds
 ```
 
 ---
 
-## Summary of Changes
+## Expected Results After Fix
 
-| Change | Impact |
-|--------|--------|
-| New `useNotificationBadge` hook | Tracks notification "last seen" timestamp |
-| New `useMessageBadge` hook | Tracks message "last seen" timestamp and unread count |
-| Updated `useNotificationsState` | Supports increment/reset pattern |
-| Updated `NotificationMenu` | Resets badge when opened |
-| Updated `BottomNav` | Shows real unread message count |
-| Updated `Messages` page | Resets message badge on load |
-| Updated realtime handlers | Increment counters on new notifications |
-
----
-
-## Expected Results
-
-After implementation:
-1. Notification bell badge shows count of NEW notifications (since last opened)
-2. Opening the notification dropdown resets badge to 0
-3. Messages icon shows count of unread messages from staff
-4. Opening the Messages page resets message badge to 0
-5. Real-time updates increment badges as new notifications/messages arrive
+1. When admin confirms a spa booking, the user receives a realtime update immediately
+2. The notification badge increments by 1
+3. A toast notification appears saying "Your spa reservation has been confirmed"
+4. Even if realtime fails, the polling fallback catches updates within 5-30 seconds
+5. Same behavior for table reservations and service requests
 
