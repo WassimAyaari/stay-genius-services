@@ -1,116 +1,100 @@
 
-# Plan: Fix Events Page Routing
+# Plan: Redesign Events Page Like Gastronomy
 
 ## Problem Summary
-When clicking "Events & Promos" in the menu, the URL changes to `/events` but displays the Profile page instead of the Events list.
 
-## Root Cause
-Route conflict in `App.tsx`:
-- Line 22: `<Route path="/*" element={<PublicRoutes />} />` - contains the Events page
-- Line 26: `<Route path="/events/*" element={<AuthenticatedRoutes />} />` - catches ALL `/events/*` URLs
+Two issues are preventing the events from displaying:
 
-When navigating to `/events`:
-1. The more specific `/events/*` route matches first
-2. This sends the request to `AuthenticatedRoutes`
-3. Inside `AuthenticatedRoutes`, the path is empty, so `<Route path="/" element={<Profile />} />` matches
-4. Profile page is displayed
+1. **Date filtering**: All events in the database have dates in 2025, but the current date is February 2026. The `upcomingEvents` filter excludes past events, resulting in an empty list.
 
-The actual Events list page is in `PublicRoutes` at path `events`, but it never gets reached.
+2. **UI design**: The current Events page has a complex structure with Stories, Carousels, multiple sections, etc. You want a simpler design like the Gastronomy (Dining) page: clean cards with event info and a "Book" button.
 
 ---
 
 ## Solution
 
-Modify `App.tsx` to only route **specific authenticated event paths** to `AuthenticatedRoutes`, not all `/events/*` paths.
+### Part 1: Use All Events (Not Just Upcoming)
 
-### Option: Use explicit path for event details
+Modify the Events page to use `events` instead of `upcomingEvents` from the hook. This will show all events from the database regardless of date.
+
+**File:** `src/pages/events/Events.tsx`
 
 Change from:
-```tsx
-<Route path="/events/*" element={<AuthenticatedRoutes />} />
+```typescript
+const { upcomingEvents: events, loading } = useEvents();
 ```
 
-To a more specific pattern that only catches event detail pages (not the main events list):
-```tsx
-{/* Remove this line - it intercepts the Events page */}
+To:
+```typescript
+const { events, loading } = useEvents();
 ```
-
-And move the event detail route to be handled differently, or add the Events list route to AuthenticatedRoutes as well.
-
-**Best approach**: Since the Events list (`/events`) should be public and accessible without authentication, while event details (`/events/:id`) require authentication, we need to restructure the routing.
-
-### Files to Modify
-
-| File | Change |
-|------|--------|
-| `src/App.tsx` | Remove the catch-all `/events/*` route that sends everything to AuthenticatedRoutes |
-| `src/routes/PublicRoutes.tsx` | Add the event detail route here, OR keep it in authenticated routes with proper path handling |
-
-### Recommended Implementation
-
-**Option A: Make event detail route more specific**
-
-In `App.tsx`, change:
-```tsx
-// FROM:
-<Route path="/events/*" element={<AuthenticatedRoutes />} />
-
-// TO: Remove this line entirely
-```
-
-Then in `PublicRoutes.tsx`, add the event detail route:
-```tsx
-<Route path="events" element={<Events />} />
-<Route path="events/:id" element={<EventDetail />} />  // Add this
-```
-
-This way:
-- `/events` shows the Events list (public)
-- `/events/:id` shows event details (can still require auth through component-level guards if needed)
 
 ---
 
-## Technical Details
+### Part 2: Redesign Events Page Like Gastronomy
 
-The issue is a classic React Router route matching problem where wildcard routes can intercept paths meant for other route groups.
+Create a simplified Events page following the Gastronomy design pattern:
 
-### Current Flow (broken)
+**New structure:**
+- Header with title and description
+- Grid of event cards (3 columns on desktop, 2 on tablet, 1 on mobile)
+- Each card shows: image, title, date/time, location, description, "Book" button
+
+**File:** `src/pages/events/Events.tsx`
+
 ```text
-User clicks "Events & Promos"
-    ↓
-Navigate to /events
-    ↓
-App.tsx: /events/* matches (line 26)
-    ↓
-AuthenticatedRoutes renders
-    ↓
-Internal path is "/" (empty after /events consumed)
-    ↓
-<Route path="/" element={<Profile />} /> matches
-    ↓
-Profile page displays ✗
+Layout
++-----------------------------------------------+
+|  Events & Promotions (title)                  |
+|  Discover our special events (subtitle)       |
++-----------------------------------------------+
+|  +--------+  +--------+  +--------+           |
+|  | Image  |  | Image  |  | Image  |           |
+|  | Title  |  | Title  |  | Title  |           |
+|  | Date   |  | Date   |  | Date   |           |
+|  | Time   |  | Time   |  | Time   |           |
+|  | Loc    |  | Loc    |  | Loc    |           |
+|  | [Book] |  | [Book] |  | [Book] |           |
+|  +--------+  +--------+  +--------+           |
++-----------------------------------------------+
 ```
 
-### Fixed Flow
-```text
-User clicks "Events & Promos"
-    ↓
-Navigate to /events
-    ↓
-App.tsx: /* matches (no more /events/* override)
-    ↓
-PublicRoutes renders
-    ↓
-<Route path="events" element={<Events />} /> matches
-    ↓
-Events page displays ✓
-```
+---
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/pages/events/Events.tsx` | Complete redesign to match Gastronomy page style |
+
+---
+
+## Implementation Details
+
+The new Events page will:
+
+1. **Remove complex components**: No more Stories, StoryCarousel, PromotionList, NewsletterSection, EventHeader
+2. **Use simple card grid**: Like Gastronomy, display events in a responsive grid
+3. **Show all events**: Use `events` instead of `upcomingEvents`
+4. **Each card contains**:
+   - Event image
+   - Event title
+   - Date and time (with icons)
+   - Location (with icon)
+   - Capacity (with icon)
+   - Description
+   - "Book" button that opens the booking dialog
+   - "View Details" button (optional)
+
+5. **Handle empty state**: Show a friendly message if no events exist
+6. **Loading state**: Show skeleton cards while loading
 
 ---
 
 ## Expected Result
 
-After this fix:
-1. Clicking "Events & Promos" in the menu navigates to `/events`
-2. The Events list page displays correctly with all events
-3. Individual event details (`/events/:id`) still work properly
+After this change:
+1. The Events page will display all events from the database in a clean card grid
+2. Each event shows its details (image, title, date, time, location)
+3. Users can click "Book" to open the booking dialog for any event
+4. The design matches the Gastronomy page style - clean and simple
