@@ -1,24 +1,20 @@
 
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Layout from '@/components/Layout';
 import { useEvents } from '@/hooks/useEvents';
 import { Event } from '@/types/event';
 import EventBookingDialog from '@/components/events/EventBookingDialog';
 import { useToast } from '@/hooks/use-toast';
-import { EventHeader } from './components/EventHeader';
-import { StoryCarousel } from './components/StoryCarousel';
-import { EventList } from './components/EventList';
-import { PromotionList } from './components/PromotionList';
-import { NewsletterSection } from './components/NewsletterSection';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-
-// Lazy load EventsStories component to improve initial load time
-const EventsStories = lazy(() => import('@/components/EventsStories'));
+import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { format } from 'date-fns';
 
 const Events = () => {
   const { t } = useTranslation();
-  const { upcomingEvents: events, loading } = useEvents();
+  const { events, loading } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const { toast } = useToast();
@@ -36,62 +32,120 @@ const Events = () => {
     });
   };
 
+  const formatEventDate = (event: Event) => {
+    if (event.recurrence_type === 'daily') return 'Available Daily';
+    if (event.recurrence_type === 'weekly') return 'Available Weekly';
+    if (event.recurrence_type === 'monthly') return 'Available Monthly';
+    if (event.date) {
+      return format(new Date(event.date), 'dd MMMM yyyy');
+    }
+    return 'Date TBD';
+  };
+
   return (
     <Layout>
-      <div className="container mx-auto px-4">
-        {/* Story Viewer - Lazy loaded */}
-        <Suspense fallback={
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-16" />
-            </div>
-            <div className="flex space-x-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-16 rounded-full" />
-              ))}
-            </div>
-          </div>
-        }>
-          <EventsStories />
-        </Suspense>
-
-        {/* Story Carousel */}
-        <StoryCarousel 
-          events={events}
-          loading={loading}
-          onBookEvent={handleBookEvent}
-        />
-
-        {/* Upcoming Events */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">{t('events.upcomingEvents')}</h2>
-          <EventList 
-            events={events}
-            loading={loading}
-            onBookEvent={handleBookEvent}
-          />
-        </div>
-
-        {/* Special Promotions */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold text-secondary mb-6">{t('events.specialOffers')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <PromotionList 
-              events={events}
-              loading={loading}
-              onBookEvent={handleBookEvent}
-            />
-          </div>
-        </div>
-
-        {/* Event Calendar */}
-        <EventHeader />
-
-        {/* Subscribe Section */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
         <div className="mb-8">
-          <NewsletterSection />
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            {t('events.title', 'Events & Promotions')}
+          </h1>
+          <p className="text-muted-foreground">
+            {t('events.subtitle', 'Discover our special events and exclusive offers')}
+          </p>
         </div>
+
+        {/* Events Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="h-48 w-full" />
+                <CardContent className="p-4">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-2/3 mb-4" />
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">
+              {t('events.noEvents', 'No events available at the moment')}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                {/* Event Image */}
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {event.is_featured && (
+                    <span className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded">
+                      Featured
+                    </span>
+                  )}
+                </div>
+
+                <CardContent className="p-4">
+                  {/* Event Title */}
+                  <h3 className="text-lg font-semibold text-foreground mb-3">
+                    {event.title}
+                  </h3>
+
+                  {/* Event Details */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 mr-2 text-primary" />
+                      <span>{formatEventDate(event)}</span>
+                    </div>
+
+                    {event.time && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4 mr-2 text-primary" />
+                        <span>{event.time}</span>
+                      </div>
+                    )}
+
+                    {event.location && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 mr-2 text-primary" />
+                        <span>{event.location}</span>
+                      </div>
+                    )}
+
+                    {event.capacity && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Users className="h-4 w-4 mr-2 text-primary" />
+                        <span>{event.capacity} places</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {event.description}
+                  </p>
+
+                  {/* Book Button */}
+                  <Button 
+                    onClick={() => handleBookEvent(event)}
+                    className="w-full"
+                  >
+                    {t('common.book', 'Book')}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Event Booking Dialog */}
