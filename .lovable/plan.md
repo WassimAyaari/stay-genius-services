@@ -1,100 +1,116 @@
 
-# Plan: Fix Restaurant Reservations Display in Admin Dashboard
+# Plan: Fix Events Page Routing
 
-## Problem Analysis
+## Problem Summary
+When clicking "Events & Promos" in the menu, the URL changes to `/events` but displays the Profile page instead of the Events list.
 
-Two issues are preventing restaurant reservations from displaying in the admin dashboard:
+## Root Cause
+Route conflict in `App.tsx`:
+- Line 22: `<Route path="/*" element={<PublicRoutes />} />` - contains the Events page
+- Line 26: `<Route path="/events/*" element={<AuthenticatedRoutes />} />` - catches ALL `/events/*` URLs
 
-### Issue 1: Missing Route
-The URL `/admin/restaurants/:id` has no registered route, causing a blank page when navigating to individual restaurant pages.
+When navigating to `/events`:
+1. The more specific `/events/*` route matches first
+2. This sends the request to `AuthenticatedRoutes`
+3. Inside `AuthenticatedRoutes`, the path is empty, so `<Route path="/" element={<Profile />} />` matches
+4. Profile page is displayed
 
-### Issue 2: Query Function Selection Bug
-The `useTableReservationsCore` hook selects the wrong query function. When the admin selects a restaurant in the Bookings tab, the hook still calls `fetchUserReservations` (filtering by user_id/email) instead of `fetchRestaurantReservations` (filtering by restaurant_id).
-
-The console logs confirm this:
-- Actual: "Fetching reservations for user ID: ..."
-- Expected: "Fetching reservations for restaurant ID: ..."
+The actual Events list page is in `PublicRoutes` at path `events`, but it never gets reached.
 
 ---
 
 ## Solution
 
-### Fix 1: Register Missing Route
+Modify `App.tsx` to only route **specific authenticated event paths** to `AuthenticatedRoutes`, not all `/events/*` paths.
 
-**File:** `src/routes/AdminRoutes.tsx`
+### Option: Use explicit path for event details
 
-Add import for `RestaurantReservationsManager` and register the route.
-
-```typescript
-import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
-
-// Add inside Routes:
-<Route path="restaurants/:id/reservations" element={<RestaurantReservationsManager />} />
+Change from:
+```tsx
+<Route path="/events/*" element={<AuthenticatedRoutes />} />
 ```
 
----
-
-### Fix 2: Fix Query Function Logic
-
-**File:** `src/hooks/reservations/useTableReservationsCore.tsx`
-
-The issue is that `isRestaurantSpecific` is computed once, but needs to be reactive. Change the queryFn to be computed dynamically within the useQuery call:
-
-Current (broken):
-```typescript
-const isRestaurantSpecific = !!restaurantId && restaurantId !== ':id';
-const { fetchUserReservations, fetchRestaurantReservations } = useReservationsFetching(...);
-
-const { data: reservations } = useQuery({
-  queryKey: ['tableReservations', userId, userEmail, restaurantId],
-  queryFn: isRestaurantSpecific ? fetchRestaurantReservations : fetchUserReservations,
-  ...
-});
+To a more specific pattern that only catches event detail pages (not the main events list):
+```tsx
+{/* Remove this line - it intercepts the Events page */}
 ```
 
-Fixed:
-```typescript
-const { data: reservations } = useQuery({
-  queryKey: ['tableReservations', userId, userEmail, restaurantId],
-  queryFn: async () => {
-    const shouldFetchByRestaurant = !!restaurantId && restaurantId !== ':id';
-    if (shouldFetchByRestaurant) {
-      return fetchRestaurantReservations();
-    }
-    return fetchUserReservations();
-  },
-  ...
-});
-```
+And move the event detail route to be handled differently, or add the Events list route to AuthenticatedRoutes as well.
 
-This ensures the decision is made at query execution time, not at hook initialization time.
+**Best approach**: Since the Events list (`/events`) should be public and accessible without authentication, while event details (`/events/:id`) require authentication, we need to restructure the routing.
 
----
-
-## Files to Modify
+### Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/routes/AdminRoutes.tsx` | Add route for `restaurants/:id/reservations` |
-| `src/hooks/reservations/useTableReservationsCore.tsx` | Fix queryFn to evaluate restaurant filtering dynamically |
+| `src/App.tsx` | Remove the catch-all `/events/*` route that sends everything to AuthenticatedRoutes |
+| `src/routes/PublicRoutes.tsx` | Add the event detail route here, OR keep it in authenticated routes with proper path handling |
+
+### Recommended Implementation
+
+**Option A: Make event detail route more specific**
+
+In `App.tsx`, change:
+```tsx
+// FROM:
+<Route path="/events/*" element={<AuthenticatedRoutes />} />
+
+// TO: Remove this line entirely
+```
+
+Then in `PublicRoutes.tsx`, add the event detail route:
+```tsx
+<Route path="events" element={<Events />} />
+<Route path="events/:id" element={<EventDetail />} />  // Add this
+```
+
+This way:
+- `/events` shows the Events list (public)
+- `/events/:id` shows event details (can still require auth through component-level guards if needed)
+
+---
+
+## Technical Details
+
+The issue is a classic React Router route matching problem where wildcard routes can intercept paths meant for other route groups.
+
+### Current Flow (broken)
+```text
+User clicks "Events & Promos"
+    ↓
+Navigate to /events
+    ↓
+App.tsx: /events/* matches (line 26)
+    ↓
+AuthenticatedRoutes renders
+    ↓
+Internal path is "/" (empty after /events consumed)
+    ↓
+<Route path="/" element={<Profile />} /> matches
+    ↓
+Profile page displays ✗
+```
+
+### Fixed Flow
+```text
+User clicks "Events & Promos"
+    ↓
+Navigate to /events
+    ↓
+App.tsx: /* matches (no more /events/* override)
+    ↓
+PublicRoutes renders
+    ↓
+<Route path="events" element={<Events />} /> matches
+    ↓
+Events page displays ✓
+```
 
 ---
 
 ## Expected Result
 
-After implementing these fixes:
-
-1. **Bookings Tab**: When admin selects a restaurant, reservations for that restaurant will appear
-2. **Individual Restaurant Page**: URL `/admin/restaurants/:id/reservations` will display that restaurant's reservations
-3. **Status Updates**: Admin can confirm or cancel reservations
-
----
-
-## Testing Steps
-
-1. Log in as admin
-2. Go to Admin Panel, then F&B, then Restaurants
-3. Click on the Bookings tab
-4. Select a restaurant from the dropdown (e.g., "Allegria")
-5. Verify reservations appear in the grid
-6. Try updating a reservation status (confirm/cancel)
+After this fix:
+1. Clicking "Events & Promos" in the menu navigates to `/events`
+2. The Events list page displays correctly with all events
+3. Individual event details (`/events/:id`) still work properly
