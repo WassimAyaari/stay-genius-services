@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UnifiedChatContainer } from '@/components/chat/UnifiedChatContainer';
@@ -7,6 +6,7 @@ import { ChatListScreen } from '@/components/chat/ChatListScreen';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useMessageBadge } from '@/hooks/useMessageBadge';
+import Layout from '@/components/Layout';
 
 const Messages = () => {
   const [userInfo, setUserInfo] = useState<{
@@ -122,12 +122,14 @@ const Messages = () => {
     );
   }
 
-  // Show chat list screen
+  // Show chat list screen with Layout wrapper for navbar
   return (
-    <ChatListScreen 
-      userInfo={userInfo}
-      onSelectChat={setSelectedChatType}
-    />
+    <Layout>
+      <ChatListScreen 
+        userInfo={userInfo}
+        onSelectChat={setSelectedChatType}
+      />
+    </Layout>
   );
 };
 

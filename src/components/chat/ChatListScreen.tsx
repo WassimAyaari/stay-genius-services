@@ -1,6 +1,6 @@
 import React from 'react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, Bot } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { User, Bot, ChevronRight } from 'lucide-react';
 
 interface ChatListScreenProps {
   onSelectChat: (type: 'concierge' | 'safety_ai') => void;
@@ -16,63 +16,64 @@ export const ChatListScreen: React.FC<ChatListScreenProps> = ({
   userInfo
 }) => {
   return (
-    <div className="fixed inset-0 bg-background flex flex-col">
-      {/* Header */}
-      <div className="border-b bg-background px-4 py-4">
-        <h1 className="text-xl font-semibold">Chats</h1>
+    <div className="py-4">
+      {/* Hero Header */}
+      <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-secondary/5 rounded-2xl px-6 py-8 mb-6 mx-1">
+        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+        <p className="text-muted-foreground mt-2">
+          Connect with our team or AI assistant
+        </p>
       </div>
 
-      {/* Chat List */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Chat Options as Cards */}
+      <div className="space-y-4 px-1">
         {/* Hotel Team Chat */}
-        <div 
-          className="flex items-center p-4 hover:bg-accent/50 cursor-pointer border-b border-border/40"
+        <Card 
+          className="cursor-pointer border-border/50 hover:border-primary/30 transition-all duration-200 group"
           onClick={() => onSelectChat('concierge')}
         >
-          <div className="relative mr-3">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback className="bg-primary/10">
-                <User className="h-6 w-6 text-primary" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium text-foreground truncate">Hotel Team</h3>
-              <span className="text-xs text-muted-foreground">now</span>
+          <div className="flex items-center gap-4 p-5">
+            <div className="relative">
+              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                <User className="h-7 w-7 text-primary" />
+              </div>
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-accent rounded-full border-2 border-card"></div>
             </div>
-            <p className="text-sm text-muted-foreground truncate mt-1">
-              Connect directly with our staff
-            </p>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg text-foreground">Hotel Team</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Connect directly with our staff
+              </p>
+            </div>
+            
+            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-        </div>
+        </Card>
 
         {/* AI Assistant Chat */}
-        <div 
-          className="flex items-center p-4 hover:bg-accent/50 cursor-pointer border-b border-border/40"
+        <Card 
+          className="cursor-pointer border-border/50 hover:border-secondary/30 transition-all duration-200 group"
           onClick={() => onSelectChat('safety_ai')}
         >
-          <div className="relative mr-3">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback className="bg-secondary/10">
-                <Bot className="h-6 w-6 text-secondary" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-blue-500 rounded-full border-2 border-background"></div>
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium text-foreground truncate">AI Assistant</h3>
-              <span className="text-xs text-muted-foreground">now</span>
+          <div className="flex items-center gap-4 p-5">
+            <div className="relative">
+              <div className="h-14 w-14 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/15 transition-colors">
+                <Bot className="h-7 w-7 text-secondary" />
+              </div>
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-secondary rounded-full border-2 border-card"></div>
             </div>
-            <p className="text-sm text-muted-foreground truncate mt-1">
-              Instant AI help, can escalate to staff
-            </p>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg text-foreground">AI Assistant</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Instant AI help, can escalate to staff
+              </p>
+            </div>
+            
+            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary transition-colors" />
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
