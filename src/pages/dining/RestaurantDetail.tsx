@@ -19,6 +19,7 @@ import RestaurantMenu from './components/RestaurantMenu';
 import RestaurantInfo from './components/RestaurantInfo';
 import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 import RestaurantBookingDialog from '@/features/dining/components/RestaurantBookingDialog';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const RestaurantDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { requireAuth } = useRequireAuth();
   const { upcomingEvents } = useEvents();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
@@ -46,7 +48,9 @@ const RestaurantDetail = () => {
   }, [location.state, location.search]);
 
   const handleBookTable = () => {
-    setIsBookingOpen(true);
+    requireAuth(() => {
+      setIsBookingOpen(true);
+    });
   };
 
   const handleBookingSuccess = () => {
@@ -153,7 +157,7 @@ const RestaurantDetail = () => {
             {/* Add Events Section */}
             <section className="mb-10">
               <h2 className="text-2xl font-bold text-secondary mb-6">
-                Événements à venir
+                Upcoming Events
               </h2>
               <EventsSection events={restaurantEvents} />
             </section>

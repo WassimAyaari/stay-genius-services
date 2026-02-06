@@ -11,11 +11,13 @@ import { useEvents } from '@/hooks/useEvents';
 import { useToast } from '@/hooks/use-toast';
 import RestaurantBookingDialog from '@/features/dining/components/RestaurantBookingDialog';
 import { Restaurant } from '@/features/dining/types';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 const Dining = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { requireAuth } = useRequireAuth();
   const { restaurants, isLoading } = useRestaurants();
   const { upcomingEvents } = useEvents();
   
@@ -24,11 +26,13 @@ const Dining = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
 
   const handleBookTable = (restaurantId: string) => {
-    const restaurant = restaurants?.find(r => r.id === restaurantId);
-    if (restaurant) {
-      setSelectedRestaurant(restaurant);
-      setIsBookingOpen(true);
-    }
+    requireAuth(() => {
+      const restaurant = restaurants?.find(r => r.id === restaurantId);
+      if (restaurant) {
+        setSelectedRestaurant(restaurant);
+        setIsBookingOpen(true);
+      }
+    });
   };
 
   const handleBookingSuccess = () => {

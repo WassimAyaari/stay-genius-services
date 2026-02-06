@@ -31,12 +31,12 @@ const BookingDialog = ({
       <DialogContent className="sm:max-w-[500px] p-0">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>
-            {isEditing ? `Modifier votre réservation - ${restaurantName}` : `Réserver une table - ${restaurantName}`}
+            {isEditing ? `Edit your reservation - ${restaurantName}` : `Book a Table - ${restaurantName}`}
           </DialogTitle>
           <DialogDescription>
             {isEditing 
-              ? "Modifiez les détails de votre réservation ci-dessous."
-              : "Remplissez le formulaire ci-dessous pour réserver une table."}
+              ? "Edit the details of your reservation below."
+              : "Fill out the form below to book a table."}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[80vh]">
@@ -45,7 +45,7 @@ const BookingDialog = ({
               <ReservationForm 
                 restaurantId={restaurantId} 
                 onSuccess={onSuccess}
-                buttonText={buttonText || (isEditing ? "Modifier ma réservation" : "Réserver une table")}
+                buttonText={buttonText || (isEditing ? "Update Reservation" : "Book a Table")}
                 existingReservation={existingReservation}
               />
             )}
