@@ -1,80 +1,108 @@
 
-# Plan: Remove Navigation Bar Movement on Interaction
+
+# Plan: Fix Navigation Bar Movement When Opening Dropdown Menus
 
 ## Problem Summary
 
-When clicking on input fields or other interactive elements, both the top and bottom navigation bars shift slightly. This is caused by Framer Motion animations that re-apply transform values during component updates.
+When clicking on the notification icon, user avatar menu, or main menu in the top navbar, both the top and bottom navigation bars shift slightly. This occurs when the dropdown/popover opens and again when it closes.
 
-## Root Causes
+## Root Cause Analysis
 
-1. **BottomNav.tsx**: Uses `AnimatePresence` and `motion.nav` with spring animations (`y: 0`, `y: "100%"`) that can cause micro-adjustments during re-renders
-2. **Scroll-based visibility toggle**: The scroll handler in BottomNav updates state on every scroll, which can trigger animation recalculations
-3. **Layout.tsx**: Uses `motion.div` for content fade-in which interacts with the fixed positioned navbars
+Based on investigation and session replay data, the movement is caused by two related issues:
+
+| Cause | Description |
+|-------|-------------|
+| **Scrollbar shift** | When Radix UI dropdowns/dialogs open, some may lock body scroll, causing the scrollbar to disappear. This shifts the viewport width and all fixed elements move slightly |
+| **Radix Popper transforms** | The Radix UI Popper component applies dynamic transform styles (`translate(1221.11px, 55.5556px)`) to position dropdown content, which can cause layout recalculations |
+
+The key evidence from session replay shows:
+- Elements get `transform: "translate(1221.11px, 55.5556px)"` 
+- CSS variables like `--radix-popper-transform-origin: "100% 0px"` are applied
+- These style updates occur when `data-state` changes from closed to open
 
 ## Solution
 
-### Part 1: Simplify BottomNav Animations
+### Part 1: Add Scrollbar Gutter to Prevent Width Shift
 
-Replace the Framer Motion spring animation with CSS transforms that only apply during actual show/hide transitions:
+Add `scrollbar-gutter: stable` to the HTML/body to reserve space for the scrollbar even when it's hidden. This prevents the viewport from shifting when modals/dropdowns lock body scroll.
 
-| Current | Change |
-|---------|--------|
-| `motion.nav` with AnimatePresence | Regular `nav` with CSS transition |
-| Spring animation (`type: "spring"`) | CSS transform with transition |
-| Re-applies transform on every render | Only transforms during visibility change |
+### Part 2: Disable Modal Behavior on DropdownMenu
 
-### Part 2: Use CSS-only Transitions
+The DropdownMenu component uses `modal={true}` by default, which locks body scroll and can cause the scrollbar shift. Setting `modal={false}` on the dropdown menus will prevent this behavior while still allowing normal dropdown functionality.
 
-Convert the bottom nav animation to use CSS `translate-y` with `transition` property instead of Framer Motion. This prevents animation recalculations on re-renders.
+### Part 3: Update Sheet Component for Smoother Transitions
 
-```tsx
-// Before (Framer Motion)
-<motion.nav 
-  initial={{ y: "100%" }}
-  animate={{ y: 0 }}
-  exit={{ y: "100%" }}
-  transition={{ type: "spring", stiffness: 300, damping: 30 }}
->
-
-// After (CSS transition)
-<nav 
-  className={cn(
-    "fixed bottom-0 left-0 right-0 ... transition-transform duration-300",
-    isVisible ? "translate-y-0" : "translate-y-full"
-  )}
->
-```
-
-### Part 3: Stabilize Header Position
-
-Add `will-change: transform` and ensure the header has no transform-related properties that could cause layout shifts.
+The Sheet component (used by MainMenu) also locks body scroll. We'll ensure consistent behavior across all navigation overlays.
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/components/BottomNav.tsx` | Replace Framer Motion with CSS transitions |
-| `src/components/Layout.tsx` | Remove motion.div opacity animation from content wrapper |
+| `src/index.css` | Add `scrollbar-gutter: stable` to html/body |
+| `src/components/NotificationMenu.tsx` | Add `modal={false}` to DropdownMenu |
+| `src/components/UserMenu.tsx` | Add `modal={false}` to DropdownMenu |
 
-## Technical Details
+## Implementation Details
 
-### BottomNav.tsx Changes
+### 1. src/index.css
 
-1. Remove `motion` and `AnimatePresence` imports from framer-motion
-2. Replace `motion.nav` with regular `nav` element
-3. Use Tailwind's `translate-y-0` and `translate-y-full` classes with `transition-transform duration-300`
-4. Remove the `initial`, `animate`, `exit`, and `transition` props
+Add scrollbar-gutter to the base styles:
 
-### Layout.tsx Changes
+```css
+html {
+  scrollbar-gutter: stable;
+}
 
-1. Remove `motion.div` wrapper for children content
-2. Replace with regular `div` to prevent any transform interference
-3. This removes potential animation side effects affecting fixed elements
+body {
+  overflow-y: scroll; /* Always show scrollbar track */
+}
+```
+
+The `scrollbar-gutter: stable` CSS property reserves space for the scrollbar in the layout, preventing the page from shifting when scrollbars appear or disappear.
+
+### 2. src/components/NotificationMenu.tsx
+
+Change the DropdownMenu to non-modal mode:
+
+```tsx
+// Before
+<DropdownMenu onOpenChange={handleOpenChange}>
+
+// After
+<DropdownMenu modal={false} onOpenChange={handleOpenChange}>
+```
+
+When `modal={false}`:
+- Body scroll is not locked when the dropdown opens
+- The scrollbar remains visible
+- No viewport width changes occur
+
+### 3. src/components/UserMenu.tsx
+
+Same change for the user menu dropdown:
+
+```tsx
+// Before
+<DropdownMenu>
+
+// After
+<DropdownMenu modal={false}>
+```
+
+## Technical Explanation
+
+| Property | Effect |
+|----------|--------|
+| `scrollbar-gutter: stable` | Reserves space for the scrollbar, preventing layout shift when scrollbar appears/disappears |
+| `overflow-y: scroll` | Ensures the scrollbar track is always present |
+| `modal={false}` | Prevents Radix UI from locking body scroll and applying scroll-prevention styles |
 
 ## Expected Result
 
 After these changes:
-1. Navigation bars will remain perfectly stable when clicking inputs or other elements
-2. The show/hide animation on scroll will still work smoothly using CSS transitions
-3. No more micro-movements or "settling" of the navbars during interactions
-4. Better performance as CSS transitions are GPU-accelerated and don't require JavaScript calculations
+1. The top navbar will remain perfectly stable when opening/closing the notification menu
+2. The top navbar will remain stable when opening/closing the user avatar menu
+3. The bottom navbar will not shift during any dropdown interactions
+4. The main menu (Sheet) will open smoothly without causing navigation shifts
+5. Dropdown menus will still function normally with proper positioning and outside-click closing
+
