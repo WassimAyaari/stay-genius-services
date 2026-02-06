@@ -46,7 +46,7 @@ const NotificationMenu = () => {
   }, [setHasNewNotifications, refetchServices, refetchReservations, refetchSpaBookings, refetchEventReservations]);
 
   return (
-    <DropdownMenu onOpenChange={handleOpenChange}>
+    <DropdownMenu modal={false} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
           <Bell className={`h-5 w-5 ${hasNewNotifications ? 'text-primary' : ''}`} />
