@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Conversation, Message, ChatState } from '@/types/chat';
@@ -11,7 +11,7 @@ interface UseUnifiedChatProps {
   };
   isAdmin?: boolean;
   conversationType?: 'concierge' | 'safety_ai';
-  conversationId?: string; // NEW: Load specific conversation by ID (for admin)
+  conversationId?: string; // Load specific conversation by ID (for admin)
 }
 
 export const useUnifiedChat = ({ 
@@ -34,142 +34,132 @@ export const useUnifiedChat = ({
   const { toast } = useToast();
 
   // Auto-scroll to bottom
-  const scrollToBottom = useCallback(() => {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  // Load a specific conversation by ID (for admin use)
-  const loadConversationById = useCallback(async (id: string) => {
-    try {
-      setChatState(prev => ({ ...prev, isLoading: true }));
-
-      // Load the conversation
-      const { data: conversation, error: convError } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (convError) throw convError;
-
-      // Load messages
-      const { data: messages, error: messagesError } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', id)
-        .order('created_at', { ascending: true });
-
-      if (messagesError) throw messagesError;
-
-      setChatState({
-        conversation,
-        messages: messages || [],
-        isLoading: false,
-        isTyping: false,
-        currentHandler: conversation.current_handler
-      });
-    } catch (error) {
-      console.error('Error loading conversation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load conversation.",
-        variant: "destructive"
-      });
-      setChatState(prev => ({ ...prev, isLoading: false }));
-    }
-  }, [toast]);
-
-  // Initialize conversation for guests
-  const initializeConversation = useCallback(async () => {
-    try {
-      setChatState(prev => ({ ...prev, isLoading: true }));
-
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return;
-
-      // Check for existing active conversation of the same type
-      const { data: existingConversation } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('guest_id', user.user.id)
-        .eq('conversation_type', conversationType)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      let conversation = existingConversation;
-
-      // Create new conversation if none exists
-      if (!conversation) {
-        const { data: newConversation, error } = await supabase
-          .from('conversations')
-          .insert({
-            guest_id: user.user.id,
-            guest_name: userInfo?.name || 'Guest',
-            guest_email: userInfo?.email || user.user.email,
-            room_number: userInfo?.roomNumber,
-            status: 'active',
-            current_handler: conversationType === 'concierge' ? 'human' : 'ai',
-            conversation_type: conversationType
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        conversation = newConversation;
-
-        // Send welcome message based on conversation type
-        const welcomeMessage = conversationType === 'safety_ai' 
-          ? `Hello ${userInfo?.name || 'there'}! I'm your AI Assistant. I can help with bookings, hotel information, and much more. If you need human assistance, I can connect you to our staff. How can I help you today?`
-          : `Hello ${userInfo?.name || 'there'}! Welcome to our Hotel Team chat. Our staff will assist you directly with any questions or requests you may have.`;
-
-        await supabase
-          .from('messages')
-          .insert({
-            conversation_id: conversation.id,
-            sender_type: conversationType === 'concierge' ? 'staff' : 'ai',
-            sender_name: conversationType === 'safety_ai' ? 'AI Assistant' : 'Hotel Team',
-            content: welcomeMessage,
-            message_type: 'text'
-          });
-      }
-
-      // Load messages
-      const { data: messages, error: messagesError } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversation.id)
-        .order('created_at', { ascending: true });
-
-      if (messagesError) throw messagesError;
-
-      setChatState({
-        conversation,
-        messages: messages || [],
-        isLoading: false,
-        isTyping: false,
-        currentHandler: conversation.current_handler
-      });
-
-    } catch (error) {
-      console.error('Error initializing conversation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to initialize chat. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [userInfo, conversationType, toast]);
+  };
 
   // Initialize or load conversation
   useEffect(() => {
+    const loadConversationById = async (id: string) => {
+      try {
+        setChatState(prev => ({ ...prev, isLoading: true }));
+
+        const { data: conversation, error: convError } = await supabase
+          .from('conversations')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (convError) throw convError;
+
+        const { data: messages, error: messagesError } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', id)
+          .order('created_at', { ascending: true });
+
+        if (messagesError) throw messagesError;
+
+        setChatState({
+          conversation,
+          messages: messages || [],
+          isLoading: false,
+          isTyping: false,
+          currentHandler: conversation.current_handler
+        });
+      } catch (error) {
+        console.error('Error loading conversation:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load conversation.",
+          variant: "destructive"
+        });
+        setChatState(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    const initializeConversation = async () => {
+      try {
+        setChatState(prev => ({ ...prev, isLoading: true }));
+
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { data: existingConversation } = await supabase
+          .from('conversations')
+          .select('*')
+          .eq('guest_id', user.user.id)
+          .eq('conversation_type', conversationType)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        let conversation = existingConversation;
+
+        if (!conversation) {
+          const { data: newConversation, error } = await supabase
+            .from('conversations')
+            .insert({
+              guest_id: user.user.id,
+              guest_name: userInfo?.name || 'Guest',
+              guest_email: userInfo?.email || user.user.email,
+              room_number: userInfo?.roomNumber,
+              status: 'active',
+              current_handler: conversationType === 'concierge' ? 'human' : 'ai',
+              conversation_type: conversationType
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          conversation = newConversation;
+
+          const welcomeMessage = conversationType === 'safety_ai' 
+            ? `Hello ${userInfo?.name || 'there'}! I'm your AI Assistant. I can help with bookings, hotel information, and much more. If you need human assistance, I can connect you to our staff. How can I help you today?`
+            : `Hello ${userInfo?.name || 'there'}! Welcome to our Hotel Team chat. Our staff will assist you directly with any questions or requests you may have.`;
+
+          await supabase
+            .from('messages')
+            .insert({
+              conversation_id: conversation.id,
+              sender_type: conversationType === 'concierge' ? 'staff' : 'ai',
+              sender_name: conversationType === 'safety_ai' ? 'AI Assistant' : 'Hotel Team',
+              content: welcomeMessage,
+              message_type: 'text'
+            });
+        }
+
+        const { data: messages, error: messagesError } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversation.id)
+          .order('created_at', { ascending: true });
+
+        if (messagesError) throw messagesError;
+
+        setChatState({
+          conversation,
+          messages: messages || [],
+          isLoading: false,
+          isTyping: false,
+          currentHandler: conversation.current_handler
+        });
+
+      } catch (error) {
+        console.error('Error initializing conversation:', error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize chat. Please try again.",
+          variant: "destructive"
+        });
+      }
+    };
+
     if (conversationId) {
-      // Admin loading a specific conversation
       loadConversationById(conversationId);
     } else if (userInfo?.name) {
-      // Guest creating/loading their own conversation
       initializeConversation();
     }
-  }, [conversationId, userInfo?.name, conversationType, loadConversationById, initializeConversation]);
+  }, [conversationId, userInfo?.name, userInfo?.email, userInfo?.roomNumber, conversationType, toast]);
 
   // Real-time subscription for messages
   useEffect(() => {
@@ -188,7 +178,6 @@ export const useUnifiedChat = ({
         (payload) => {
           const newMessage = payload.new as Message;
           setChatState(prev => {
-            // Prevent duplicate messages
             if (prev.messages.some(m => m.id === newMessage.id)) {
               return prev;
             }
@@ -223,13 +212,13 @@ export const useUnifiedChat = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [chatState.conversation?.id, scrollToBottom]);
+  }, [chatState.conversation?.id]);
 
   // Polling fallback with exponential backoff
   useEffect(() => {
     if (!chatState.conversation?.id) return;
 
-    let pollInterval = 3000; // Start at 3 seconds
+    let pollInterval = 3000;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let lastMessageTime = chatState.messages.length > 0
       ? chatState.messages[chatState.messages.length - 1].created_at
@@ -245,7 +234,6 @@ export const useUnifiedChat = ({
           .order('created_at', { ascending: true });
 
         if (data && data.length > 0) {
-          // New messages found - update state
           setChatState(prev => ({
             ...prev,
             messages: [...prev.messages, ...data.filter(
@@ -254,9 +242,8 @@ export const useUnifiedChat = ({
             isTyping: false
           }));
           lastMessageTime = data[data.length - 1].created_at;
-          pollInterval = 3000; // Reset interval on new messages
+          pollInterval = 3000;
         } else {
-          // No new messages - increase interval (max 15 seconds)
           pollInterval = Math.min(pollInterval * 1.5, 15000);
         }
       } catch (error) {
@@ -277,7 +264,7 @@ export const useUnifiedChat = ({
   // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [chatState.messages, scrollToBottom]);
+  }, [chatState.messages]);
 
   // Send message
   const sendMessage = async () => {
@@ -291,7 +278,6 @@ export const useUnifiedChat = ({
       setInputMessage('');
       setChatState(prev => ({ ...prev, isTyping: true }));
 
-      // Insert user message
       await supabase
         .from('messages')
         .insert({
@@ -303,7 +289,6 @@ export const useUnifiedChat = ({
           message_type: 'text'
         });
 
-      // If current handler is AI and conversation type is safety_ai, send to AI
       if (chatState.currentHandler === 'ai' && !isAdmin && chatState.conversation.conversation_type === 'safety_ai') {
         await sendToAI(messageContent);
       }
@@ -338,13 +323,10 @@ export const useUnifiedChat = ({
       if (response.error) {
         throw response.error;
       }
-
-      // AI response will be inserted via real-time subscription
     } catch (error) {
       console.error('Error communicating with AI:', error);
       setChatState(prev => ({ ...prev, isTyping: false }));
       
-      // Insert error message
       await supabase
         .from('messages')
         .insert({
@@ -355,7 +337,6 @@ export const useUnifiedChat = ({
           message_type: 'system'
         });
 
-      // Escalate to human
       await escalateToHuman('AI Error');
     }
   };
@@ -365,7 +346,6 @@ export const useUnifiedChat = ({
     if (!chatState.conversation) return;
 
     try {
-      // Update conversation handler
       await supabase
         .from('conversations')
         .update({
@@ -374,7 +354,6 @@ export const useUnifiedChat = ({
         })
         .eq('id', chatState.conversation.id);
 
-      // Log the routing change
       await supabase
         .from('chat_routing')
         .insert({
@@ -384,7 +363,6 @@ export const useUnifiedChat = ({
           reason
         });
 
-      // Notify guest
       await supabase
         .from('messages')
         .insert({
@@ -428,7 +406,6 @@ export const useUnifiedChat = ({
         })
         .eq('id', convId);
 
-      // Log the routing change
       await supabase
         .from('chat_routing')
         .insert({
