@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'lastSeenNotificationsAt';
@@ -23,16 +22,24 @@ export const useNotificationsState = () => {
     setNewNotificationCount(0);
   }, []);
 
+  // FIXED: Memoize with useCallback to prevent subscription churn
+  const setHasNewNotifications = useCallback((value: boolean) => {
+    if (value) {
+      setNewNotificationCount(prev => prev + 1);
+    } else {
+      const now = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, now);
+      setLastSeenAt(now);
+      setNewNotificationCount(0);
+    }
+  }, []);
+
   return {
     newNotificationCount,
     lastSeenAt,
     incrementCount,
     markAsSeen,
-    // Legacy support for existing code
     hasNewNotifications: newNotificationCount > 0,
-    setHasNewNotifications: (value: boolean) => {
-      if (value) incrementCount();
-      else markAsSeen();
-    }
+    setHasNewNotifications
   };
 };
