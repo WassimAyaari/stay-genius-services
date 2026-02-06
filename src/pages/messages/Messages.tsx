@@ -6,6 +6,7 @@ import { AdminChatDashboard } from '@/components/admin/chat/AdminChatDashboard';
 import { ChatListScreen } from '@/components/chat/ChatListScreen';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useMessageBadge } from '@/hooks/useMessageBadge';
 
 const Messages = () => {
   const [userInfo, setUserInfo] = useState<{
@@ -16,6 +17,14 @@ const Messages = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedChatType, setSelectedChatType] = useState<'concierge' | 'safety_ai' | null>(null);
+  const { markAsSeen } = useMessageBadge();
+
+  // Mark messages as seen when the page loads (for non-admin users)
+  useEffect(() => {
+    if (!isAdmin && !isLoading) {
+      markAsSeen();
+    }
+  }, [isAdmin, isLoading, markAsSeen]);
 
   useEffect(() => {
     const checkUserAndRole = async () => {

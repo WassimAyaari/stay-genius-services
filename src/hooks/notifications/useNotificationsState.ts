@@ -1,14 +1,38 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+
+const STORAGE_KEY = 'lastSeenNotificationsAt';
 
 /**
- * Hook to manage notification state
+ * Hook to manage notification state with timestamp-based tracking
  */
 export const useNotificationsState = () => {
-  const [hasNewNotifications, setHasNewNotifications] = useState(false);
-  
+  const [newNotificationCount, setNewNotificationCount] = useState(0);
+  const [lastSeenAt, setLastSeenAt] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEY) || new Date(0).toISOString();
+  });
+
+  const incrementCount = useCallback(() => {
+    setNewNotificationCount(prev => prev + 1);
+  }, []);
+
+  const markAsSeen = useCallback(() => {
+    const now = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, now);
+    setLastSeenAt(now);
+    setNewNotificationCount(0);
+  }, []);
+
   return {
-    hasNewNotifications,
-    setHasNewNotifications
+    newNotificationCount,
+    lastSeenAt,
+    incrementCount,
+    markAsSeen,
+    // Legacy support for existing code
+    hasNewNotifications: newNotificationCount > 0,
+    setHasNewNotifications: (value: boolean) => {
+      if (value) incrementCount();
+      else markAsSeen();
+    }
   };
 };
