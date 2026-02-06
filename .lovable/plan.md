@@ -1,30 +1,28 @@
 
 
-# Plan: Fix Real-Time Notifications for Booking Status Updates
+# Plan: Fix Notification Badge Not Incrementing on Admin Status Updates
 
-## Problem Analysis
+## Problem Identified
 
-When an admin confirms a spa booking, the user doesn't receive a real-time notification. After investigation, I found **two root causes**:
+When an admin confirms a restaurant booking, the user's notification badge doesn't increment. Based on my investigation, I found **two root causes**:
 
-### Root Cause 1: Missing Realtime Publication
+### Root Cause 1: Unstable Callback Reference
 
-The Supabase realtime publication is missing key tables. Currently published:
+The `setHasNewNotifications` function in `useNotificationsState.ts` is **not memoized with `useCallback`**:
 
-| Table | Published |
-|-------|-----------|
-| `event_reservations` | Yes |
-| `conversations` | Yes |
-| `messages` | Yes |
-| `chat_routing` | Yes |
-| **`spa_bookings`** | **NO** |
-| **`table_reservations`** | **NO** |
-| **`service_requests`** | **NO** |
+```typescript
+// Current (PROBLEMATIC)
+setHasNewNotifications: (value: boolean) => {
+  if (value) incrementCount();
+  else markAsSeen();
+}
+```
 
-Without these tables in the realtime publication, Supabase doesn't broadcast changes to connected clients.
+This creates a new function reference on every render. Since this function is passed to `useNotificationsRealtime` and included in its dependency array, the realtime subscriptions are constantly being torn down and recreated. During this churn, updates may be missed.
 
-### Root Cause 2: No Polling Fallback
+### Root Cause 2: Polling Fallback Doesn't Increment Badge
 
-Unlike the message system (which now has a polling fallback), the notification system relies 100% on realtime subscriptions. If realtime fails for any reason, updates are missed.
+The polling fallback only refetches data but doesn't detect status changes to increment the notification counter. It should compare the `updated_at` timestamps to detect changes that occurred since last poll.
 
 ---
 
@@ -32,52 +30,125 @@ Unlike the message system (which now has a polling fallback), the notification s
 
 | Step | Action |
 |------|--------|
-| 1 | Add missing tables to Supabase realtime publication via migration |
-| 2 | Add polling fallback to useNotificationsRealtime for reliability |
-| 3 | Fix the increment counter function connection |
+| 1 | Memoize `setHasNewNotifications` with `useCallback` in `useNotificationsState.ts` |
+| 2 | Pass `incrementCount` directly instead of `setHasNewNotifications` for clearer intent |
+| 3 | Update polling fallback to detect new updates and increment counter |
 
 ---
 
-## Implementation Details
+## File Changes
 
-### Step 1: Database Migration - Enable Realtime for Notification Tables
-
-Create a migration to add the missing tables to the realtime publication:
-
-```sql
--- Add notification-related tables to realtime publication
-ALTER PUBLICATION supabase_realtime ADD TABLE spa_bookings;
-ALTER PUBLICATION supabase_realtime ADD TABLE table_reservations;
-ALTER PUBLICATION supabase_realtime ADD TABLE service_requests;
-```
-
-### Step 2: Add Polling Fallback to Notifications
-
-Add an exponential backoff polling mechanism in `useNotificationsRealtime.ts` as a safety net:
+### 1. Fix `useNotificationsState.ts` - Memoize the callback
 
 ```typescript
-// Add polling fallback with exponential backoff
+import { useState, useCallback } from 'react';
+
+const STORAGE_KEY = 'lastSeenNotificationsAt';
+
+export const useNotificationsState = () => {
+  const [newNotificationCount, setNewNotificationCount] = useState(0);
+  const [lastSeenAt, setLastSeenAt] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEY) || new Date(0).toISOString();
+  });
+
+  const incrementCount = useCallback(() => {
+    setNewNotificationCount(prev => prev + 1);
+  }, []);
+
+  const markAsSeen = useCallback(() => {
+    const now = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, now);
+    setLastSeenAt(now);
+    setNewNotificationCount(0);
+  }, []);
+
+  // FIXED: Memoize with useCallback
+  const setHasNewNotifications = useCallback((value: boolean) => {
+    if (value) {
+      setNewNotificationCount(prev => prev + 1);
+    } else {
+      const now = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, now);
+      setLastSeenAt(now);
+      setNewNotificationCount(0);
+    }
+  }, []);
+
+  return {
+    newNotificationCount,
+    lastSeenAt,
+    incrementCount,
+    markAsSeen,
+    hasNewNotifications: newNotificationCount > 0,
+    setHasNewNotifications
+  };
+};
+```
+
+### 2. Update `useNotificationsRealtime.ts` - Add better logging and ensure handlers work
+
+Add more detailed logging to diagnose if the realtime events are being received:
+
+```typescript
+// In each handler callback
+(payload) => {
+  console.log('[NOTIFICATION REALTIME] Reservation update received:', {
+    eventType: payload.eventType,
+    oldStatus: payload.old?.status,
+    newStatus: payload.new?.status,
+    userId: payload.new?.user_id
+  });
+  
+  setHasNewNotifications(true);
+  refetchReservations();
+  handleReservationStatusChange(payload);
+}
+```
+
+### 3. Update Polling to Detect Status Changes
+
+Modify the polling fallback to track last poll timestamp and detect if any items were updated:
+
+```typescript
 useEffect(() => {
   if (!userId && !userEmail && !userRoomNumber) return;
   
-  let pollInterval = 5000; // Start at 5 seconds
-  let timeoutId: NodeJS.Timeout | null = null;
+  let pollInterval = 5000;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let isMounted = true;
+  let lastPollTimestamp = new Date().toISOString();
+  
+  const checkForUpdates = async () => {
+    try {
+      // Check for reservation updates since last poll
+      const { count: reservationUpdates } = await supabase
+        .from('table_reservations')
+        .select('*', { count: 'exact', head: true })
+        .or(`user_id.eq.${userId},guest_email.eq.${userEmail}`)
+        .gt('updated_at', lastPollTimestamp)
+        .neq('status', 'pending'); // Only count status changes
+      
+      if (reservationUpdates && reservationUpdates > 0) {
+        setHasNewNotifications(true);
+      }
+      
+      // Similar checks for spa_bookings, service_requests, event_reservations
+      
+      lastPollTimestamp = new Date().toISOString();
+    } catch (error) {
+      console.error('Polling check error:', error);
+    }
+  };
   
   const poll = async () => {
-    try {
-      // Refetch all data
-      await Promise.all([
-        refetchReservations(),
-        refetchServices(),
-        refetchSpaBookings(),
-        refetchEventReservations()
-      ]);
-      
-      // Gradually increase interval (max 30 seconds)
-      pollInterval = Math.min(pollInterval * 1.5, 30000);
-    } catch (error) {
-      console.error('Notification polling error:', error);
-    } finally {
+    if (!isMounted) return;
+    
+    await checkForUpdates();
+    await refetchAll();
+    
+    pollInterval = Math.min(pollInterval * 1.5, 30000);
+    
+    if (isMounted) {
       timeoutId = setTimeout(poll, pollInterval);
     }
   };
@@ -85,93 +156,68 @@ useEffect(() => {
   timeoutId = setTimeout(poll, pollInterval);
   
   return () => {
+    isMounted = false;
     if (timeoutId) clearTimeout(timeoutId);
   };
-}, [userId, userEmail, userRoomNumber, ...refetch functions]);
-```
-
-### Step 3: Update Realtime Handlers to Properly Increment Counter
-
-Currently, `setHasNewNotifications(true)` calls `incrementCount()` which is correct, but we should also ensure the toast is shown. Update the handlers to be more explicit:
-
-```typescript
-// In each listener callback
-(payload) => {
-  console.log('Notification update received:', payload);
-  
-  // Increment notification count
-  setHasNewNotifications(true);
-  
-  // Refetch the data
-  refetchData();
-  
-  // Show toast for status updates
-  handleStatusChange(payload);
-}
+}, [userId, userEmail, userRoomNumber, ...]);
 ```
 
 ---
 
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `supabase/migrations/[new].sql` | Add spa_bookings, table_reservations, service_requests to realtime publication |
-| `src/hooks/notifications/useNotificationsRealtime.ts` | Add polling fallback with exponential backoff |
-
----
-
-## Technical Details
-
-### How Realtime Works
+## Data Flow After Fix
 
 ```text
-Admin updates spa_booking status
-        │
-        ▼
-PostgreSQL UPDATE executed
-        │
-        ▼
-Supabase checks supabase_realtime publication
-        │
-        ├── spa_bookings NOT in publication ──► No broadcast (CURRENT)
-        │
-        └── spa_bookings IN publication ──► Broadcast to subscribers (AFTER FIX)
-                                                     │
-                                                     ▼
-                                           User receives update
-                                                     │
-                                                     ▼
-                                           incrementCount() called
-                                                     │
-                                                     ▼
-                                           Badge shows +1
-```
+Admin confirms reservation
+         |
+         v
+Supabase UPDATE executed
+         |
+         v
+Realtime broadcast (table_reservations)
+         |
+         v
+User's subscription receives event
+         |
+         v
+setHasNewNotifications(true) called
+         |
+         v
+setNewNotificationCount(prev => prev + 1)
+         |
+         v
+Badge shows: 1
 
-### Polling Fallback Flow
+---
 
-```text
-Initial poll after 5 seconds
-        │
-        ▼
-Refetch all notification data
-        │
-        ├── New data found ──► Already in state via realtime
-        │                       Poll again in 7.5s (increases)
-        │
-        └── No new data ──► Poll again in 7.5s
-                            │
-                            ▼
-                      Max poll interval: 30 seconds
+If Realtime fails, Polling catches it:
+         |
+         v
+Poll detects updated_at > lastPollTimestamp
+         |
+         v
+setHasNewNotifications(true) called
+         |
+         v
+Badge increments
 ```
 
 ---
 
-## Expected Results After Fix
+## Summary of Changes
 
-1. When admin confirms a spa booking, the user receives a realtime update immediately
-2. The notification badge increments by 1
-3. A toast notification appears saying "Your spa reservation has been confirmed"
-4. Even if realtime fails, the polling fallback catches updates within 5-30 seconds
-5. Same behavior for table reservations and service requests
+| File | Change |
+|------|--------|
+| `src/hooks/notifications/useNotificationsState.ts` | Memoize `setHasNewNotifications` with `useCallback` to prevent subscription churn |
+| `src/hooks/notifications/useNotificationsRealtime.ts` | Add enhanced logging + update polling to detect status changes |
+
+---
+
+## Expected Results
+
+After implementation:
+1. Realtime subscriptions remain stable (no constant re-subscription)
+2. When admin confirms a booking, the realtime event is received and badge increments
+3. Toast notification shows "Your table reservation has been confirmed"
+4. Even if realtime fails, polling will catch the update and increment the badge
+5. Opening the notification dropdown still resets the badge to 0
 
