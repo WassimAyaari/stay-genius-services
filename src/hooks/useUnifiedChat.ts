@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Conversation, Message, ChatState } from '@/types/chat';
@@ -11,9 +11,15 @@ interface UseUnifiedChatProps {
   };
   isAdmin?: boolean;
   conversationType?: 'concierge' | 'safety_ai';
+  conversationId?: string; // NEW: Load specific conversation by ID (for admin)
 }
 
-export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = 'concierge' }: UseUnifiedChatProps) => {
+export const useUnifiedChat = ({ 
+  userInfo, 
+  isAdmin = false, 
+  conversationType = 'concierge',
+  conversationId 
+}: UseUnifiedChatProps) => {
   const [chatState, setChatState] = useState<ChatState>({
     conversation: null,
     messages: [],
@@ -27,72 +33,54 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = '
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
-  // Initialize or get existing conversation
-  useEffect(() => {
-    if (userInfo?.name) {
-      initializeConversation();
-    }
-  }, [userInfo, conversationType]);
-
-  // Real-time subscription for messages
-  useEffect(() => {
-    if (!chatState.conversation?.id) return;
-
-    const channel = supabase
-      .channel(`conversation-${chatState.conversation.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${chatState.conversation.id}`
-        },
-        (payload) => {
-          const newMessage = payload.new as Message;
-          setChatState(prev => ({
-            ...prev,
-            messages: [...prev.messages, newMessage],
-            isTyping: false
-          }));
-          scrollToBottom();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'conversations',
-          filter: `id=eq.${chatState.conversation.id}`
-        },
-        (payload) => {
-          const updatedConversation = payload.new as Conversation;
-          setChatState(prev => ({
-            ...prev,
-            conversation: updatedConversation,
-            currentHandler: updatedConversation.current_handler
-          }));
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [chatState.conversation?.id]);
-
   // Auto-scroll to bottom
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [chatState.messages]);
+  // Load a specific conversation by ID (for admin use)
+  const loadConversationById = useCallback(async (id: string) => {
+    try {
+      setChatState(prev => ({ ...prev, isLoading: true }));
 
-  // Initialize conversation
-  const initializeConversation = async () => {
+      // Load the conversation
+      const { data: conversation, error: convError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (convError) throw convError;
+
+      // Load messages
+      const { data: messages, error: messagesError } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', id)
+        .order('created_at', { ascending: true });
+
+      if (messagesError) throw messagesError;
+
+      setChatState({
+        conversation,
+        messages: messages || [],
+        isLoading: false,
+        isTyping: false,
+        currentHandler: conversation.current_handler
+      });
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load conversation.",
+        variant: "destructive"
+      });
+      setChatState(prev => ({ ...prev, isLoading: false }));
+    }
+  }, [toast]);
+
+  // Initialize conversation for guests
+  const initializeConversation = useCallback(async () => {
     try {
       setChatState(prev => ({ ...prev, isLoading: true }));
 
@@ -170,7 +158,126 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = '
         variant: "destructive"
       });
     }
-  };
+  }, [userInfo, conversationType, toast]);
+
+  // Initialize or load conversation
+  useEffect(() => {
+    if (conversationId) {
+      // Admin loading a specific conversation
+      loadConversationById(conversationId);
+    } else if (userInfo?.name) {
+      // Guest creating/loading their own conversation
+      initializeConversation();
+    }
+  }, [conversationId, userInfo?.name, conversationType, loadConversationById, initializeConversation]);
+
+  // Real-time subscription for messages
+  useEffect(() => {
+    if (!chatState.conversation?.id) return;
+
+    const channel = supabase
+      .channel(`conversation-${chatState.conversation.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${chatState.conversation.id}`
+        },
+        (payload) => {
+          const newMessage = payload.new as Message;
+          setChatState(prev => {
+            // Prevent duplicate messages
+            if (prev.messages.some(m => m.id === newMessage.id)) {
+              return prev;
+            }
+            return {
+              ...prev,
+              messages: [...prev.messages, newMessage],
+              isTyping: false
+            };
+          });
+          scrollToBottom();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations',
+          filter: `id=eq.${chatState.conversation.id}`
+        },
+        (payload) => {
+          const updatedConversation = payload.new as Conversation;
+          setChatState(prev => ({
+            ...prev,
+            conversation: updatedConversation,
+            currentHandler: updatedConversation.current_handler
+          }));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [chatState.conversation?.id, scrollToBottom]);
+
+  // Polling fallback with exponential backoff
+  useEffect(() => {
+    if (!chatState.conversation?.id) return;
+
+    let pollInterval = 3000; // Start at 3 seconds
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let lastMessageTime = chatState.messages.length > 0
+      ? chatState.messages[chatState.messages.length - 1].created_at
+      : '1970-01-01';
+
+    const poll = async () => {
+      try {
+        const { data } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', chatState.conversation!.id)
+          .gt('created_at', lastMessageTime)
+          .order('created_at', { ascending: true });
+
+        if (data && data.length > 0) {
+          // New messages found - update state
+          setChatState(prev => ({
+            ...prev,
+            messages: [...prev.messages, ...data.filter(
+              msg => !prev.messages.some(existing => existing.id === msg.id)
+            )],
+            isTyping: false
+          }));
+          lastMessageTime = data[data.length - 1].created_at;
+          pollInterval = 3000; // Reset interval on new messages
+        } else {
+          // No new messages - increase interval (max 15 seconds)
+          pollInterval = Math.min(pollInterval * 1.5, 15000);
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+        pollInterval = Math.min(pollInterval * 1.5, 15000);
+      } finally {
+        timeoutId = setTimeout(poll, pollInterval);
+      }
+    };
+
+    timeoutId = setTimeout(poll, pollInterval);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [chatState.conversation?.id]);
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatState.messages, scrollToBottom]);
 
   // Send message
   const sendMessage = async () => {
@@ -304,7 +411,10 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = '
   };
 
   // Take over conversation (for admin)
-  const takeOverConversation = async (conversationId: string) => {
+  const takeOverConversation = async (targetConversationId?: string) => {
+    const convId = targetConversationId || chatState.conversation?.id;
+    if (!convId) return;
+
     try {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user || !isAdmin) return;
@@ -316,13 +426,13 @@ export const useUnifiedChat = ({ userInfo, isAdmin = false, conversationType = '
           assigned_staff_id: user.user.id,
           status: 'active'
         })
-        .eq('id', conversationId);
+        .eq('id', convId);
 
       // Log the routing change
       await supabase
         .from('chat_routing')
         .insert({
-          conversation_id: conversationId,
+          conversation_id: convId,
           from_handler: 'ai',
           to_handler: 'human',
           reason: 'Staff Takeover',
