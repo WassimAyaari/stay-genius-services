@@ -23,7 +23,7 @@ function App() {
             <Route path="/profile/*" element={<AuthenticatedRoutes />} />
             <Route path="/dining/reservations/*" element={<AuthenticatedRoutes />} />
             <Route path="/spa/booking/*" element={<AuthenticatedRoutes />} />
-            <Route path="/events/*" element={<AuthenticatedRoutes />} />
+            {/* Events list is public, event details handled in PublicRoutes */}
             <Route path="/my-room/*" element={<AuthenticatedRoutes />} />
             <Route path="/notifications/*" element={<AuthenticatedRoutes />} />
             <Route path="/admin/*" element={<AdminRoutes />} />
