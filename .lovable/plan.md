@@ -1,108 +1,170 @@
 
 
-# Plan: Fix Navigation Bar Movement When Opening Dropdown Menus
+# Plan: Restrict Bookings to Logged-in Users & Ensure English Display
 
 ## Problem Summary
 
-When clicking on the notification icon, user avatar menu, or main menu in the top navbar, both the top and bottom navigation bars shift slightly. This occurs when the dropdown/popover opens and again when it closes.
+1. **Booking Access**: Currently, any user (logged in or not) can click on "Book" buttons for restaurants, spa, events, and activities. The system should redirect non-logged-in users to the login page instead.
 
-## Root Cause Analysis
+2. **French Text**: Several components have hardcoded French text that should be in English.
 
-Based on investigation and session replay data, the movement is caused by two related issues:
+---
 
-| Cause | Description |
-|-------|-------------|
-| **Scrollbar shift** | When Radix UI dropdowns/dialogs open, some may lock body scroll, causing the scrollbar to disappear. This shifts the viewport width and all fixed elements move slightly |
-| **Radix Popper transforms** | The Radix UI Popper component applies dynamic transform styles (`translate(1221.11px, 55.5556px)`) to position dropdown content, which can cause layout recalculations |
+## Solution Overview
 
-The key evidence from session replay shows:
-- Elements get `transform: "translate(1221.11px, 55.5556px)"` 
-- CSS variables like `--radix-popper-transform-origin: "100% 0px"` are applied
-- These style updates occur when `data-state` changes from closed to open
+Create a reusable **authentication check** that intercepts booking actions. When a non-authenticated user clicks a "Book" button, they'll see a toast message and be redirected to the login page.
 
-## Solution
-
-### Part 1: Add Scrollbar Gutter to Prevent Width Shift
-
-Add `scrollbar-gutter: stable` to the HTML/body to reserve space for the scrollbar even when it's hidden. This prevents the viewport from shifting when modals/dropdowns lock body scroll.
-
-### Part 2: Disable Modal Behavior on DropdownMenu
-
-The DropdownMenu component uses `modal={true}` by default, which locks body scroll and can cause the scrollbar shift. Setting `modal={false}` on the dropdown menus will prevent this behavior while still allowing normal dropdown functionality.
-
-### Part 3: Update Sheet Component for Smoother Transitions
-
-The Sheet component (used by MainMenu) also locks body scroll. We'll ensure consistent behavior across all navigation overlays.
+---
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/index.css` | Add `scrollbar-gutter: stable` to html/body |
-| `src/components/NotificationMenu.tsx` | Add `modal={false}` to DropdownMenu |
-| `src/components/UserMenu.tsx` | Add `modal={false}` to DropdownMenu |
+| `src/hooks/useRequireAuth.ts` | **NEW** - Create a reusable hook for auth-gated actions |
+| `src/pages/spa/Spa.tsx` | Add auth check before opening spa booking dialog |
+| `src/pages/dining/Dining.tsx` | Add auth check before opening restaurant booking dialog |
+| `src/pages/dining/RestaurantDetail.tsx` | Add auth check + translate French text to English |
+| `src/pages/events/Events.tsx` | Add auth check before opening event booking dialog |
+| `src/pages/activities/Activities.tsx` | Add auth check (already partially implemented but needs redirect) |
+| `src/components/events/EventBookingCard.tsx` | Add auth check + translate French text |
+| `src/features/spa/components/SpaServiceCard.tsx` | Add auth check wrapper |
+| `src/features/spa/components/SpaSection.tsx` | Pass auth check to card |
+| `src/features/activities/components/ActivityCard.tsx` | Add auth check wrapper |
+| `src/pages/dining/components/RestaurantInfo.tsx` | Translate French text |
+| `src/pages/dining/components/BookingDialog.tsx` | Translate French text |
+| `src/components/events/EventBookingDialog.tsx` | Translate French text |
+| `src/pages/notifications/components/details/spa/SpaBookingFacilityInfo.tsx` | Translate French text |
+
+---
 
 ## Implementation Details
 
-### 1. src/index.css
+### Step 1: Create useRequireAuth Hook
 
-Add scrollbar-gutter to the base styles:
+```typescript
+// src/hooks/useRequireAuth.ts
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/features/auth/hooks/useAuthContext';
+import { useToast } from '@/hooks/use-toast';
 
-```css
-html {
-  scrollbar-gutter: stable;
-}
+export const useRequireAuth = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-body {
-  overflow-y: scroll; /* Always show scrollbar track */
-}
+  const requireAuth = (callback: () => void) => {
+    if (!isAuthenticated) {
+      toast({
+        variant: "destructive",
+        title: "Login Required",
+        description: "Please log in to make a booking.",
+      });
+      navigate('/auth/login', { state: { from: window.location.pathname } });
+      return;
+    }
+    callback();
+  };
+
+  return { requireAuth, isAuthenticated };
+};
 ```
 
-The `scrollbar-gutter: stable` CSS property reserves space for the scrollbar in the layout, preventing the page from shifting when scrollbars appear or disappear.
+### Step 2: Update Booking Handlers in Each Page
 
-### 2. src/components/NotificationMenu.tsx
-
-Change the DropdownMenu to non-modal mode:
-
-```tsx
-// Before
-<DropdownMenu onOpenChange={handleOpenChange}>
-
-// After
-<DropdownMenu modal={false} onOpenChange={handleOpenChange}>
+**Spa Page:**
+```typescript
+const handleBookTreatment = (serviceId: string) => {
+  requireAuth(() => {
+    setSelectedService(serviceId);
+    setIsBookingOpen(true);
+  });
+};
 ```
 
-When `modal={false}`:
-- Body scroll is not locked when the dropdown opens
-- The scrollbar remains visible
-- No viewport width changes occur
-
-### 3. src/components/UserMenu.tsx
-
-Same change for the user menu dropdown:
-
-```tsx
-// Before
-<DropdownMenu>
-
-// After
-<DropdownMenu modal={false}>
+**Dining Page:**
+```typescript
+const handleBookTable = (restaurantId: string) => {
+  requireAuth(() => {
+    const restaurant = restaurants?.find(r => r.id === restaurantId);
+    if (restaurant) {
+      setSelectedRestaurant(restaurant);
+      setIsBookingOpen(true);
+    }
+  });
+};
 ```
 
-## Technical Explanation
+**Events Page:**
+```typescript
+const handleBookEvent = (event: Event) => {
+  requireAuth(() => {
+    setSelectedEvent(event);
+    setIsBookingOpen(true);
+  });
+};
+```
 
-| Property | Effect |
-|----------|--------|
-| `scrollbar-gutter: stable` | Reserves space for the scrollbar, preventing layout shift when scrollbar appears/disappears |
-| `overflow-y: scroll` | Ensures the scrollbar track is always present |
-| `modal={false}` | Prevents Radix UI from locking body scroll and applying scroll-prevention styles |
+**Activities Page:**
+```typescript
+const handleBookActivity = (activityId: string) => {
+  requireAuth(async () => {
+    // existing booking logic
+  });
+};
+```
+
+### Step 3: Translate French Text to English
+
+| Location | French Text | English Translation |
+|----------|-------------|---------------------|
+| `EventBookingCard.tsx` | "places disponibles" | "spots available" |
+| `EventBookingCard.tsx` | "Réserver l'événement" | "Book Event" |
+| `RestaurantDetail.tsx` | "Événements à venir" | "Upcoming Events" |
+| `RestaurantInfo.tsx` | "Réserver une table" | "Book a Table" |
+| `BookingDialog.tsx` | "Modifier votre réservation" | "Edit your reservation" |
+| `BookingDialog.tsx` | "Réserver une table" | "Book a Table" |
+| `BookingDialog.tsx` | "Remplissez le formulaire..." | "Fill out the form below to book a table." |
+| `EventBookingDialog.tsx` | "Modifier votre réservation" | "Edit your reservation" |
+| `EventBookingDialog.tsx` | "Réserver" | "Book" |
+| `EventBookingDialog.tsx` | "Remplissez le formulaire..." | "Fill out the form below to reserve your spot." |
+| `SpaBookingFacilityInfo.tsx` | "Détails de l'installation" | "Facility Details" |
+| `SpaBookingFacilityInfo.tsx` | "Informations sur l'installation non disponibles" | "Facility information not available" |
+
+---
+
+## User Flow After Changes
+
+```text
+User clicks "Book" button
+       │
+       ▼
+ Is user logged in?
+       │
+  ┌────┴────┐
+  │         │
+ YES        NO
+  │         │
+  ▼         ▼
+Open      Show toast:
+booking   "Login Required"
+dialog        │
+              ▼
+         Redirect to
+         /auth/login
+              │
+              ▼
+         After login,
+         return to
+         original page
+```
+
+---
 
 ## Expected Result
 
 After these changes:
-1. The top navbar will remain perfectly stable when opening/closing the notification menu
-2. The top navbar will remain stable when opening/closing the user avatar menu
-3. The bottom navbar will not shift during any dropdown interactions
-4. The main menu (Sheet) will open smoothly without causing navigation shifts
-5. Dropdown menus will still function normally with proper positioning and outside-click closing
+1. Non-authenticated users clicking any "Book" button will see a toast message and be redirected to login
+2. After logging in, they can return to the page and book successfully
+3. All text in the guest-facing UI will be in English
+4. Authenticated users will see no change in their booking experience
 
