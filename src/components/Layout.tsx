@@ -22,18 +22,12 @@ const Layout = ({
   const location = useLocation();
   
   const isHomePage = location.pathname === '/';
-  const isMessagePage = location.pathname === '/messages' || location.pathname.startsWith('/messages?');
   const isSpaManagerPage = location.pathname === '/admin/spa';
   const isMobile = useIsMobile();
-
-  // For debugging, show current path
-  console.log('Current path in Layout:', location.pathname);
   
   return (
     <div className="min-h-screen bg-background">
-      {/* Header appears on all pages except messages page */}
-      {!isMessagePage && (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-lg">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-lg">
           <div className="container mx-auto px-4">
             <div className="relative flex items-center h-16">
               {/* Left section - Menu */}
@@ -60,9 +54,8 @@ const Layout = ({
             </div>
           </div>
         </header>
-      )}
 
-      <main className={cn("container mx-auto px-[9px]", !isMessagePage && "pt-16 pb-24", isSpaManagerPage && "h-screen flex flex-col")}>
+      <main className={cn("container mx-auto px-[9px] pt-16 pb-24", isSpaManagerPage && "h-screen flex flex-col")}>
         {isSpaManagerPage ? (
           <ScrollArea className="flex-1 overflow-y-auto">
             <div className="py-4">
@@ -76,7 +69,7 @@ const Layout = ({
         )}
       </main>
 
-      {!isMessagePage && <BottomNav />}
+      <BottomNav />
     </div>
   );
 };
