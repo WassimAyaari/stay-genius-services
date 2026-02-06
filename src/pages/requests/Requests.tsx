@@ -1,49 +1,34 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
-import { useNotifications } from '@/hooks/useNotifications';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  FileText, 
-  Search, 
-  Filter,
-  RefreshCw,
-  ArrowLeft
-} from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import NotificationCard from './components/NotificationCard';
-import { useUnifiedCancellation } from './hooks/useUnifiedCancellation';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Layout from "@/components/Layout";
+import { useNotifications } from "@/hooks/useNotifications";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileText, Search, Filter, RefreshCw, ArrowLeft } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import NotificationCard from "./components/NotificationCard";
+import { useUnifiedCancellation } from "./hooks/useUnifiedCancellation";
 
 const Requests = () => {
   const navigate = useNavigate();
-  const { 
-    notifications,
-    refetchServices,
-    refetchReservations,
-    refetchSpaBookings,
-    refetchEventReservations
-  } = useNotifications();
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const { notifications, refetchServices, refetchReservations, refetchSpaBookings, refetchEventReservations } =
+    useNotifications();
 
-  const {
-    isUpdating,
-    isCancelDialogOpen,
-    canCancelNotification,
-    openCancelDialog,
-    closeCancelDialog,
-    handleCancel
-  } = useUnifiedCancellation(
-    refetchServices,
-    refetchSpaBookings,
-    refetchReservations,
-    refetchEventReservations
-  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+
+  const { isUpdating, isCancelDialogOpen, canCancelNotification, openCancelDialog, closeCancelDialog, handleCancel } =
+    useUnifiedCancellation(refetchServices, refetchSpaBookings, refetchReservations, refetchEventReservations);
 
   const handleRefreshAll = () => {
     refetchServices();
@@ -53,14 +38,14 @@ const Requests = () => {
   };
 
   // Filter notifications based on search term, status, and type
-  const filteredNotifications = notifications.filter(notification => {
-    const matchesSearch = 
+  const filteredNotifications = notifications.filter((notification) => {
+    const matchesSearch =
       notification.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       notification.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || notification.status === statusFilter;
-    const matchesType = typeFilter === 'all' || notification.type === typeFilter;
-    
+
+    const matchesStatus = statusFilter === "all" || notification.status === statusFilter;
+    const matchesType = typeFilter === "all" || notification.type === typeFilter;
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -72,7 +57,7 @@ const Requests = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-2xl font-bold">My Requests</h1>
+          <h1 className="text-2xl font-bold">My Notifications</h1>
           <Button variant="outline" onClick={handleRefreshAll}>
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -143,25 +128,20 @@ const Requests = () => {
               <div className="text-center py-8">
                 <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-600 mb-2">
-                  {notifications.length === 0 ? 'No requests yet' : 'No matching requests'}
+                  {notifications.length === 0 ? "No requests yet" : "No matching requests"}
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  {notifications.length === 0 
+                  {notifications.length === 0
                     ? "You haven't made any service requests yet."
-                    : "Try adjusting your search or filter criteria."
-                  }
+                    : "Try adjusting your search or filter criteria."}
                 </p>
-                {notifications.length === 0 && (
-                  <Button onClick={() => navigate('/my-room')}>
-                    Go to My Room
-                  </Button>
-                )}
+                {notifications.length === 0 && <Button onClick={() => navigate("/my-room")}>Go to My Room</Button>}
               </div>
             </CardContent>
           </Card>
         )}
       </div>
-      
+
       {/* Cancel Confirmation Dialog */}
       <Dialog open={isCancelDialogOpen} onOpenChange={closeCancelDialog}>
         <DialogContent className="sm:max-w-[425px]">
@@ -176,7 +156,7 @@ const Requests = () => {
               Keep Request
             </Button>
             <Button variant="destructive" onClick={handleCancel} disabled={isUpdating}>
-              {isUpdating ? 'Cancelling...' : 'Yes, Cancel'}
+              {isUpdating ? "Cancelling..." : "Yes, Cancel"}
             </Button>
           </DialogFooter>
         </DialogContent>
