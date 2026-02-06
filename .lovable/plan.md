@@ -1,120 +1,80 @@
 
-# Plan: Display All Notifications in the Requests Page
+# Plan: Remove Navigation Bar Movement on Interaction
 
 ## Problem Summary
 
-The "My Requests" page (`/requests`) only displays items from the `service_requests` table using `useServiceRequests()`. However, the notification dropdown shows data from **four sources**:
+When clicking on input fields or other interactive elements, both the top and bottom navigation bars shift slightly. This is caused by Framer Motion animations that re-apply transform values during component updates.
 
-| Source | Table | Currently Shown |
-|--------|-------|-----------------|
-| Service Requests | `service_requests` | Yes (in Requests page) |
-| Spa Bookings | `spa_bookings` | No |
-| Table Reservations | `table_reservations` | No |
-| Event Reservations | `event_reservations` | No |
+## Root Causes
 
-Your screenshot shows 5 notifications (3 Spa Reservations + 1 Event Reservation), but the Requests page shows 0 because it only queries `service_requests`.
-
----
+1. **BottomNav.tsx**: Uses `AnimatePresence` and `motion.nav` with spring animations (`y: 0`, `y: "100%"`) that can cause micro-adjustments during re-renders
+2. **Scroll-based visibility toggle**: The scroll handler in BottomNav updates state on every scroll, which can trigger animation recalculations
+3. **Layout.tsx**: Uses `motion.div` for content fade-in which interacts with the fixed positioned navbars
 
 ## Solution
 
-Update the Requests page to use `useNotifications()` instead of `useServiceRequests()`. This will display all types of notifications (spa bookings, table reservations, event reservations, and service requests) in one unified list.
+### Part 1: Simplify BottomNav Animations
 
----
+Replace the Framer Motion spring animation with CSS transforms that only apply during actual show/hide transitions:
+
+| Current | Change |
+|---------|--------|
+| `motion.nav` with AnimatePresence | Regular `nav` with CSS transition |
+| Spring animation (`type: "spring"`) | CSS transform with transition |
+| Re-applies transform on every render | Only transforms during visibility change |
+
+### Part 2: Use CSS-only Transitions
+
+Convert the bottom nav animation to use CSS `translate-y` with `transition` property instead of Framer Motion. This prevents animation recalculations on re-renders.
+
+```tsx
+// Before (Framer Motion)
+<motion.nav 
+  initial={{ y: "100%" }}
+  animate={{ y: 0 }}
+  exit={{ y: "100%" }}
+  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+>
+
+// After (CSS transition)
+<nav 
+  className={cn(
+    "fixed bottom-0 left-0 right-0 ... transition-transform duration-300",
+    isVisible ? "translate-y-0" : "translate-y-full"
+  )}
+>
+```
+
+### Part 3: Stabilize Header Position
+
+Add `will-change: transform` and ensure the header has no transform-related properties that could cause layout shifts.
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/pages/requests/Requests.tsx` | Replace `useServiceRequests()` with `useNotifications()` and display all notification types |
+| `src/components/BottomNav.tsx` | Replace Framer Motion with CSS transitions |
+| `src/components/Layout.tsx` | Remove motion.div opacity animation from content wrapper |
 
----
+## Technical Details
 
-## Implementation Details
+### BottomNav.tsx Changes
 
-### Step 1: Change Data Source
+1. Remove `motion` and `AnimatePresence` imports from framer-motion
+2. Replace `motion.nav` with regular `nav` element
+3. Use Tailwind's `translate-y-0` and `translate-y-full` classes with `transition-transform duration-300`
+4. Remove the `initial`, `animate`, `exit`, and `transition` props
 
-Replace the `useServiceRequests` import with `useNotifications`:
+### Layout.tsx Changes
 
-```typescript
-// Before
-import { useServiceRequests } from '@/hooks/useServiceRequests';
-const { data: requests = [], ... } = useServiceRequests();
-
-// After
-import { useNotifications } from '@/hooks/useNotifications';
-const { notifications, refetchServices, refetchReservations, refetchSpaBookings, refetchEventReservations } = useNotifications();
-```
-
-### Step 2: Update Search/Filter Logic
-
-The search and filter will work on the unified `notifications` array instead of just service requests. Each notification already has:
-- `type`: 'request', 'spa_booking', 'reservation', 'event_reservation'
-- `title`: 'Spa Reservation', 'Event Reservation', etc.
-- `description`: Details about the booking
-- `status`: 'pending', 'confirmed', 'completed', 'cancelled'
-- `time`: Creation date
-
-### Step 3: Display Different Notification Types
-
-Each card will show the appropriate icon and title based on notification type:
-
-| Type | Icon | Title |
-|------|------|-------|
-| request | FileText | Service Request |
-| spa_booking | Sparkles | Spa Reservation |
-| reservation | UtensilsCrossed | Restaurant Reservation |
-| event_reservation | Calendar | Event Reservation |
-
-### Step 4: Handle Cancel Actions
-
-Different types have different cancel functions:
-- Service requests: `cancelRequest()` from `useServiceRequests`
-- Spa bookings: Cancel via `useSpaBookings`
-- Table reservations: Cancel via `useTableReservations`
-- Event reservations: Cancel via `useEventReservations`
-
-### Step 5: Add Type Filter
-
-Add a new filter option to filter by notification type (All Types, Service Requests, Spa Bookings, etc.).
-
----
-
-## Visual Change
-
-**Before:**
-```
-My Requests
-Showing 0 of 0 requests
-[Empty state: "No requests yet"]
-```
-
-**After:**
-```
-My Requests
-Showing 5 of 5 requests
-+-----------------------------------+
-| Spa Reservation        [Completed]|
-| Booking for 2026-02-06 at 09:00  |
-+-----------------------------------+
-| Spa Reservation         [Pending] |
-| Booking for 2026-02-06 at 12:00  |
-+-----------------------------------+
-| Spa Reservation         [Pending] |
-| Booking for 2026-02-06 at 16:00  |
-+-----------------------------------+
-| Event Reservation      [Confirmed]|
-| 2026-02-10 - 2 guests            |
-+-----------------------------------+
-```
-
----
+1. Remove `motion.div` wrapper for children content
+2. Replace with regular `div` to prevent any transform interference
+3. This removes potential animation side effects affecting fixed elements
 
 ## Expected Result
 
-After this change:
-1. The Requests page will show all 5 notifications visible in the dropdown
-2. Users can filter by type (Spa, Event, Dining, Service)
-3. Users can filter by status (Pending, Confirmed, Completed, Cancelled)
-4. Users can search across all notification types
-5. The "Cancel" button will work for applicable notification types
+After these changes:
+1. Navigation bars will remain perfectly stable when clicking inputs or other elements
+2. The show/hide animation on scroll will still work smoothly using CSS transitions
+3. No more micro-movements or "settling" of the navbars during interactions
+4. Better performance as CSS transitions are GPU-accelerated and don't require JavaScript calculations
