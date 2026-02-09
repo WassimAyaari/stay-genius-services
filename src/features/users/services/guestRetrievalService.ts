@@ -1,8 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '../types/userTypes';
-import { validateGuestId, logGuestOperation } from './guestValidation';
-import { cleanupDuplicateGuestRecords } from './guestCleanupService';
+import { validateGuestId } from './guestValidation';
 
 /**
  * Récupère les données d'un invité depuis Supabase
@@ -11,34 +10,15 @@ export const getGuestData = async (userId: string): Promise<UserData | null> => 
   try {
     console.log('Fetching guest data for user ID:', userId);
     
-    // Vérifier si l'UUID est valide
     if (!validateGuestId(userId)) {
       return null;
     }
     
-    // Récupérer tous les enregistrements pour vérifier s'il y a des doublons
-    const { data: allRecords, error: recordsError } = await supabase
-      .from('guests')
-      .select('id')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-      
-    if (recordsError) {
-      console.error('Error checking for duplicate records:', recordsError);
-    } else if (allRecords && allRecords.length > 1) {
-      // S'il y a des doublons, nettoyer
-      console.log(`Found ${allRecords.length} records for user ${userId}, cleaning up duplicates`);
-      await cleanupDuplicateGuestRecords(userId);
-    }
-    
-    // Maintenant récupérer l'enregistrement le plus récent
     const { data, error } = await supabase
       .from('guests')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error('Error fetching guest data:', error);
