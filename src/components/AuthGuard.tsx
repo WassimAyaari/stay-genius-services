@@ -68,7 +68,8 @@ const AuthGuard = ({
     }
   }, [authorized, isAuthPage, loading, navigate, toast, location, publicRoutes, publicAccess]);
 
-  if (loading) {
+  // Only show full-page spinner on initial load, not during navigation when already authorized
+  if (loading && !authorized) {
     return <LoadingSpinner />;
   }
 
