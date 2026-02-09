@@ -1,17 +1,18 @@
 
-# Plan: Align Chat Management Layout with Dashboard
+
+# Plan: Fix About Editor Page Layout
 
 ## Problem
 
-The Chat Management page uses `container mx-auto max-w-6xl` which centers and constrains the content, creating visual padding on both sides. The Dashboard page uses `flex-1 space-y-6 p-6` which lets content start from the edge of the page.
+The About Editor page uses `container mx-auto p-6` which centers and constrains the content, creating unnecessary side margins. It should match the Dashboard's edge-to-edge layout.
 
 ## Change
 
-**File: `src/components/admin/chat/AdminChatDashboard.tsx`** (line 135)
+**File: `src/pages/admin/AboutEditor.tsx`** (line ~103)
 
 Replace:
 ```
-<div className="container mx-auto p-6 max-w-6xl">
+<div className="container mx-auto p-6">
 ```
 
 With:
@@ -19,4 +20,5 @@ With:
 <div className="flex-1 space-y-6 p-6">
 ```
 
-This single change makes the Chat Management page layout match the Dashboard, with titles and content aligned to the left edge.
+This aligns the About Editor layout with the Dashboard and Chat Management pages.
+
