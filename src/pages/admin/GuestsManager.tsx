@@ -26,6 +26,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import GuestDetailSheet from './components/guests/GuestDetailSheet';
+import { Guest } from './components/guests/types';
 
 type FilterType = 'all' | 'in-house' | 'arrivals' | 'upcoming' | 'departures' | 'past';
 
@@ -49,6 +51,18 @@ const filterCards: FilterCard[] = [
 const GuestsManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const handleViewGuest = (guest: Guest) => {
+    setSelectedGuest(guest);
+    setIsSheetOpen(true);
+  };
+
+  const handleCloseSheet = () => {
+    setIsSheetOpen(false);
+    setSelectedGuest(null);
+  };
 
   const { data: guests = [], isLoading, refetch } = useQuery({
     queryKey: ['guests'],
@@ -263,7 +277,12 @@ const GuestsManager: React.FC = () => {
                       </TableCell>
                       <TableCell>{guest.phone || '—'}</TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleViewGuest(guest)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -275,6 +294,13 @@ const GuestsManager: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Guest Detail Sheet */}
+      <GuestDetailSheet
+        guest={selectedGuest}
+        isOpen={isSheetOpen}
+        onClose={handleCloseSheet}
+      />
     </div>
   );
 };
