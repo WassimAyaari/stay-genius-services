@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Phone, Calendar, Globe, Users, Heart } from 'lucide-react';
+import { User, Mail, Phone, ArrowRight, Heart } from 'lucide-react';
 import { format } from 'date-fns';
 import { Guest, Companion } from './types';
 
@@ -19,7 +19,7 @@ const GuestProfileCard: React.FC<GuestProfileCardProps> = ({ guest, companions }
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return null;
-    return format(new Date(dateString), 'MMM d, yyyy');
+    return format(new Date(dateString), 'dd MMM yyyy');
   };
 
   return (
@@ -27,85 +27,74 @@ const GuestProfileCard: React.FC<GuestProfileCardProps> = ({ guest, companions }
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <User className="h-4 w-4" />
-          Core Profile & Loyalty
+          Profile & Loyalty
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Avatar and Name Section */}
-        <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={guest.profile_image || undefined} alt={`${guest.first_name} ${guest.last_name}`} />
-            <AvatarFallback className="text-lg bg-primary/10 text-primary">
-              {getInitials()}
-            </AvatarFallback>
-          </Avatar>
+      <CardContent className="space-y-5">
+        {/* Identity Section */}
+        <div className="space-y-3">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            IDENTITY
+          </div>
           
-          <div className="flex-1 space-y-1">
-            <h3 className="text-lg font-semibold">
-              {guest.first_name} {guest.last_name}
-            </h3>
+          <div className="flex items-start gap-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={guest.profile_image || undefined} alt={`${guest.first_name} ${guest.last_name}`} />
+              <AvatarFallback className="text-sm bg-primary/10 text-primary">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
             
-            {guest.email && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-3.5 w-3.5" />
-                <span className="truncate">{guest.email}</span>
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">
+                  {guest.first_name} {guest.last_name}
+                </span>
               </div>
-            )}
-            
-            {guest.phone && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-3.5 w-3.5" />
-                <span>{guest.phone}</span>
-              </div>
-            )}
+              
+              {guest.email && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  <span className="truncate">{guest.email}</span>
+                </div>
+              )}
+              
+              {guest.phone && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                  <span>{guest.phone}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Details Grid */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          {guest.birth_date && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <div>
-                <span className="text-muted-foreground">Born: </span>
-                <span className="font-medium">{formatDate(guest.birth_date)}</span>
-              </div>
-            </div>
-          )}
+        <Separator />
+
+        {/* Account Activity Section */}
+        <div className="space-y-3">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            ACCOUNT ACTIVITY
+          </div>
           
-          {guest.nationality && (
-            <div className="flex items-center gap-2">
-              <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-              <div>
-                <span className="text-muted-foreground">Nationality: </span>
-                <span className="font-medium">{guest.nationality}</span>
-              </div>
+          {guest.created_at ? (
+            <div className="flex items-center gap-2 text-sm">
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              <span>First Login: {formatDate(guest.created_at)}</span>
             </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">No activity recorded</p>
           )}
         </div>
 
-        {/* Guest Type Badge */}
-        {guest.guest_type && (
-          <Badge variant="secondary" className="bg-primary/10 text-primary">
-            {guest.guest_type}
-          </Badge>
-        )}
-
-        {/* Member Since */}
-        {guest.created_at && (
-          <div className="text-xs text-muted-foreground">
-            Member since {formatDate(guest.created_at)}
-          </div>
-        )}
-
-        {/* Companions Section */}
+        {/* Companions (if any) */}
         {companions.length > 0 && (
           <>
             <Separator />
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Users className="h-4 w-4" />
-                Companions ({companions.length})
+            <div className="space-y-3">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                COMPANIONS ({companions.length})
               </div>
               <div className="space-y-1.5">
                 {companions.map((companion) => (
@@ -123,15 +112,24 @@ const GuestProfileCard: React.FC<GuestProfileCardProps> = ({ guest, companions }
           </>
         )}
 
-        {/* Loyalty Placeholder */}
         <Separator />
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Heart className="h-4 w-4" />
-            Loyalty Program
+
+        {/* Loyalty Section */}
+        <div className="space-y-3">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            LOYALTY
           </div>
-          <div className="text-sm text-muted-foreground italic">
-            Loyalty information not available
+          
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <Heart className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Membership Number:</span>
+              <span>—</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="ml-6 text-muted-foreground">Membership Level:</span>
+              <span>—</span>
+            </div>
           </div>
         </div>
       </CardContent>

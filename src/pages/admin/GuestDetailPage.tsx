@@ -1,35 +1,20 @@
 import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Loader2, User } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay } from 'date-fns';
+import { Loader2 } from 'lucide-react';
 
-import GuestStayContextBar from './GuestStayContextBar';
-import GuestProfileCard from './GuestProfileCard';
-import GuestPreferencesCard from './GuestPreferencesCard';
-import GuestActivityCard from './GuestActivityCard';
-import GuestIntelligenceCard from './GuestIntelligenceCard';
-import { Guest, GuestStatus } from './types';
+import GuestPageHeader from './components/guests/GuestPageHeader';
+import GuestProfileCard from './components/guests/GuestProfileCard';
+import GuestPreferencesCard from './components/guests/GuestPreferencesCard';
+import GuestActivityCard from './components/guests/GuestActivityCard';
+import GuestIntelligenceCard from './components/guests/GuestIntelligenceCard';
+import { GuestStatus } from './components/guests/types';
 
-interface GuestDetailSheetProps {
-  guest: Guest | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const GuestDetailSheet: React.FC<GuestDetailSheetProps> = ({
-  guest,
-  isOpen,
-  onClose,
-}) => {
+const GuestDetailPage: React.FC = () => {
+  const { guestId } = useParams<{ guestId: string }>();
+  const navigate = useNavigate();
   const today = startOfDay(new Date());
 
   const getGuestStatus = (checkIn: string | null, checkOut: string | null): GuestStatus => {
@@ -44,6 +29,22 @@ const GuestDetailSheet: React.FC<GuestDetailSheetProps> = ({
     if (isBefore(checkOutDate, today)) return 'past';
     return null;
   };
+
+  // Fetch guest data
+  const { data: guest, isLoading: isGuestLoading } = useQuery({
+    queryKey: ['guest', guestId],
+    queryFn: async () => {
+      if (!guestId) return null;
+      const { data, error } = await supabase
+        .from('guests')
+        .select('*')
+        .eq('id', guestId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!guestId,
+  });
 
   // Fetch room details
   const { data: room } = useQuery({
@@ -169,58 +170,61 @@ const GuestDetailSheet: React.FC<GuestDetailSheetProps> = ({
     enabled: !!guest,
   });
 
-  const isLoading = !guest;
   const status = guest ? getGuestStatus(guest.check_in_date, guest.check_out_date) : null;
 
+  if (isGuestLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!guest) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <p className="text-muted-foreground">Guest not found</p>
+        <button
+          onClick={() => navigate('/admin/guests')}
+          className="text-primary hover:underline"
+        >
+          Back to guests
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:max-w-lg p-0 flex flex-col">
-        <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
-          <SheetTitle className="flex items-center gap-2 text-lg">
-            <User className="h-5 w-5" />
-            Guest 360°
-          </SheetTitle>
-        </SheetHeader>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <GuestPageHeader
+        guest={guest}
+        room={room || null}
+        companions={companions}
+        status={status}
+      />
 
-        {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : guest ? (
-          <ScrollArea className="flex-1">
-            <div className="p-6 space-y-4">
-              {/* Stay Context Bar */}
-              <GuestStayContextBar
-                guest={guest}
-                room={room || null}
-                companions={companions}
-                status={status}
-              />
+      {/* 2-Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <div className="space-y-6">
+          <GuestProfileCard guest={guest} companions={companions} />
+          <GuestActivityCard
+            serviceRequests={serviceRequests}
+            tableReservations={tableReservations}
+            spaBookings={spaBookings}
+            eventReservations={eventReservations}
+          />
+        </div>
 
-              <Separator />
-
-              {/* Profile Card */}
-              <GuestProfileCard guest={guest} companions={companions} />
-
-              {/* Preferences Card */}
-              <GuestPreferencesCard guestId={guest.id} />
-
-              {/* Activity Card */}
-              <GuestActivityCard
-                serviceRequests={serviceRequests}
-                tableReservations={tableReservations}
-                spaBookings={spaBookings}
-                eventReservations={eventReservations}
-              />
-
-              {/* Intelligence Card */}
-              <GuestIntelligenceCard guest={guest} />
-            </div>
-          </ScrollArea>
-        ) : null}
-      </SheetContent>
-    </Sheet>
+        {/* Right Column */}
+        <div className="space-y-6">
+          <GuestPreferencesCard guestId={guest.id} />
+          <GuestIntelligenceCard guest={guest} />
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default GuestDetailSheet;
+export default GuestDetailPage;
