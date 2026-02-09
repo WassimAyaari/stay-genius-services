@@ -1,41 +1,22 @@
 
+# Plan: Align Chat Management Layout with Dashboard
 
-# Plan: Redirect "Start Chat" to /messages with Concierge Chat
+## Problem
 
-## Overview
+The Chat Management page uses `container mx-auto max-w-6xl` which centers and constrains the content, creating visual padding on both sides. The Dashboard page uses `flex-1 space-y-6 p-6` which lets content start from the edge of the page.
 
-Change the "Start Chat" button on the Services page to navigate to `/messages` and automatically open the concierge conversation, instead of opening an inline chat overlay.
+## Change
 
-## Changes
+**File: `src/components/admin/chat/AdminChatDashboard.tsx`** (line 135)
 
-### 1. `src/pages/services/Services.tsx`
-
-- Change `handleStartChat` to navigate to `/messages` with state indicating the chat type:
-  ```typescript
-  const handleStartChat = () => {
-    navigate('/messages', { state: { chatType: 'concierge' } });
-  };
-  ```
-- Remove the `isChatOpen` state, the `UnifiedChatContainer` overlay, and the `UnifiedChatContainer` import (no longer needed on this page)
-
-### 2. `src/pages/messages/Messages.tsx`
-
-- Read `location.state?.chatType` on mount
-- If `chatType` is `'concierge'`, auto-set `selectedChatType` to `'concierge'`, skipping the chat list screen
-
-```typescript
-const location = useLocation();
-
-useEffect(() => {
-  if (location.state?.chatType) {
-    setSelectedChatType(location.state.chatType);
-  }
-}, [location.state]);
+Replace:
+```
+<div className="container mx-auto p-6 max-w-6xl">
 ```
 
-## Result
+With:
+```
+<div className="flex-1 space-y-6 p-6">
+```
 
-- Clicking "Start Chat" on Services navigates to `/messages` and lands directly in the concierge conversation
-- The back button in the chat will return to the chat list as it does today
-- No new dependencies or files needed
-
+This single change makes the Chat Management page layout match the Dashboard, with titles and content aligned to the left edge.
