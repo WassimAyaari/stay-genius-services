@@ -32,9 +32,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   LayoutDashboard,
   Users,
-  ConciergeBell,
   Utensils,
   Sparkles,
   PartyPopper,
@@ -50,7 +54,7 @@ import {
   Shield,
   MessageCircle,
   Settings,
-  ChevronDown,
+  ChevronRight,
   Globe,
 } from 'lucide-react';
 
@@ -193,45 +197,41 @@ export const AdminSidebar: React.FC = () => {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-3 px-2 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+      {/* Header */}
+      <SidebarHeader className="p-4 pb-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm">
             <Hotel className="h-5 w-5" />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-sidebar-foreground">Admin Panel</span>
-              <span className="text-xs text-sidebar-foreground/60">Hotel Management</span>
+              <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">Admin Panel</span>
+              <span className="text-[11px] text-muted-foreground">Hotel Management</span>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        {navigationSections.map((section) => {
+      <SidebarSeparator />
+
+      {/* Navigation */}
+      <SidebarContent className="px-3 py-2">
+        {navigationSections.map((section, index) => {
           const sectionActive = isSectionActive(section);
           const isOpen = openSections[section.label] || sectionActive;
+          const isSingleItem = section.items.length === 1;
 
           return (
-            <Collapsible
-              key={section.label}
-              open={isOpen}
-              onOpenChange={() => toggleSection(section.label)}
-            >
-              <SidebarGroup className="py-0">
-                <CollapsibleTrigger asChild>
-                  <SidebarGroupLabel className="flex w-full cursor-pointer items-center justify-between py-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60 hover:text-sidebar-foreground">
-                    <span>{section.label}</span>
-                    {!isCollapsed && (
-                      <ChevronDown
-                        className={`h-3 w-3 transition-transform duration-200 ${
-                          isOpen ? 'rotate-0' : '-rotate-90'
-                        }`}
-                      />
-                    )}
-                  </SidebarGroupLabel>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+            <React.Fragment key={section.label}>
+              {index > 0 && <SidebarSeparator className="mx-0 my-1" />}
+              {isSingleItem ? (
+                /* Single-item sections: no collapsible, just render the item */
+                <SidebarGroup className="py-1 px-0">
+                  {!isCollapsed && (
+                    <SidebarGroupLabel className="h-7 px-3 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+                      {section.label}
+                    </SidebarGroupLabel>
+                  )}
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {section.items.map((item) => (
@@ -240,91 +240,136 @@ export const AdminSidebar: React.FC = () => {
                             asChild
                             isActive={isActive(item.url)}
                             tooltip={item.title}
-                            disabled={item.disabled}
-                            className="rounded-lg"
+                            className="h-9 rounded-lg transition-all duration-150"
                           >
-                            {item.disabled ? (
-                              <span className="flex items-center gap-2 opacity-50 cursor-not-allowed px-2 py-1.5">
-                                <item.icon className="h-4 w-4" />
-                                <span>{item.title}</span>
-                              </span>
-                            ) : (
-                              <NavLink to={item.url} end={item.url === '/admin'}>
-                                <item.icon className="h-4 w-4" />
-                                <span>{item.title}</span>
-                              </NavLink>
-                            )}
+                            <NavLink to={item.url} end={item.url === '/admin'}>
+                              <item.icon className={`h-4 w-4 ${isActive(item.url) ? 'text-primary' : 'text-muted-foreground'}`} />
+                              <span>{item.title}</span>
+                            </NavLink>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}
                     </SidebarMenu>
                   </SidebarGroupContent>
-                </CollapsibleContent>
-              </SidebarGroup>
-            </Collapsible>
+                </SidebarGroup>
+              ) : (
+                /* Multi-item sections: collapsible */
+                <Collapsible
+                  open={isOpen}
+                  onOpenChange={() => toggleSection(section.label)}
+                >
+                  <SidebarGroup className="py-1 px-0">
+                    <CollapsibleTrigger asChild>
+                      <SidebarGroupLabel className="flex w-full cursor-pointer items-center justify-between h-7 px-3 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase hover:text-muted-foreground transition-colors">
+                        <span>{section.label}</span>
+                        {!isCollapsed && (
+                          <ChevronRight
+                            className={`h-3 w-3 transition-transform duration-200 ${
+                              isOpen ? 'rotate-90' : 'rotate-0'
+                            }`}
+                          />
+                        )}
+                      </SidebarGroupLabel>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarGroupContent>
+                        <SidebarMenu>
+                          {section.items.map((item) => (
+                            <SidebarMenuItem key={item.title}>
+                              <SidebarMenuButton
+                                asChild
+                                isActive={isActive(item.url)}
+                                tooltip={item.title}
+                                disabled={item.disabled}
+                                className="h-9 rounded-lg transition-all duration-150"
+                              >
+                                {item.disabled ? (
+                                  <span className="flex items-center gap-2 opacity-40 cursor-not-allowed px-2 py-1.5">
+                                    <item.icon className="h-4 w-4" />
+                                    <span>{item.title}</span>
+                                  </span>
+                                ) : (
+                                  <NavLink to={item.url} end={item.url === '/admin'}>
+                                    <item.icon className={`h-4 w-4 ${isActive(item.url) ? 'text-primary' : 'text-muted-foreground'}`} />
+                                    <span>{item.title}</span>
+                                  </NavLink>
+                                )}
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                      </SidebarGroupContent>
+                    </CollapsibleContent>
+                  </SidebarGroup>
+                </Collapsible>
+              )}
+            </React.Fragment>
           );
         })}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
-        <SidebarSeparator className="mx-0" />
-        
+      {/* Footer */}
+      <SidebarFooter className="border-t border-sidebar-border p-3">
         {/* Language Selector */}
         {!isCollapsed && (
-          <div className="px-2 py-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-2 px-2 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start gap-2 h-8 px-2 text-xs text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                <span>{currentLanguage.flag} {currentLanguage.name}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-36">
+              {languages.map((lang) => (
+                <DropdownMenuItem
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  className="cursor-pointer text-xs"
                 >
-                  <Globe className="h-4 w-4" />
-                  <span>{currentLanguage.flag} {currentLanguage.name}</span>
-                  <ChevronDown className="ml-auto h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-40">
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className="cursor-pointer"
-                  >
-                    <span className="mr-2">{lang.flag}</span>
-                    {lang.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                  <span className="mr-2">{lang.flag}</span>
+                  {lang.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
 
-        <div className="flex items-center gap-3 px-2 py-3">
-          <Avatar className="h-8 w-8">
+        {/* User Profile */}
+        <div className="flex items-center gap-2.5 rounded-lg p-2 hover:bg-sidebar-accent transition-colors">
+          <Avatar className="h-8 w-8 shrink-0">
             <AvatarImage src={userData?.profile_image || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
               {userInitials}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
-            <div className="flex flex-1 flex-col overflow-hidden">
-              <span className="truncate text-sm font-medium text-sidebar-foreground">
-                {userName}
-              </span>
-              <span className="truncate text-xs text-sidebar-foreground/60">
-                {user?.email}
-              </span>
-            </div>
-          )}
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
+            <>
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <span className="truncate text-sm font-medium text-sidebar-foreground leading-tight">
+                  {userName}
+                </span>
+                <span className="truncate text-[11px] text-muted-foreground leading-tight">
+                  {user?.email}
+                </span>
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleLogout}
+                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">Sign out</TooltipContent>
+              </Tooltip>
+            </>
           )}
         </div>
       </SidebarFooter>
