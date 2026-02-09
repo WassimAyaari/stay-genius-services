@@ -2,23 +2,20 @@
 import { supabase } from '@/integrations/supabase/client';
 import { UserData } from '../types/userTypes';
 import { formatDateToString } from '../utils/validationUtils';
-import { validateGuestId, logGuestOperation } from './guestValidation';
-import { cleanupDuplicateGuestRecords } from './guestCleanupService';
+import { validateGuestId } from './guestValidation';
 
 /**
  * Synchronise les données d'un invité avec Supabase
- * Utilise un UPSERT pour éviter les doublons
+ * Utilise un UPSERT atomique sur user_id pour éviter les doublons
  */
 export const syncGuestData = async (userId: string, userData: UserData): Promise<boolean> => {
   try {
     console.log('Syncing guest data for user ID:', userId);
     
-    // Vérifier si l'UUID est valide
     if (!validateGuestId(userId)) {
       return false;
     }
     
-    // Préparer les données avec les dates correctement formatées
     const guestData = {
       user_id: userId,
       first_name: userData.first_name,
@@ -34,39 +31,9 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
       guest_type: userData.guest_type || 'Standard Guest'
     };
     
-    // D'abord vérifier si l'enregistrement existe déjà
-    const { data: existingGuest, error: checkError } = await supabase
+    const { error } = await supabase
       .from('guests')
-      .select('id')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-      
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking existing guest:', checkError);
-    }
-    
-    let result;
-    if (existingGuest) {
-      // Mettre à jour l'enregistrement existant le plus récent
-      console.log('Updating existing guest record with ID:', existingGuest.id);
-      result = await supabase
-        .from('guests')
-        .update(guestData)
-        .eq('id', existingGuest.id);
-      
-      // Nettoyer les autres enregistrements s'il y en a
-      await cleanupDuplicateGuestRecords(userId);
-    } else {
-      // Insérer un nouvel enregistrement
-      console.log('Creating new guest record');
-      result = await supabase
-        .from('guests')
-        .insert([guestData]);
-    }
-    
-    const { error } = result;
+      .upsert(guestData, { onConflict: 'user_id' });
     
     if (error) {
       console.error('Error syncing guest data:', error);
@@ -75,14 +42,10 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
     
     console.log('Guest data synchronized successfully for user ID:', userId);
     
-    // Si l'opération a réussi, s'assurer que localStorage est à jour
     localStorage.setItem('user_data', JSON.stringify(userData));
     if (userData.room_number) {
       localStorage.setItem('user_room_number', userData.room_number);
     }
-    
-    // Après synchronisation réussie, garantir qu'il n'y a pas de doublons
-    await cleanupDuplicateGuestRecords(userId);
     
     return true;
   } catch (error) {
@@ -91,5 +54,5 @@ export const syncGuestData = async (userId: string, userData: UserData): Promise
   }
 };
 
-// Re-export the cleanupDuplicateGuestRecords for convenience
+// Re-export for backward compatibility
 export { cleanupDuplicateGuestRecords } from './guestCleanupService';
