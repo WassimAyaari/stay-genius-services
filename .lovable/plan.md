@@ -1,59 +1,41 @@
 
 
-# Plan: Fix Duplicate Guest Records
+# Plan: Redirect "Start Chat" to /messages with Concierge Chat
 
-## Root Cause
+## Overview
 
-The `guests` table has no **unique constraint** on `user_id`. The `syncGuestData` function uses a check-then-insert pattern that is vulnerable to race conditions -- two concurrent calls both see "no existing record" and both insert, creating duplicates. The existing cleanup code runs too late to prevent the issue.
+Change the "Start Chat" button on the Services page to navigate to `/messages` and automatically open the concierge conversation, instead of opening an inline chat overlay.
 
-## Solution: Two-Part Fix
+## Changes
 
-### Part 1: Database Migration -- Add Unique Constraint
+### 1. `src/pages/services/Services.tsx`
 
-1. **Delete existing duplicates** keeping only the most recent record per `user_id`
-2. **Add a unique index** on `user_id` (partial, where `user_id IS NOT NULL`) to prevent future duplicates
+- Change `handleStartChat` to navigate to `/messages` with state indicating the chat type:
+  ```typescript
+  const handleStartChat = () => {
+    navigate('/messages', { state: { chatType: 'concierge' } });
+  };
+  ```
+- Remove the `isChatOpen` state, the `UnifiedChatContainer` overlay, and the `UnifiedChatContainer` import (no longer needed on this page)
 
-```sql
--- Delete duplicates, keeping the most recent per user_id
-DELETE FROM guests
-WHERE id NOT IN (
-  SELECT DISTINCT ON (user_id) id
-  FROM guests
-  WHERE user_id IS NOT NULL
-  ORDER BY user_id, created_at DESC
-);
+### 2. `src/pages/messages/Messages.tsx`
 
--- Prevent future duplicates
-CREATE UNIQUE INDEX idx_guests_user_id_unique 
-ON guests (user_id) 
-WHERE user_id IS NOT NULL;
-```
-
-### Part 2: Simplify Sync Code
-
-With the unique constraint in place, replace the check-then-insert pattern in `guestSyncService.ts` with a proper Supabase **upsert** using `onConflict: 'user_id'`. This is atomic and race-condition-proof.
+- Read `location.state?.chatType` on mount
+- If `chatType` is `'concierge'`, auto-set `selectedChatType` to `'concierge'`, skipping the chat list screen
 
 ```typescript
-// Instead of: check if exists -> update or insert -> cleanup
-// Just do:
-const { error } = await supabase
-  .from('guests')
-  .upsert(guestData, { onConflict: 'user_id' });
+const location = useLocation();
+
+useEffect(() => {
+  if (location.state?.chatType) {
+    setSelectedChatType(location.state.chatType);
+  }
+}, [location.state]);
 ```
 
-## Files to Modify
+## Result
 
-| File | Change |
-|------|--------|
-| Database migration | Remove duplicates + add unique index on `user_id` |
-| `src/features/users/services/guestSyncService.ts` | Replace check-then-insert with simple `upsert` on `user_id` conflict |
-| `src/features/users/services/guestRetrievalService.ts` | Remove duplicate-checking logic (no longer needed) |
-| `src/features/users/services/guestCleanupService.ts` | Can be simplified or kept as a safety net |
-
-## Impact
-
-- **Immediately cleans up** all 8 sets of duplicate records currently in the database
-- **Permanently prevents** future duplicates at the database level
-- **Simplifies** the sync code by removing the race-condition-prone check-then-insert pattern
-- No UI changes needed -- the guest list will automatically show unique entries
+- Clicking "Start Chat" on Services navigates to `/messages` and lands directly in the concierge conversation
+- The back button in the chat will return to the chat list as it does today
+- No new dependencies or files needed
 
