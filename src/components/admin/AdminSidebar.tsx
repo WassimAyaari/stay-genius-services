@@ -78,7 +78,7 @@ const navigationSections: NavSection[] = [
   {
     label: 'Guest Management',
     items: [
-      { title: 'Guests', url: '/admin/guests', icon: Users, disabled: true },
+      { title: 'Guests', url: '/admin/guests', icon: Users },
       { title: 'Chat Manager', url: '/admin/chat', icon: MessageCircle },
       { title: 'Feedback', url: '/admin/feedback', icon: MessageSquare },
     ],

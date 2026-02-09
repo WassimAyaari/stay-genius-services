@@ -21,6 +21,7 @@ import RestaurantEventsManager from '@/pages/admin/RestaurantEventsManager';
 import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsManager';
 import DestinationAdmin from '@/pages/admin/DestinationAdmin';
 import DemoManager from '@/pages/admin/DemoManager';
+import GuestsManager from '@/pages/admin/GuestsManager';
 
 const AdminRoutes = () => {
   return (
@@ -28,6 +29,7 @@ const AdminRoutes = () => {
       <AdminLayout>
         <Routes>
           <Route index element={<AdminDashboard />} />
+          <Route path="guests" element={<GuestsManager />} />
           <Route path="security" element={<SecurityManager />} />
           <Route path="housekeeping" element={<HousekeepingManager />} />
           <Route path="maintenance" element={<MaintenanceManager />} />
