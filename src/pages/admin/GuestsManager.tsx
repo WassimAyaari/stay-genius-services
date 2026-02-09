@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { format, isToday, isBefore, isAfter, startOfDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -26,7 +27,6 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import GuestDetailSheet from './components/guests/GuestDetailSheet';
 import { Guest } from './components/guests/types';
 
 type FilterType = 'all' | 'in-house' | 'arrivals' | 'upcoming' | 'departures' | 'past';
@@ -51,17 +51,10 @@ const filterCards: FilterCard[] = [
 const GuestsManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleViewGuest = (guest: Guest) => {
-    setSelectedGuest(guest);
-    setIsSheetOpen(true);
-  };
-
-  const handleCloseSheet = () => {
-    setIsSheetOpen(false);
-    setSelectedGuest(null);
+    navigate(`/admin/guests/${guest.id}`);
   };
 
   const { data: guests = [], isLoading, refetch } = useQuery({
@@ -294,13 +287,6 @@ const GuestsManager: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Guest Detail Sheet */}
-      <GuestDetailSheet
-        guest={selectedGuest}
-        isOpen={isSheetOpen}
-        onClose={handleCloseSheet}
-      />
     </div>
   );
 };

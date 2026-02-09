@@ -22,6 +22,7 @@ import RestaurantReservationsManager from '@/pages/admin/RestaurantReservationsM
 import DestinationAdmin from '@/pages/admin/DestinationAdmin';
 import DemoManager from '@/pages/admin/DemoManager';
 import GuestsManager from '@/pages/admin/GuestsManager';
+import GuestDetailPage from '@/pages/admin/GuestDetailPage';
 
 const AdminRoutes = () => {
   return (
@@ -30,6 +31,7 @@ const AdminRoutes = () => {
         <Routes>
           <Route index element={<AdminDashboard />} />
           <Route path="guests" element={<GuestsManager />} />
+          <Route path="guests/:guestId" element={<GuestDetailPage />} />
           <Route path="security" element={<SecurityManager />} />
           <Route path="housekeeping" element={<HousekeepingManager />} />
           <Route path="maintenance" element={<MaintenanceManager />} />
