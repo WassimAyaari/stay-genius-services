@@ -1,177 +1,317 @@
 
-# Plan: Create Guest Management Page
 
-## Problem Summary
+# Plan: Guest 360° Detail Panel
 
-The "Guests" navigation item in the admin sidebar is currently **disabled** (`disabled: true` on line 81 of `AdminSidebar.tsx`). The page doesn't exist yet. You want to display a list of hotel guests similar to the reference screenshot ("Guest 360°").
+## Overview
 
----
-
-## Solution Overview
-
-| Step | Action |
-|------|--------|
-| 1 | Enable the "Guests" navigation item in the sidebar |
-| 2 | Create a new `GuestsManager.tsx` page following the reference design |
-| 3 | Add the route to `AdminRoutes.tsx` |
+When clicking the Eye icon on a guest row in the Guest Manager, a slide-out Sheet panel will open displaying comprehensive guest information organized into four cards plus a top status bar, matching the detailed interface you described.
 
 ---
 
-## Reference Design Analysis (from screenshot)
+## Architecture
 
-The design includes:
+The implementation will add a Sheet-based detail panel that opens when clicking a guest row. The panel fetches all related data for that guest.
 
-| Component | Description |
-|-----------|-------------|
-| **Header** | "Guest 360°" title with subtitle and guest count badge |
-| **Filter Cards** | 5 status filter cards: All, In-House, Arrivals, Upcoming, Departures, Past |
-| **Search Bar** | Search by name, email, or room with a Refresh button |
-| **Data Table** | Columns: Name, Status, Room, Check-in, Check-out, First Login, Last Logout, Email, Phone, Actions |
-| **Actions** | Eye icon to view guest details |
+| Component | Purpose |
+|-----------|---------|
+| `GuestDetailSheet.tsx` | Main container with Sheet and data fetching |
+| `GuestStayContextBar.tsx` | Top status bar showing live stay context |
+| `GuestProfileCard.tsx` | Card 1: Core profile, identity, loyalty |
+| `GuestPreferencesCard.tsx` | Card 2: Interactive preference tags |
+| `GuestActivityCard.tsx` | Card 3: Requests, F&B orders, complaints history |
+| `GuestIntelligenceCard.tsx` | Card 4: Alerts, guest value, staff notes |
+
+---
+
+## Visual Layout
+
+```text
++-------------------------------------------------------------+
+| [X]  GUEST 360°                                             |
++-------------------------------------------------------------+
+|  ┌─────────────────────────────────────────────────────────┐|
+|  │ [IN-HOUSE]  Jan 10 - Jan 15 (5 Nights)                  ||
+|  │ Room #302 (Junior Suite)  •  2 Adults, 1 Child          ||
+|  │ Reservation ID: #HG-98442                               ||
+|  └─────────────────────────────────────────────────────────┘|
++-------------------------------------------------------------+
+|                                                             |
+|  ┌──────────────────────────────────────────────────────┐   |
+|  │ CORE PROFILE & LOYALTY                               │   |
+|  │ ┌──────┐  John Smith                                 │   |
+|  │ │Avatar│  john@email.com • +1 555-0123               │   |
+|  │ └──────┘  Born: Jan 15, 1985 • Anniversary: Jun 20   │   |
+|  │                                                       │   |
+|  │ Loyalty: #LY-12345 • 2,450 pts                       │   |
+|  │ Total Stays: 3 • Favorite Room: 104                  │   |
+|  └──────────────────────────────────────────────────────┘   |
+|                                                             |
+|  ┌──────────────────────────────────────────────────────┐   |
+|  │ PREFERENCES (The DNA)                      [Edit]    │   |
+|  │ ┌─────────────┐ ┌────────────┐ ┌──────────────┐      │   |
+|  │ │ High Floor  │ │ King Bed   │ │ No Smoking   │      │   |
+|  │ └─────────────┘ └────────────┘ └──────────────┘      │   |
+|  │ ┌───────────────┐ ┌────────────────┐                 │   |
+|  │ │ Extra Pillows │ │ Quiet Room     │                 │   |
+|  │ └───────────────┘ └────────────────┘                 │   |
+|  └──────────────────────────────────────────────────────┘   |
+|                                                             |
+|  ┌──────────────────────────────────────────────────────┐   |
+|  │ ACTIVITY & MEMORY                                    │   |
+|  │ ├─ Requests ────────────────────────────────────────││   |
+|  │ │  • Iron - Completed - Jul 8                       ││   |
+|  │ │  • Late Checkout - Pending - Jul 9                ││   |
+|  │ ├─ F&B Orders ──────────────────────────────────────││   |
+|  │ │  • Room Service - Breakfast - Jul 8               ││   |
+|  │ ├─ Past Issues ─────────────────────────────────────││   |
+|  │ │  • A/C not working (resolved)                     ││   |
+|  └──────────────────────────────────────────────────────┘   |
+|                                                             |
+|  ┌──────────────────────────────────────────────────────┐   |
+|  │ INTELLIGENCE & ALERTS                                │   |
+|  │ ┌────────────────────────────────────────────────┐   │   |
+|  │ │ !!! ALLERGIC TO PEANUTS !!!                    │   │   |
+|  │ └────────────────────────────────────────────────┘   │   |
+|  │ [HIGH-VALUE GUEST]  [TOP SPENDER]                    │   |
+|  │                                                       │   |
+|  │ ┌── Staff Notes ───────────────────────────────────┐ │   |
+|  │ │ Prefers sparkling water over still               │ │   |
+|  │ │ Always requests room away from elevator          │ │   |
+|  │ └──────────────────────────────────────────────────┘ │   |
+|  └──────────────────────────────────────────────────────┘   |
++-------------------------------------------------------------+
+```
+
+---
+
+## Data Sources
+
+### Current Database Tables
+
+| Data | Source Table | Fields Used |
+|------|--------------|-------------|
+| Guest Info | `guests` | All fields |
+| Companions | `companions` | Where `user_id` matches |
+| Room Details | `rooms` | Join on `room_number` |
+| Service Requests | `service_requests` | Where `guest_id` or `room_number` matches |
+| Dining Reservations | `table_reservations` | Where `user_id` or `guest_email` matches |
+| Spa Bookings | `spa_bookings` | Where `user_id` or `guest_email` matches |
+| Event Reservations | `event_reservations` | Where `user_id` or `guest_email` matches |
+
+### New Database Tables Required
+
+To support all the features in your design, the following new tables will need to be created:
+
+| Table | Purpose | Columns |
+|-------|---------|---------|
+| `guest_preferences` | Store preference tags | `id`, `guest_id`, `preference`, `created_at`, `updated_at` |
+| `guest_allergies` | Medical alerts | `id`, `guest_id`, `allergy`, `severity`, `created_at` |
+| `guest_notes` | Staff-to-staff notes | `id`, `guest_id`, `note`, `created_by`, `created_at` |
+| `guest_loyalty` | Loyalty info | `id`, `guest_id`, `membership_number`, `points`, `tier` |
 
 ---
 
 ## Implementation Details
 
-### Step 1: Enable Navigation
+### File 1: GuestDetailSheet.tsx
 
-Update `AdminSidebar.tsx` to remove `disabled: true` from the Guests item:
-
-```typescript
-// Line 81 - Change from:
-{ title: 'Guests', url: '/admin/guests', icon: Users, disabled: true },
-
-// To:
-{ title: 'Guests', url: '/admin/guests', icon: Users },
-```
-
-### Step 2: Create GuestsManager Page
-
-Create `src/pages/admin/GuestsManager.tsx` with:
-
-**Header Section:**
-- "Guest 360°" title with subtitle "Manage and view all hotel guests"
-- Guest count badge in top-right corner
-
-**Filter Cards (5 clickable cards):**
-
-| Filter | Icon | Color | Description |
-|--------|------|-------|-------------|
-| All | Users | Default | Total registered guests |
-| In-House | Home | Blue | Currently staying |
-| Arrivals | ArrowRight | Gray | Arriving today |
-| Upcoming | Calendar | Red | Future check-ins |
-| Departures | ArrowLeftRight | Red | Checking out today |
-| Past | Clock | Gray | Previous guests |
-
-**Guest List Section:**
-- "Guest List" card with search input
-- Table with columns matching the reference:
-  - Name (first + last name)
-  - Status indicator
-  - Room number
-  - Check-in date
-  - Check-out date
-  - First Login (from created_at)
-  - Last Logout (N/A for now)
-  - Email
-  - Phone
-  - Actions (view details button)
-
-**Data fetching:**
-- Use Supabase to query the `guests` table
-- Filter by status based on check_in_date and check_out_date
-- Search functionality across name, email, and room_number
-
-### Step 3: Add Route
-
-Update `AdminRoutes.tsx` to include the guests route:
+Main container component that:
+- Receives `guest` object and `isOpen` state
+- Fetches related data (companions, room, requests, reservations)
+- Uses Sheet component sliding from right
+- Contains ScrollArea for content
 
 ```typescript
-import GuestsManager from '@/pages/admin/GuestsManager';
-
-// In Routes:
-<Route path="guests" element={<GuestsManager />} />
+interface GuestDetailSheetProps {
+  guest: Guest | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
 ```
+
+### File 2: GuestStayContextBar.tsx
+
+The highlighted top bar showing:
+- Status badge: `[IN-HOUSE]`, `[ARRIVING TODAY]`, `[DEPARTING]`, `[UPCOMING]`, `[PAST]`
+- Stay dates with nights calculation
+- Room number with room type (from rooms table)
+- Occupancy (from companions count + 1)
+- Reservation ID (use guest.id truncated)
+
+Color coding:
+- In-House: Blue background
+- Arriving Today: Green background  
+- Departing: Orange background
+- Upcoming: Gray background
+- Past: Muted background
+
+### File 3: GuestProfileCard.tsx
+
+Core Profile & Loyalty card:
+- Avatar (from profile_image or initials fallback)
+- Full name, email, phone
+- Birth date, nationality
+- Guest type badge
+- Created date (as "Member since")
+- Companions list with relations
+
+Since loyalty table doesn't exist yet, show placeholder or skip loyalty section.
+
+### File 4: GuestPreferencesCard.tsx
+
+Interactive preference bubbles/tags:
+- Initially empty (no preferences table yet)
+- "Edit" button to add preferences
+- Tags displayed as interactive badges
+- Will show "No preferences recorded" placeholder
+
+### File 5: GuestActivityCard.tsx
+
+Activity & Memory hub with tabs:
+- **Requests Tab**: List from `service_requests`
+- **F&B Tab**: Dining reservations from `table_reservations` 
+- **Spa Tab**: Bookings from `spa_bookings`
+- **Events Tab**: Reservations from `event_reservations`
+
+Each item shows:
+- Description/name
+- Status badge (completed, pending, cancelled)
+- Date
+
+### File 6: GuestIntelligenceCard.tsx
+
+Intelligence & Alerts:
+- Medical alerts section (placeholder - no allergies table)
+- Guest value badges based on stay count or guest_type
+- Staff notes area (placeholder - no notes table)
 
 ---
 
 ## Files to Create/Modify
 
-| File | Action |
-|------|--------|
-| `src/components/admin/AdminSidebar.tsx` | Remove `disabled: true` from Guests item |
-| `src/pages/admin/GuestsManager.tsx` | **Create new file** with full guest management UI |
-| `src/routes/AdminRoutes.tsx` | Add route for `/admin/guests` |
+| File | Action | Description |
+|------|--------|-------------|
+| `src/pages/admin/GuestsManager.tsx` | Modify | Add state for selected guest and sheet open state |
+| `src/pages/admin/components/guests/GuestDetailSheet.tsx` | Create | Main sheet container |
+| `src/pages/admin/components/guests/GuestStayContextBar.tsx` | Create | Top status bar |
+| `src/pages/admin/components/guests/GuestProfileCard.tsx` | Create | Profile & loyalty card |
+| `src/pages/admin/components/guests/GuestPreferencesCard.tsx` | Create | Preferences card |
+| `src/pages/admin/components/guests/GuestActivityCard.tsx` | Create | Activity history card |
+| `src/pages/admin/components/guests/GuestIntelligenceCard.tsx` | Create | Alerts & notes card |
+| `src/pages/admin/components/guests/types.ts` | Create | Shared types |
 
 ---
 
-## Visual Preview
+## Database Migrations (Future Enhancement)
 
-```text
-┌──────────────────────────────────────────────────────────────────────┐
-│  Guest 360°                                          👥 20 guests    │
-│  Manage and view all hotel guests                                    │
-├──────────────────────────────────────────────────────────────────────┤
-│  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────────┐  │
-│  │   All   │ │ In-House │ │ Arrivals │ │ Upcoming │ │ Departures  │  │
-│  │   20    │ │    0     │ │    0     │ │    0     │ │      0      │  │
-│  └─────────┘ └──────────┘ └──────────┘ └──────────┘ └─────────────┘  │
-├──────────────────────────────────────────────────────────────────────┤
-│  Guest List                                            20 guests     │
-│  All registered guests in the system                                 │
-│  ┌───────────────────────────────────────────┐  ┌─────────┐          │
-│  │ 🔍 Search by name, email or room...       │  │ Refresh │          │
-│  └───────────────────────────────────────────┘  └─────────┘          │
-├───────────────────────────────────────────────────────────────────────┤
-│ Name        │Status│ Room │Check-in│Check-out│First Login│Email│Action│
-├───────────────────────────────────────────────────────────────────────┤
-│ te tt       │  —   │ 442  │05/02/26│11/02/26 │05/02/2026 │test@│  👁  │
-│ Sofia Sofiy │  —   │ —    │  N/A   │  N/A    │10/06/2025 │wass@│  👁  │
-│ Nora Nora   │  —   │ 206  │10/06/25│26/06/25 │10/06/2025 │nour@│  👁  │
-└──────────────────────────────────────────────────────────────────────┘
+To fully implement all features, these tables should be created:
+
+```sql
+-- Guest Preferences
+CREATE TABLE guest_preferences (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  guest_id UUID REFERENCES guests(id) ON DELETE CASCADE,
+  preference TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Guest Allergies / Medical Alerts
+CREATE TABLE guest_allergies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  guest_id UUID REFERENCES guests(id) ON DELETE CASCADE,
+  allergy TEXT NOT NULL,
+  severity TEXT DEFAULT 'medium', -- low, medium, high
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Staff Notes
+CREATE TABLE guest_notes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  guest_id UUID REFERENCES guests(id) ON DELETE CASCADE,
+  note TEXT NOT NULL,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
 ```
 
 ---
 
-## Technical Details
+## Components Used
 
-### Database Query
+- `Sheet`, `SheetContent`, `SheetHeader`, `SheetTitle` - Slide-out panel
+- `ScrollArea` - Scrollable content
+- `Card`, `CardContent`, `CardHeader`, `CardTitle` - Section cards
+- `Badge` - Status indicators and tags
+- `Avatar`, `AvatarImage`, `AvatarFallback` - Guest photo
+- `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` - Activity sections
+- `Separator` - Visual dividers
+- `Button` - Actions (Edit, Add preference)
+- `Textarea` - Staff notes input
+- Icons: `User`, `Phone`, `Mail`, `Calendar`, `AlertTriangle`, `Star`, `StickyNote`, `Utensils`, `Sparkles`, `CalendarDays`
+
+---
+
+## Technical Notes
+
+### Query Strategy
+
+Use React Query to fetch related data when sheet opens:
 
 ```typescript
-const { data, error } = await supabase
-  .from('guests')
-  .select('*')
-  .order('created_at', { ascending: false });
+const { data: roomDetails } = useQuery({
+  queryKey: ['room', guest?.room_number],
+  queryFn: async () => {
+    const { data } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('room_number', guest.room_number)
+      .single();
+    return data;
+  },
+  enabled: !!guest?.room_number
+});
+
+const { data: serviceRequests } = useQuery({
+  queryKey: ['guest-requests', guest?.id],
+  queryFn: async () => {
+    const { data } = await supabase
+      .from('service_requests')
+      .select('*, request_items(*)')
+      .or(`guest_id.eq.${guest.id},guest_id.eq.${guest.user_id}`)
+      .order('created_at', { ascending: false });
+    return data;
+  },
+  enabled: !!guest
+});
 ```
 
-### Status Filtering Logic
+### Status Calculation
 
-| Filter | Condition |
-|--------|-----------|
-| All | No filter (all guests) |
-| In-House | `check_in_date <= today AND check_out_date >= today` |
-| Arrivals | `check_in_date = today` |
-| Upcoming | `check_in_date > today` |
-| Departures | `check_out_date = today` |
-| Past | `check_out_date < today` |
+Reuse the existing `getGuestStatus` function from GuestsManager to determine the status badge.
 
-### Key Components Used
+### Nights Calculation
 
-- `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableCell` from ui/table
-- `Card`, `CardContent`, `CardHeader`, `CardTitle` from ui/card
-- `Input` for search
-- `Button` for refresh and actions
-- `Badge` for guest count
-- Lucide icons: `Users`, `Home`, `ArrowRight`, `Calendar`, `ArrowLeftRight`, `Clock`, `Eye`, `Search`, `RefreshCw`
+```typescript
+const calculateNights = (checkIn: string, checkOut: string) => {
+  const start = new Date(checkIn);
+  const end = new Date(checkOut);
+  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+};
+```
 
 ---
 
 ## Summary
 
-This implementation will:
-1. Enable the Guests navigation in the admin sidebar
-2. Create a polished guest management page matching the reference design
-3. Display all hotel guests with filtering and search capabilities
-4. Allow hotel managers to view and manage their guest database
-5. Follow existing code patterns and UI components from other admin pages
+This implementation will create a comprehensive Guest 360° detail panel that:
+
+1. Opens as a slide-out sheet when clicking the eye icon on any guest
+2. Shows live stay context at the top with status, dates, room info, and occupancy
+3. Displays core profile information with photo and contact details
+4. Shows preferences as interactive tags (with placeholder for future data)
+5. Lists all guest activity: requests, dining, spa, and event reservations
+6. Highlights medical alerts and provides staff notes area (with placeholders for future tables)
+
+The current implementation will use existing tables and show appropriate placeholders where new tables would be needed. Future enhancements can add the preference, allergy, and notes tables for complete functionality.
+
