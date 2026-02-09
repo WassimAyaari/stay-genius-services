@@ -8,7 +8,7 @@ interface NavLinkProps extends RouterNavLinkProps {
 
 export const NavLink: React.FC<NavLinkProps> = ({ 
   className, 
-  activeClassName = 'bg-sidebar-accent text-sidebar-accent-foreground font-medium',
+  activeClassName = 'bg-primary/5 text-primary font-medium border-l-[3px] border-primary',
   ...props 
 }) => {
   return (
