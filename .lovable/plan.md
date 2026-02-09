@@ -1,78 +1,59 @@
 
 
-# Plan: Improve Admin Sidebar Design
+# Plan: Fix Duplicate Guest Records
 
-## Overview
+## Root Cause
 
-Redesign the admin sidebar to be more visually polished and user-friendly with better spacing, refined active states, a cleaner header, improved section labels, and a more elegant footer.
+The `guests` table has no **unique constraint** on `user_id`. The `syncGuestData` function uses a check-then-insert pattern that is vulnerable to race conditions -- two concurrent calls both see "no existing record" and both insert, creating duplicates. The existing cleanup code runs too late to prevent the issue.
 
-## Key Improvements
+## Solution: Two-Part Fix
 
-1. **Add sidebar CSS variables** - Define proper sidebar-specific colors in `src/index.css` for consistent theming
-2. **Refined header** - Gradient-style branding with better typography
-3. **Better section labels** - Smaller, more subtle labels with clean dividers instead of heavy uppercase text
-4. **Improved active state** - Use the primary color as a left border accent on active items instead of just a background change
-5. **Better hover states** - Smooth transitions with subtle color shifts
-6. **Polished footer** - Cleaner user profile area with a more refined language selector
-7. **Tighter spacing** - Reduce excessive vertical gaps between sections
+### Part 1: Database Migration -- Add Unique Constraint
 
----
+1. **Delete existing duplicates** keeping only the most recent record per `user_id`
+2. **Add a unique index** on `user_id` (partial, where `user_id IS NOT NULL`) to prevent future duplicates
+
+```sql
+-- Delete duplicates, keeping the most recent per user_id
+DELETE FROM guests
+WHERE id NOT IN (
+  SELECT DISTINCT ON (user_id) id
+  FROM guests
+  WHERE user_id IS NOT NULL
+  ORDER BY user_id, created_at DESC
+);
+
+-- Prevent future duplicates
+CREATE UNIQUE INDEX idx_guests_user_id_unique 
+ON guests (user_id) 
+WHERE user_id IS NOT NULL;
+```
+
+### Part 2: Simplify Sync Code
+
+With the unique constraint in place, replace the check-then-insert pattern in `guestSyncService.ts` with a proper Supabase **upsert** using `onConflict: 'user_id'`. This is atomic and race-condition-proof.
+
+```typescript
+// Instead of: check if exists -> update or insert -> cleanup
+// Just do:
+const { error } = await supabase
+  .from('guests')
+  .upsert(guestData, { onConflict: 'user_id' });
+```
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/index.css` | Add sidebar CSS variables (sidebar, sidebar-foreground, sidebar-accent, etc.) |
-| `src/components/admin/AdminSidebar.tsx` | Rework structure: refined header, better active styling with primary accent, cleaner section groups, polished footer |
-| `src/components/NavLink.tsx` | Update active class to use primary-colored left border accent style |
+| Database migration | Remove duplicates + add unique index on `user_id` |
+| `src/features/users/services/guestSyncService.ts` | Replace check-then-insert with simple `upsert` on `user_id` conflict |
+| `src/features/users/services/guestRetrievalService.ts` | Remove duplicate-checking logic (no longer needed) |
+| `src/features/users/services/guestCleanupService.ts` | Can be simplified or kept as a safety net |
 
----
+## Impact
 
-## Detailed Changes
-
-### 1. src/index.css
-
-Add sidebar-specific CSS variables inside `:root`:
-
-```css
---sidebar-background: 0 0% 100%;
---sidebar-foreground: 222.2 84% 4.9%;
---sidebar-primary: 187 100% 36%;
---sidebar-primary-foreground: 0 0% 100%;
---sidebar-accent: 210 40% 96%;
---sidebar-accent-foreground: 222.2 84% 4.9%;
---sidebar-border: 214.3 31.8% 91.4%;
---sidebar-ring: 187 100% 36%;
-```
-
-### 2. src/components/admin/AdminSidebar.tsx
-
-Key visual changes:
-
-- **Header**: Remove border-b, use a subtle bottom shadow. Tighten padding. Add a subtle gradient or softer brand icon background.
-- **Section labels**: Change from bold uppercase to a lighter, sentence-case style with muted color. Remove the collapsible chevron arrows for single-item sections (Dashboard). Add a thin separator line between section groups.
-- **Menu items**: Increase the height slightly for better touch targets. Active items get a left-side primary color bar (3px) plus a light primary tint background. Icons get primary color when active.
-- **Footer**: Clean card-like user area with subtle top border. Language selector as a compact pill. Logout as an icon-only button with tooltip.
-- **Spacing**: Reduce gap between sections. Tighten padding within groups.
-
-### 3. src/components/NavLink.tsx
-
-Update the default `activeClassName` to use the new accent style:
-
-```typescript
-activeClassName = 'bg-primary/5 text-primary font-medium border-l-[3px] border-primary'
-```
-
-This gives active items a colored left edge and tinted background, making the current page immediately obvious.
-
----
-
-## Visual Result
-
-- Clean white sidebar with subtle section dividers
-- Active page highlighted with a teal/primary left accent bar
-- Icons colorized when active (teal) vs muted gray when inactive
-- Compact, professional section labels
-- Polished user profile card in footer
-- Smoother hover transitions throughout
+- **Immediately cleans up** all 8 sets of duplicate records currently in the database
+- **Permanently prevents** future duplicates at the database level
+- **Simplifies** the sync code by removing the race-condition-prone check-then-insert pattern
+- No UI changes needed -- the guest list will automatically show unique entries
 
