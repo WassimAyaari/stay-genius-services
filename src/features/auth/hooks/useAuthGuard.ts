@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +17,9 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState<boolean>(true);
   const [authorized, setAuthorized] = useState<boolean>(false);
+  
+  // Track if initial auth check has completed
+  const initialAuthDone = useRef(false);
 
   // Fonction pour vérifier si la page actuelle est une page d'authentification
   const isAuthPage = () => location.pathname.includes('/auth/');
@@ -51,8 +54,16 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
       return;
     }
     
+    // If already authorized and initial auth is done, skip re-check
+    if (initialAuthDone.current && authorized) {
+      return;
+    }
+    
     const checkAuth = async () => {
-      setLoading(true);
+      // Only show loading spinner on initial load
+      if (!initialAuthDone.current) {
+        setLoading(true);
+      }
       console.log("Vérification de l'authentification pour la route:", location.pathname);
       console.log("adminRequired:", adminRequired);
       
@@ -166,6 +177,7 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
           });
           
           setAuthorized(true);
+          initialAuthDone.current = true;
         } catch (parseError) {
           console.error("Erreur d'analyse des données utilisateur:", parseError);
           toast({
