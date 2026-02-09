@@ -132,7 +132,7 @@ export const AdminChatDashboard: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="flex-1 space-y-6 p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Chat Management</h1>
         <Button 
