@@ -117,7 +117,7 @@ const AboutEditor = () => {
   }
   
   return (
-    <div className="container mx-auto p-6">
+    <div className="flex-1 space-y-6 p-6">
       <h1 className="text-2xl font-bold mb-6">About Page Editor</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
