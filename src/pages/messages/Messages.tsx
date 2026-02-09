@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { UnifiedChatContainer } from '@/components/chat/UnifiedChatContainer';
 import { AdminChatDashboard } from '@/components/admin/chat/AdminChatDashboard';
@@ -9,6 +10,7 @@ import { useMessageBadge } from '@/hooks/useMessageBadge';
 import Layout from '@/components/Layout';
 
 const Messages = () => {
+  const location = useLocation();
   const [userInfo, setUserInfo] = useState<{
     name: string;
     email?: string;
@@ -18,6 +20,13 @@ const Messages = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedChatType, setSelectedChatType] = useState<'concierge' | 'safety_ai' | null>(null);
   const { markAsSeen } = useMessageBadge();
+
+  // Auto-select chat type from navigation state
+  useEffect(() => {
+    if (location.state?.chatType) {
+      setSelectedChatType(location.state.chatType);
+    }
+  }, [location.state]);
 
   // Mark messages as seen when the page loads (for non-admin users)
   useEffect(() => {
