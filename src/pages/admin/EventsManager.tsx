@@ -4,10 +4,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EventsTab } from './components/events/EventsTab';
 import { StoriesTab } from './components/events/StoriesTab';
 import { EventReservationsTab } from './components/events/EventReservationsTab';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 const EventsManager = () => {
   const [selectedEventId, setSelectedEventId] = React.useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = React.useState('events');
+  const { markSectionSeen } = useAdminNotifications();
+
+  React.useEffect(() => {
+    if (activeTab === 'reservations') {
+      markSectionSeen('events');
+    }
+  }, [activeTab, markSectionSeen]);
   
   return (
     <div className="p-6">

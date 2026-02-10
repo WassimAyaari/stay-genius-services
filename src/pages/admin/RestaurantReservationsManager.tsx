@@ -12,9 +12,15 @@ import ReservationList from '@/components/admin/reservations/ReservationList';
 import ErrorState from '@/components/admin/reservations/ErrorState';
 import { toast } from 'sonner';
 import { useTableReservations } from '@/hooks/useTableReservations';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 const RestaurantReservationsManager = () => {
   const { id } = useParams<{ id: string }>();
+  const { markSectionSeen } = useAdminNotifications();
+
+  useEffect(() => {
+    markSectionSeen('restaurants');
+  }, [markSectionSeen]);
   const navigate = useNavigate();
   const { fetchRestaurantById } = useRestaurants();
   const [restaurant, setRestaurant] = useState<any>(null);

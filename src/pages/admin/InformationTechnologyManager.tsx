@@ -10,10 +10,18 @@ import InformationTechnologyItemsTab from './information-technology/components/I
 import InformationTechnologyRequestsTab from './information-technology/components/InformationTechnologyRequestsTab';
 import AddItemDialog from './information-technology/components/AddItemDialog';
 import EditItemDialog from './information-technology/components/EditItemDialog';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 
 const InformationTechnologyManager = () => {
   const [activeTab, setActiveTab] = useState('items');
+  const { markSectionSeen } = useAdminNotifications();
+
+  React.useEffect(() => {
+    if (activeTab === 'requests') {
+      markSectionSeen('information-technology');
+    }
+  }, [activeTab, markSectionSeen]);
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

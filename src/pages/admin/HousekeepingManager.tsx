@@ -10,10 +10,18 @@ import HousekeepingItemsTab from './housekeeping/components/HousekeepingItemsTab
 import HousekeepingRequestsTab from './housekeeping/components/HousekeepingRequestsTab';
 import AddItemDialog from './housekeeping/components/AddItemDialog';
 import EditItemDialog from './housekeeping/components/EditItemDialog';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 
 const HousekeepingManager = () => {
   const [activeTab, setActiveTab] = useState('items');
+  const { markSectionSeen } = useAdminNotifications();
+
+  React.useEffect(() => {
+    if (activeTab === 'requests') {
+      markSectionSeen('housekeeping');
+    }
+  }, [activeTab, markSectionSeen]);
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

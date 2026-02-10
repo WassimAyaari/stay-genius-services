@@ -8,10 +8,19 @@ import SecurityRequestsTab from './security/SecurityRequestsTab';
 import AddItemDialog from './security/AddItemDialog';
 import EditItemDialog from './security/EditItemDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 
 const SecurityManager = () => {
   const [activeTab, setActiveTab] = useState('items');
+  const { markSectionSeen } = useAdminNotifications();
+
+  React.useEffect(() => {
+    if (activeTab === 'requests') {
+      markSectionSeen('security');
+    }
+  }, [activeTab, markSectionSeen]);
+
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

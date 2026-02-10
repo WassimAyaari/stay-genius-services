@@ -15,6 +15,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import EventForm from '@/pages/admin/components/events/EventForm';
 import { useEvents } from '@/hooks/useEvents';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 const RestaurantManager = () => {
   const navigate = useNavigate();
@@ -24,6 +25,13 @@ const RestaurantManager = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('restaurants');
+  const { markSectionSeen } = useAdminNotifications();
+
+  useEffect(() => {
+    if (activeTab === 'bookings') {
+      markSectionSeen('restaurants');
+    }
+  }, [activeTab, markSectionSeen]);
 
   // State for add event dialog
   const [addEventRestaurantId, setAddEventRestaurantId] = useState<string|null>(null);

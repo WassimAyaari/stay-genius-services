@@ -26,10 +26,19 @@ import { useRequestCategories, useCreateRequestItem, useUpdateRequestItem } from
 import { RequestItem } from '@/features/rooms/types';
 import MaintenanceItemsTab from './maintenance/components/MaintenanceItemsTab';
 import MaintenanceRequestsTab from './maintenance/components/MaintenanceRequestsTab';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 
 const MaintenanceManager = () => {
   const [activeTab, setActiveTab] = useState('items');
+  const { markSectionSeen } = useAdminNotifications();
+
+  React.useEffect(() => {
+    if (activeTab === 'requests') {
+      markSectionSeen('maintenance');
+    }
+  }, [activeTab, markSectionSeen]);
+
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
