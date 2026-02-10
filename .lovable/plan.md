@@ -1,43 +1,19 @@
 
+# Fix Layout Shift When Opening Select Dropdowns
 
-# Replace Reservation Cards with a Data Table
+## Problem
 
-## Overview
+When clicking the "Tous les restaurants" or "Tous les statuts" dropdown, the Radix Select component is **modal by default** -- it hides the page scrollbar while open. This causes the entire page content (sidebar, table) to shift horizontally by the scrollbar width (~8px).
 
-Switch the Bookings tab from a grid of cards to a clean, compact **data table** layout. This is more suited for admin use -- easier to scan, sort visually, and manage many reservations at once.
+## Solution
+
+Add `modal={false}` to both `SelectContent` components in `RestaurantBookingsTab.tsx`. This prevents Radix from removing the body scrollbar when the dropdown is open, eliminating all layout shifts.
 
 ## Changes
 
 ### File: `src/pages/admin/restaurants/RestaurantBookingsTab.tsx`
 
-Replace the `ReservationList` card grid with an inline data table using the existing Shadcn `Table` components. The table will have these columns:
+- Line 80: Change `<SelectContent>` to `<SelectContent modal={false}>`
+- Line 94: Change `<SelectContent>` to `<SelectContent modal={false}>`
 
-| Column | Content |
-|--------|---------|
-| Guest | Name + room number |
-| Restaurant | Restaurant name (from restaurantMap) |
-| Date | Formatted date |
-| Time | Time slot |
-| Guests | Number of guests |
-| Status | Color-coded badge (pending/confirmed/cancelled) |
-| Actions | "Modifier le statut" button |
-
-- The filters (restaurant dropdown, status dropdown) and refresh button stay exactly as they are at the top
-- The `StatusDialog` remains unchanged
-- Contact info (email, phone) and special requests will be visible via a collapsible row or tooltip to keep the table clean
-- Empty and loading states remain the same
-
-### No new files needed
-
-The `ReservationList` and `ReservationCard` components are no longer used by this tab (they may still be used elsewhere, so they won't be deleted).
-
-### Technical Details
-
-The table will be built directly in `RestaurantBookingsTab.tsx` using:
-- `Table`, `TableHeader`, `TableRow`, `TableHead`, `TableBody`, `TableCell` from `@/components/ui/table`
-- Status badges using the same color scheme (green for confirmed, yellow for pending, red for cancelled)
-- `format(new Date(date), 'dd MMM yyyy', { locale: fr })` for date formatting
-- A small icon button or text button in the Actions column to open the status dialog
-- Special requests shown as a tooltip icon (MessageSquare) when present
-- Contact info (email/phone) shown as a tooltip on hover over the guest name
-
+That's it -- two small prop additions, no other changes needed.
