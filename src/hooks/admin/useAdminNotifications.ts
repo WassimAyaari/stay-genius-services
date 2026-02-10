@@ -10,6 +10,7 @@ const SECTION_KEYS = [
   'maintenance',
   'security',
   'information-technology',
+  'chat',
 ] as const;
 
 type SectionKey = (typeof SECTION_KEYS)[number];
@@ -105,6 +106,19 @@ async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; rest
     .gt('created_at', getLastSeen('events'));
   counts.events = eventsCount || 0;
 
+  // Chat: count conversations with new guest messages since last seen
+  const chatLastSeen = getLastSeen('chat');
+  const { data: newGuestMessages } = await supabase
+    .from('messages')
+    .select('conversation_id')
+    .eq('sender_type', 'guest')
+    .gt('created_at', chatLastSeen);
+
+  if (newGuestMessages) {
+    const uniqueConvos = new Set(newGuestMessages.map(m => m.conversation_id));
+    counts.chat = uniqueConvos.size;
+  }
+
   // Service requests by category
   const { data: serviceRequests } = await supabase
     .from('service_requests')
@@ -164,6 +178,7 @@ export function useAdminNotifications() {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'event_reservations' }, invalidate)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_requests' }, invalidate)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'service_requests' }, invalidate)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, invalidate)
       .subscribe();
 
     return () => {
