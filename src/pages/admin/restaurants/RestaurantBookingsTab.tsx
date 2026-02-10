@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTableReservations } from '@/hooks/useTableReservations';
+import { useAllTableReservations } from '@/hooks/useAllTableReservations';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import ReservationList from '@/components/admin/reservations/ReservationList';
 import StatusDialog from '@/components/admin/reservations/StatusDialog';
@@ -7,10 +7,10 @@ import { TableReservation } from '@/features/dining/types';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
 
 const RestaurantBookingsTab = () => {
-  const [selectedRestaurantId, setSelectedRestaurantId] = React.useState<string | undefined>();
+  const [selectedRestaurantId, setSelectedRestaurantId] = React.useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = React.useState<string>('all');
   const [selectedReservation, setSelectedReservation] = React.useState<TableReservation | null>(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = React.useState(false);
   const [newStatus, setNewStatus] = React.useState<'pending' | 'confirmed' | 'cancelled'>('pending');
@@ -18,27 +18,24 @@ const RestaurantBookingsTab = () => {
   const { restaurants } = useRestaurants();
   const { 
     reservations, 
-    isLoading: isLoadingReservations, 
+    isLoading, 
     updateReservationStatus,
     refetch 
-  } = useTableReservations(selectedRestaurantId);
+  } = useAllTableReservations({
+    restaurantId: selectedRestaurantId === 'all' ? undefined : selectedRestaurantId,
+    status: selectedStatus === 'all' ? undefined : selectedStatus,
+  });
 
-  const handleRefresh = async () => {
-    try {
-      await refetch();
-      toast.success("Reservations refreshed");
-    } catch (error) {
-      console.error("Error refreshing reservations:", error);
-      toast.error("Failed to refresh reservations");
-    }
-  };
+  // Build a map of restaurant id -> name
+  const restaurantMap = React.useMemo(() => {
+    const map: Record<string, string> = {};
+    restaurants?.forEach(r => { map[r.id] = r.name; });
+    return map;
+  }, [restaurants]);
 
   const handleUpdateStatus = () => {
     if (selectedReservation && newStatus) {
-      updateReservationStatus({ 
-        id: selectedReservation.id, 
-        status: newStatus 
-      });
+      updateReservationStatus({ id: selectedReservation.id, status: newStatus });
       setIsStatusDialogOpen(false);
     }
   };
@@ -49,17 +46,16 @@ const RestaurantBookingsTab = () => {
     setIsStatusDialogOpen(true);
   };
 
-  const selectedRestaurant = restaurants?.find(r => r.id === selectedRestaurantId);
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex flex-wrap gap-3 items-center">
           <Select value={selectedRestaurantId} onValueChange={setSelectedRestaurantId}>
-            <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder="Select a restaurant" />
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Tous les restaurants" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">Tous les restaurants</SelectItem>
               {restaurants?.map((restaurant) => (
                 <SelectItem key={restaurant.id} value={restaurant.id}>
                   {restaurant.name}
@@ -67,47 +63,45 @@ const RestaurantBookingsTab = () => {
               ))}
             </SelectContent>
           </Select>
+
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Tous les statuts" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              <SelectItem value="pending">En attente</SelectItem>
+              <SelectItem value="confirmed">Confirmée</SelectItem>
+              <SelectItem value="cancelled">Annulée</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {selectedRestaurantId && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefresh}
-            disabled={isLoadingReservations}
-            className="gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoadingReservations ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        )}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => refetch()}
+          disabled={isLoading}
+          className="gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Rafraîchir
+        </Button>
       </div>
 
-      {!selectedRestaurantId ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Please select a restaurant to view its reservations</p>
-        </div>
-      ) : isLoadingReservations ? (
+      {isLoading ? (
         <div className="flex justify-center py-8">
           <RefreshCw className="h-6 w-6 animate-spin text-primary" />
         </div>
-      ) : reservations && reservations.length > 0 ? (
-        <div>
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold">{selectedRestaurant?.name} - Reservations</h3>
-          </div>
-          <ReservationList 
-            reservations={reservations} 
-            onOpenStatusDialog={handleOpenStatusDialog} 
-          />
-        </div>
+      ) : reservations.length > 0 ? (
+        <ReservationList 
+          reservations={reservations} 
+          onOpenStatusDialog={handleOpenStatusDialog}
+          restaurantMap={restaurantMap}
+        />
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground mb-4">No reservations found for this restaurant</p>
-          <Button variant="outline" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          <p className="text-muted-foreground">Aucune réservation trouvée</p>
         </div>
       )}
       

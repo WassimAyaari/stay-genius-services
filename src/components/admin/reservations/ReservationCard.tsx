@@ -4,15 +4,16 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Users, MessageSquare, CheckCircle, XCircle, Clock3, Home } from 'lucide-react';
+import { Calendar, Clock, Users, MessageSquare, CheckCircle, XCircle, Clock3, Home, UtensilsCrossed } from 'lucide-react';
 import { TableReservation } from '@/features/dining/types';
 
 interface ReservationCardProps {
   reservation: TableReservation;
   onOpenStatusDialog: (reservation: TableReservation) => void;
+  restaurantName?: string;
 }
 
-const ReservationCard = ({ reservation, onOpenStatusDialog }: ReservationCardProps) => {
+const ReservationCard = ({ reservation, onOpenStatusDialog, restaurantName }: ReservationCardProps) => {
   const formatDate = (dateStr: string) => {
     try {
       return format(new Date(dateStr), 'dd MMMM yyyy', { locale: fr });
@@ -66,6 +67,12 @@ const ReservationCard = ({ reservation, onOpenStatusDialog }: ReservationCardPro
             {getStatusText(reservation.status)}
           </div>
         </div>
+        {restaurantName && (
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <UtensilsCrossed className="h-3.5 w-3.5" />
+            <span>{restaurantName}</span>
+          </div>
+        )}
         <CardDescription>
           Réservation #{reservation.id.substring(0, 8)}
         </CardDescription>
