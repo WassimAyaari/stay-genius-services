@@ -111,9 +111,9 @@ export const AdminChatDashboard: React.FC = () => {
       </div>
 
       {/* Side-by-side: Conversations + Chat */}
-      <div className="flex flex-1 min-h-0 mx-6 mb-2 border rounded-lg overflow-hidden">
+      <div className="flex flex-1 min-h-0 mx-6 mb-2 gap-4 overflow-hidden">
         {/* Left panel */}
-        <div className="w-[35%] border-r flex flex-col">
+        <div className="w-[35%] border rounded-lg flex flex-col overflow-hidden">
           <Tabs defaultValue="escalated" className="flex flex-col flex-1 overflow-hidden">
             <div className="p-3 border-b">
               <TabsList className="grid w-full grid-cols-3">
@@ -133,7 +133,7 @@ export const AdminChatDashboard: React.FC = () => {
         </div>
 
         {/* Right panel */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col border rounded-lg overflow-hidden">
           {selectedConversation ? (
             <UnifiedChatContainer
               userInfo={{ name: 'Admin', email: 'admin@hotel.com' }}
