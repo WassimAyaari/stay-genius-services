@@ -33,13 +33,7 @@ export const useReservationsRealtime = (
           console.log('Restaurant reservation update received:', payload);
           queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
           
-          // Show notification for new reservations
-          if (payload.eventType === 'INSERT') {
-            toast.info(`New Reservation`, {
-              description: `A new reservation has been created.`,
-              duration: 5000,
-            });
-          }
+          // Silently refetch - no toast needed here
         })
         .subscribe();
         
@@ -84,43 +78,8 @@ export const useReservationsRealtime = (
     }
       
     const handleReservationUpdate = (payload: any) => {
-      // For new reservations
-      if (payload.eventType === 'INSERT') {
-        toast.info(`New reservation`, {
-          description: `Your reservation has been created successfully.`,
-          duration: 5000,
-        });
-        queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
-        return;
-      }
-      
-      // For status updates
-      if (payload.eventType === 'UPDATE') {
-        const oldStatus = payload.old.status;
-        const newStatus = payload.new.status;
-        
-        // Only notify if the status has changed
-        if (oldStatus !== newStatus) {
-          // Show a toast notification
-          toast.info(`Mise à jour de réservation`, {
-            description: `Votre réservation est maintenant ${getStatusFrench(newStatus)}.`,
-            duration: 5000,
-          });
-        }
-        
-        // Refetch the reservations to update the UI
-        queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
-      }
-    };
-
-    // Helper function for getting status in French
-    const getStatusFrench = (status: string) => {
-      switch (status) {
-        case 'confirmed': return 'confirmée';
-        case 'cancelled': return 'annulée';
-        case 'pending': return 'en attente';
-        default: return status;
-      }
+      // Silently refetch - toasts are handled by the direct action handlers
+      queryClient.invalidateQueries({ queryKey: ['tableReservations', userId, userEmail, restaurantId] });
     };
       
     return () => {

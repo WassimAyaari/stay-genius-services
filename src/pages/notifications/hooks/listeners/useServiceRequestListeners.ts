@@ -42,22 +42,6 @@ export const setupServiceRequestListenerByRoom = (roomNumber: string, refetchReq
  * Handle service request update events
  */
 export const handleServiceRequestUpdate = (payload: any, refetchRequests: () => void) => {
-  // Show notification for status changes
-  if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
-    const statusMap: Record<string, string> = {
-      'pending': 'est en attente',
-      'in_progress': 'est en cours de traitement',
-      'completed': 'a été complétée',
-      'cancelled': 'a été annulée'
-    };
-    
-    const status = payload.new.status;
-    const message = statusMap[status] || 'a été mise à jour';
-    
-    toast.info(`Mise à jour de demande`, {
-      description: `Votre demande de type ${payload.new.type} ${message}.`
-    });
-  }
-  
+  // Silently refetch - toasts handled by direct action handlers
   refetchRequests();
 };
