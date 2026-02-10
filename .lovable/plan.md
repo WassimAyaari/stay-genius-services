@@ -1,20 +1,19 @@
 
 
-# Move Refresh Button to CardHeader
+# Remove Redundant Request Count Badges
 
 ## Problem
-The "Refresh" button sits inside `SpaBookingsTab` on its own row, creating a large visual gap between the "Bookings" title and the spa service list.
+The "Requests" tab in both Housekeeping and IT Management pages shows a badge with the total request count (e.g., "3", "1"). These are not static -- they come from the database -- but they are redundant since the sidebar already shows notification badges for new pending requests.
 
-## Fix
+## Changes
 
-### File: `src/pages/admin/SpaManager.tsx`
-- Modify the Bookings `CardHeader` to use a flex row layout with the title/description on the left and a "Refresh" button on the right
-- The Refresh button calls `refreshSpaData()` (already defined in this component)
+### File: `src/pages/admin/HousekeepingManager.tsx` (lines 163-168)
+- Remove the Badge from the "Requests" TabsTrigger, leaving just the text "Requests"
 
-### File: `src/pages/admin/spa/SpaBookingsTab.tsx`
-- Remove the "Refresh" button and its wrapping `<div className="flex justify-end mb-6">` block from the Level 1 (service list) view (around lines 219-230)
-- The service list cards will render directly without the extra gap
+### File: `src/pages/admin/InformationTechnologyManager.tsx` (lines 133-138)
+- Remove the Badge from the "Requests" TabsTrigger, leaving just the text "Requests"
+
+Both files also have unused Badge imports that can be cleaned up.
 
 ## Result
-The "Bookings" title, description, and Refresh button all appear on one row in the CardHeader. The spa service list follows immediately below with no wasted space.
-
+The "Requests" tabs will display only the word "Requests" with no number badge, matching a cleaner look while relying on the sidebar notifications for new item alerts.
