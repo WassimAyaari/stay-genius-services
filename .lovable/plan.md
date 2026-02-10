@@ -1,82 +1,56 @@
 
 
-# Plan: Admin Notification Badges for New Reservations and Requests
+# Plan: Move Badge Clearing from Route Change to Tab Click
 
-## Overview
+## Problem
 
-Add real-time notification badges in the admin sidebar to alert staff when new reservations (restaurant, spa, event) or service requests arrive. Badges appear next to sidebar items and disappear when the admin navigates to the corresponding page.
+Currently, notification badges in the sidebar disappear as soon as the admin navigates to a page (e.g., visiting `/admin/information-technology` immediately clears the IT badge). The user wants badges to persist until the admin actually opens the "Requests"/"Bookings"/"Reservations" tab within the page.
 
-## How It Works
+## Changes
 
-1. **Track "last seen" timestamps** per admin section using localStorage (similar to the guest notification system)
-2. **Query pending counts** from Supabase for each section (pending table reservations, spa bookings, event reservations, service requests)
-3. **Display red badges** in the sidebar next to the relevant menu items
-4. **Clear badges** when the admin navigates to that section's page
-5. **Real-time updates** via Supabase subscriptions to increment counts live
+### 1. `src/hooks/admin/useAdminNotifications.ts` -- Remove auto-mark on route change
 
-## Technical Changes
+Remove the `useEffect` (lines 136-144) that auto-calls `markSeen` when the route changes. Also remove `useLocation` import since it won't be needed. Export `markSeen` so pages can call it manually.
 
-### 1. New Hook: `src/hooks/admin/useAdminNotifications.ts`
+### 2. `src/pages/admin/InformationTechnologyManager.tsx` -- Clear badge on "Requests" tab click
 
-A centralized hook that:
-- Stores per-section "last seen" timestamps in localStorage (keys like `admin_lastSeen_restaurants`, `admin_lastSeen_spa`, etc.)
-- Queries Supabase for counts of records created after each section's last-seen timestamp:
-  - `table_reservations` with `status = 'pending'` and `created_at > lastSeen`
-  - `spa_bookings` with `status = 'pending'` and `created_at > lastSeen`
-  - `event_reservations` with `status = 'pending'` and `created_at > lastSeen`
-  - `service_requests` with `status = 'pending'` and `created_at > lastSeen` (grouped by category: housekeeping, maintenance, security, IT)
-- Sets up Supabase realtime subscriptions on INSERT for each table
-- Exposes: `{ counts: Record<string, number>, markSeen: (section: string) => void }`
-- Uses `useQuery` with `refetchInterval: 30000` for polling backup
-- Sections: `'restaurants'`, `'spa'`, `'events'`, `'housekeeping'`, `'maintenance'`, `'security'`, `'information-technology'`
+- Import `useAdminNotifications`
+- Convert `Tabs` from uncontrolled (`defaultValue`) to controlled (`value`/`onValueChange`)
+- When tab changes to `"requests"`, call `markSeen('information-technology')`
 
-### 2. Update: `src/components/admin/AdminSidebar.tsx`
+### 3. `src/pages/admin/HousekeepingManager.tsx` -- Same pattern
 
-- Import `useAdminNotifications` hook
-- Import `SidebarMenuBadge` from sidebar UI
-- Pass notification counts to each nav item
-- Render a red badge circle next to items that have `count > 0`:
-  ```tsx
-  {count > 0 && (
-    <SidebarMenuBadge className="bg-red-500 text-white text-xs min-w-[18px] h-[18px] rounded-full flex items-center justify-center">
-      {count}
-    </SidebarMenuBadge>
-  )}
-  ```
-- The "Services" section label will also show a badge if any child service has pending requests
-- Call `markSeen(section)` when detecting the current route matches a section (via `useEffect` on `location.pathname`)
+- Import `useAdminNotifications`
+- On tab change to `"requests"`, call `markSeen('housekeeping')`
 
-### 3. Update: `src/components/admin/AdminLayout.tsx`
+### 4. `src/pages/admin/MaintenanceManager.tsx` -- Same pattern
 
-- Wrap the sidebar context with the admin notifications provider/hook so it persists across page navigations
+- Import `useAdminNotifications`
+- On tab change to `"requests"`, call `markSeen('maintenance')`
 
-### 4. Mapping of routes to notification sections
+### 5. `src/pages/admin/SecurityManager.tsx` -- Same pattern
 
-| Route | Section Key | Data Source |
-|-------|------------|-------------|
-| `/admin/restaurants` | `restaurants` | `table_reservations` (pending) |
-| `/admin/spa` | `spa` | `spa_bookings` (pending) |
-| `/admin/events` | `events` | `event_reservations` (pending) |
-| `/admin/housekeeping` | `housekeeping` | `service_requests` where category = Housekeeping |
-| `/admin/maintenance` | `maintenance` | `service_requests` where category = Maintenance |
-| `/admin/security` | `security` | `service_requests` where category = Security |
-| `/admin/information-technology` | `information-technology` | `service_requests` where category = IT Support |
+- Import `useAdminNotifications`
+- On tab change to `"requests"`, call `markSeen('security')`
 
-### 5. Dashboard Enhancement
+### 6. `src/pages/admin/RestaurantManager.tsx` -- Clear badge on "Bookings" tab click
 
-On the admin dashboard, the existing stats already show pending counts. No additional changes needed -- the sidebar badges serve as the notification mechanism visible from any admin page.
+- Import `useAdminNotifications`
+- On tab change to `"bookings"`, call `markSeen('restaurants')`
 
-## Badge Clearing Logic
+### 7. `src/pages/admin/SpaManager.tsx` -- Clear badge on "Bookings" tab click
 
-- When `location.pathname` matches a section (e.g., starts with `/admin/restaurants`), call `markSeen('restaurants')` which updates localStorage timestamp to `now()` and resets that section's count to 0
-- This means: navigating to Restaurants clears the restaurant badge; navigating to Spa clears the spa badge, etc.
+- Import `useAdminNotifications`
+- On tab change to `"bookings"`, call `markSeen('spa')`
 
-## Files Created/Modified
+### 8. `src/pages/admin/EventsManager.tsx` -- Clear badge on "Reservations" tab click
 
-| File | Action |
-|------|--------|
-| `src/hooks/admin/useAdminNotifications.ts` | **Create** -- centralized notification counts + realtime |
-| `src/components/admin/AdminSidebar.tsx` | **Modify** -- render badges, call markSeen on route change |
+- Import `useAdminNotifications`
+- On tab change to `"reservations"`, call `markSeen('events')`
 
-No new dependencies needed. Uses existing `SidebarMenuBadge`, Supabase client, and React Query.
+## Summary
+
+- **1 hook modified** -- remove auto-clear on route change
+- **7 page components modified** -- add controlled tabs with `markSeen` on relevant tab selection
+- Badges stay visible in sidebar until the admin explicitly opens the requests/bookings tab
 
