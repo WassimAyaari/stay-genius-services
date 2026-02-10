@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,18 +16,58 @@ export const AdminChatDashboard: React.FC = () => {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ active: 0, escalated: 0, total: 0 });
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const { toast } = useToast();
+  const { markSectionSeen } = useAdminNotifications();
 
   useEffect(() => {
+    markSectionSeen('chat');
     fetchConversations();
     const channel = supabase
       .channel('admin-conversations')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
         fetchConversations();
       })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
+        fetchUnreadCounts();
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
+
+  const fetchUnreadCounts = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: seenRows } = await supabase
+      .from('admin_section_seen')
+      .select('section_key, last_seen_at')
+      .eq('user_id', user.id)
+      .like('section_key', 'chat:%');
+
+    const seenMap: Record<string, string> = {};
+    if (seenRows) {
+      for (const row of seenRows) {
+        seenMap[row.section_key] = row.last_seen_at;
+      }
+    }
+
+    const { data: guestMessages } = await supabase
+      .from('messages')
+      .select('conversation_id, created_at')
+      .eq('sender_type', 'guest');
+
+    const counts: Record<string, number> = {};
+    if (guestMessages) {
+      for (const msg of guestMessages) {
+        const lastSeen = seenMap[`chat:${msg.conversation_id}`] || '1970-01-01T00:00:00Z';
+        if (msg.created_at > lastSeen) {
+          counts[msg.conversation_id] = (counts[msg.conversation_id] || 0) + 1;
+        }
+      }
+    }
+    setUnreadCounts(counts);
+  };
 
   const fetchConversations = async () => {
     try {
@@ -40,6 +81,7 @@ export const AdminChatDashboard: React.FC = () => {
       const active = data?.filter(c => c.status === 'active').length || 0;
       const escalated = data?.filter(c => c.status === 'escalated').length || 0;
       setStats({ active, escalated, total: data?.length || 0 });
+      fetchUnreadCounts();
     } catch (error) {
       console.error('Error fetching conversations:', error);
       toast({ title: "Error", description: "Failed to load conversations.", variant: "destructive" });
@@ -69,7 +111,12 @@ export const AdminChatDashboard: React.FC = () => {
         key={conversation.id}
         conversation={conversation}
         isSelected={selectedConversation?.id === conversation.id}
-        onClick={() => setSelectedConversation(conversation)}
+        unreadCount={unreadCounts[conversation.id] || 0}
+        onClick={() => {
+          setSelectedConversation(conversation);
+          markSectionSeen(`chat:${conversation.id}`);
+          setUnreadCounts(prev => ({ ...prev, [conversation.id]: 0 }));
+        }}
       />
     ));
   };

@@ -89,8 +89,8 @@ export const useUnifiedChat = ({
           .from('conversations')
           .select('*')
           .eq('guest_id', user.user.id)
-          .eq('conversation_type', conversationType)
-          .eq('status', 'active')
+      .eq('conversation_type', conversationType)
+      .in('status', ['active', 'escalated'])
           .maybeSingle();
 
         let conversation = existingConversation;
