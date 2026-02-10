@@ -170,7 +170,7 @@ export const AdminSidebar: React.FC = () => {
   const { state } = useSidebar();
   const { i18n } = useTranslation();
   const isCollapsed = state === 'collapsed';
-  const { counts } = useAdminNotifications();
+  const { counts = {} as Record<string, number> } = useAdminNotifications();
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
