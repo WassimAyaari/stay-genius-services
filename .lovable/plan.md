@@ -1,77 +1,80 @@
 
 
-# Fix Admin Notifications: Persistent, Status-Based System
+# Fix Admin Notifications: Database-Persisted "Last Seen" Timestamps
 
 ## Problem
 
-The current admin notification system uses `localStorage` timestamps (`admin_lastSeen_*`) to track which items are "new." But `localStorage.clear()` is called on logout (in `UserMenu.tsx`), which wipes these timestamps. On next login, the fallback date becomes `1970-01-01`, so **all pending items** appear as new notifications again -- and the counts vary because they depend on how many pending items exist in each section at that moment.
+The notification badges currently show **all pending items** (e.g., 10 pending restaurant reservations = badge shows "10"). The user wants badges to show only **new items since the admin last visited** that section. And this "last visited" timestamp must survive logout/login.
 
 ## Solution
 
-Replace the timestamp-based tracking with a simple **status-based** system:
-
-- A notification badge shows the count of items with `status = 'pending'`
-- Once an admin processes an item (confirms, cancels, or completes it), the badge count drops
-- No localStorage timestamps needed -- the badge reflects real pending work, not "new since last visit"
-- Logout/login has zero effect on badge counts
-
-This is more intuitive: the badge means "items that need attention," not "items you haven't looked at."
+Create a database table `admin_section_seen` to store per-admin, per-section timestamps. When the admin navigates to a section's Requests tab, we update the timestamp. The badge count = pending items created **after** that timestamp.
 
 ## Changes
 
-### File: `src/hooks/admin/useAdminNotifications.ts`
+### 1. New Database Table: `admin_section_seen`
 
-Simplify the `fetchCounts` function:
+```sql
+CREATE TABLE public.admin_section_seen (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  section_key text NOT NULL,
+  last_seen_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(user_id, section_key)
+);
 
-- **Remove** `getLastSeen()` and `setLastSeen()` functions entirely
-- **Remove** all `.gt('created_at', lastSeen)` filters from queries
-- Keep only `.eq('status', 'pending')` filters -- count all pending items regardless of when they were created
-- **Remove** the `markSeen` callback (no longer needed)
-- Keep real-time subscriptions and polling as-is, but also listen for `UPDATE` events (status changes) in addition to `INSERT`
+ALTER TABLE public.admin_section_seen ENABLE ROW LEVEL SECURITY;
 
-The simplified query pattern:
-
+CREATE POLICY "Admins can manage their own seen timestamps"
+  ON public.admin_section_seen
+  FOR ALL
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
 ```
-// Before (broken by logout)
-.eq('status', 'pending')
-.gt('created_at', getLastSeen('restaurants'))
 
-// After (always accurate)
-.eq('status', 'pending')
-```
+### 2. File: `src/hooks/admin/useAdminNotifications.ts`
 
-### File: `src/components/admin/AdminSidebar.tsx`
+Update `fetchCounts` to:
+- Fetch the current user's `admin_section_seen` rows
+- For each section, count only pending items where `created_at > last_seen_at` for that section
+- If no `last_seen_at` exists for a section, count all pending items (first-time behavior)
 
-- Remove the `markSeen` destructuring (no longer exported)
-- No other changes needed -- it already reads `counts` which will now be purely status-based
+Add a new `markSectionSeen` function that upserts a row into `admin_section_seen` with the current timestamp for the given section key.
 
-### Files calling `markSeen` (6 files)
+Export `markSectionSeen` alongside `counts`.
 
-Remove all `markSeen` calls from:
-- `src/pages/admin/RestaurantManager.tsx`
-- `src/pages/admin/SpaManager.tsx`
-- `src/pages/admin/EventsManager.tsx`
-- `src/pages/admin/HousekeepingManager.tsx`
-- `src/pages/admin/MaintenanceManager.tsx`
-- `src/pages/admin/SecurityManager.tsx`
-- `src/pages/admin/InformationTechnologyManager.tsx`
-- `src/pages/admin/RestaurantReservationsManager.tsx`
+### 3. Admin Manager Pages (7 files)
 
-These pages will no longer need to call `markSeen` because the badge clears automatically when the admin changes the item's status.
+When the admin navigates to the Requests tab (or the page itself for single-purpose pages like Spa/Events/Restaurants), call `markSectionSeen(sectionKey)`:
 
-## What This Means for the User
+- `RestaurantManager.tsx` / `RestaurantReservationsManager.tsx` -- call `markSectionSeen('restaurants')` when the Bookings tab is active
+- `SpaManager.tsx` -- call `markSectionSeen('spa')` when Bookings tab is active
+- `EventsManager.tsx` -- call `markSectionSeen('events')` when Reservations tab is active
+- `HousekeepingManager.tsx` -- call `markSectionSeen('housekeeping')` when Requests tab is active
+- `MaintenanceManager.tsx` -- call `markSectionSeen('maintenance')` when Requests tab is active
+- `SecurityManager.tsx` -- call `markSectionSeen('security')` when Requests tab is active
+- `InformationTechnologyManager.tsx` -- call `markSectionSeen('information-technology')` when Requests tab is active
 
-- Badge shows "7" on Spa? That means there are 7 pending spa bookings that haven't been confirmed or cancelled yet
-- Admin confirms 3 of them? Badge drops to "4" automatically
-- Admin logs out and back in? Badge still shows "4" -- no reset
-- New booking comes in? Badge goes to "5" via real-time subscription
+### 4. File: `src/components/admin/AdminSidebar.tsx`
+
+No changes needed -- it already reads `counts` from `useAdminNotifications`.
+
+## How It Works
+
+1. A guest creates a new spa booking at 2:00 PM
+2. The admin sidebar badge for Spa shows "1" (new since last visit)
+3. The admin clicks on Spa and views the Bookings tab
+4. `markSectionSeen('spa')` updates `admin_section_seen` with `last_seen_at = now()`
+5. Badge drops to 0
+6. Admin logs out and back in -- badge stays at 0 because the timestamp is in the database
+7. Another guest books at 3:00 PM -- badge shows "1" again
 
 ## Summary
 
-| File | Change |
-|------|--------|
-| `src/hooks/admin/useAdminNotifications.ts` | Remove localStorage timestamps, use pure status-based counts, add UPDATE listener |
-| `src/components/admin/AdminSidebar.tsx` | Remove markSeen usage |
-| 7 admin manager pages | Remove markSeen calls |
-| `src/components/admin/restaurants/RestaurantTable.tsx` | No change (restaurantCounts still works) |
+| Change | Description |
+|--------|-------------|
+| New table `admin_section_seen` | Stores per-user, per-section "last visited" timestamps |
+| `useAdminNotifications.ts` | Filter counts by `created_at > last_seen_at`, add `markSectionSeen` |
+| 7 admin manager pages | Call `markSectionSeen` when viewing the relevant tab |
 
