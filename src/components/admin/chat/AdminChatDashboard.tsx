@@ -28,7 +28,14 @@ export const AdminChatDashboard: React.FC = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
         fetchConversations();
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        const msg = payload.new as any;
+        if (msg.sender_type === 'guest' && msg.conversation_id) {
+          const convId = msg.conversation_id;
+          if (selectedConversation?.id !== convId) {
+            setUnreadCounts(prev => ({ ...prev, [convId]: (prev[convId] || 0) + 1 }));
+          }
+        }
         fetchUnreadCounts();
       })
       .subscribe();

@@ -41,7 +41,7 @@ export const ConversationListItem: React.FC<ConversationListItemProps> = ({
           <span className="font-semibold text-sm truncate">{conversation.guest_name}</span>
           <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
             {unreadCount > 0 && (
-              <span className="min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-1">
+              <span className="min-w-[18px] h-[18px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center px-1">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
