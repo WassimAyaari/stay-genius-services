@@ -1,80 +1,85 @@
 
-
-# Fix Admin Notifications: Database-Persisted "Last Seen" Timestamps
+# Fix Duplicate Toasts Across All Actions
 
 ## Problem
 
-The notification badges currently show **all pending items** (e.g., 10 pending restaurant reservations = badge shows "10"). The user wants badges to show only **new items since the admin last visited** that section. And this "last visited" timestamp must survive logout/login.
+When a guest or admin performs an action (create, update, cancel), multiple toast notifications appear because the same event is caught by several overlapping systems:
+
+1. **Form/mutation success handlers** -- toast on direct action success
+2. **`useReservationsRealtime.tsx`** -- real-time listener that also toasts on INSERT and UPDATE events
+3. **`useNotificationsRealtime.ts`** -- notification system real-time listener that also toasts
+4. **`useTableReservationListeners.ts` / `useSpaBookingListeners.ts` / `useServiceRequestListeners.ts`** -- notifications page listeners that also toast
+
+### Specific Duplicates Found
+
+**Creating a restaurant booking (3 toasts):**
+- `RestaurantBookingForm.tsx`: "Restaurant booking request sent successfully!" (KEEP -- this is the direct user action feedback)
+- `useReservationsRealtime.tsx`: "New reservation" (REMOVE -- duplicate from real-time INSERT)
+- `useNotificationsRealtime.ts`: triggers via realtime too (no toast on INSERT, but refetches)
+
+**Creating a spa booking (2 toasts):**
+- `SpaBookingForm.tsx`: "Spa booking request sent successfully" (KEEP)
+- `useSpaBookingMutations.tsx`: "Reservation creee avec succes" (REMOVE -- the form already shows success)
+
+**Admin confirms/updates a reservation (3+ toasts):**
+- `useAllTableReservations.ts` or `useSpaBookingMutations.tsx`: "Statut de la reservation mis a jour" (KEEP -- admin action feedback)
+- `useReservationsRealtime.tsx`: "Mise a jour de reservation" (REMOVE -- duplicate real-time toast on guest side when admin is also the one triggering)
+- `useNotificationsRealtime.ts`: "Reservation Update" (REMOVE toast, keep refetch)
+- `useTableReservationListeners.ts`: "Mise a jour de reservation" (REMOVE toast, keep refetch)
+- `useSpaBookingListeners.ts`: "Mise a jour de demande de reservation spa" (REMOVE toast, keep refetch)
+- `useServiceRequestListeners.ts`: "Mise a jour de demande" (REMOVE toast, keep refetch)
+
+**Admin confirms spa booking (2+ toasts):**
+- `SpaBookingsTab.tsx`: "Status updated successfully" (KEEP)
+- `useSpaBookingMutations.tsx`: "Statut de la reservation mis a jour" (REMOVE -- duplicate from mutation)
 
 ## Solution
 
-Create a database table `admin_section_seen` to store per-admin, per-section timestamps. When the admin navigates to a section's Requests tab, we update the timestamp. The badge count = pending items created **after** that timestamp.
+**Principle**: Only the direct action handler (the form submit or the button click) should show a toast. Real-time listeners should silently refetch data without showing toasts -- their job is to update the UI, not to notify the person who performed the action.
 
 ## Changes
 
-### 1. New Database Table: `admin_section_seen`
+### 1. `src/hooks/reservations/useReservationsRealtime.tsx`
+- Remove all `toast.info()` calls (lines 38-41 and 89-92 and 105-108)
+- Keep the `queryClient.invalidateQueries()` calls so the UI still updates
 
-```sql
-CREATE TABLE public.admin_section_seen (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  section_key text NOT NULL,
-  last_seen_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE(user_id, section_key)
-);
+### 2. `src/hooks/notifications/useNotificationsRealtime.ts`
+- Remove all `toast.info()` calls from `handleReservationStatusChange`, `handleServiceStatusChange`, `handleSpaBookingStatusChange`, `handleEventReservationStatusChange`
+- Keep `setHasNewNotifications(true)` and `refetch*()` calls -- the notification badge still updates
 
-ALTER TABLE public.admin_section_seen ENABLE ROW LEVEL SECURITY;
+### 3. `src/pages/notifications/hooks/listeners/useTableReservationListeners.ts`
+- Remove `toast.info()` in `handleReservationUpdate` (line 54)
+- Keep `refetchReservations()` call
 
-CREATE POLICY "Admins can manage their own seen timestamps"
-  ON public.admin_section_seen
-  FOR ALL
-  TO authenticated
-  USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
-```
+### 4. `src/pages/notifications/hooks/listeners/useSpaBookingListeners.ts`
+- Remove `notifySpaBookingStatusChange()` calls and the function itself
+- Keep `refetchSpaBookings()` calls
 
-### 2. File: `src/hooks/admin/useAdminNotifications.ts`
+### 5. `src/pages/notifications/hooks/listeners/useServiceRequestListeners.ts`
+- Remove `toast.info()` in `handleServiceRequestUpdate` (line 57)
+- Keep `refetchRequests()` call
 
-Update `fetchCounts` to:
-- Fetch the current user's `admin_section_seen` rows
-- For each section, count only pending items where `created_at > last_seen_at` for that section
-- If no `last_seen_at` exists for a section, count all pending items (first-time behavior)
+### 6. `src/hooks/spa/useSpaBookingMutations.tsx`
+- Remove `toast.success('Reservation creee avec succes')` from `createBookingMutation.onSuccess` (line 28) -- the `SpaBookingForm.tsx` already shows this
+- Remove `toast.success('Statut de la reservation mis a jour')` from `updateBookingStatusMutation.onSuccess` (line 53) -- the admin page (`SpaBookingsTab.tsx`) already shows this
 
-Add a new `markSectionSeen` function that upserts a row into `admin_section_seen` with the current timestamp for the given section key.
+### 7. `src/hooks/reservations/useTableReservationsCore.tsx`
+- Check for duplicate toasts in cancel/update mutations that may overlap with admin page toasts
 
-Export `markSectionSeen` alongside `counts`.
-
-### 3. Admin Manager Pages (7 files)
-
-When the admin navigates to the Requests tab (or the page itself for single-purpose pages like Spa/Events/Restaurants), call `markSectionSeen(sectionKey)`:
-
-- `RestaurantManager.tsx` / `RestaurantReservationsManager.tsx` -- call `markSectionSeen('restaurants')` when the Bookings tab is active
-- `SpaManager.tsx` -- call `markSectionSeen('spa')` when Bookings tab is active
-- `EventsManager.tsx` -- call `markSectionSeen('events')` when Reservations tab is active
-- `HousekeepingManager.tsx` -- call `markSectionSeen('housekeeping')` when Requests tab is active
-- `MaintenanceManager.tsx` -- call `markSectionSeen('maintenance')` when Requests tab is active
-- `SecurityManager.tsx` -- call `markSectionSeen('security')` when Requests tab is active
-- `InformationTechnologyManager.tsx` -- call `markSectionSeen('information-technology')` when Requests tab is active
-
-### 4. File: `src/components/admin/AdminSidebar.tsx`
-
-No changes needed -- it already reads `counts` from `useAdminNotifications`.
-
-## How It Works
-
-1. A guest creates a new spa booking at 2:00 PM
-2. The admin sidebar badge for Spa shows "1" (new since last visit)
-3. The admin clicks on Spa and views the Bookings tab
-4. `markSectionSeen('spa')` updates `admin_section_seen` with `last_seen_at = now()`
-5. Badge drops to 0
-6. Admin logs out and back in -- badge stays at 0 because the timestamp is in the database
-7. Another guest books at 3:00 PM -- badge shows "1" again
+### 8. `src/hooks/events/useEventReservationMutations.tsx`
+- Remove `toast.success('Reservation creee avec succes')` from `createMutation.onSuccess` (line 41) -- the event booking form already shows success
+- Keep the cancel and update status toasts as they are direct action feedback
 
 ## Summary
 
-| Change | Description |
-|--------|-------------|
-| New table `admin_section_seen` | Stores per-user, per-section "last visited" timestamps |
-| `useAdminNotifications.ts` | Filter counts by `created_at > last_seen_at`, add `markSectionSeen` |
-| 7 admin manager pages | Call `markSectionSeen` when viewing the relevant tab |
+| File | Action |
+|------|--------|
+| `useReservationsRealtime.tsx` | Remove all toast calls, keep data refetch |
+| `useNotificationsRealtime.ts` | Remove all toast calls from status change handlers, keep badge updates |
+| `useTableReservationListeners.ts` | Remove toast, keep refetch |
+| `useSpaBookingListeners.ts` | Remove toast function and calls, keep refetch |
+| `useServiceRequestListeners.ts` | Remove toast, keep refetch |
+| `useSpaBookingMutations.tsx` | Remove create and update status success toasts (handled by calling components) |
+| `useEventReservationMutations.tsx` | Remove create success toast (handled by calling form) |
 
+After these changes, each action will produce exactly **one** toast -- from the component that initiated the action.
