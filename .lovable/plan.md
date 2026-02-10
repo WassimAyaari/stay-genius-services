@@ -1,26 +1,23 @@
 
-# Hide Card Header When Viewing Reservations
+
+# Remove Duplicate Titles in Spa Bookings
 
 ## Problem
-When clicking on a restaurant's reservations, the `CardHeader` (with "Restaurants" title, description, Refresh and Add Restaurant buttons) remains visible above the inline reservations panel. This is redundant since the reservations panel has its own header with a back button and refresh.
+1. On the spa service list (Level 1), "Spa Bookings" title is redundant since the parent Card already shows "Bookings" / "Manage spa bookings and their status"
+2. When viewing a specific service's bookings (Level 2), the parent "Bookings" CardHeader stays visible, duplicating context already shown by the back button and service name header
 
-## Fix
+## Changes
 
-### File: `src/pages/admin/RestaurantManager.tsx`
-- Wrap the `<CardHeader>` block (lines 126-146) in a conditional so it only renders when `selectedRestaurantForReservations` is `null`
-- When a restaurant's reservations are being viewed, the Card will skip straight to `<CardContent>` with the inline reservations panel
+### File: `src/pages/admin/spa/SpaBookingsTab.tsx`
+- Remove the "Spa Bookings" heading (line 218) from the Level 1 view -- keep only the Refresh button aligned to the right
+- Expose the `selectedServiceId` state to the parent by accepting an optional callback prop (e.g., `onServiceSelected?: (id: string | null) => void`) and calling it whenever the selection changes
 
-```tsx
-{!selectedRestaurantForReservations && (
-  <CardHeader>
-    <CardTitle>Restaurants</CardTitle>
-    <CardDescription>...</CardDescription>
-    <div className="flex gap-2">
-      <Button>Refresh</Button>
-      <Button>Add Restaurant</Button>
-    </div>
-  </CardHeader>
-)}
-```
+### File: `src/pages/admin/SpaManager.tsx`
+- Track whether a spa service is selected via a state variable (e.g., `selectedSpaService`)
+- Pass a callback to `SpaBookingsTab` to update this state
+- Wrap the Bookings tab's `CardHeader` in a conditional: only render it when no service is selected (`!selectedSpaService`)
+- Same pattern already applied to the Restaurant Manager
 
-This is a single conditional wrapper -- no other changes needed.
+## Result
+- Level 1: No more duplicate "Spa Bookings" title; the Card's "Bookings" header is sufficient
+- Level 2: The "Bookings" CardHeader hides, leaving only the back button and service name as the header
