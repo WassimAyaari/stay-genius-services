@@ -25,7 +25,7 @@ export const useSpaBookingMutations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spa-bookings'] });
-      toast.success('Réservation créée avec succès');
+      // Toast handled by the calling form (SpaBookingForm.tsx)
     },
     onError: (error) => {
       console.error('Error in create booking mutation:', error);
@@ -50,7 +50,7 @@ export const useSpaBookingMutations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spa-bookings'] });
-      toast.success('Statut de la réservation mis à jour');
+      // Toast handled by the calling component (SpaBookingsTab.tsx)
     },
     onError: (error) => {
       console.error('Error in update booking status mutation:', error);

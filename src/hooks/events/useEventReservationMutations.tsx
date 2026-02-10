@@ -38,7 +38,7 @@ export const useEventReservationMutations = (userId?: string | null, userEmail?:
     mutationFn: (data: CreateEventReservationDTO) => createEventReservation(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eventReservations', userId, userEmail, eventId] });
-      toast.success('Réservation créée avec succès');
+      // Toast handled by the calling form
     },
     onError: (error: any) => {
       console.error('Error creating event reservation:', error);

@@ -43,18 +43,6 @@ export const setupReservationListenerByEmail = (userEmail: string, refetchReserv
  * Handle reservation update events
  */
 export const handleReservationUpdate = (payload: any, refetchReservations: () => void) => {
-  // Show notification for status changes
-  if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old.status) {
-    const status = payload.new.status;
-    const message = reservationTransformers.getStatusFrench(status);
-    
-    const date = new Date(payload.new.date).toLocaleDateString('fr-FR');
-    const time = payload.new.time;
-    
-    toast.info(`Mise à jour de réservation`, {
-      description: `Votre réservation de table pour le ${date} à ${time} ${message}.`
-    });
-  }
-  
+  // Silently refetch - toasts handled by direct action handlers
   refetchReservations();
 };
