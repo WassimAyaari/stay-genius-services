@@ -39,10 +39,6 @@ const RestaurantManager = () => {
 
   const { createEvent } = useEvents();
 
-  // Force refresh on first render
-  useEffect(() => {
-    handleRefresh();
-  }, []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
