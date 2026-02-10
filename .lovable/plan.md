@@ -1,46 +1,51 @@
 
 
-# Spa Bookings: Two-Level View (Services List then Bookings)
+# Per-Service Notification Badges in Spa Bookings
 
-## Overview
+## Problem
 
-Replace the current flat list of all bookings with a two-level navigation:
-1. **Level 1** -- List all spa services (e.g., "Hammam & Sauna Experience", "Wellness") as rows with a "View Bookings >" button and a pending count badge
-2. **Level 2** -- When clicking a service, show that service's bookings with filters and booking cards, plus a "Back" button to return to the list
+The current "1 pending" and "7 pending" red badges next to each spa service name show **all** pending bookings, not just new ones. The user wants these badges to show only **new reservations since the admin last visited** that specific service's bookings -- matching the notification behavior used elsewhere.
 
-This matches the pattern shown in the reference screenshot.
+## Solution
+
+Extend the `admin_section_seen` system to track per-service "last seen" timestamps. When the admin opens a specific service's bookings (Level 2), mark that service as seen. The badge next to each service name will show only bookings created after the admin's last visit to that service.
 
 ## Changes
 
-### File: `src/pages/admin/spa/SpaBookingsTab.tsx` (full rewrite)
+### 1. `src/hooks/admin/useAdminNotifications.ts`
 
-**Level 1 -- Services list view:**
-- Fetch spa services from `spa_services` table
-- For each service, show a card row with the service name and a "View Bookings >" link on the right
-- Optionally show a badge with the count of pending bookings per service
-- A "Refresh" button at the top right
+- Add per-spa-service counts: fetch `spa_bookings` with `service_id` grouping, filtered by `created_at > last_seen_at` for each `spa:SERVICE_ID` key
+- Export a new `spaServiceCounts` record (`Record<string, number>`) alongside existing `counts`
+- Update `markSectionSeen` to also support keys like `spa:SERVICE_ID`
 
-**Level 2 -- Selected service bookings view:**
-- Add `selectedServiceId` state (null = show list, string = show bookings)
-- When a service is selected, filter bookings by `service_id === selectedServiceId`
-- Show a back button/arrow at the top to return to the services list
-- Show the service name as the section title
-- Keep the existing search, status filter, and date filter
-- Keep the existing booking cards with status management
+### 2. `src/pages/admin/spa/SpaBookingsTab.tsx`
 
-**State flow:**
-```text
-selectedServiceId = null  -->  Show services list
-selectedServiceId = "abc" -->  Show bookings for that service
-```
+- Import `useAdminNotifications` and use `spaServiceCounts` for badges instead of the current `getPendingCount` (which counts all pending)
+- Replace `Badge variant="destructive"` showing "X pending" with a notification-style badge showing only new-since-last-seen count
+- When the admin enters Level 2 (selects a service), call `markSectionSeen('spa:SERVICE_ID')` to clear that service's badge
+- Keep `markSectionSeen('spa')` call in `SpaManager.tsx` to clear the sidebar badge when the Bookings tab is active
 
-**No other files need to change.** The existing `useSpaBookings` hook already fetches all bookings with service data joined, so we just filter client-side by `service_id`.
+### 3. `src/pages/admin/SpaManager.tsx`
+
+- No changes needed -- it already calls `markSectionSeen('spa')` for the sidebar badge
+
+## How It Works
+
+1. A guest books "Hammam & Sauna Experience" -- badge appears: "1" next to Hammam
+2. The admin clicks on Hammam to view its bookings
+3. `markSectionSeen('spa:hammam_id')` runs, badge drops to 0
+4. Another guest books "Wellness" -- badge appears: "1" next to Wellness, Hammam stays at 0
+5. The sidebar "Spa" badge also updates based on the aggregate of all per-service new counts
 
 ## Technical Details
 
-- Fetch services via `supabase.from('spa_services').select('id, name, facility_id').order('name')`
-- Use a simple `useState<string | null>(null)` to track selected service
-- When `selectedServiceId` is null, render the services list
-- When set, render existing booking cards filtered by `service_id`
-- Add `ChevronRight` and `ArrowLeft` icons from lucide-react for navigation
-- Pending count per service: count from `bookings.filter(b => b.service_id === svc.id && b.status === 'pending')`
+- Section keys for per-service tracking use format `spa:SERVICE_UUID` in `admin_section_seen`
+- `fetchCounts` will query `spa_bookings` grouped by `service_id`, comparing each booking's `created_at` against `last_seen_at` for its specific `spa:service_id` key
+- The existing `spa` section key continues to work for the sidebar badge (counts all new spa bookings regardless of service)
+- The total count text ("X bookings") remains unchanged -- it still shows total bookings per service
+
+| File | Change |
+|------|--------|
+| `useAdminNotifications.ts` | Add `spaServiceCounts` with per-service new-booking counts, support `spa:ID` keys |
+| `SpaBookingsTab.tsx` | Use `spaServiceCounts` for badges, call `markSectionSeen('spa:ID')` on entering Level 2 |
+
