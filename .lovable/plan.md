@@ -1,23 +1,20 @@
 
 
-# Remove Duplicate Titles in Spa Bookings
+# Move Refresh Button to CardHeader
 
 ## Problem
-1. On the spa service list (Level 1), "Spa Bookings" title is redundant since the parent Card already shows "Bookings" / "Manage spa bookings and their status"
-2. When viewing a specific service's bookings (Level 2), the parent "Bookings" CardHeader stays visible, duplicating context already shown by the back button and service name header
+The "Refresh" button sits inside `SpaBookingsTab` on its own row, creating a large visual gap between the "Bookings" title and the spa service list.
 
-## Changes
-
-### File: `src/pages/admin/spa/SpaBookingsTab.tsx`
-- Remove the "Spa Bookings" heading (line 218) from the Level 1 view -- keep only the Refresh button aligned to the right
-- Expose the `selectedServiceId` state to the parent by accepting an optional callback prop (e.g., `onServiceSelected?: (id: string | null) => void`) and calling it whenever the selection changes
+## Fix
 
 ### File: `src/pages/admin/SpaManager.tsx`
-- Track whether a spa service is selected via a state variable (e.g., `selectedSpaService`)
-- Pass a callback to `SpaBookingsTab` to update this state
-- Wrap the Bookings tab's `CardHeader` in a conditional: only render it when no service is selected (`!selectedSpaService`)
-- Same pattern already applied to the Restaurant Manager
+- Modify the Bookings `CardHeader` to use a flex row layout with the title/description on the left and a "Refresh" button on the right
+- The Refresh button calls `refreshSpaData()` (already defined in this component)
+
+### File: `src/pages/admin/spa/SpaBookingsTab.tsx`
+- Remove the "Refresh" button and its wrapping `<div className="flex justify-end mb-6">` block from the Level 1 (service list) view (around lines 219-230)
+- The service list cards will render directly without the extra gap
 
 ## Result
-- Level 1: No more duplicate "Spa Bookings" title; the Card's "Bookings" header is sufficient
-- Level 2: The "Bookings" CardHeader hides, leaving only the back button and service name as the header
+The "Bookings" title, description, and Refresh button all appear on one row in the CardHeader. The spa service list follows immediately below with no wasted space.
+
