@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, Calendar, Clock, User, Phone, Mail, MapPin, FileText, Search } from 'lucide-react';
+import { RefreshCw, Calendar, Clock, User, Phone, Mail, MapPin, FileText, Search, ChevronRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSpaBookings } from '@/hooks/useSpaBookings';
 import { format } from 'date-fns';
@@ -14,49 +14,60 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { SpaBooking } from '@/features/spa/types';
 
+interface SpaService {
+  id: string;
+  name: string;
+  facility_id: string | null;
+}
+
 export default function SpaBookingsTab() {
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [services, setServices] = useState<SpaService[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('');
-  const [isLoadingServices, setIsLoadingServices] = useState(false);
-  const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
 
   const { bookings, isLoading, updateBookingStatus, refetch } = useSpaBookings();
 
-  React.useEffect(() => {
-    const loadServiceNames = async () => {
+  useEffect(() => {
+    const loadServices = async () => {
       setIsLoadingServices(true);
       try {
         const { data, error } = await supabase
-          .from('spa_bookings')
-          .select(`
-            id,
-            service_id,
-            spa_services:service_id (
-              name
-            )
-          `);
-
+          .from('spa_services')
+          .select('id, name, facility_id')
+          .order('name');
         if (error) throw error;
-
-        const servicesMap: Record<string, string> = {};
-        data.forEach((booking: any) => {
-          if (booking.service_id && booking.spa_services?.name) {
-            servicesMap[booking.service_id] = booking.spa_services.name;
-          }
-        });
-
-        setServiceNames(servicesMap);
+        setServices(data || []);
       } catch (error) {
-        console.error('Error loading service names:', error);
-        toast.error('Error loading service names');
+        console.error('Error loading spa services:', error);
+        toast.error('Error loading spa services');
       } finally {
         setIsLoadingServices(false);
       }
     };
+    loadServices();
+  }, []);
 
-    loadServiceNames();
-  }, [bookings]);
+  const getPendingCount = (serviceId: string) =>
+    bookings.filter((b: SpaBooking) => b.service_id === serviceId && b.status === 'pending').length;
+
+  const getTotalCount = (serviceId: string) =>
+    bookings.filter((b: SpaBooking) => b.service_id === serviceId).length;
+
+  const selectedService = services.find(s => s.id === selectedServiceId);
+
+  const filteredBookings = bookings.filter((booking: SpaBooking & { spa_services?: { name: string } }) => {
+    if (booking.service_id !== selectedServiceId) return false;
+    const matchesSearch =
+      (booking.guest_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       booking.guest_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       booking.room_number?.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
+    const matchesDate = !dateFilter || booking.date === dateFilter;
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
@@ -64,7 +75,6 @@ export default function SpaBookingsTab() {
       toast.success('Status updated successfully');
     } catch (error) {
       toast.error('Error updating status');
-      console.error('Error updating status:', error);
     }
   };
 
@@ -74,23 +84,8 @@ export default function SpaBookingsTab() {
       toast.success('Booking cancelled successfully');
     } catch (error) {
       toast.error('Error cancelling booking');
-      console.error('Error canceling booking:', error);
     }
   };
-
-  const filteredBookings = bookings.filter((booking: SpaBooking & { spa_services?: { name: string } }) => {
-    const matchesSearch = 
-      (booking.guest_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-       booking.guest_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       booking.room_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       (serviceNames[booking.service_id] || booking.spa_services?.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
-    
-    const matchesDate = !dateFilter || booking.date === dateFilter;
-    
-    return matchesSearch && matchesStatus && matchesDate;
-  });
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -115,14 +110,12 @@ export default function SpaBookingsTab() {
   const renderBookingCard = (booking: SpaBooking & { spa_services?: { name: string } }) => {
     const bookingDate = new Date(booking.date);
     const formattedDate = format(bookingDate, 'EEEE, MMMM d, yyyy', { locale: enUS });
-    const serviceName = serviceNames[booking.service_id] || booking.spa_services?.name || 'Unknown service';
-    
+
     return (
       <Card key={booking.id} className="mb-4">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div>
             <CardTitle className="text-lg">Booking #{booking.id.substring(0, 8)}</CardTitle>
-            <div className="text-sm text-muted-foreground mt-1">{serviceName}</div>
           </div>
           <Badge className={getStatusBadgeColor(booking.status)}>
             {getStatusText(booking.status)}
@@ -163,7 +156,7 @@ export default function SpaBookingsTab() {
               )}
             </div>
           </div>
-          
+
           {booking.special_requests && (
             <div className="mt-4">
               <div className="flex items-center mb-2">
@@ -173,7 +166,7 @@ export default function SpaBookingsTab() {
               <p className="text-sm text-muted-foreground">{booking.special_requests}</p>
             </div>
           )}
-          
+
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {booking.status !== 'cancelled' && booking.status !== 'completed' && (
               <>
@@ -194,10 +187,10 @@ export default function SpaBookingsTab() {
                 </Select>
               </>
             )}
-            
+
             {booking.status === 'pending' && (
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 size="sm"
                 onClick={() => handleCancelBooking(booking.id)}
                 className="ml-auto"
@@ -211,10 +204,84 @@ export default function SpaBookingsTab() {
     );
   };
 
+  // Level 1: Services list
+  if (!selectedServiceId) {
+    return (
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Spa Bookings</h2>
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            className="flex items-center"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+
+        {isLoading || isLoadingServices ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Loading services...</p>
+          </div>
+        ) : services.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No spa services found</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {services.map((service) => {
+              const pendingCount = getPendingCount(service.id);
+              const totalCount = getTotalCount(service.id);
+              return (
+                <Card
+                  key={service.id}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => setSelectedServiceId(service.id)}
+                >
+                  <CardContent className="flex items-center justify-between py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">{service.name}</span>
+                      {pendingCount > 0 && (
+                        <Badge variant="destructive" className="text-xs">
+                          {pendingCount} pending
+                        </Badge>
+                      )}
+                      <span className="text-sm text-muted-foreground">
+                        {totalCount} booking{totalCount !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Level 2: Bookings for selected service
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Spa Bookings</h2>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedServiceId(null);
+              setSearchTerm('');
+              setStatusFilter('all');
+              setDateFilter('');
+            }}
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+          <h2 className="text-2xl font-bold">{selectedService?.name}</h2>
+        </div>
         <Button
           variant="outline"
           onClick={() => refetch()}
@@ -224,7 +291,7 @@ export default function SpaBookingsTab() {
           Refresh
         </Button>
       </div>
-      
+
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label htmlFor="search" className="text-sm">Search</Label>
@@ -239,13 +306,10 @@ export default function SpaBookingsTab() {
             />
           </div>
         </div>
-        
+
         <div>
           <Label htmlFor="status-filter" className="text-sm">Status</Label>
-          <Select
-            value={statusFilter}
-            onValueChange={setStatusFilter}
-          >
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger id="status-filter">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
@@ -258,7 +322,7 @@ export default function SpaBookingsTab() {
             </SelectContent>
           </Select>
         </div>
-        
+
         <div>
           <Label htmlFor="date-filter" className="text-sm">Date</Label>
           <Input
@@ -269,8 +333,8 @@ export default function SpaBookingsTab() {
           />
         </div>
       </div>
-      
-      {isLoading || isLoadingServices ? (
+
+      {isLoading ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">Loading bookings...</p>
         </div>
