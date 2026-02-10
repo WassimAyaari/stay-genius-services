@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { SpaBooking } from '@/features/spa/types';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 interface SpaService {
   id: string;
@@ -29,6 +30,7 @@ export default function SpaBookingsTab() {
   const [dateFilter, setDateFilter] = useState<string>('');
 
   const { bookings, isLoading, updateBookingStatus, refetch } = useSpaBookings();
+  const { spaServiceCounts, markSectionSeen } = useAdminNotifications();
 
   useEffect(() => {
     const loadServices = async () => {
@@ -50,11 +52,15 @@ export default function SpaBookingsTab() {
     loadServices();
   }, []);
 
-  const getPendingCount = (serviceId: string) =>
-    bookings.filter((b: SpaBooking) => b.service_id === serviceId && b.status === 'pending').length;
+  const getNewCount = (serviceId: string) => spaServiceCounts[serviceId] || 0;
 
   const getTotalCount = (serviceId: string) =>
     bookings.filter((b: SpaBooking) => b.service_id === serviceId).length;
+
+  const handleSelectService = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    markSectionSeen(`spa:${serviceId}`);
+  };
 
   const selectedService = services.find(s => s.id === selectedServiceId);
 
@@ -231,20 +237,20 @@ export default function SpaBookingsTab() {
         ) : (
           <div className="space-y-2">
             {services.map((service) => {
-              const pendingCount = getPendingCount(service.id);
+              const newCount = getNewCount(service.id);
               const totalCount = getTotalCount(service.id);
               return (
                 <Card
                   key={service.id}
                   className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => setSelectedServiceId(service.id)}
+                  onClick={() => handleSelectService(service.id)}
                 >
                   <CardContent className="flex items-center justify-between py-4 px-6">
                     <div className="flex items-center gap-3">
                       <span className="font-medium">{service.name}</span>
-                      {pendingCount > 0 && (
+                      {newCount > 0 && (
                         <Badge variant="destructive" className="text-xs">
-                          {pendingCount} pending
+                          {newCount}
                         </Badge>
                       )}
                       <span className="text-sm text-muted-foreground">
