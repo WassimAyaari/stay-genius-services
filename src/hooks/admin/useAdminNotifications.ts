@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -101,7 +100,6 @@ async function fetchCounts(): Promise<Record<SectionKey, number>> {
 }
 
 export function useAdminNotifications() {
-  const location = useLocation();
   const queryClient = useQueryClient();
   const [localCounts, setLocalCounts] = useState<Record<SectionKey, number>>(() => {
     const init: Record<string, number> = {};
@@ -131,17 +129,6 @@ export function useAdminNotifications() {
     },
     [queryClient]
   );
-
-  // Auto-mark seen on route change
-  useEffect(() => {
-    const path = location.pathname;
-    for (const [route, section] of Object.entries(ROUTE_TO_SECTION)) {
-      if (path.startsWith(route)) {
-        markSeen(section);
-        break;
-      }
-    }
-  }, [location.pathname, markSeen]);
 
   // Realtime subscriptions
   useEffect(() => {
