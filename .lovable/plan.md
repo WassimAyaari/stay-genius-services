@@ -1,33 +1,54 @@
 
+# Chat Management: Side-by-Side Layout
 
-# Replace Technical Booking IDs with Guest Names
+## Overview
 
-## Problem
+Redesign the Chat Management page to show conversations on the left and messages on the right side simultaneously, matching the reference screenshot layout. Also remove the red "Needs Attention" badges next to each conversation name.
 
-The booking cards show "Booking #9f07620e" which is a truncated database UUID -- meaningless to the admin.
+## Changes
 
-## Solution
+### File: `src/components/admin/chat/AdminChatDashboard.tsx`
 
-Replace the card title with the guest's name, which is immediately recognizable and useful.
+**Remove badges:**
+- Remove the `getStatusBadge` function and the `<Badge>` next to each conversation name in the list
 
-**Before:** `Booking #9f07620e`
-**After:** `emna jemal`
+**Side-by-side layout:**
+- Replace the current full-page swap (list OR detail) with a two-column flex layout
+- Left panel (~35% width, with border): shows the stats cards, tabs, and scrollable conversation list
+- Right panel (~65% width): shows either a "Select a conversation" placeholder or the `UnifiedChatContainer` for the selected conversation
+- When a conversation is clicked, it highlights in the left list and loads messages on the right -- no page navigation needed
+- Remove the "Back to Dashboard" button since both panels are always visible
 
-## Change
+**Conversation list items:**
+- Show guest name (bold), room number, last message preview, and relative time
+- Add an avatar with initials (like the reference)
+- Highlight the active/selected conversation row with a left border accent
 
-### File: `src/pages/admin/spa/SpaBookingsTab.tsx`
+### Layout Structure
 
-In the `renderBookingCard` function, change the CardTitle from:
-
-```tsx
-<CardTitle className="text-lg">Booking #{booking.id.substring(0, 8)}</CardTitle>
+```text
++------------------------------------------+
+|  Chat Management             [Refresh]   |
++------------------------------------------+
+| Stats Cards (3 across full width)        |
++------------------+-----------------------+
+| Conversations    | Guest Name            |
+| [Tabs]           | Room XXX              |
+|                  +-----------------------+
+| > Guest A  12d   |                       |
+|   Guest B  15d   |   [Message bubbles]   |
+|   Guest C  27d   |                       |
+|                  |                       |
+|                  +-----------------------+
+|                  | [Type your reply...]  |
++------------------+-----------------------+
 ```
 
-To:
+## Technical Details
 
-```tsx
-<CardTitle className="text-lg">{booking.guest_name}</CardTitle>
-```
-
-That is the only change needed. The guest name is already available on every booking object.
-
+- The left panel uses `ScrollArea` for the conversation list
+- The right panel renders `UnifiedChatContainer` when `selectedConversation` is set, or a placeholder with a chat icon and "Select a conversation" text when nothing is selected
+- Conversation rows use `cn()` for conditional active styling: `bg-muted` and `border-l-[3px] border-primary`
+- Stats cards remain at the top spanning full width
+- Tabs (Needs Attention / AI Handled / All Chats) stay in the left panel header
+- The conversation list items show: avatar initials, name, room number, last update time -- no status badge
