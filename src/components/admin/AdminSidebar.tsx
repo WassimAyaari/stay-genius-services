@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/hooks/useAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { NavLink } from '@/components/NavLink';
 import { useTranslation } from 'react-i18next';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +14,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
@@ -63,6 +65,7 @@ interface NavItem {
   url: string;
   icon: React.ElementType;
   disabled?: boolean;
+  notificationKey?: string;
 }
 
 interface NavSection {
@@ -91,31 +94,31 @@ const navigationSections: NavSection[] = [
   {
     label: 'Services',
     items: [
-      { title: 'Housekeeping', url: '/admin/housekeeping', icon: Trash2 },
-      { title: 'Maintenance', url: '/admin/maintenance', icon: Wrench },
-      { title: 'Security', url: '/admin/security', icon: Shield },
-      { title: 'IT Support', url: '/admin/information-technology', icon: Wifi },
+      { title: 'Housekeeping', url: '/admin/housekeeping', icon: Trash2, notificationKey: 'housekeeping' },
+      { title: 'Maintenance', url: '/admin/maintenance', icon: Wrench, notificationKey: 'maintenance' },
+      { title: 'Security', url: '/admin/security', icon: Shield, notificationKey: 'security' },
+      { title: 'IT Support', url: '/admin/information-technology', icon: Wifi, notificationKey: 'information-technology' },
     ],
     defaultOpen: false,
   },
   {
     label: 'F&B',
     items: [
-      { title: 'Restaurants', url: '/admin/restaurants', icon: Utensils },
+      { title: 'Restaurants', url: '/admin/restaurants', icon: Utensils, notificationKey: 'restaurants' },
     ],
     defaultOpen: false,
   },
   {
     label: 'Wellness',
     items: [
-      { title: 'Spa', url: '/admin/spa', icon: Sparkles },
+      { title: 'Spa', url: '/admin/spa', icon: Sparkles, notificationKey: 'spa' },
     ],
     defaultOpen: false,
   },
   {
     label: 'Entertainment',
     items: [
-      { title: 'Events', url: '/admin/events', icon: PartyPopper },
+      { title: 'Events', url: '/admin/events', icon: PartyPopper, notificationKey: 'events' },
       { title: 'Shops', url: '/admin/shops', icon: Store },
     ],
     defaultOpen: false,
@@ -142,6 +145,24 @@ const languages = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
 ];
 
+const NotificationBadge: React.FC<{ count: number }> = ({ count }) => {
+  if (count <= 0) return null;
+  return (
+    <SidebarMenuBadge className="bg-destructive text-destructive-foreground text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center font-medium">
+      {count > 99 ? '99+' : count}
+    </SidebarMenuBadge>
+  );
+};
+
+const SectionBadge: React.FC<{ count: number }> = ({ count }) => {
+  if (count <= 0) return null;
+  return (
+    <span className="ml-auto mr-1 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-medium px-1">
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+};
+
 export const AdminSidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -149,7 +170,8 @@ export const AdminSidebar: React.FC = () => {
   const { state } = useSidebar();
   const { i18n } = useTranslation();
   const isCollapsed = state === 'collapsed';
-  
+  const { counts } = useAdminNotifications();
+
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     navigationSections.forEach((section) => {
@@ -187,6 +209,15 @@ export const AdminSidebar: React.FC = () => {
     }));
   };
 
+  const getSectionNotificationCount = (section: NavSection): number => {
+    return section.items.reduce((sum, item) => {
+      if (item.notificationKey && counts[item.notificationKey as keyof typeof counts]) {
+        return sum + counts[item.notificationKey as keyof typeof counts];
+      }
+      return sum;
+    }, 0);
+  };
+
   const userInitials = userData
     ? `${userData.first_name?.[0] || ''}${userData.last_name?.[0] || ''}`.toUpperCase()
     : user?.email?.[0]?.toUpperCase() || 'A';
@@ -220,12 +251,12 @@ export const AdminSidebar: React.FC = () => {
           const sectionActive = isSectionActive(section);
           const isOpen = openSections[section.label] || sectionActive;
           const isSingleItem = section.items.length === 1;
+          const sectionNotifCount = getSectionNotificationCount(section);
 
           return (
             <React.Fragment key={section.label}>
               {index > 0 && <SidebarSeparator className="mx-0 my-1" />}
               {isSingleItem ? (
-                /* Single-item sections: no collapsible, just render the item */
                 <SidebarGroup className="py-1 px-0">
                   {!isCollapsed && (
                     <SidebarGroupLabel className="h-7 px-3 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
@@ -234,26 +265,29 @@ export const AdminSidebar: React.FC = () => {
                   )}
                   <SidebarGroupContent>
                     <SidebarMenu>
-                      {section.items.map((item) => (
-                        <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={isActive(item.url)}
-                            tooltip={item.title}
-                            className="h-9 rounded-lg transition-all duration-150"
-                          >
-                            <NavLink to={item.url} end={item.url === '/admin'}>
-                              <item.icon className={`h-4 w-4 ${isActive(item.url) ? 'text-primary' : 'text-muted-foreground'}`} />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
+                      {section.items.map((item) => {
+                        const itemCount = item.notificationKey ? (counts[item.notificationKey as keyof typeof counts] || 0) : 0;
+                        return (
+                          <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive(item.url)}
+                              tooltip={item.title}
+                              className="h-9 rounded-lg transition-all duration-150"
+                            >
+                              <NavLink to={item.url} end={item.url === '/admin'}>
+                                <item.icon className={`h-4 w-4 ${isActive(item.url) ? 'text-primary' : 'text-muted-foreground'}`} />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuButton>
+                            <NotificationBadge count={itemCount} />
+                          </SidebarMenuItem>
+                        );
+                      })}
                     </SidebarMenu>
                   </SidebarGroupContent>
                 </SidebarGroup>
               ) : (
-                /* Multi-item sections: collapsible */
                 <Collapsible
                   open={isOpen}
                   onOpenChange={() => toggleSection(section.label)}
@@ -262,41 +296,50 @@ export const AdminSidebar: React.FC = () => {
                     <CollapsibleTrigger asChild>
                       <SidebarGroupLabel className="flex w-full cursor-pointer items-center justify-between h-7 px-3 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase hover:text-muted-foreground transition-colors">
                         <span>{section.label}</span>
-                        {!isCollapsed && (
-                          <ChevronRight
-                            className={`h-3 w-3 transition-transform duration-200 ${
-                              isOpen ? 'rotate-90' : 'rotate-0'
-                            }`}
-                          />
-                        )}
+                        <div className="flex items-center gap-1">
+                          {!isCollapsed && sectionNotifCount > 0 && !isOpen && (
+                            <SectionBadge count={sectionNotifCount} />
+                          )}
+                          {!isCollapsed && (
+                            <ChevronRight
+                              className={`h-3 w-3 transition-transform duration-200 ${
+                                isOpen ? 'rotate-90' : 'rotate-0'
+                              }`}
+                            />
+                          )}
+                        </div>
                       </SidebarGroupLabel>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarGroupContent>
                         <SidebarMenu>
-                          {section.items.map((item) => (
-                            <SidebarMenuItem key={item.title}>
-                              <SidebarMenuButton
-                                asChild
-                                isActive={isActive(item.url)}
-                                tooltip={item.title}
-                                disabled={item.disabled}
-                                className="h-9 rounded-lg transition-all duration-150"
-                              >
-                                {item.disabled ? (
-                                  <span className="flex items-center gap-2 opacity-40 cursor-not-allowed px-2 py-1.5">
-                                    <item.icon className="h-4 w-4" />
-                                    <span>{item.title}</span>
-                                  </span>
-                                ) : (
-                                  <NavLink to={item.url} end={item.url === '/admin'}>
-                                    <item.icon className={`h-4 w-4 ${isActive(item.url) ? 'text-primary' : 'text-muted-foreground'}`} />
-                                    <span>{item.title}</span>
-                                  </NavLink>
-                                )}
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          ))}
+                          {section.items.map((item) => {
+                            const itemCount = item.notificationKey ? (counts[item.notificationKey as keyof typeof counts] || 0) : 0;
+                            return (
+                              <SidebarMenuItem key={item.title}>
+                                <SidebarMenuButton
+                                  asChild
+                                  isActive={isActive(item.url)}
+                                  tooltip={item.title}
+                                  disabled={item.disabled}
+                                  className="h-9 rounded-lg transition-all duration-150"
+                                >
+                                  {item.disabled ? (
+                                    <span className="flex items-center gap-2 opacity-40 cursor-not-allowed px-2 py-1.5">
+                                      <item.icon className="h-4 w-4" />
+                                      <span>{item.title}</span>
+                                    </span>
+                                  ) : (
+                                    <NavLink to={item.url} end={item.url === '/admin'}>
+                                      <item.icon className={`h-4 w-4 ${isActive(item.url) ? 'text-primary' : 'text-muted-foreground'}`} />
+                                      <span>{item.title}</span>
+                                    </NavLink>
+                                  )}
+                                </SidebarMenuButton>
+                                <NotificationBadge count={itemCount} />
+                              </SidebarMenuItem>
+                            );
+                          })}
                         </SidebarMenu>
                       </SidebarGroupContent>
                     </CollapsibleContent>
