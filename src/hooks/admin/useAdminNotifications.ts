@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -26,18 +26,41 @@ async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; rest
   const counts: Record<string, number> = {};
   SECTION_KEYS.forEach((k) => (counts[k] = 0));
 
-  // Restaurant reservations - count all pending
-  const { count: restaurantCount } = await supabase
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { counts: counts as Record<SectionKey, number>, restaurantCounts: {} };
+
+  // Fetch last seen timestamps
+  const { data: seenRows } = await supabase
+    .from('admin_section_seen')
+    .select('section_key, last_seen_at')
+    .eq('user_id', user.id);
+
+  const lastSeenMap: Record<string, string> = {};
+  if (seenRows) {
+    for (const row of seenRows) {
+      lastSeenMap[row.section_key] = row.last_seen_at;
+    }
+  }
+
+  // Helper: get last_seen or epoch for first-time
+  const getLastSeen = (key: string) => lastSeenMap[key] || '1970-01-01T00:00:00Z';
+
+  // Restaurant reservations
+  let restaurantQuery = supabase
     .from('table_reservations')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .gt('created_at', getLastSeen('restaurants'));
+  const { count: restaurantCount } = await restaurantQuery;
   counts.restaurants = restaurantCount || 0;
 
-  // Per-restaurant pending counts
+  // Per-restaurant pending counts (only new ones)
   const { data: restaurantReservations } = await supabase
     .from('table_reservations')
     .select('restaurant_id')
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .gt('created_at', getLastSeen('restaurants'));
 
   const restaurantCounts: Record<string, number> = {};
   if (restaurantReservations) {
@@ -48,31 +71,36 @@ async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; rest
     }
   }
 
-  // Spa bookings - count all pending
+  // Spa bookings
   const { count: spaCount } = await supabase
     .from('spa_bookings')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .gt('created_at', getLastSeen('spa'));
   counts.spa = spaCount || 0;
 
-  // Event reservations - count all pending
+  // Event reservations
   const { count: eventsCount } = await supabase
     .from('event_reservations')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .gt('created_at', getLastSeen('events'));
   counts.events = eventsCount || 0;
 
-  // Service requests by category - count all pending
+  // Service requests by category
   const { data: serviceRequests } = await supabase
     .from('service_requests')
-    .select('category_id')
+    .select('category_id, created_at')
     .eq('status', 'pending');
 
   if (serviceRequests) {
     for (const req of serviceRequests) {
       const section = CATEGORY_MAP[req.category_id || ''];
       if (section) {
-        counts[section] = (counts[section] || 0) + 1;
+        const lastSeen = getLastSeen(section);
+        if (req.created_at && req.created_at > lastSeen) {
+          counts[section] = (counts[section] || 0) + 1;
+        }
       }
     }
   }
@@ -102,7 +130,7 @@ export function useAdminNotifications() {
     }
   }, [data]);
 
-  // Realtime subscriptions - listen for INSERT and UPDATE
+  // Realtime subscriptions
   useEffect(() => {
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin-notifications'] });
 
@@ -123,7 +151,22 @@ export function useAdminNotifications() {
     };
   }, [queryClient]);
 
-  return { counts: localCounts, restaurantCounts: localRestaurantCounts };
+  const markSectionSeen = useCallback(async (sectionKey: SectionKey) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from('admin_section_seen')
+      .upsert(
+        { user_id: user.id, section_key: sectionKey, last_seen_at: new Date().toISOString() },
+        { onConflict: 'user_id,section_key' }
+      );
+
+    // Immediately refresh counts
+    queryClient.invalidateQueries({ queryKey: ['admin-notifications'] });
+  }, [queryClient]);
+
+  return { counts: localCounts, restaurantCounts: localRestaurantCounts, markSectionSeen };
 }
 
 export type { SectionKey };

@@ -6,10 +6,18 @@ import SpaFacilitiesTab from './spa/SpaFacilitiesTab';
 import SpaServicesTab from './spa/SpaServicesTab';
 import SpaBookingsTab from './spa/SpaBookingsTab';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 export default function SpaManager() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('bookings');
+  const { markSectionSeen } = useAdminNotifications();
+
+  React.useEffect(() => {
+    if (activeTab === 'bookings') {
+      markSectionSeen('spa');
+    }
+  }, [activeTab, markSectionSeen]);
 
   const refreshSpaData = () => {
     queryClient.invalidateQueries({ queryKey: ['spa-facilities'] });
