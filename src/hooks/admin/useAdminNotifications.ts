@@ -47,7 +47,7 @@ function setLastSeen(section: string) {
   localStorage.setItem(`admin_lastSeen_${section}`, new Date().toISOString());
 }
 
-async function fetchCounts(): Promise<Record<SectionKey, number>> {
+async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; restaurantCounts: Record<string, number> }> {
   const counts: Record<string, number> = {};
   SECTION_KEYS.forEach((k) => (counts[k] = 0));
 
@@ -59,6 +59,22 @@ async function fetchCounts(): Promise<Record<SectionKey, number>> {
     .eq('status', 'pending')
     .gt('created_at', restaurantLastSeen);
   counts.restaurants = restaurantCount || 0;
+
+  // Per-restaurant pending counts
+  const { data: restaurantReservations } = await supabase
+    .from('table_reservations')
+    .select('restaurant_id')
+    .eq('status', 'pending')
+    .gt('created_at', restaurantLastSeen);
+
+  const restaurantCounts: Record<string, number> = {};
+  if (restaurantReservations) {
+    for (const r of restaurantReservations) {
+      if (r.restaurant_id) {
+        restaurantCounts[r.restaurant_id] = (restaurantCounts[r.restaurant_id] || 0) + 1;
+      }
+    }
+  }
 
   // Spa bookings
   const spaLastSeen = getLastSeen('spa');
@@ -96,7 +112,7 @@ async function fetchCounts(): Promise<Record<SectionKey, number>> {
     }
   }
 
-  return counts as Record<SectionKey, number>;
+  return { counts: counts as Record<SectionKey, number>, restaurantCounts };
 }
 
 export function useAdminNotifications() {
@@ -106,18 +122,20 @@ export function useAdminNotifications() {
     SECTION_KEYS.forEach((k) => (init[k] = 0));
     return init as Record<SectionKey, number>;
   });
+  const [localRestaurantCounts, setLocalRestaurantCounts] = useState<Record<string, number>>({});
 
-  const { data: counts } = useQuery({
+  const { data } = useQuery({
     queryKey: ['admin-notifications'],
     queryFn: fetchCounts,
     refetchInterval: 30000,
   });
 
   useEffect(() => {
-    if (counts) {
-      setLocalCounts(counts);
+    if (data) {
+      setLocalCounts(data.counts);
+      setLocalRestaurantCounts(data.restaurantCounts);
     }
-  }, [counts]);
+  }, [data]);
 
   // Mark section as seen
   const markSeen = useCallback(
@@ -161,7 +179,7 @@ export function useAdminNotifications() {
     };
   }, [queryClient]);
 
-  return { counts: localCounts, markSeen };
+  return { counts: localCounts, restaurantCounts: localRestaurantCounts, markSeen };
 }
 
 export type { SectionKey };
