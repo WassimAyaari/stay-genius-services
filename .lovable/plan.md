@@ -1,62 +1,43 @@
 
 
-# Plan: Show All Restaurant Reservations in the Bookings Tab
+# Replace Reservation Cards with a Data Table
 
-## Problem
+## Overview
 
-The Bookings tab currently requires selecting a restaurant from a dropdown before showing any reservations. The user wants to see all reservations from all restaurants in one unified, user-friendly list.
+Switch the Bookings tab from a grid of cards to a clean, compact **data table** layout. This is more suited for admin use -- easier to scan, sort visually, and manage many reservations at once.
 
 ## Changes
 
 ### File: `src/pages/admin/restaurants/RestaurantBookingsTab.tsx`
 
-Complete rework of this component:
+Replace the `ReservationList` card grid with an inline data table using the existing Shadcn `Table` components. The table will have these columns:
 
-1. **Fetch all reservations without a restaurant filter** -- call `useTableReservations()` with no `restaurantId` argument. However, this currently fetches user-specific reservations, not all. So we need a different approach:
-   - Query `table_reservations` directly with Supabase, fetching ALL reservations ordered by date descending
-   - Join with restaurant names so each reservation shows which restaurant it belongs to
+| Column | Content |
+|--------|---------|
+| Guest | Name + room number |
+| Restaurant | Restaurant name (from restaurantMap) |
+| Date | Formatted date |
+| Time | Time slot |
+| Guests | Number of guests |
+| Status | Color-coded badge (pending/confirmed/cancelled) |
+| Actions | "Modifier le statut" button |
 
-2. **Display a unified table/grid** showing:
-   - Restaurant name (looked up from the restaurants list)
-   - Guest name
-   - Date and time
-   - Number of guests
-   - Status badge (pending/confirmed/cancelled)
-   - Action button to change status
+- The filters (restaurant dropdown, status dropdown) and refresh button stay exactly as they are at the top
+- The `StatusDialog` remains unchanged
+- Contact info (email, phone) and special requests will be visible via a collapsible row or tooltip to keep the table clean
+- Empty and loading states remain the same
 
-3. **Add filter controls at the top**:
-   - Optional restaurant filter dropdown (still available, but defaults to "All restaurants")
-   - Optional status filter (All / Pending / Confirmed / Cancelled)
+### No new files needed
 
-4. **Keep the StatusDialog** for updating reservation status
+The `ReservationList` and `ReservationCard` components are no longer used by this tab (they may still be used elsewhere, so they won't be deleted).
 
-### File: `src/hooks/useAllTableReservations.ts` (new file)
+### Technical Details
 
-Create a new hook that fetches all table reservations across all restaurants (for admin use):
-- Query `table_reservations` ordered by `created_at desc`
-- No restaurant filter by default, but accept optional filters
-- Include real-time subscription for updates
-- Use the existing `updateReservationStatus` mutation pattern
-
-### Implementation Details
-
-The new Bookings tab will:
-- On load, fetch all reservations across restaurants using a single Supabase query
-- Look up restaurant names from the `useRestaurants` hook
-- Display reservations in the existing `ReservationCard` grid, but with the restaurant name shown on each card
-- Optionally filter by restaurant or status using dropdowns at the top
-- Include a refresh button
-
-### File: `src/components/admin/reservations/ReservationCard.tsx`
-
-- Add an optional `restaurantName` prop
-- Display it at the top of the card when provided (e.g., as a subtitle or tag)
-
-### Summary
-
-| File | Change |
-|------|--------|
-| `src/hooks/useAllTableReservations.ts` | New hook to fetch all reservations for admin |
-| `src/pages/admin/restaurants/RestaurantBookingsTab.tsx` | Rework to show all reservations with optional filters |
-| `src/components/admin/reservations/ReservationCard.tsx` | Add optional `restaurantName` display |
+The table will be built directly in `RestaurantBookingsTab.tsx` using:
+- `Table`, `TableHeader`, `TableRow`, `TableHead`, `TableBody`, `TableCell` from `@/components/ui/table`
+- Status badges using the same color scheme (green for confirmed, yellow for pending, red for cancelled)
+- `format(new Date(date), 'dd MMM yyyy', { locale: fr })` for date formatting
+- A small icon button or text button in the Actions column to open the status dialog
+- Special requests shown as a tooltip icon (MessageSquare) when present
+- Contact info (email/phone) shown as a tooltip on hover over the guest name
 
