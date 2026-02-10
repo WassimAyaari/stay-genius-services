@@ -121,7 +121,7 @@ export default function SpaBookingsTab() {
       <Card key={booking.id} className="mb-4">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div>
-            <CardTitle className="text-lg">Booking #{booking.id.substring(0, 8)}</CardTitle>
+            <CardTitle className="text-lg">{booking.guest_name}</CardTitle>
           </div>
           <Badge className={getStatusBadgeColor(booking.status)}>
             {getStatusText(booking.status)}
