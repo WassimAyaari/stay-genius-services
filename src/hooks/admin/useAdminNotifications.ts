@@ -22,13 +22,13 @@ const CATEGORY_MAP: Record<string, SectionKey> = {
   '2f96741e-3e04-4117-8d37-e94795e37a68': 'information-technology',
 };
 
-async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; restaurantCounts: Record<string, number> }> {
+async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; restaurantCounts: Record<string, number>; spaServiceCounts: Record<string, number> }> {
   const counts: Record<string, number> = {};
   SECTION_KEYS.forEach((k) => (counts[k] = 0));
 
   // Get current user
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { counts: counts as Record<SectionKey, number>, restaurantCounts: {} };
+  if (!user) return { counts: counts as Record<SectionKey, number>, restaurantCounts: {}, spaServiceCounts: {} };
 
   // Fetch last seen timestamps
   const { data: seenRows } = await supabase
@@ -71,13 +71,31 @@ async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; rest
     }
   }
 
-  // Spa bookings
+  // Spa bookings - global count for sidebar
   const { count: spaCount } = await supabase
     .from('spa_bookings')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'pending')
     .gt('created_at', getLastSeen('spa'));
   counts.spa = spaCount || 0;
+
+  // Spa bookings - per-service counts
+  const { data: spaBookings } = await supabase
+    .from('spa_bookings')
+    .select('service_id, created_at')
+    .eq('status', 'pending');
+
+  const spaServiceCounts: Record<string, number> = {};
+  if (spaBookings) {
+    for (const b of spaBookings) {
+      if (b.service_id) {
+        const lastSeen = getLastSeen(`spa:${b.service_id}`);
+        if (b.created_at && b.created_at > lastSeen) {
+          spaServiceCounts[b.service_id] = (spaServiceCounts[b.service_id] || 0) + 1;
+        }
+      }
+    }
+  }
 
   // Event reservations
   const { count: eventsCount } = await supabase
@@ -105,7 +123,7 @@ async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; rest
     }
   }
 
-  return { counts: counts as Record<SectionKey, number>, restaurantCounts };
+  return { counts: counts as Record<SectionKey, number>, restaurantCounts, spaServiceCounts };
 }
 
 export function useAdminNotifications() {
@@ -116,6 +134,7 @@ export function useAdminNotifications() {
     return init as Record<SectionKey, number>;
   });
   const [localRestaurantCounts, setLocalRestaurantCounts] = useState<Record<string, number>>({});
+  const [localSpaServiceCounts, setLocalSpaServiceCounts] = useState<Record<string, number>>({});
 
   const { data } = useQuery({
     queryKey: ['admin-notifications'],
@@ -127,6 +146,7 @@ export function useAdminNotifications() {
     if (data) {
       setLocalCounts(data.counts);
       setLocalRestaurantCounts(data.restaurantCounts);
+      setLocalSpaServiceCounts(data.spaServiceCounts);
     }
   }, [data]);
 
@@ -151,7 +171,7 @@ export function useAdminNotifications() {
     };
   }, [queryClient]);
 
-  const markSectionSeen = useCallback(async (sectionKey: SectionKey) => {
+  const markSectionSeen = useCallback(async (sectionKey: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -166,7 +186,7 @@ export function useAdminNotifications() {
     queryClient.invalidateQueries({ queryKey: ['admin-notifications'] });
   }, [queryClient]);
 
-  return { counts: localCounts, restaurantCounts: localRestaurantCounts, markSectionSeen };
+  return { counts: localCounts, restaurantCounts: localRestaurantCounts, spaServiceCounts: localSpaServiceCounts, markSectionSeen };
 }
 
 export type { SectionKey };
