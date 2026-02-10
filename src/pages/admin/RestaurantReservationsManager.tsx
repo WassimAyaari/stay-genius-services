@@ -114,7 +114,7 @@ const RestaurantReservationsManager = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate('/admin/restaurants')}>
@@ -135,28 +135,24 @@ const RestaurantReservationsManager = () => {
         </Button>
       </div>
       
-      <Card>
-        <CardContent className="p-6">
-          {isLoadingReservations || isRefreshing ? (
-            <div className="flex justify-center py-8">
-              <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : reservations && reservations.length > 0 ? (
-            <ReservationList 
-              reservations={reservations} 
-              onOpenStatusDialog={handleOpenStatusDialog} 
-            />
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No reservations found for this restaurant</p>
-              <Button variant="outline" onClick={handleRefresh}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {isLoadingReservations || isRefreshing ? (
+        <div className="flex justify-center py-8">
+          <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      ) : reservations && reservations.length > 0 ? (
+        <ReservationList 
+          reservations={reservations} 
+          onOpenStatusDialog={handleOpenStatusDialog} 
+        />
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground mb-4">No reservations found for this restaurant</p>
+          <Button variant="outline" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+      )}
       
       <StatusDialog 
         isOpen={isStatusDialogOpen}
