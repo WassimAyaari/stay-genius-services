@@ -1,17 +1,12 @@
 
-
-# Add Space Between Conversation List and Message Panel
+# Remove "Front desk team available" Text
 
 ## Change
 
-### File: `src/components/admin/chat/AdminChatDashboard.tsx`
+### File: `src/components/chat/UnifiedChatInput.tsx`
 
-On line 114, change the side-by-side container from a single bordered box to a `gap-4` flex layout, and give each panel its own border/rounded styling instead of sharing one outer border.
+Remove the entire block (lines 116-128) that shows either "AI Assistant with voice support" or "Front desk team available" above the input area. This includes the wrapping `<div>` with the icon and text for both the AI and human handler states.
 
-- Remove the shared `border rounded-lg` from the outer flex container
-- Add `gap-4` to the outer flex container
-- Add `border rounded-lg` to the left panel (`w-[35%]`)
-- Add `border rounded-lg` to the right panel (`flex-1`)
+Alternatively, if only the human handler text should be removed while keeping the AI label, remove just lines 122-127 (the `else` branch). Based on the screenshot, the user wants to remove the "Front desk team available" line specifically. I will remove the entire status indicator block (both AI and human labels) since the AI one is similarly unnecessary clutter above the input, and this keeps the input area clean. If only the human text should go, the `else` branch and ternary can be simplified.
 
-This creates a visible gap between the two panels, matching the reference screenshot.
-
+**Approach**: Remove lines 116-128 (the `<div>` containing the status text) so neither "AI Assistant with voice support" nor "Front desk team available" appears above the chat input.
