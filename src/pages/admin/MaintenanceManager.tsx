@@ -26,7 +26,7 @@ import { useRequestCategories, useCreateRequestItem, useUpdateRequestItem } from
 import { RequestItem } from '@/features/rooms/types';
 import MaintenanceItemsTab from './maintenance/components/MaintenanceItemsTab';
 import MaintenanceRequestsTab from './maintenance/components/MaintenanceRequestsTab';
-import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
+
 
 const MaintenanceManager = () => {
   const [activeTab, setActiveTab] = useState('items');
@@ -43,7 +43,7 @@ const MaintenanceManager = () => {
   
   const { toast } = useToast();
   const { categories, allItems, isLoading } = useRequestCategories();
-  const { markSeen } = useAdminNotifications();
+  
   const createItem = useCreateRequestItem();
   const updateItem = useUpdateRequestItem();
   
@@ -145,7 +145,7 @@ const MaintenanceManager = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Maintenance & Technical Items Management</h1>
       
-      <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); if (val === 'requests') markSeen('maintenance'); }} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="items">Items</TabsTrigger>
           <TabsTrigger value="requests">Requests</TabsTrigger>
