@@ -1,27 +1,26 @@
 
-# Convert Restaurant Reservations from Cards to Table View
+
+# Show Restaurant Reservations Inline (Keep Title and Tabs Visible)
 
 ## Overview
-Replace the card grid layout on the per-restaurant reservations page (`/admin/restaurants/:id/reservations`) with a data table matching the style of the "Bookings" tab at `/admin/restaurants`.
+Instead of navigating to a separate page (`/admin/restaurants/:id/reservations`) when clicking on a restaurant's reservations, the reservations will be displayed inline below the restaurant table on the same page. The page title "Restaurant Management" and the Restaurants/Bookings/Menus tab bar will remain visible at all times.
 
 ## Changes
 
-### File: `src/pages/admin/RestaurantReservationsManager.tsx`
-- Remove the `ReservationList` component usage (lines 142-145)
-- Replace it with a `<Table>` using the same structure as `RestaurantBookingsTab.tsx`:
-  - Columns: **Client**, **Date**, **Heure**, **Couverts**, **Statut**, **Actions**
-  - No "Restaurant" column needed since this page is already filtered to one restaurant
-  - Client column: guest name with room number below it, contact info in a tooltip (same pattern as the Bookings tab), special requests shown via a message icon tooltip
-  - Status column: colored Badge (green/yellow/red)
-  - Actions column: "Modifier" ghost button
-- Import `Table`, `TableHeader`, `TableRow`, `TableHead`, `TableBody`, `TableCell` from UI components
-- Import `Badge`, `Tooltip`/`TooltipProvider`/`TooltipContent`/`TooltipTrigger` components
-- Import `Mail`, `Phone`, `Home`, `MessageSquare` icons
-- Remove import of `ReservationList`
-- Also remove the force-refresh `useEffect` on lines 95-98 (same optimization applied to `RestaurantManager`)
+### File: `src/pages/admin/RestaurantManager.tsx`
+- Add a new state `selectedRestaurantForReservations` to track which restaurant's reservations to display inline
+- Change `navigateToReservations` from a route navigation to setting this state
+- When a restaurant is selected, render an inline reservations panel below the restaurant table (inside the same "Restaurants" tab content)
+- The inline panel will include:
+  - A header row with the restaurant name, a "Back" / close button, and a Refresh button
+  - The reservation table (reusing the same table markup from `RestaurantReservationsManager`)
+  - The StatusDialog for editing reservation status
+- Import `useTableReservations` hook and necessary table/tooltip/badge components
+- Import icons: `ArrowLeft`, `MessageSquare`, `Mail`, `Phone`, `Home`
 
-### File: `src/components/admin/reservations/ReservationList.tsx`
-- No changes needed -- it remains available for any other consumers, but will no longer be used by this page.
+### File: `src/pages/admin/RestaurantReservationsManager.tsx`
+- No changes needed -- it stays as a fallback for direct URL access
 
 ## Result
-The per-restaurant reservation view will display a compact, scannable table identical in style to the global Bookings tab, with tooltips for contact details and special requests.
+When you click "View Reservations" on any restaurant, the reservations table slides in below the restaurant list without leaving the page. The title, subtitle, and tab navigation all remain visible and accessible.
+
