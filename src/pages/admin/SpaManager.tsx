@@ -6,6 +6,8 @@ import SpaFacilitiesTab from './spa/SpaFacilitiesTab';
 import SpaServicesTab from './spa/SpaServicesTab';
 import SpaBookingsTab from './spa/SpaBookingsTab';
 import { useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 export default function SpaManager() {
@@ -49,11 +51,17 @@ export default function SpaManager() {
         <TabsContent value="bookings">
           <Card>
             {!selectedSpaService && (
-              <CardHeader>
-                <CardTitle>Bookings</CardTitle>
-                <CardDescription>
-                  Manage spa bookings and their status
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div className="space-y-1.5">
+                  <CardTitle>Bookings</CardTitle>
+                  <CardDescription>
+                    Manage spa bookings and their status
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={refreshSpaData}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
               </CardHeader>
             )}
             <CardContent>
