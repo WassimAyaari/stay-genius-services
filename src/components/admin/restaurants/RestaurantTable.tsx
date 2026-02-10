@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import RestaurantEventsDialog from '@/pages/admin/components/restaurants/RestaurantEventsDialog';
 import { useEvents } from '@/hooks/useEvents';
 import { useNavigate } from 'react-router-dom';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 interface RestaurantTableProps {
   restaurants: any[];
@@ -26,6 +27,7 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
   onAddEvent,
 }) => {
   const navigate = useNavigate();
+  const { restaurantCounts } = useAdminNotifications();
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const { events } = useEvents();
@@ -64,7 +66,16 @@ export const RestaurantTable: React.FC<RestaurantTableProps> = ({
           <TableBody>
             {restaurants.map((restaurant) => (
               <TableRow key={restaurant.id}>
-                <TableCell className="font-medium">{restaurant.name}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    {restaurant.name}
+                    {restaurantCounts[restaurant.id] > 0 && (
+                      <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-medium px-1">
+                        {restaurantCounts[restaurant.id]}
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell>{restaurant.cuisine}</TableCell>
                 <TableCell>{restaurant.location}</TableCell>
                 <TableCell>

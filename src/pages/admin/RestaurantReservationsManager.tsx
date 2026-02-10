@@ -12,15 +12,22 @@ import ReservationList from '@/components/admin/reservations/ReservationList';
 import ErrorState from '@/components/admin/reservations/ErrorState';
 import { toast } from 'sonner';
 import { useTableReservations } from '@/hooks/useTableReservations';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 const RestaurantReservationsManager = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { fetchRestaurantById } = useRestaurants();
+  const { markSeen } = useAdminNotifications();
   const [restaurant, setRestaurant] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Clear notification badge when viewing reservations
+  useEffect(() => {
+    markSeen('restaurants');
+  }, [markSeen]);
   
   const { 
     reservations, 
