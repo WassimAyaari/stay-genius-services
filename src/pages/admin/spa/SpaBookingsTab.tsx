@@ -219,17 +219,6 @@ export default function SpaBookingsTab({ onServiceSelected }: SpaBookingsTabProp
   if (!selectedServiceId) {
     return (
       <div className="p-4">
-        <div className="flex justify-end mb-6">
-          <Button
-            variant="outline"
-            onClick={() => refetch()}
-            className="flex items-center"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-        </div>
-
         {isLoading || isLoadingServices ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground">Loading services...</p>
