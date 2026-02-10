@@ -123,6 +123,7 @@ const RestaurantManager = () => {
         
         <TabsContent value="restaurants">
           <Card>
+            {!selectedRestaurantForReservations && (
             <CardHeader>
               <CardTitle>Restaurants</CardTitle>
               <CardDescription>
@@ -144,6 +145,7 @@ const RestaurantManager = () => {
                 </Button>
               </div>
             </CardHeader>
+            )}
             <CardContent>
               {isLoading || isRefreshing ? (
                 <div className="flex justify-center py-8">
