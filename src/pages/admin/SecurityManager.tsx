@@ -9,11 +9,12 @@ import AddItemDialog from './security/AddItemDialog';
 import EditItemDialog from './security/EditItemDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
+import { Badge } from '@/components/ui/badge';
 
 
 const SecurityManager = () => {
   const [activeTab, setActiveTab] = useState('items');
-  const { markSectionSeen } = useAdminNotifications();
+  const { counts, markSectionSeen } = useAdminNotifications();
 
   React.useEffect(() => {
     if (activeTab === 'requests') {
@@ -78,7 +79,14 @@ const SecurityManager = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="items">Items</TabsTrigger>
-          <TabsTrigger value="requests">Requests</TabsTrigger>
+          <TabsTrigger value="requests" className="gap-2">
+            Requests
+            {counts.security > 0 && (
+              <Badge variant="destructive" className="h-5 w-5 flex items-center justify-center p-0 text-[10px]">
+                {counts.security}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="items">
