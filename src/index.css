@@ -10,7 +10,9 @@
   }
 
   body {
-    overflow-y: scroll;
+    overflow-y: scroll !important;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
   }
 
   :root {
