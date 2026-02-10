@@ -21,7 +21,11 @@ interface SpaService {
   facility_id: string | null;
 }
 
-export default function SpaBookingsTab() {
+interface SpaBookingsTabProps {
+  onServiceSelected?: (id: string | null) => void;
+}
+
+export default function SpaBookingsTab({ onServiceSelected }: SpaBookingsTabProps) {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [services, setServices] = useState<SpaService[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(false);
@@ -59,6 +63,7 @@ export default function SpaBookingsTab() {
 
   const handleSelectService = (serviceId: string) => {
     setSelectedServiceId(serviceId);
+    onServiceSelected?.(serviceId);
     markSectionSeen(`spa:${serviceId}`);
   };
 
@@ -214,8 +219,7 @@ export default function SpaBookingsTab() {
   if (!selectedServiceId) {
     return (
       <div className="p-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Spa Bookings</h2>
+        <div className="flex justify-end mb-6">
           <Button
             variant="outline"
             onClick={() => refetch()}
@@ -278,6 +282,7 @@ export default function SpaBookingsTab() {
             size="sm"
             onClick={() => {
               setSelectedServiceId(null);
+              onServiceSelected?.(null);
               setSearchTerm('');
               setStatusFilter('all');
               setDateFilter('');
