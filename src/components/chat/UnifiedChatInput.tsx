@@ -113,20 +113,6 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
 
   return (
     <div className="bg-card">
-      <div className="flex items-center gap-2 p-3 pb-0">
-        {isAIHandling ? (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Bot className="h-3 w-3" />
-            <span>AI Assistant with voice support</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <User className="h-3 w-3" />
-            <span>Front desk team available</span>
-          </div>
-        )}
-      </div>
-      
       {isAIHandling ? (
         <VoiceMessageInput
           inputMessage={inputMessage}
