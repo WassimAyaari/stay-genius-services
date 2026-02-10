@@ -8,12 +8,15 @@ import SecurityRequestsTab from './security/SecurityRequestsTab';
 import AddItemDialog from './security/AddItemDialog';
 import EditItemDialog from './security/EditItemDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 const SecurityManager = () => {
+  const [activeTab, setActiveTab] = useState('items');
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingItem, setEditingItem] = useState<RequestItem | null>(null);
+  const { markSeen } = useAdminNotifications();
   const { toast } = useToast();
   
   const { categories } = useRequestCategories();
@@ -63,7 +66,7 @@ const SecurityManager = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Security Management</h1>
       
-      <Tabs defaultValue="items" className="w-full">
+      <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); if (val === 'requests') markSeen('security'); }} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="items">Items</TabsTrigger>
           <TabsTrigger value="requests">Requests</TabsTrigger>

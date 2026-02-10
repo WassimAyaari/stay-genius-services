@@ -10,8 +10,10 @@ import HousekeepingItemsTab from './housekeeping/components/HousekeepingItemsTab
 import HousekeepingRequestsTab from './housekeeping/components/HousekeepingRequestsTab';
 import AddItemDialog from './housekeeping/components/AddItemDialog';
 import EditItemDialog from './housekeeping/components/EditItemDialog';
+import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 const HousekeepingManager = () => {
+  const [activeTab, setActiveTab] = useState('items');
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isEditItemDialogOpen, setIsEditItemDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,6 +29,7 @@ const HousekeepingManager = () => {
   const { toast } = useToast();
   const { categories } = useRequestCategories();
   const { requests, handleRefresh } = useRequestsData();
+  const { markSeen } = useAdminNotifications();
   const createItem = useCreateRequestItem();
   const updateItem = useUpdateRequestItem();
   
@@ -145,7 +148,7 @@ const HousekeepingManager = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Housekeeping Management</h1>
       
-      <Tabs defaultValue="items" className="w-full">
+      <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); if (val === 'requests') markSeen('housekeeping'); }} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="items">Items</TabsTrigger>
           <TabsTrigger value="requests">
