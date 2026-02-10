@@ -6,9 +6,10 @@ import ReservationCard from './ReservationCard';
 interface ReservationListProps {
   reservations: TableReservation[] | undefined;
   onOpenStatusDialog: (reservation: TableReservation) => void;
+  restaurantMap?: Record<string, string>;
 }
 
-const ReservationList = ({ reservations, onOpenStatusDialog }: ReservationListProps) => {
+const ReservationList = ({ reservations, onOpenStatusDialog, restaurantMap }: ReservationListProps) => {
   if (!reservations || reservations.length === 0) {
     return (
       <div className="text-center py-8">
@@ -23,7 +24,8 @@ const ReservationList = ({ reservations, onOpenStatusDialog }: ReservationListPr
         <ReservationCard 
           key={reservation.id} 
           reservation={reservation} 
-          onOpenStatusDialog={onOpenStatusDialog} 
+          onOpenStatusDialog={onOpenStatusDialog}
+          restaurantName={restaurantMap?.[reservation.restaurantId] }
         />
       ))}
     </div>
