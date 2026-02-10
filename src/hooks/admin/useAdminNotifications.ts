@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -14,16 +14,6 @@ const SECTION_KEYS = [
 
 type SectionKey = (typeof SECTION_KEYS)[number];
 
-const ROUTE_TO_SECTION: Record<string, SectionKey> = {
-  '/admin/restaurants': 'restaurants',
-  '/admin/spa': 'spa',
-  '/admin/events': 'events',
-  '/admin/housekeeping': 'housekeeping',
-  '/admin/maintenance': 'maintenance',
-  '/admin/security': 'security',
-  '/admin/information-technology': 'information-technology',
-};
-
 // Category IDs from request_categories table
 const CATEGORY_MAP: Record<string, SectionKey> = {
   '7beb3ccf-bbcf-4405-a397-6b6c636c955b': 'housekeeping',
@@ -32,40 +22,22 @@ const CATEGORY_MAP: Record<string, SectionKey> = {
   '2f96741e-3e04-4117-8d37-e94795e37a68': 'information-technology',
 };
 
-const CATEGORY_NAME_TO_SECTION: Record<string, SectionKey> = {
-  'Housekeeping': 'housekeeping',
-  'Maintenance': 'maintenance',
-  'Security': 'security',
-  'Information Technology': 'information-technology',
-};
-
-function getLastSeen(section: string): string {
-  return localStorage.getItem(`admin_lastSeen_${section}`) || '1970-01-01T00:00:00.000Z';
-}
-
-function setLastSeen(section: string) {
-  localStorage.setItem(`admin_lastSeen_${section}`, new Date().toISOString());
-}
-
 async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; restaurantCounts: Record<string, number> }> {
   const counts: Record<string, number> = {};
   SECTION_KEYS.forEach((k) => (counts[k] = 0));
 
-  // Restaurant reservations
-  const restaurantLastSeen = getLastSeen('restaurants');
+  // Restaurant reservations - count all pending
   const { count: restaurantCount } = await supabase
     .from('table_reservations')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
-    .gt('created_at', restaurantLastSeen);
+    .eq('status', 'pending');
   counts.restaurants = restaurantCount || 0;
 
   // Per-restaurant pending counts
   const { data: restaurantReservations } = await supabase
     .from('table_reservations')
     .select('restaurant_id')
-    .eq('status', 'pending')
-    .gt('created_at', restaurantLastSeen);
+    .eq('status', 'pending');
 
   const restaurantCounts: Record<string, number> = {};
   if (restaurantReservations) {
@@ -76,38 +48,31 @@ async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; rest
     }
   }
 
-  // Spa bookings
-  const spaLastSeen = getLastSeen('spa');
+  // Spa bookings - count all pending
   const { count: spaCount } = await supabase
     .from('spa_bookings')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
-    .gt('created_at', spaLastSeen);
+    .eq('status', 'pending');
   counts.spa = spaCount || 0;
 
-  // Event reservations
-  const eventsLastSeen = getLastSeen('events');
+  // Event reservations - count all pending
   const { count: eventsCount } = await supabase
     .from('event_reservations')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
-    .gt('created_at', eventsLastSeen);
+    .eq('status', 'pending');
   counts.events = eventsCount || 0;
 
-  // Service requests by category
+  // Service requests by category - count all pending
   const { data: serviceRequests } = await supabase
     .from('service_requests')
-    .select('category_id, created_at')
+    .select('category_id')
     .eq('status', 'pending');
 
   if (serviceRequests) {
     for (const req of serviceRequests) {
       const section = CATEGORY_MAP[req.category_id || ''];
       if (section) {
-        const lastSeen = getLastSeen(section);
-        if (req.created_at && req.created_at > lastSeen) {
-          counts[section] = (counts[section] || 0) + 1;
-        }
+        counts[section] = (counts[section] || 0) + 1;
       }
     }
   }
@@ -137,41 +102,20 @@ export function useAdminNotifications() {
     }
   }, [data]);
 
-  // Mark section as seen
-  const markSeen = useCallback(
-    (section: SectionKey) => {
-      setLastSeen(section);
-      setLocalCounts((prev) => ({ ...prev, [section]: 0 }));
-      // Refetch after a short delay to sync
-      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['admin-notifications'] }), 500);
-    },
-    [queryClient]
-  );
-
-  // Realtime subscriptions
+  // Realtime subscriptions - listen for INSERT and UPDATE
   useEffect(() => {
+    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin-notifications'] });
+
     const channel = supabase
       .channel('admin-notifications')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'table_reservations' },
-        () => queryClient.invalidateQueries({ queryKey: ['admin-notifications'] })
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'spa_bookings' },
-        () => queryClient.invalidateQueries({ queryKey: ['admin-notifications'] })
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'event_reservations' },
-        () => queryClient.invalidateQueries({ queryKey: ['admin-notifications'] })
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'service_requests' },
-        () => queryClient.invalidateQueries({ queryKey: ['admin-notifications'] })
-      )
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'table_reservations' }, invalidate)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'table_reservations' }, invalidate)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'spa_bookings' }, invalidate)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'spa_bookings' }, invalidate)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'event_reservations' }, invalidate)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'event_reservations' }, invalidate)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_requests' }, invalidate)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'service_requests' }, invalidate)
       .subscribe();
 
     return () => {
@@ -179,7 +123,7 @@ export function useAdminNotifications() {
     };
   }, [queryClient]);
 
-  return { counts: localCounts, restaurantCounts: localRestaurantCounts, markSeen };
+  return { counts: localCounts, restaurantCounts: localRestaurantCounts };
 }
 
 export type { SectionKey };

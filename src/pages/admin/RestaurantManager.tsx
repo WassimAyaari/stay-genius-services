@@ -15,7 +15,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import EventForm from '@/pages/admin/components/events/EventForm';
 import { useEvents } from '@/hooks/useEvents';
-import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 const RestaurantManager = () => {
   const navigate = useNavigate();
@@ -25,7 +24,6 @@ const RestaurantManager = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('restaurants');
-  const { markSeen } = useAdminNotifications();
 
   // State for add event dialog
   const [addEventRestaurantId, setAddEventRestaurantId] = useState<string|null>(null);
@@ -110,7 +108,7 @@ const RestaurantManager = () => {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); if (val === 'bookings') markSeen('restaurants'); }} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="restaurants">Restaurants</TabsTrigger>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>

@@ -10,7 +10,7 @@ import InformationTechnologyItemsTab from './information-technology/components/I
 import InformationTechnologyRequestsTab from './information-technology/components/InformationTechnologyRequestsTab';
 import AddItemDialog from './information-technology/components/AddItemDialog';
 import EditItemDialog from './information-technology/components/EditItemDialog';
-import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
+
 
 const InformationTechnologyManager = () => {
   const [activeTab, setActiveTab] = useState('items');
@@ -26,7 +26,7 @@ const InformationTechnologyManager = () => {
   });
   const [editingItem, setEditingItem] = useState<RequestItem | null>(null);
 
-  const { markSeen } = useAdminNotifications();
+  
   const { toast } = useToast();
   const { categories } = useRequestCategories();
   const { requests, handleRefresh } = useRequestsData();
@@ -118,7 +118,7 @@ const InformationTechnologyManager = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Information Technology Management</h1>
-      <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); if (val === 'requests') markSeen('information-technology'); }} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="items">Items</TabsTrigger>
           <TabsTrigger value="requests">
