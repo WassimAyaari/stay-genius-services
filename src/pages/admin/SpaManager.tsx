@@ -11,6 +11,7 @@ import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 export default function SpaManager() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('bookings');
+  const [selectedSpaService, setSelectedSpaService] = useState<string | null>(null);
   const { markSectionSeen } = useAdminNotifications();
 
   React.useEffect(() => {
@@ -47,14 +48,16 @@ export default function SpaManager() {
         
         <TabsContent value="bookings">
           <Card>
-            <CardHeader>
-              <CardTitle>Bookings</CardTitle>
-              <CardDescription>
-                Manage spa bookings and their status
-              </CardDescription>
-            </CardHeader>
+            {!selectedSpaService && (
+              <CardHeader>
+                <CardTitle>Bookings</CardTitle>
+                <CardDescription>
+                  Manage spa bookings and their status
+                </CardDescription>
+              </CardHeader>
+            )}
             <CardContent>
-              <SpaBookingsTab />
+              <SpaBookingsTab onServiceSelected={setSelectedSpaService} />
             </CardContent>
           </Card>
         </TabsContent>
