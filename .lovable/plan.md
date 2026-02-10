@@ -1,19 +1,20 @@
 
 
-# Remove Redundant Request Count Badges
+# Add Red Notification Badge to Security "Requests" Tab
 
 ## Problem
-The "Requests" tab in both Housekeeping and IT Management pages shows a badge with the total request count (e.g., "3", "1"). These are not static -- they come from the database -- but they are redundant since the sidebar already shows notification badges for new pending requests.
+The Security Management page lacks a notification badge on the "Requests" tab trigger. The sidebar correctly shows a red badge with the new pending count, but when looking at the tabs themselves, there's no visual cue. When clicking "Requests", the sidebar badge clears (expected behavior via `markSectionSeen`), but the user has no indication on the tab itself.
 
-## Changes
+## Fix
 
-### File: `src/pages/admin/HousekeepingManager.tsx` (lines 163-168)
-- Remove the Badge from the "Requests" TabsTrigger, leaving just the text "Requests"
+### File: `src/pages/admin/SecurityManager.tsx`
+- Import `Badge` from `@/components/ui/badge`
+- Use the existing `useAdminNotifications` hook (already imported) to read `counts.security`
+- Add a red `Badge` inside the "Requests" `TabsTrigger` showing the count when it is greater than 0
+- Style it consistently with the sidebar notification badges (red/destructive variant)
 
-### File: `src/pages/admin/InformationTechnologyManager.tsx` (lines 133-138)
-- Remove the Badge from the "Requests" TabsTrigger, leaving just the text "Requests"
+### Result
+- A red badge appears on the "Requests" tab when there are new pending security requests
+- Clicking "Requests" clears both the tab badge and the sidebar badge (via `markSectionSeen`)
+- Consistent with the notification system already in place
 
-Both files also have unused Badge imports that can be cleaned up.
-
-## Result
-The "Requests" tabs will display only the word "Requests" with no number badge, matching a cleaner look while relying on the sidebar notifications for new item alerts.
