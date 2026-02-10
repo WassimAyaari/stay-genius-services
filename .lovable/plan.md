@@ -1,56 +1,97 @@
 
 
-# Plan: Move Badge Clearing from Route Change to Tab Click
+# Plan: Per-Restaurant Notification Badges and Proper Badge Clearing
 
 ## Problem
 
-Currently, notification badges in the sidebar disappear as soon as the admin navigates to a page (e.g., visiting `/admin/information-technology` immediately clears the IT badge). The user wants badges to persist until the admin actually opens the "Requests"/"Bookings"/"Reservations" tab within the page.
+1. The sidebar badge next to "Restaurants" shows a count, but it does not disappear when opening a specific restaurant's reservations page (`/admin/restaurants/:id/reservations`)
+2. No notification appears next to individual restaurant names in the restaurant table to show which restaurant has new pending reservations
+3. The badge only clears when clicking the "Bookings" tab in RestaurantManager, but not when viewing reservations via the per-restaurant route
 
-## Changes
+## Solution
 
-### 1. `src/hooks/admin/useAdminNotifications.ts` -- Remove auto-mark on route change
+### 1. Track per-restaurant reservation counts
 
-Remove the `useEffect` (lines 136-144) that auto-calls `markSeen` when the route changes. Also remove `useLocation` import since it won't be needed. Export `markSeen` so pages can call it manually.
+Extend `useAdminNotifications` to also fetch per-restaurant pending reservation counts, so we know which restaurants have new reservations.
 
-### 2. `src/pages/admin/InformationTechnologyManager.tsx` -- Clear badge on "Requests" tab click
+**File: `src/hooks/admin/useAdminNotifications.ts`**
+- Add a new query that fetches pending reservation counts grouped by `restaurant_id` (only those created after the restaurants lastSeen timestamp)
+- Expose a `restaurantCounts: Record<string, number>` mapping restaurant IDs to their pending count
+- Keep the existing global `restaurants` count for the sidebar badge
 
+### 2. Show badges next to restaurant names in the table
+
+**File: `src/components/admin/restaurants/RestaurantTable.tsx`**
 - Import `useAdminNotifications`
-- Convert `Tabs` from uncontrolled (`defaultValue`) to controlled (`value`/`onValueChange`)
-- When tab changes to `"requests"`, call `markSeen('information-technology')`
+- Read `restaurantCounts` from the hook
+- Next to each restaurant name, display a small red badge showing the count of pending reservations for that specific restaurant (if > 0)
 
-### 3. `src/pages/admin/HousekeepingManager.tsx` -- Same pattern
+### 3. Clear badge when opening restaurant reservations page
 
+**File: `src/pages/admin/RestaurantReservationsManager.tsx`**
 - Import `useAdminNotifications`
-- On tab change to `"requests"`, call `markSeen('housekeeping')`
+- Call `markSeen('restaurants')` on mount so the sidebar badge clears when viewing reservations for any restaurant
 
-### 4. `src/pages/admin/MaintenanceManager.tsx` -- Same pattern
+### 4. Also clear from RestaurantManager bookings tab (already done)
 
-- Import `useAdminNotifications`
-- On tab change to `"requests"`, call `markSeen('maintenance')`
+The existing `markSeen('restaurants')` call on the "Bookings" tab in `RestaurantManager.tsx` remains unchanged.
 
-### 5. `src/pages/admin/SecurityManager.tsx` -- Same pattern
+## Technical Details
 
-- Import `useAdminNotifications`
-- On tab change to `"requests"`, call `markSeen('security')`
+### Changes to `useAdminNotifications.ts`
 
-### 6. `src/pages/admin/RestaurantManager.tsx` -- Clear badge on "Bookings" tab click
+Add to `fetchCounts` (or a parallel query):
+```typescript
+// Fetch per-restaurant pending counts
+const { data: restaurantReservations } = await supabase
+  .from('table_reservations')
+  .select('restaurant_id')
+  .eq('status', 'pending')
+  .gt('created_at', restaurantLastSeen);
 
-- Import `useAdminNotifications`
-- On tab change to `"bookings"`, call `markSeen('restaurants')`
+const restaurantCounts: Record<string, number> = {};
+if (restaurantReservations) {
+  for (const r of restaurantReservations) {
+    if (r.restaurant_id) {
+      restaurantCounts[r.restaurant_id] = (restaurantCounts[r.restaurant_id] || 0) + 1;
+    }
+  }
+}
+```
 
-### 7. `src/pages/admin/SpaManager.tsx` -- Clear badge on "Bookings" tab click
+Return `restaurantCounts` alongside `counts`.
 
-- Import `useAdminNotifications`
-- On tab change to `"bookings"`, call `markSeen('spa')`
+### Changes to `RestaurantTable.tsx`
 
-### 8. `src/pages/admin/EventsManager.tsx` -- Clear badge on "Reservations" tab click
+Next to the restaurant name cell:
+```tsx
+<TableCell className="font-medium">
+  <div className="flex items-center gap-2">
+    {restaurant.name}
+    {restaurantCounts[restaurant.id] > 0 && (
+      <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-medium px-1">
+        {restaurantCounts[restaurant.id]}
+      </span>
+    )}
+  </div>
+</TableCell>
+```
 
-- Import `useAdminNotifications`
-- On tab change to `"reservations"`, call `markSeen('events')`
+### Changes to `RestaurantReservationsManager.tsx`
 
-## Summary
+Add at the top of the component:
+```typescript
+const { markSeen } = useAdminNotifications();
 
-- **1 hook modified** -- remove auto-clear on route change
-- **7 page components modified** -- add controlled tabs with `markSeen` on relevant tab selection
-- Badges stay visible in sidebar until the admin explicitly opens the requests/bookings tab
+useEffect(() => {
+  markSeen('restaurants');
+}, []);
+```
 
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/hooks/admin/useAdminNotifications.ts` | Add per-restaurant counts to returned data |
+| `src/components/admin/restaurants/RestaurantTable.tsx` | Show red badge next to restaurant names with pending reservations |
+| `src/pages/admin/RestaurantReservationsManager.tsx` | Call `markSeen('restaurants')` on mount to clear sidebar badge |
