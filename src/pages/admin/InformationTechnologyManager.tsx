@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+
 import { RequestItem } from '@/features/rooms/types';
 import { useRequestCategories, useCreateRequestItem, useUpdateRequestItem } from '@/hooks/useRequestCategories';
 import { useRequestsData } from '@/hooks/useRequestsData';
@@ -129,14 +129,7 @@ const InformationTechnologyManager = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="items">Items</TabsTrigger>
-          <TabsTrigger value="requests">
-            Requests
-            {itRequests.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {itRequests.length}
-              </Badge>
-            )}
-          </TabsTrigger>
+          <TabsTrigger value="requests">Requests</TabsTrigger>
         </TabsList>
         <TabsContent value="items">
           <InformationTechnologyItemsTab 
