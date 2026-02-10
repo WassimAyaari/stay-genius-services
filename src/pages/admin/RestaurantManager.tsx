@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import EventForm from '@/pages/admin/components/events/EventForm';
 import { useEvents } from '@/hooks/useEvents';
 import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
+import InlineReservationsPanel from '@/components/admin/restaurants/InlineReservationsPanel';
 
 const RestaurantManager = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const RestaurantManager = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('restaurants');
   const { markSectionSeen } = useAdminNotifications();
+  const [selectedRestaurantForReservations, setSelectedRestaurantForReservations] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeTab === 'bookings') {
@@ -76,7 +78,7 @@ const RestaurantManager = () => {
   };
 
   const navigateToReservations = (restaurantId) => {
-    navigate(`/admin/restaurants/${restaurantId}/reservations`);
+    setSelectedRestaurantForReservations(restaurantId);
   };
 
   const navigateToMenus = (restaurantId) => {
@@ -147,6 +149,12 @@ const RestaurantManager = () => {
                 <div className="flex justify-center py-8">
                   <RefreshCw className="h-8 w-8 animate-spin text-primary" />
                 </div>
+              ) : selectedRestaurantForReservations ? (
+                <InlineReservationsPanel
+                  restaurantId={selectedRestaurantForReservations}
+                  restaurantName={restaurants?.find(r => r.id === selectedRestaurantForReservations)?.name || 'Restaurant'}
+                  onBack={() => setSelectedRestaurantForReservations(null)}
+                />
               ) : (
                 <RestaurantTable 
                   restaurants={restaurants || []} 
