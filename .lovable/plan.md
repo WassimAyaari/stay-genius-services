@@ -1,77 +1,36 @@
 
 
-# Staff Management Section
+## Problem Analysis
+The "Create Staff" dialog shifts when focusing inputs or clicking buttons. This is caused by:
 
-## Overview
-Create a new "Staff Management" admin page where admins can create staff accounts with role assignments, view existing staff members, search/filter them, and manage their roles.
+1. **Form validation errors appearing/disappearing**: When validation errors appear below fields, they increase the form height, causing the dialog to reposition
+2. **Select dropdown modal behavior**: The role Select component doesn't have `modal={false}`, which can affect scrollbar behavior
+3. **Nested scrollbar behavior**: The AdminLayout's `overflow-auto` container can interact unpredictably with the dialog's modal behavior
 
-## Roles Definition
-- **Admin**: Full access to all admin features
-- **Moderator**: Access to Chat, Housekeeping, Maintenance, and Security sections
-- **Staff**: Basic staff access (limited admin panel visibility)
-- **User (Guest)**: Public pages, profile, and reservations only (existing default role)
+## Solution
 
-## Changes Required
+### Fix 1: Set `modal={false}` on Select component
+The Select component in CreateStaffDialog should not apply modal behavior (which removes the body scrollbar). Setting `modal={false}` ensures the scrollbar remains visible and consistent.
 
-### 1. Database: Add "staff" to the app_role enum
-- Run a migration to add `'staff'` to the `app_role` enum type
-- Update the TypeScript types to include `"staff"`
+**File**: `src/pages/admin/staff/CreateStaffDialog.tsx`
+- Change `<Select>` to `<Select modal={false}>`
 
-### 2. Edge Function: `create-staff-account`
-- New Supabase Edge Function at `supabase/functions/create-staff-account/index.ts`
-- Accepts: first_name, last_name, email, password, role
-- Uses the **service role key** to call `supabase.auth.admin.createUser()` (creates the user without email confirmation)
-- Inserts a record into `user_roles` with the chosen role
-- Optionally inserts into `guests` table for profile data
-- Validates that the calling user is an admin (checks their JWT)
+### Fix 2: Reserve space for error messages
+Error messages should always reserve space even when not visible, preventing layout reflow when they appear/disappear.
 
-### 3. New Admin Page: `src/pages/admin/StaffManager.tsx`
-- Header with icon, title "Staff Management", and subtitle "Manage staff accounts (moderators and staff)"
-- "Create Staff" button (primary) and "Refresh" button
-- Search bar to filter by name or email
-- Table/list of all staff accounts showing: name, email, role, created date
-- Each row has actions: edit role, delete account
-- Empty state when no staff found
+**File**: `src/pages/admin/staff/CreateStaffDialog.tsx`
+- Add `min-h-[20px]` to FormMessage or the form field container to reserve space
+- This ensures the form height remains constant whether errors are shown or not
 
-### 4. Create Staff Dialog
-- Modal dialog with form fields:
-  - First Name + Last Name (side by side)
-  - Email
-  - Role (dropdown: Staff, Moderator, Admin)
-  - Password + Confirm Password
-- "Create Account" button
-- Validation with Zod schema
-- Calls the edge function on submit
+### Fix 3: Ensure stable AdminLayout scrollbar
+Although the global CSS already has `overflow-y: scroll`, ensure the AdminLayout doesn't introduce additional shifts.
 
-### 5. Sidebar Update: `AdminSidebar.tsx`
-- Add "Staff Management" link under the "Administration" section
-- Icon: `Users` (from lucide-react) or `UserCog`
-- URL: `/admin/staff`
+**File**: `src/components/admin/AdminLayout.tsx`
+- The layout is already correct (`overflow-auto` on the inner content div), but verify it doesn't conflict with dialog
 
-### 6. Route Registration: `AdminRoutes.tsx`
-- Add route: `<Route path="staff" element={<StaffManager />} />`
-
-### 7. Role-Based Access Control (future-ready)
-- The `AuthGuard` and `useAuthGuard` hook currently only check for `admin` role
-- For moderators/staff, the existing `is_user_admin` check will need to also accept moderator/staff for relevant sections
-- This plan focuses on the staff creation UI; granular role enforcement can be added incrementally
-
-## Technical Details
-
-### Edge Function Security
-- Verifies the calling user's JWT token
-- Checks the caller has the `admin` role via `has_role()` database function
-- Uses `SUPABASE_SERVICE_ROLE_KEY` to create auth users (required for admin user creation)
-
-### Files to Create
-- `supabase/functions/create-staff-account/index.ts` -- edge function
-- `src/pages/admin/StaffManager.tsx` -- main page component
-- `src/pages/admin/staff/CreateStaffDialog.tsx` -- create dialog component
-- `src/pages/admin/staff/StaffTable.tsx` -- staff list table component
-
-### Files to Modify
-- `src/components/admin/AdminSidebar.tsx` -- add nav item
-- `src/routes/AdminRoutes.tsx` -- add route
-- `src/integrations/supabase/types.ts` -- update app_role enum type
-- New SQL migration -- add 'staff' to enum
+### Expected Result
+- Dialog remains centered and stable when clicking inputs
+- No layout shift when validation errors appear
+- Select dropdown opens without affecting the overall layout
+- Consistent visual experience across all interactions
 
