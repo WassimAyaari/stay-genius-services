@@ -1,57 +1,77 @@
 
 
-# Translate Auth Pages to English and Fix Card Shifting
+# Staff Management Section
 
-## 1. Translate All French Text to English
+## Overview
+Create a new "Staff Management" admin page where admins can create staff accounts with role assignments, view existing staff members, search/filter them, and manage their roles.
 
-### Files to update:
+## Roles Definition
+- **Admin**: Full access to all admin features
+- **Moderator**: Access to Chat, Housekeeping, Maintenance, and Security sections
+- **Staff**: Basic staff access (limited admin panel visibility)
+- **User (Guest)**: Public pages, profile, and reservations only (existing default role)
 
-**LoginCard.tsx** - Subtitle text and tab labels
-- "Connectez-vous pour acceder..." -> "Sign in to access hotel services"
-- "Creez votre compte..." -> "Create your account to access hotel services"
-- "Connexion" -> "Login", "Inscription" -> "Register"
+## Changes Required
 
-**LoginForm.tsx** - Labels, validation, toasts, button
-- "Adresse email invalide" -> "Invalid email address"
-- "Le mot de passe est requis" -> "Password is required"
-- "Mot de passe" -> "Password"
-- "Se connecter" -> "Sign In"
-- "Connexion en cours..." -> "Signing in..."
-- All toast titles/descriptions to English
+### 1. Database: Add "staff" to the app_role enum
+- Run a migration to add `'staff'` to the `app_role` enum type
+- Update the TypeScript types to include `"staff"`
 
-**BasicInfoFields.tsx** - Labels and placeholders
-- "Prenom" -> "First Name", "Nom" -> "Last Name"
+### 2. Edge Function: `create-staff-account`
+- New Supabase Edge Function at `supabase/functions/create-staff-account/index.ts`
+- Accepts: first_name, last_name, email, password, role
+- Uses the **service role key** to call `supabase.auth.admin.createUser()` (creates the user without email confirmation)
+- Inserts a record into `user_roles` with the chosen role
+- Optionally inserts into `guests` table for profile data
+- Validates that the calling user is an admin (checks their JWT)
 
-**DateFields.tsx** - Labels, placeholders, date locale
-- "Date de naissance" -> "Date of Birth"
-- "Date d'arrivee" -> "Check-in Date", "Date de depart" -> "Check-out Date"
-- "Selectionner" -> "Select"
-- Date formatting from 'fr-FR' to 'en-US'
+### 3. New Admin Page: `src/pages/admin/StaffManager.tsx`
+- Header with icon, title "Staff Management", and subtitle "Manage staff accounts (moderators and staff)"
+- "Create Staff" button (primary) and "Refresh" button
+- Search bar to filter by name or email
+- Table/list of all staff accounts showing: name, email, role, created date
+- Each row has actions: edit role, delete account
+- Empty state when no staff found
 
-**AdditionalFields.tsx** - Labels and placeholders
-- "Nationalite" -> "Nationality"
-- "Numero de chambre" -> "Room Number"
+### 4. Create Staff Dialog
+- Modal dialog with form fields:
+  - First Name + Last Name (side by side)
+  - Email
+  - Role (dropdown: Staff, Moderator, Admin)
+  - Password + Confirm Password
+- "Create Account" button
+- Validation with Zod schema
+- Calls the edge function on submit
 
-**PasswordField.tsx** - Labels and placeholders
-- "Mot de passe" -> "Password"
-- "Confirmer le mot de passe" -> "Confirm Password"
+### 5. Sidebar Update: `AdminSidebar.tsx`
+- Add "Staff Management" link under the "Administration" section
+- Icon: `Users` (from lucide-react) or `UserCog`
+- URL: `/admin/staff`
 
-**CompanionsList.tsx** - Labels, relation options, button
-- "Accompagnants" -> "Companions"
-- Relation options: "Conjoint(e)" -> "Spouse", "Enfant" -> "Child", etc.
-- "Ajouter un accompagnant" -> "Add a Companion"
+### 6. Route Registration: `AdminRoutes.tsx`
+- Add route: `<Route path="staff" element={<StaffManager />} />`
 
-**useRegistrationForm.ts** - Validation messages and toasts
-- All Zod validation messages to English
-- All toast messages to English
+### 7. Role-Based Access Control (future-ready)
+- The `AuthGuard` and `useAuthGuard` hook currently only check for `admin` role
+- For moderators/staff, the existing `is_user_admin` check will need to also accept moderator/staff for relevant sections
+- This plan focuses on the staff creation UI; granular role enforcement can be added incrementally
 
-**BirthDatePicker.tsx** - Default placeholder and date locale
-- "Selectionner une date" -> "Select a date"
-- Date formatting from 'fr-FR' to 'en-US'
+## Technical Details
 
-## 2. Fix Card Shifting on Input Focus
+### Edge Function Security
+- Verifies the calling user's JWT token
+- Checks the caller has the `admin` role via `has_role()` database function
+- Uses `SUPABASE_SERVICE_ROLE_KEY` to create auth users (required for admin user creation)
 
-The card shifts when focusing inputs because the page content height changes (e.g., validation messages appearing, or mobile keyboard triggering scroll changes) while the card is vertically centered with `items-center`.
+### Files to Create
+- `supabase/functions/create-staff-account/index.ts` -- edge function
+- `src/pages/admin/StaffManager.tsx` -- main page component
+- `src/pages/admin/staff/CreateStaffDialog.tsx` -- create dialog component
+- `src/pages/admin/staff/StaffTable.tsx` -- staff list table component
 
-**Fix in Login.tsx**: Add `overflow-y: scroll` to the container so the scrollbar is always present, preventing layout shifts. Also ensure the card doesn't reposition by using a stable layout approach (e.g., `items-start` with top padding, or keeping `items-center` but forcing consistent scrollbar).
+### Files to Modify
+- `src/components/admin/AdminSidebar.tsx` -- add nav item
+- `src/routes/AdminRoutes.tsx` -- add route
+- `src/integrations/supabase/types.ts` -- update app_role enum type
+- New SQL migration -- add 'staff' to enum
 
