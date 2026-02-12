@@ -1,44 +1,32 @@
 
 
-# Fix: Restore Dark Backdrop on Profile Dialogs
+# Fix: Add Accompanist Dialog -- Stop Layout Shift and Restore Backdrop
 
 ## Problem
-Setting `modal={false}` on the Dialog components fixed the layout shift, but it also removed the semi-transparent black overlay/backdrop behind the dialog. The user wants both: no layout shift AND the dark backdrop visible (as shown in their screenshot).
-
-## Root Cause
-When `modal={false}` is set, Radix Dialog skips rendering the `DialogOverlay` component inside `DialogPortal`. The overlay is part of the `DialogContent` component in `src/components/ui/dialog.tsx`, but it only renders in modal mode.
+The "Add Accompanist" dialog in `CompanionsList.tsx` still uses the default `modal` mode, causing the same layout shift issue that was already fixed for the Preference and Medical Alert dialogs.
 
 ## Solution
-Add a manual overlay `<div>` inside the `DialogContent` of the two profile dialogs, styled identically to the standard `DialogOverlay` (`fixed inset-0 z-50 bg-black/80`). This preserves `modal={false}` (no scrollbar manipulation) while restoring the dark backdrop.
+Apply the exact same pattern used for the other two dialogs:
+1. Add `modal={false}` to prevent scrollbar manipulation
+2. Add a manual backdrop div for the dark overlay
 
-## Files to Edit
+## File to Edit
 
-### `src/pages/profile/components/AddPreferenceDialog.tsx`
-- Add a backdrop div before `DialogContent`:
+### `src/pages/profile/components/CompanionsList.tsx`
+
+Change the Dialog section (around line 179) from:
+
 ```tsx
-<Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-  <DialogPortal>
-    {open && <div className="fixed inset-0 z-50 bg-black/80" />}
-    <DialogContent className="sm:max-w-md">
-      ...
-    </DialogContent>
-  </DialogPortal>
-</Dialog>
+<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+  <DialogContent className="sm:max-w-[425px]">
 ```
-- Remove `DialogContent`'s built-in portal wrapping by switching to use `DialogPortal` explicitly so we can insert the backdrop alongside the content.
 
-### `src/pages/profile/components/AddMedicalAlertDialog.tsx`
-- Same change: add manual backdrop div inside an explicit `DialogPortal`.
+To:
 
-### Alternative (simpler approach)
-Instead of restructuring the portal, we can add a click-to-close overlay div rendered conditionally alongside the Dialog:
 ```tsx
-{open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
+{isDialogOpen && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => setIsDialogOpen(false)} />}
+<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} modal={false}>
+  <DialogContent className="sm:max-w-[425px]">
 ```
-This div is rendered as a sibling just before `DialogContent`, providing the visual backdrop and click-to-dismiss behavior without changing the dialog component itself.
 
-## Result
-- Dark semi-transparent backdrop appears when dialogs open (matching the screenshot)
-- No layout shift when opening/closing dialogs
-- Click on backdrop still closes the dialog
-
+This is the same two-line change already applied to `AddPreferenceDialog.tsx` and `AddMedicalAlertDialog.tsx`.
