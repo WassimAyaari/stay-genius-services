@@ -31,8 +31,10 @@ const AddPreferenceDialog: React.FC<AddPreferenceDialogProps> = ({ open, onOpenC
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="sm:max-w-md">
+    <>
+      {open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add Preference</DialogTitle>
         </DialogHeader>
@@ -77,7 +79,8 @@ const AddPreferenceDialog: React.FC<AddPreferenceDialogProps> = ({ open, onOpenC
           <Button onClick={handleAdd} disabled={!value.trim()}>Add</Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </>
   );
 };
 
