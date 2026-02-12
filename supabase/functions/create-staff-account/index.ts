@@ -107,15 +107,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Optionally insert into guests table for profile
-    await supabaseAdmin.from("guests").insert({
-      user_id: newUser.user.id,
-      first_name,
-      last_name,
-      email,
-      guest_type: "Staff",
-    });
-
     return new Response(
       JSON.stringify({ success: true, user_id: newUser.user.id }),
       {
