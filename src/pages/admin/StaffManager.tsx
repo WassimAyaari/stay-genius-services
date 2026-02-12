@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import StaffTable, { StaffMember } from './staff/StaffTable';
 import CreateStaffDialog from './staff/CreateStaffDialog';
 import DeleteStaffDialog from './staff/DeleteStaffDialog';
+import EditRoleDialog from './staff/EditRoleDialog';
 import { toast } from '@/hooks/use-toast';
 
 const StaffManager: React.FC = () => {
@@ -14,7 +15,9 @@ const StaffManager: React.FC = () => {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState<StaffMember | null>(null);
+  const [staffToEdit, setStaffToEdit] = useState<StaffMember | null>(null);
 
   const fetchStaff = useCallback(async () => {
     setIsLoading(true);
@@ -71,8 +74,8 @@ const StaffManager: React.FC = () => {
   }, [fetchStaff]);
 
   const handleEditRole = (member: StaffMember) => {
-    // Future: open edit role dialog
-    toast({ title: 'Coming soon', description: 'Role editing will be available soon.' });
+    setStaffToEdit(member);
+    setEditOpen(true);
   };
 
   const handleDelete = (member: StaffMember) => {
@@ -148,6 +151,14 @@ const StaffManager: React.FC = () => {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         member={staffToDelete}
+        onSuccess={fetchStaff}
+      />
+
+      {/* Edit Role Dialog */}
+      <EditRoleDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        member={staffToEdit}
         onSuccess={fetchStaff}
       />
     </div>
