@@ -48,11 +48,11 @@ const LoginForm: React.FC = () => {
         // Check if user is admin and redirect accordingly
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user?.id) {
-          const { data: isAdmin } = await supabase.rpc('is_user_admin', { 
+          const { data: isStaff } = await supabase.rpc('is_staff_member', { 
             _user_id: session.user.id 
           });
           
-          if (isAdmin) {
+          if (isStaff) {
             navigate('/admin');
           } else {
             navigate('/');

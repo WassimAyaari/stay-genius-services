@@ -60,6 +60,7 @@ import {
   Globe,
   UserCog,
 } from 'lucide-react';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface NavItem {
   title: string;
@@ -173,10 +174,30 @@ export const AdminSidebar: React.FC = () => {
   const { i18n } = useTranslation();
   const isCollapsed = state === 'collapsed';
   const { counts } = useAdminNotifications();
+  const { role } = useUserRole();
+
+  // Moderator-allowed paths
+  const moderatorAllowedUrls = [
+    '/admin',
+    '/admin/chat',
+    '/admin/housekeeping',
+    '/admin/maintenance',
+    '/admin/security',
+    '/admin/information-technology',
+  ];
+
+  const filteredSections = role === 'moderator'
+    ? navigationSections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => moderatorAllowedUrls.includes(item.url)),
+        }))
+        .filter((section) => section.items.length > 0)
+    : navigationSections;
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
-    navigationSections.forEach((section) => {
+    filteredSections.forEach((section) => {
       initial[section.label] = section.defaultOpen ?? false;
     });
     return initial;
@@ -249,7 +270,7 @@ export const AdminSidebar: React.FC = () => {
 
       {/* Navigation */}
       <SidebarContent className="px-3 py-2">
-        {navigationSections.map((section, index) => {
+        {filteredSections.map((section, index) => {
           const sectionActive = isSectionActive(section);
           const isOpen = openSections[section.label] || sectionActive;
           const isSingleItem = section.items.length === 1;
