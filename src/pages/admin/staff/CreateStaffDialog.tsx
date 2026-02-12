@@ -154,19 +154,6 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Doe" {...field} />
-                    </FormControl>
-                    <div className="min-h-[20px]"><FormMessage /></div>
-                  </FormItem>
-                )}
-              />
             </div>
             <FormField
               control={form.control}
