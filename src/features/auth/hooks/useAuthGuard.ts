@@ -118,7 +118,7 @@ export const useAuthGuard = (adminRequired: boolean = false) => {
           
           try {
             const { data: isAdmin, error: adminError } = await supabase
-              .rpc('is_user_admin', { _user_id: session.user.id });
+              .rpc('is_staff_member', { _user_id: session.user.id });
 
             if (adminError) {
               console.error('Erreur lors de la vérification admin:', adminError);

@@ -1569,6 +1569,7 @@ export type Database = {
         Args: { hotel_id: string; user_id: string }
         Returns: boolean
       }
+      is_staff_member: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { user_id: string }; Returns: boolean }
       is_user_admin: { Args: { _user_id: string }; Returns: boolean }
     }
