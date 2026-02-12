@@ -19,7 +19,7 @@ const severityColors: Record<string, string> = {
   Critical: 'bg-destructive/15 text-destructive border-destructive/30',
   High: 'bg-destructive/10 text-destructive border-destructive/20',
   Medium: 'bg-orange-100 text-orange-800 border-orange-200',
-  Low: 'bg-secondary text-secondary-foreground border-border',
+  Low: 'bg-blue-50 text-blue-800 border-blue-200',
 };
 
 const PreferencesSection: React.FC = () => {
@@ -106,7 +106,7 @@ const PreferencesSection: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {items.map((p) => (
-                    <Badge key={p.id} variant="secondary" className="gap-1 pr-1">
+                    <Badge key={p.id} variant="outline" className="gap-1 pr-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
                       {p.value}
                       <button
                         className="ml-1 rounded-full hover:bg-muted p-0.5"
