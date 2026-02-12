@@ -26,8 +26,10 @@ const AddMedicalAlertDialog: React.FC<AddMedicalAlertDialogProps> = ({ open, onO
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="sm:max-w-md">
+    <>
+      {open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add Medical Alert</DialogTitle>
         </DialogHeader>
@@ -68,7 +70,8 @@ const AddMedicalAlertDialog: React.FC<AddMedicalAlertDialogProps> = ({ open, onO
           <Button onClick={handleAdd} disabled={!description.trim()}>Add</Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </>
   );
 };
 
