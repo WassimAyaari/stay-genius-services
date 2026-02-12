@@ -1,45 +1,77 @@
 
-## Problem Analysis
-The card moves when clicking the three dots (dropdown menu) or the Create Staff button because:
 
-1. **Dialog doesn't have `modal={false}`**: The Radix Dialog Root doesn't explicitly set `modal={false}`, which may cause the scrollbar to disappear when the dialog opens
-2. **Select component doesn't have `modal={false}`**: The Select component in the Create Staff form also doesn't prevent the modal behavior from affecting scrollbars
-3. **Dropdown menu behavior**: When the dropdown opens, it may trigger scrollbar calculations that shift the layout
+# Staff Management Section
 
-Even though `overflow-y: scroll !important;` is set globally on the body in `index.css`, the Radix components' default modal behavior can still override this by manipulating the `overflow` property on the html or body element.
+## Overview
+Create a new "Staff Management" admin page where admins can create staff accounts with role assignments, view existing staff members, search/filter them, and manage their roles.
 
-## Solution
+## Roles Definition
+- **Admin**: Full access to all admin features
+- **Moderator**: Access to Chat, Housekeeping, Maintenance, and Security sections
+- **Staff**: Basic staff access (limited admin panel visibility)
+- **User (Guest)**: Public pages, profile, and reservations only (existing default role)
 
-### 1. **Dialog Component (src/components/ui/dialog.tsx)**
-Add `modal={false}` to the Dialog Root to prevent it from controlling scrollbar visibility:
-```tsx
-const Dialog = DialogPrimitive.Root
-// Change to:
-const Dialog: typeof DialogPrimitive.Root = (props) => <DialogPrimitive.Root {...props} modal={false} />
-```
+## Changes Required
 
-**Rationale**: This tells Radix Dialog not to manage the scrollbar, allowing our global CSS to maintain scrollbar visibility.
+### 1. Database: Add "staff" to the app_role enum
+- Run a migration to add `'staff'` to the `app_role` enum type
+- Update the TypeScript types to include `"staff"`
 
-### 2. **Select Component (src/components/ui/select.tsx)**
-Add `modal={false}` to the Select Root to prevent it from triggering scrollbar removal:
-```tsx
-const Select = SelectPrimitive.Root
-// Change to:
-const Select: typeof SelectPrimitive.Root = (props) => <SelectPrimitive.Root {...props} modal={false} />
-```
+### 2. Edge Function: `create-staff-account`
+- New Supabase Edge Function at `supabase/functions/create-staff-account/index.ts`
+- Accepts: first_name, last_name, email, password, role
+- Uses the **service role key** to call `supabase.auth.admin.createUser()` (creates the user without email confirmation)
+- Inserts a record into `user_roles` with the chosen role
+- Optionally inserts into `guests` table for profile data
+- Validates that the calling user is an admin (checks their JWT)
 
-**Rationale**: Same as Dialog - prevents Select from controlling scrollbar behavior.
+### 3. New Admin Page: `src/pages/admin/StaffManager.tsx`
+- Header with icon, title "Staff Management", and subtitle "Manage staff accounts (moderators and staff)"
+- "Create Staff" button (primary) and "Refresh" button
+- Search bar to filter by name or email
+- Table/list of all staff accounts showing: name, email, role, created date
+- Each row has actions: edit role, delete account
+- Empty state when no staff found
 
-### 3. **AdminLayout Optimization (src/components/admin/AdminLayout.tsx)**
-The inner content div already uses `overflow-auto`, which is correct. No changes needed here.
+### 4. Create Staff Dialog
+- Modal dialog with form fields:
+  - First Name + Last Name (side by side)
+  - Email
+  - Role (dropdown: Staff, Moderator, Admin)
+  - Password + Confirm Password
+- "Create Account" button
+- Validation with Zod schema
+- Calls the edge function on submit
 
-## Expected Result
-- The Create Staff button click will open the dialog without the scrollbar disappearing
-- The three dots (dropdown menu) will open without triggering any scrollbar shifts
-- Selecting a role from the dropdown will not cause layout movement
-- The card/content will remain fixed in place during all interactions
+### 5. Sidebar Update: `AdminSidebar.tsx`
+- Add "Staff Management" link under the "Administration" section
+- Icon: `Users` (from lucide-react) or `UserCog`
+- URL: `/admin/staff`
+
+### 6. Route Registration: `AdminRoutes.tsx`
+- Add route: `<Route path="staff" element={<StaffManager />} />`
+
+### 7. Role-Based Access Control (future-ready)
+- The `AuthGuard` and `useAuthGuard` hook currently only check for `admin` role
+- For moderators/staff, the existing `is_user_admin` check will need to also accept moderator/staff for relevant sections
+- This plan focuses on the staff creation UI; granular role enforcement can be added incrementally
 
 ## Technical Details
-- `modal={false}` on Radix Dialog/Select tells them not to manage `inert` attribute or body scrollbar
-- Our global CSS (`overflow-y: scroll !important;`) will maintain the scrollbar consistently
-- Dropdown menus use Portal without modal behavior, so they won't cause shifts
+
+### Edge Function Security
+- Verifies the calling user's JWT token
+- Checks the caller has the `admin` role via `has_role()` database function
+- Uses `SUPABASE_SERVICE_ROLE_KEY` to create auth users (required for admin user creation)
+
+### Files to Create
+- `supabase/functions/create-staff-account/index.ts` -- edge function
+- `src/pages/admin/StaffManager.tsx` -- main page component
+- `src/pages/admin/staff/CreateStaffDialog.tsx` -- create dialog component
+- `src/pages/admin/staff/StaffTable.tsx` -- staff list table component
+
+### Files to Modify
+- `src/components/admin/AdminSidebar.tsx` -- add nav item
+- `src/routes/AdminRoutes.tsx` -- add route
+- `src/integrations/supabase/types.ts` -- update app_role enum type
+- New SQL migration -- add 'staff' to enum
+
