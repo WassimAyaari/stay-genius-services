@@ -107,6 +107,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Insert guest profile so StaffManager can display name/email
+    await supabaseAdmin.from("guests").insert({
+      user_id: newUser.user.id,
+      first_name,
+      last_name,
+      email,
+      guest_type: "Staff",
+    });
+
     return new Response(
       JSON.stringify({ success: true, user_id: newUser.user.id }),
       {
