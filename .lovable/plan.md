@@ -1,56 +1,31 @@
 
 
-# Implement Staff Account Deletion
+# Fix: Staff Name and Email Not Displayed
 
-## Overview
-Currently, clicking "Delete Account" on a staff member shows a "Coming soon" toast. We need to make it fully functional with a confirmation dialog and a new edge function that uses the service role to delete the user from `auth.users` (which cascades to `user_roles`, `guests`, etc.).
+## Problem
+When a staff/moderator account is created, the name and email fields appear blank in the Staff Management table. This is because the `create-staff-account` edge function no longer inserts a record into the `guests` table (removed in a previous fix), but the `StaffManager` still looks up name and email from that table.
+
+## Solution
+Re-add the `guests` table insert in the edge function. The `guests` table serves as the profile store for all users. The Guest 360 page already filters out staff users, so adding staff to `guests` won't cause them to appear in the wrong list.
 
 ## Changes
 
-### 1. New Edge Function: `delete-staff-account`
-**File**: `supabase/functions/delete-staff-account/index.ts`
+### 1. Update `create-staff-account` edge function
+**File**: `supabase/functions/create-staff-account/index.ts`
 
-- Accepts `{ user_id }` in the request body
-- Verifies the caller is an admin (same pattern as `create-staff-account`)
-- Prevents self-deletion (admin cannot delete their own account)
-- Uses `supabaseAdmin.auth.admin.deleteUser(user_id)` to remove the user
-- Foreign key cascades will automatically clean up `user_roles`, `guests`, `conversations`, etc.
-
-### 2. Confirmation Dialog: `DeleteStaffDialog`
-**File**: `src/pages/admin/staff/DeleteStaffDialog.tsx`
-
-- AlertDialog with warning message showing the staff member's name and email
-- Confirm/Cancel buttons
-- Loading state on the confirm button while deletion is in progress
-
-### 3. Update StaffManager to wire up deletion
-**File**: `src/pages/admin/StaffManager.tsx`
-
-- Add state for the delete dialog (`deleteOpen`, `staffToDelete`)
-- Replace the placeholder `handleDelete` with logic that opens the confirmation dialog
-- On confirm, call the `delete-staff-account` edge function
-- On success, show a success toast and refresh the staff list
-
-### Technical Details
-
-```text
-User clicks "Delete Account"
-       |
-       v
-  Confirmation Dialog opens
-       |
-       v
-  User confirms --> POST /delete-staff-account { user_id }
-       |
-       v
-  Edge function verifies admin --> deletes user via admin API
-       |
-       v
-  Cascade deletes user_roles, guests, etc.
-       |
-       v
-  Success toast + refresh list
+After inserting the role, add a `guests` insert:
+```typescript
+await supabaseAdmin.from("guests").insert({
+  user_id: newUser.user.id,
+  first_name,
+  last_name,
+  email,
+  guest_type: "Staff",
+});
 ```
 
-The edge function follows the exact same auth pattern as `create-staff-account` (verify JWT, check admin role via `has_role` RPC, then use service role client for the privileged operation).
+This restores the profile data that `StaffManager` relies on. The `GuestsManager` already excludes users with staff/admin/moderator roles, so they won't appear in the guest list.
+
+### 2. No other changes needed
+The `StaffManager` fetch logic already handles this correctly -- it joins `user_roles` with `guests` to get the name and email. The only missing piece was the `guests` insert.
 
