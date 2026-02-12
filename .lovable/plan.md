@@ -1,38 +1,56 @@
 
 
-# Fix: Separate Staff from Guests
+# Implement Staff Account Deletion
 
-## Problem
-When creating a staff account, the edge function inserts a record into the `guests` table. This causes staff/admin accounts to appear in the Guest 360 list, which should only show regular users.
+## Overview
+Currently, clicking "Delete Account" on a staff member shows a "Coming soon" toast. We need to make it fully functional with a confirmation dialog and a new edge function that uses the service role to delete the user from `auth.users` (which cascades to `user_roles`, `guests`, etc.).
 
-## Root Cause
-The `create-staff-account` edge function has this line that inserts every new staff member into the `guests` table:
-```typescript
-await supabaseAdmin.from("guests").insert({
-  user_id: newUser.user.id,
-  first_name, last_name, email,
-  guest_type: "Staff",
-});
+## Changes
+
+### 1. New Edge Function: `delete-staff-account`
+**File**: `supabase/functions/delete-staff-account/index.ts`
+
+- Accepts `{ user_id }` in the request body
+- Verifies the caller is an admin (same pattern as `create-staff-account`)
+- Prevents self-deletion (admin cannot delete their own account)
+- Uses `supabaseAdmin.auth.admin.deleteUser(user_id)` to remove the user
+- Foreign key cascades will automatically clean up `user_roles`, `guests`, `conversations`, etc.
+
+### 2. Confirmation Dialog: `DeleteStaffDialog`
+**File**: `src/pages/admin/staff/DeleteStaffDialog.tsx`
+
+- AlertDialog with warning message showing the staff member's name and email
+- Confirm/Cancel buttons
+- Loading state on the confirm button while deletion is in progress
+
+### 3. Update StaffManager to wire up deletion
+**File**: `src/pages/admin/StaffManager.tsx`
+
+- Add state for the delete dialog (`deleteOpen`, `staffToDelete`)
+- Replace the placeholder `handleDelete` with logic that opens the confirmation dialog
+- On confirm, call the `delete-staff-account` edge function
+- On success, show a success toast and refresh the staff list
+
+### Technical Details
+
+```text
+User clicks "Delete Account"
+       |
+       v
+  Confirmation Dialog opens
+       |
+       v
+  User confirms --> POST /delete-staff-account { user_id }
+       |
+       v
+  Edge function verifies admin --> deletes user via admin API
+       |
+       v
+  Cascade deletes user_roles, guests, etc.
+       |
+       v
+  Success toast + refresh list
 ```
 
-Additionally, the GuestsManager query fetches **all** records from the `guests` table without filtering out staff accounts.
-
-## Solution
-
-### 1. Remove guest insertion from the edge function
-**File**: `supabase/functions/create-staff-account/index.ts`
-- Remove the block that inserts into the `guests` table. Staff members are not guests and should not appear there.
-
-### 2. Filter the Guests list to exclude staff users
-**File**: `src/pages/admin/GuestsManager.tsx`
-- After fetching guests, cross-reference with `user_roles` to exclude users who have non-"user" roles (admin, moderator, staff).
-- Query `user_roles` for roles other than `user`, collect those `user_id`s, then filter them out of the guest list.
-
-### 3. Clean up existing data
-- The "hotel genius" admin account already exists in the `guests` table. The code fix will filter it out going forward. Optionally, a note can be provided to manually delete that record from the `guests` table via the Supabase dashboard.
-
-## Expected Result
-- Staff Management shows only admin/moderator/staff accounts
-- Guest 360 shows only regular user (guest) accounts
-- Future staff account creation will not pollute the guests table
+The edge function follows the exact same auth pattern as `create-staff-account` (verify JWT, check admin role via `has_role` RPC, then use service role client for the privileged operation).
 
