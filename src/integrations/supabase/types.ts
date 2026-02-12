@@ -552,6 +552,73 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_medical_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string
+          guest_id: string
+          id: string
+          severity: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description: string
+          guest_id: string
+          id?: string
+          severity: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string
+          guest_id?: string
+          id?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_medical_alerts_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_preferences: {
+        Row: {
+          category: string
+          created_at: string
+          guest_id: string
+          id: string
+          value: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          guest_id: string
+          id?: string
+          value: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          guest_id?: string
+          id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_preferences_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guests: {
         Row: {
           birth_date: string | null
@@ -1611,6 +1678,10 @@ export type Database = {
       is_staff_member: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { user_id: string }; Returns: boolean }
       is_user_admin: { Args: { _user_id: string }; Returns: boolean }
+      owns_guest_record: {
+        Args: { _guest_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "staff"

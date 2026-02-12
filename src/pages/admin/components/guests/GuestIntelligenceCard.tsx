@@ -11,13 +11,35 @@ import {
   Bell
 } from 'lucide-react';
 import { Guest } from './types';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GuestIntelligenceCardProps {
   guest: Guest;
 }
 
+const severityColors: Record<string, string> = {
+  Critical: 'bg-destructive text-destructive-foreground',
+  High: 'bg-destructive/80 text-destructive-foreground',
+  Medium: 'bg-orange-100 text-orange-800',
+  Low: 'bg-secondary text-secondary-foreground',
+};
+
 const GuestIntelligenceCard: React.FC<GuestIntelligenceCardProps> = ({ guest }) => {
   const isHighValueGuest = guest.guest_type === 'Premium Guest' || guest.guest_type === 'VIP';
+
+  const { data: alerts = [] } = useQuery({
+    queryKey: ['admin-guest-alerts', guest.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('guest_medical_alerts')
+        .select('*')
+        .eq('guest_id', guest.id);
+      if (error) throw error;
+      return data as { id: string; alert_type: string; severity: string; description: string }[];
+    },
+    enabled: !!guest.id,
+  });
   
   return (
     <Card>
@@ -47,10 +69,27 @@ const GuestIntelligenceCard: React.FC<GuestIntelligenceCardProps> = ({ guest }) 
             ACTIVE ALERTS
           </div>
           
-          {/* Placeholder for allergies - will come from guest_allergies table */}
-          <p className="text-sm text-muted-foreground italic">
-            No active alerts
-          </p>
+          {alerts.length > 0 ? (
+            <div className="space-y-2">
+              {alerts.map((alert) => (
+                <div key={alert.id} className="flex items-start gap-2 rounded-md border p-2.5">
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">{alert.alert_type}</Badge>
+                      <Badge className={`text-xs ${severityColors[alert.severity] || ''}`}>
+                        {alert.severity}
+                      </Badge>
+                    </div>
+                    <p className="text-sm">{alert.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              No active alerts
+            </p>
+          )}
 
           {/* Guest Value Badges */}
           {(isHighValueGuest || guest.guest_type) && (
@@ -78,7 +117,6 @@ const GuestIntelligenceCard: React.FC<GuestIntelligenceCardProps> = ({ guest }) 
             STAFF-TO-STAFF NOTES
           </div>
           
-          {/* Placeholder notes area - will come from guest_notes table */}
           <p className="text-sm text-muted-foreground italic">
             No notes
           </p>
