@@ -176,7 +176,8 @@ const CompanionsList = ({ companions, onAddCompanion }: CompanionsListProps) => 
         </div>
       </CardContent>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {isDialogOpen && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => setIsDialogOpen(false)} />}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} modal={false}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Ajouter un accompagnateur</DialogTitle>
