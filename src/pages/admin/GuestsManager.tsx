@@ -60,13 +60,23 @@ const GuestsManager: React.FC = () => {
   const { data: guests = [], isLoading, refetch } = useQuery({
     queryKey: ['guests'],
     queryFn: async () => {
+      // Fetch staff user_ids to exclude from guest list
+      const { data: staffRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['admin', 'moderator', 'staff']);
+
+      const staffUserIds = new Set((staffRoles || []).map((r) => r.user_id));
+
       const { data, error } = await supabase
         .from('guests')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+
+      // Filter out guests that are staff/admin/moderator
+      return (data || []).filter((guest) => !guest.user_id || !staffUserIds.has(guest.user_id));
     },
   });
 
