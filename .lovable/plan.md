@@ -1,38 +1,106 @@
 
-
-# Fix: Old Notifications Showing on First Login
+# Implement "Change Role" Feature for Staff Management
 
 ## Problem
-When a staff/moderator/admin logs in for the first time, the `admin_section_seen` table has no rows for that user. The notification counting logic falls back to epoch (`1970-01-01`), so every pending item in the entire database is counted as "new."
+The "Change Role" button in the Staff Management page currently shows a "Coming soon" toast. Admins need the ability to update roles for any staff member, including other admins, with proper validation to prevent self-demotion.
 
-## Solution
-When no `admin_section_seen` record exists for a section, instead of using epoch, automatically seed all section keys with the current timestamp on the user's first load. This treats all existing items as "already seen" and only new items created after login will trigger badges.
+## Solution Overview
+Implement a complete role-editing workflow using a new dialog component and backend edge function, following the existing patterns from CreateStaffDialog and DeleteStaffDialog.
 
-## Changes
+## Implementation Steps
 
-### 1. Update `useAdminNotifications.ts` -- seed on first load
-**File**: `src/hooks/admin/useAdminNotifications.ts`
+### 1. Create Edge Function: `update-staff-role`
+**File**: `supabase/functions/update-staff-role/index.ts`
 
-In the `fetchCounts` function, after fetching `seenRows`, check if the user has any rows at all. If not (first login), insert rows for all section keys with `last_seen_at = now()` and return zero counts:
+This function will:
+- Verify the caller is an admin (using `has_role` RPC)
+- Prevent self-demotion (caller cannot change their own role to a lower privilege)
+- Delete the old role record and insert the new one in the `user_roles` table
+- Return success/error responses with proper error handling
 
-```
-if (!seenRows || seenRows.length === 0) {
-  const now = new Date().toISOString();
-  const seedRows = SECTION_KEYS.map(key => ({
-    user_id: user.id,
-    section_key: key,
-    last_seen_at: now,
-  }));
-  await supabase.from('admin_section_seen').upsert(seedRows, {
-    onConflict: 'user_id,section_key',
-  });
-  // Return all zeros since everything is now "seen"
-  return { counts: counts as Record<SectionKey, number>, restaurantCounts: {}, spaServiceCounts: {} };
-}
+**Key Logic**:
+```typescript
+// 1. Verify admin access
+// 2. Check if user_id === callerId && new_role is lower privilege → reject
+// 3. Delete old role: DELETE FROM user_roles WHERE user_id = X AND role != new_role
+// 4. Insert new role: INSERT INTO user_roles (user_id, role)
+// 5. Return success
 ```
 
-This ensures:
-- First login: all badges start at 0
-- Subsequent logins: only items created after the last visit show as new
-- No changes needed to any other file
+### 2. Create EditRoleDialog Component
+**File**: `src/pages/admin/staff/EditRoleDialog.tsx`
+
+This dialog will:
+- Display current role and allow selection of new role
+- Include form validation with Zod
+- Prevent admins from demoting themselves
+- Call the new edge function to update the role
+- Show loading state during submission
+
+**Form Schema**:
+```typescript
+const editRoleSchema = z.object({
+  new_role: z.enum(['staff', 'moderator', 'admin'], {
+    required_error: 'Please select a role',
+  }),
+});
+```
+
+**Props**:
+- `open: boolean`
+- `onOpenChange: (open: boolean) => void`
+- `member: StaffMember | null` (staff member to edit)
+- `currentUserRole: string | null` (current logged-in user's role)
+- `onSuccess: () => void` (callback to refresh list)
+
+### 3. Update StaffManager Component
+**File**: `src/pages/admin/StaffManager.tsx`
+
+Changes:
+- Add state for edit dialog: `editOpen` and `staffToEdit`
+- Update `handleEditRole` to open the dialog instead of showing toast
+- Get the current user's role using the existing `useUserRole` hook
+- Add the EditRoleDialog component to the JSX
+- Pass the role to EditRoleDialog for self-demotion validation
+
+### 4. Self-Demotion Validation Logic
+Implement on both frontend and backend:
+
+**Frontend** (EditRoleDialog):
+- If `member.user_id === currentUserId` and attempting to lower privilege, show warning
+- Disable role options that would result in demotion
+
+**Backend** (edge function):
+- Get caller's role using `has_role` RPC
+- Role hierarchy: `admin` (3) > `moderator` (2) > `staff` (1)
+- If `callerId === userId` and new role is lower, return 400 error
+
+### 5. UI/UX Considerations
+- Show current role in the dialog header/description
+- Disabled state for role options that aren't allowed
+- Clear warning messages for self-demotion attempts
+- Success toast with updated role name
+- Consistent styling with other dialogs
+
+## Technical Architecture
+
+```
+StaffManager
+├── EditRoleDialog (new)
+│   └── Calls edge function: update-staff-role
+└── Edge Function: update-staff-role
+    └── Updates user_roles table via service role
+```
+
+## Security Considerations
+1. **Edge function validates admin access** - Uses `has_role('admin')` RPC
+2. **Self-demotion prevention** - Both frontend and backend prevent admins from demoting themselves
+3. **Service role for updates** - Uses service role key for write operations to bypass RLS
+4. **Input validation** - Zod validation on role selection
+5. **Authorization checks** - Ensures only admins can change roles
+
+## Files to Create/Edit
+- Create: `supabase/functions/update-staff-role/index.ts` (edge function)
+- Create: `src/pages/admin/staff/EditRoleDialog.tsx` (dialog component)
+- Edit: `src/pages/admin/StaffManager.tsx` (add state and integrate dialog)
 
