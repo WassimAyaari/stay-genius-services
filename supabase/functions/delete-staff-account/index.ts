@@ -74,6 +74,9 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Delete guest profile for this staff member before deleting auth user
+    await supabaseAdmin.from("guests").delete().eq("user_id", user_id);
+
     const { error: deleteError } =
       await supabaseAdmin.auth.admin.deleteUser(user_id);
 
