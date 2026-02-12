@@ -1,28 +1,42 @@
 
 
-# Fix: Table Layout Shift When Opening Dropdowns/Dialogs
+# Fix: Staff Members Appearing in Guests After Deletion
 
 ## Problem
-When you click the three-dot menu on a staff row or "Create Staff," the page content shifts slightly. This happens because Radix UI's default modal behavior locks the body scroll by hiding the scrollbar, which changes the page width and causes the table to reflow.
+When a staff account is deleted from Staff Management, the person reappears in the Guest 360 list. This happens because:
 
-## Root Cause
-The `DropdownMenu` in StaffTable and the `Dialog`/`AlertDialog` components in CreateStaffDialog, DeleteStaffDialog, and EditRoleDialog all use the default `modal={true}` behavior. When they open, Radix adds `data-scroll-locked` to the body, hiding the scrollbar and causing a layout shift. The project already applies `modal={false}` to UserMenu and NotificationMenu dropdowns to prevent this exact issue, but it was not applied to the Staff Management components.
+1. The `create-staff-account` function inserts a record in the `guests` table (with `guest_type: "Staff"`)
+2. The `delete-staff-account` function only deletes the auth user -- it does **not** clean up the `guests` table record
+3. The Guest 360 page filters staff by checking `user_roles`, but after deletion, the role record is gone, so the orphaned guest record passes through the filter
 
-## Fix
-Add `modal={false}` to all four components that trigger this shift:
+## Solution (Two-Layer Fix)
 
-### 1. StaffTable.tsx -- DropdownMenu
-Add `modal={false}` to the `DropdownMenu` component wrapping the three-dot actions menu.
+### 1. Delete the guest record when deleting a staff account
+**File**: `supabase/functions/delete-staff-account/index.ts`
 
-### 2. CreateStaffDialog.tsx -- Dialog
-Add `modal={false}` to the `Dialog` component.
+Before deleting the auth user, explicitly delete the corresponding `guests` row using the service-role client:
 
-### 3. DeleteStaffDialog.tsx -- AlertDialog
-Add `modal={false}` to the `AlertDialog` component.
+```typescript
+// Delete guest profile for this staff member
+await supabaseAdmin.from("guests").delete().eq("user_id", user_id);
+```
 
-### 4. EditRoleDialog.tsx -- Dialog
-Add `modal={false}` to the `Dialog` component.
+This ensures no orphaned guest record is left behind.
 
-## Scope
-Each change is a single prop addition (`modal={false}`) on one line per file. No other logic or styling changes are needed.
+### 2. Add a secondary filter in Guest 360
+**File**: `src/pages/admin/GuestsManager.tsx`
+
+In addition to the existing `user_roles` check, also exclude guests where `guest_type` is `"Staff"`. This acts as a safety net for any edge cases:
+
+```typescript
+return (data || []).filter(
+  (guest) =>
+    guest.guest_type !== 'Staff' &&
+    (!guest.user_id || !staffUserIds.has(guest.user_id))
+);
+```
+
+## Files to Edit
+- `supabase/functions/delete-staff-account/index.ts` -- add guest record cleanup before auth deletion
+- `src/pages/admin/GuestsManager.tsx` -- add `guest_type` filter as secondary defense
 
