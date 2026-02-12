@@ -1,25 +1,23 @@
 
 
-# Fix: Lighter Colors for Preferences & Medical Alerts
+# Fix: Cards Shifting When Clicking Buttons on Profile
 
 ## Problem
-The medical alert card for "Low" severity appears with a dark navy background because it maps to `bg-secondary` which is `#2C3E50`. The preference chips also use the dark `secondary` variant.
+When you click any button that opens a dialog (like "Preference" or "Medical Alert"), all cards shift slightly to the right. This happens because Radix Dialog's default modal mode hides the body scrollbar momentarily, causing a layout shift.
 
-## Changes
+## Root Cause
+The dialogs in the profile page (`AddPreferenceDialog.tsx` and `AddMedicalAlertDialog.tsx`) do not have `modal={false}` set on the `<Dialog>` component. The admin panel already uses this pattern to prevent the same issue.
 
-### File: `src/pages/profile/components/PreferencesSection.tsx`
+## Fix
+Add `modal={false}` to the `<Dialog>` component in both dialog files. This prevents Radix from manipulating the body scrollbar while still keeping the dialogs functional.
 
-**1. Update severity color mapping** -- replace the dark backgrounds with soft, light pastels:
+## Files to Edit
 
-| Severity | Current | New |
-|----------|---------|-----|
-| Critical | `bg-destructive/15 text-destructive` | Keep as-is (red tint is appropriate) |
-| High | `bg-destructive/10 text-destructive` | Keep as-is |
-| Medium | `bg-orange-100 text-orange-800` | Keep as-is |
-| Low | `bg-secondary text-secondary-foreground` | `bg-blue-50 text-blue-800 border-blue-200` |
+### `src/pages/profile/components/AddPreferenceDialog.tsx`
+- Change `<Dialog open={open} onOpenChange={onOpenChange}>` to `<Dialog open={open} onOpenChange={onOpenChange} modal={false}>`
 
-**2. Update preference badge styling** -- change from the dark `secondary` variant to a lighter style using `className` override with soft teal/primary tones (`bg-primary/10 text-primary border-primary/20`) to match the app's teal color scheme.
+### `src/pages/profile/components/AddMedicalAlertDialog.tsx`
+- Change `<Dialog open={open} onOpenChange={onOpenChange}>` to `<Dialog open={open} onOpenChange={onOpenChange} modal={false}>`
 
-## Result
-All cards and chips will have light pastel backgrounds with readable dark text instead of dark navy backgrounds with white text.
+This is a two-line change that aligns the profile dialogs with the pattern already used across the admin panel.
 
