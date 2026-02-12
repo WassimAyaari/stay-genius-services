@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AuthGuard from '@/components/AuthGuard';
+import AdminRoleGuard from '@/components/admin/AdminRoleGuard';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import SecurityManager from '@/pages/admin/SecurityManager';
@@ -28,31 +29,33 @@ import StaffManager from '@/pages/admin/StaffManager';
 const AdminRoutes = () => {
   return (
     <AuthGuard adminRequired={true}>
-      <AdminLayout>
-        <Routes>
-          <Route index element={<AdminDashboard />} />
-          <Route path="guests" element={<GuestsManager />} />
-          <Route path="guests/:guestId" element={<GuestDetailPage />} />
-          <Route path="security" element={<SecurityManager />} />
-          <Route path="housekeeping" element={<HousekeepingManager />} />
-          <Route path="maintenance" element={<MaintenanceManager />} />
-          <Route path="reservations" element={<ReservationManager />} />
-          <Route path="restaurants" element={<RestaurantManager />} />
-          <Route path="spa" element={<SpaManager />} />
-          <Route path="events" element={<EventsManager />} />
-          <Route path="shops" element={<ShopsManager />} />
-          <Route path="destination" element={<DestinationManager />} />
-          <Route path="chat" element={<AdminChatDashboard />} />
-          <Route path="about" element={<AboutEditor />} />
-          <Route path="feedback" element={<FeedbackManager />} />
-          <Route path="information-technology" element={<InformationTechnologyManager />} />
-          <Route path="restaurants/:id/events" element={<RestaurantEventsManager />} />
-          <Route path="restaurants/:id/reservations" element={<RestaurantReservationsManager />} />
-          <Route path="destination-admin" element={<DestinationAdmin />} />
-          <Route path="demo" element={<DemoManager />} />
-          <Route path="staff" element={<StaffManager />} />
-        </Routes>
-      </AdminLayout>
+      <AdminRoleGuard>
+        <AdminLayout>
+          <Routes>
+            <Route index element={<AdminDashboard />} />
+            <Route path="guests" element={<GuestsManager />} />
+            <Route path="guests/:guestId" element={<GuestDetailPage />} />
+            <Route path="security" element={<SecurityManager />} />
+            <Route path="housekeeping" element={<HousekeepingManager />} />
+            <Route path="maintenance" element={<MaintenanceManager />} />
+            <Route path="reservations" element={<ReservationManager />} />
+            <Route path="restaurants" element={<RestaurantManager />} />
+            <Route path="spa" element={<SpaManager />} />
+            <Route path="events" element={<EventsManager />} />
+            <Route path="shops" element={<ShopsManager />} />
+            <Route path="destination" element={<DestinationManager />} />
+            <Route path="chat" element={<AdminChatDashboard />} />
+            <Route path="about" element={<AboutEditor />} />
+            <Route path="feedback" element={<FeedbackManager />} />
+            <Route path="information-technology" element={<InformationTechnologyManager />} />
+            <Route path="restaurants/:id/events" element={<RestaurantEventsManager />} />
+            <Route path="restaurants/:id/reservations" element={<RestaurantReservationsManager />} />
+            <Route path="destination-admin" element={<DestinationAdmin />} />
+            <Route path="demo" element={<DemoManager />} />
+            <Route path="staff" element={<StaffManager />} />
+          </Routes>
+        </AdminLayout>
+      </AdminRoleGuard>
     </AuthGuard>
   );
 };
