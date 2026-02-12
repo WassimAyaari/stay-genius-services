@@ -19,14 +19,17 @@ export const useUserRole = () => {
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', user.id)
-          .maybeSingle();
+          .eq('user_id', user.id);
 
         if (error) {
           console.error('Error fetching user role:', error);
           setRole(null);
         } else {
-          setRole(data?.role || null);
+          // Pick the highest-priority role
+          const priority: string[] = ['admin', 'moderator', 'staff', 'user'];
+          const roles = (data || []).map(r => r.role as string);
+          const highest = priority.find(p => roles.includes(p)) || null;
+          setRole(highest);
         }
       } catch (error) {
         console.error('Error in role fetch:', error);

@@ -35,6 +35,45 @@ export type Database = {
         }
         Relationships: []
       }
+      articles: {
+        Row: {
+          content: string
+          created_at: string
+          description: string | null
+          hero_image: string | null
+          id: string
+          published_at: string | null
+          reading_time: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          description?: string | null
+          hero_image?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          description?: string | null
+          hero_image?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       attractions: {
         Row: {
           created_at: string | null

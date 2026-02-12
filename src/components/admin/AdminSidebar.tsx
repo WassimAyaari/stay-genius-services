@@ -176,7 +176,7 @@ export const AdminSidebar: React.FC = () => {
   const { counts } = useAdminNotifications();
   const { role } = useUserRole();
 
-  // Moderator-allowed paths
+  // Role-based allowed paths
   const moderatorAllowedUrls = [
     '/admin',
     '/admin/chat',
@@ -186,14 +186,30 @@ export const AdminSidebar: React.FC = () => {
     '/admin/information-technology',
   ];
 
-  const filteredSections = role === 'moderator'
-    ? navigationSections
+  const staffAllowedUrls = [
+    '/admin',
+    '/admin/restaurants',
+  ];
+
+  const filteredSections = (() => {
+    if (role === 'moderator') {
+      return navigationSections
         .map((section) => ({
           ...section,
           items: section.items.filter((item) => moderatorAllowedUrls.includes(item.url)),
         }))
-        .filter((section) => section.items.length > 0)
-    : navigationSections;
+        .filter((section) => section.items.length > 0);
+    }
+    if (role === 'staff') {
+      return navigationSections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => staffAllowedUrls.includes(item.url)),
+        }))
+        .filter((section) => section.items.length > 0);
+    }
+    return navigationSections;
+  })();
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};

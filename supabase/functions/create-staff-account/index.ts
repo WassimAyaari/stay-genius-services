@@ -107,6 +107,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Remove the auto-inserted 'user' role from the trigger
+    await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", newUser.user.id)
+      .eq("role", "user");
+
     // Insert guest profile so StaffManager can display name/email
     await supabaseAdmin.from("guests").insert({
       user_id: newUser.user.id,
