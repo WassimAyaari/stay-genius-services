@@ -37,11 +37,23 @@ async function fetchCounts(): Promise<{ counts: Record<SectionKey, number>; rest
     .select('section_key, last_seen_at')
     .eq('user_id', user.id);
 
+  // Seed on first login: if no rows exist, insert current timestamp for all sections
+  if (!seenRows || seenRows.length === 0) {
+    const now = new Date().toISOString();
+    const seedRows = SECTION_KEYS.map(key => ({
+      user_id: user.id,
+      section_key: key,
+      last_seen_at: now,
+    }));
+    await supabase.from('admin_section_seen').upsert(seedRows, {
+      onConflict: 'user_id,section_key',
+    });
+    return { counts: counts as Record<SectionKey, number>, restaurantCounts: {}, spaServiceCounts: {} };
+  }
+
   const lastSeenMap: Record<string, string> = {};
-  if (seenRows) {
-    for (const row of seenRows) {
-      lastSeenMap[row.section_key] = row.last_seen_at;
-    }
+  for (const row of seenRows) {
+    lastSeenMap[row.section_key] = row.last_seen_at;
   }
 
   // Helper: get last_seen or epoch for first-time
