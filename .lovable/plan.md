@@ -1,58 +1,59 @@
 
 
-# Fix: Moderator Access to Admin Panel
+# Fix Role-Based Access Control (3-Tier System)
 
 ## Problem
-The `is_user_admin` database function only checks for the `admin` role. When a moderator logs in, three things go wrong:
-1. **Login redirect**: The login form calls `is_user_admin` which returns `false` for moderators, so they get sent to `/` instead of `/admin`
-2. **Auth guard**: The `adminRequired` check in `useAuthGuard` also uses `is_user_admin`, so navigating to `/admin` manually shows "Access restricted"
-3. **Sidebar**: All menu sections are visible -- moderators should only see their allowed sections
+Two issues are preventing proper role-based access:
 
-## Solution
+1. **Duplicate role rows**: When a staff account is created, the database trigger `handle_new_user_role` automatically inserts a `user` role. Then the edge function inserts a second role (e.g., `moderator`). The `useUserRole` hook uses `.maybeSingle()` which breaks with multiple rows, so it may return `null` or `user` instead of the actual elevated role.
 
-### 1. New database function: `is_staff_member`
-Create a SQL function that returns `true` if the user has `admin` OR `moderator` role. This will be used for access control to the admin panel.
+2. **Missing 3-tier filtering**: The sidebar only handles `moderator` filtering. There is no handling for the `staff` role, and the `is_staff_member` function needs to include `staff`.
 
-```sql
-CREATE OR REPLACE FUNCTION public.is_staff_member(_user_id uuid)
-RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.user_roles
-    WHERE user_id = _user_id AND role IN ('admin', 'moderator')
-  )
-$$;
+## Desired Access Levels
+
+| Role | Accessible Sections |
+|------|---------------------|
+| Staff | Dashboard, Restaurants |
+| Moderator | Dashboard, Chat Manager, Housekeeping, Maintenance, Security, IT Support |
+| Admin | Full access to everything |
+
+## Changes
+
+### 1. Fix the edge function to remove the default `user` role
+**File**: `supabase/functions/create-staff-account/index.ts`
+
+After creating the user and inserting the elevated role, delete the auto-inserted `user` role so each staff member has exactly one role entry:
+```
+DELETE FROM user_roles WHERE user_id = X AND role = 'user'
 ```
 
-### 2. Update login redirect
-**File**: `src/pages/auth/components/LoginForm.tsx`
-- Replace `is_user_admin` with `is_staff_member` in the post-login redirect check
-- Moderators and admins both go to `/admin`
+### 2. Fix existing duplicate roles in the database
+**Migration**: Clean up existing duplicates -- for any user who has both a `user` role and an elevated role (`admin`/`moderator`/`staff`), remove the `user` row.
 
-### 3. Update auth guard
-**File**: `src/features/auth/hooks/useAuthGuard.ts`
-- Replace `is_user_admin` with `is_staff_member` when checking `adminRequired`
-- Both admins and moderators pass the guard
-
-### 4. Create a `useUserRole` hook
+### 3. Update `useUserRole` hook to handle priority
 **File**: `src/hooks/useUserRole.ts`
-- Fetches the current user's role from `user_roles` table
-- Returns `{ role, loading }` so components can conditionally render based on role
 
-### 5. Filter sidebar by role
+Instead of `.maybeSingle()`, fetch all roles for the user and pick the highest-priority one (`admin` > `moderator` > `staff` > `user`). This makes it resilient even if cleanup is incomplete.
+
+### 4. Update `is_staff_member` to include `staff` role
+**Migration**: Alter the function to check for `admin`, `moderator`, OR `staff`:
+```sql
+WHERE role IN ('admin', 'moderator', 'staff')
+```
+
+### 5. Add `staff` role filtering to the sidebar
 **File**: `src/components/admin/AdminSidebar.tsx`
-- Use the `useUserRole` hook to get the current role
-- Define which sections moderators can access: Dashboard, Chat Manager, Housekeeping, Maintenance, Security, IT Support
-- Filter `navigationSections` before rendering -- admins see everything, moderators see only their allowed items
 
-### Moderator-Visible Sections
-| Section | Items |
-|---------|-------|
-| Overview | Dashboard |
-| Guest Management | Chat Manager only |
-| Services | Housekeeping, Maintenance, Security, IT Support |
+Add a `staffAllowedUrls` list and extend the filtering logic:
+- If role is `staff`: show only Dashboard + Restaurants
+- If role is `moderator`: show only Dashboard + Chat + Housekeeping + Maintenance + Security + IT Support
+- If role is `admin` (or anything else for safety): show everything
 
-All other sections (F&B, Wellness, Entertainment, Hotel Info, Administration) are hidden for moderators.
+### 6. Add route-level protection for moderators and staff
+**File**: `src/components/admin/AdminSidebar.tsx` (or a new route guard)
 
+If a moderator or staff member navigates directly to a restricted URL (e.g., `/admin/restaurants` for a moderator), redirect them to `/admin`.
+
+## Technical Details
+
+The edge function fix (step 1) ensures new accounts get a clean single role. The migration (step 2) fixes existing data. The hook fix (step 3) adds resilience. Steps 4-6 implement the 3-tier UI and access filtering.
