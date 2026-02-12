@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import ProfileHeader from './components/ProfileHeader';
 import PersonalInformation from './components/PersonalInformation';
 import CurrentStay from './components/CurrentStay';
+import PreferencesSection from './components/PreferencesSection';
 import CompanionsList from './components/CompanionsList';
 import NotificationsList from './components/NotificationsList';
 import QuickActions from './components/QuickActions';
@@ -34,6 +35,8 @@ const Profile = () => {
           userData={userData} 
           stayDuration={stayDuration} 
         />
+        
+        <PreferencesSection />
         
         <CompanionsList 
           companions={companions} 

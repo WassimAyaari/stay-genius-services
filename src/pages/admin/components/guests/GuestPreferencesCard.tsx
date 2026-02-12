@@ -3,41 +3,38 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Sparkles, Plus, Bed, Utensils, ConciergeBell } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GuestPreferencesCardProps {
   guestId: string;
 }
 
-interface PreferenceCategory {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-  preferences: string[];
-}
-
-// Placeholder categories - in the future these will come from guest_preferences table
-const preferenceCategories: PreferenceCategory[] = [
-  {
-    id: 'room',
-    label: 'ROOM',
-    icon: Bed,
-    preferences: [],
-  },
-  {
-    id: 'dining',
-    label: 'DINING',
-    icon: Utensils,
-    preferences: [],
-  },
-  {
-    id: 'service',
-    label: 'SERVICE',
-    icon: ConciergeBell,
-    preferences: [],
-  },
+const categoryConfig = [
+  { id: 'room', label: 'ROOM', icon: Bed },
+  { id: 'dining', label: 'DINING', icon: Utensils },
+  { id: 'service', label: 'SERVICE', icon: ConciergeBell },
 ];
 
 const GuestPreferencesCard: React.FC<GuestPreferencesCardProps> = ({ guestId }) => {
+  const { data: preferences = [] } = useQuery({
+    queryKey: ['admin-guest-preferences', guestId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('guest_preferences')
+        .select('*')
+        .eq('guest_id', guestId);
+      if (error) throw error;
+      return data as { id: string; category: string; value: string }[];
+    },
+    enabled: !!guestId,
+  });
+
+  const grouped = preferences.reduce<Record<string, string[]>>((acc, p) => {
+    (acc[p.category] = acc[p.category] || []).push(p.value);
+    return acc;
+  }, {});
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -53,8 +50,9 @@ const GuestPreferencesCard: React.FC<GuestPreferencesCardProps> = ({ guestId }) 
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {preferenceCategories.map((category, index) => {
+        {categoryConfig.map((category, index) => {
           const Icon = category.icon;
+          const prefs = grouped[category.id] || [];
           return (
             <React.Fragment key={category.id}>
               {index > 0 && <Separator />}
@@ -63,9 +61,9 @@ const GuestPreferencesCard: React.FC<GuestPreferencesCardProps> = ({ guestId }) 
                   <Icon className="h-3.5 w-3.5" />
                   {category.label}
                 </div>
-                {category.preferences.length > 0 ? (
+                {prefs.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {category.preferences.map((pref, i) => (
+                    {prefs.map((pref, i) => (
                       <span
                         key={i}
                         className="px-3 py-1.5 text-sm bg-primary/10 text-primary rounded-full"
