@@ -24,3 +24,6 @@ verify_jwt = false
 
 [functions.create-staff-account]
 verify_jwt = false
+
+[functions.update-staff-role]
+verify_jwt = false
