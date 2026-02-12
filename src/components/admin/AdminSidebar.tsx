@@ -58,6 +58,7 @@ import {
   Settings,
   ChevronRight,
   Globe,
+  UserCog,
 } from 'lucide-react';
 
 interface NavItem {
@@ -134,6 +135,7 @@ const navigationSections: NavSection[] = [
   {
     label: 'Administration',
     items: [
+      { title: 'Staff Management', url: '/admin/staff', icon: UserCog },
       { title: 'Demo Settings', url: '/admin/demo', icon: Settings },
     ],
     defaultOpen: false,
