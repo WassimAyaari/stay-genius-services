@@ -32,11 +32,11 @@ interface CompanionsListProps {
 }
 
 const relationOptions = [
-  { value: "spouse", label: "Conjoint(e)" },
-  { value: "child", label: "Enfant" },
+  { value: "spouse", label: "Spouse" },
+  { value: "child", label: "Child" },
   { value: "parent", label: "Parent" },
-  { value: "friend", label: "Ami(e)" },
-  { value: "other", label: "Autre" },
+  { value: "friend", label: "Friend" },
+  { value: "other", label: "Other" },
 ];
 
 // Calculate reasonable range for birth dates (100 years ago to today)
@@ -66,7 +66,7 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
     <div>
       {companions.length > 0 && (
         <div className="space-y-4 mt-6">
-          <h3 className="font-medium">Accompagnants</h3>
+          <h3 className="font-medium">Companions</h3>
           
           {companions.map((companion, index) => (
             <div key={index} className="border p-4 rounded-md space-y-4 relative">
@@ -80,26 +80,26 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Prénom</label>
+                  <label className="text-sm font-medium">First Name</label>
                   <Input 
                     value={companion.firstName} 
                     onChange={(e) => updateCompanion(index, 'firstName', e.target.value)}
-                    placeholder="Prénom"
+                    placeholder="First Name"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Nom</label>
+                  <label className="text-sm font-medium">Last Name</label>
                   <Input 
                     value={companion.lastName} 
                     onChange={(e) => updateCompanion(index, 'lastName', e.target.value)}
-                    placeholder="Nom"
+                    placeholder="Last Name"
                   />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Date de naissance</label>
+                  <label className="text-sm font-medium">Date of Birth</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -111,7 +111,7 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
                         {companion.birthDate ? (
                           format(companion.birthDate, "P")
                         ) : (
-                          <span>Sélectionner</span>
+                          <span>Select</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -135,7 +135,7 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
                     onValueChange={(value) => updateCompanion(index, 'relation', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner" />
+                      <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent className="z-[9999]">
                       {relationOptions.map(option => (
@@ -158,7 +158,7 @@ const CompanionsList: React.FC<CompanionsListProps> = ({ companions, setCompanio
         className="w-full mt-4"
         onClick={addCompanion}
       >
-        Ajouter un accompagnant
+        Add a Companion
       </Button>
     </div>
   );

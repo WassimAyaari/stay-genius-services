@@ -25,7 +25,7 @@ export function BirthDatePicker({
   required,
   className,
   disabled = false,
-  placeholder = "Sélectionner une date",
+  placeholder = "Select a date",
 }: BirthDatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(selected);
   
@@ -53,7 +53,7 @@ export function BirthDatePicker({
     }
   };
 
-  const formattedDate = date ? date.toLocaleDateString('fr-FR', {
+  const formattedDate = date ? date.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'

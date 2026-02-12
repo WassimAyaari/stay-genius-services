@@ -18,27 +18,27 @@ eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
 
 // Schema pour le formulaire d'inscription
 export const registerSchema = z.object({
-  email: z.string().email({ message: "Adresse email invalide" }),
-  firstName: z.string().min(2, { message: "Le prénom est requis" }),
-  lastName: z.string().min(2, { message: "Le nom est requis" }),
-  birthDate: z.date({ required_error: "La date de naissance est requise" })
+  email: z.string().email({ message: "Invalid email address" }),
+  firstName: z.string().min(2, { message: "First name is required" }),
+  lastName: z.string().min(2, { message: "Last name is required" }),
+  birthDate: z.date({ required_error: "Date of birth is required" })
     .refine((date) => date <= eighteenYearsAgo, {
-      message: "Vous devez avoir au moins 18 ans",
+      message: "You must be at least 18 years old",
     }),
-  nationality: z.string().min(2, { message: "La nationalité est requise" }),
-  roomNumber: z.string().min(1, { message: "Le numéro de chambre est requis" }),
-  checkInDate: z.date({ required_error: "La date d'arrivée est requise" })
+  nationality: z.string().min(2, { message: "Nationality is required" }),
+  roomNumber: z.string().min(1, { message: "Room number is required" }),
+  checkInDate: z.date({ required_error: "Check-in date is required" })
     .refine((date) => date >= new Date(), {
-      message: "La date d'arrivée ne peut pas être dans le passé",
+      message: "Check-in date cannot be in the past",
     }),
-  checkOutDate: z.date({ required_error: "La date de départ est requise" }),
-  password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
-  confirmPassword: z.string().min(6, { message: "La confirmation du mot de passe est requise" }),
+  checkOutDate: z.date({ required_error: "Check-out date is required" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  confirmPassword: z.string().min(6, { message: "Password confirmation is required" }),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Les mots de passe ne correspondent pas",
+  message: "Passwords do not match",
   path: ["confirmPassword"],
 }).refine((data) => data.checkOutDate > data.checkInDate, {
-  message: "La date de départ doit être après la date d'arrivée",
+  message: "Check-out date must be after check-in date",
   path: ["checkOutDate"],
 });
 
@@ -96,7 +96,7 @@ export const useRegistrationForm = () => {
       const result = await registerUser(values.email, values.password, userData);
       
       if (!result.success) {
-        throw new Error(result.error || "Erreur lors de l'inscription");
+        throw new Error(result.error || "Registration failed");
       }
       
       // Si userId est défini, synchroniser avec Supabase
@@ -120,11 +120,11 @@ export const useRegistrationForm = () => {
           .insert([guestData]);
         
         if (error) {
-          console.error('Erreur lors de la création de l\'invité:', error);
+          console.error('Error creating guest:', error);
           toast({
             variant: "destructive",
-            title: "Erreur lors de la création du profil invité",
-            description: "Votre compte a été créé mais nous n'avons pas pu enregistrer votre profil d'invité.",
+            title: "Error creating guest profile",
+            description: "Your account was created but we couldn't save your guest profile.",
           });
         }
         
@@ -138,15 +138,15 @@ export const useRegistrationForm = () => {
         if (!syncSuccess) {
           toast({
             variant: "destructive",
-            title: "Synchronisation échouée",
-            description: "Les données ont été enregistrées localement mais la synchronisation avec le serveur a échoué.",
+            title: "Sync failed",
+            description: "Data was saved locally but server sync failed.",
           });
         }
       }
       
       toast({
-        title: "Inscription réussie",
-        description: "Bienvenue dans l'application Stay Genius",
+        title: "Registration successful",
+        description: "Welcome to Stay Genius",
       });
       
       // Rediriger vers la page d'accueil
@@ -154,7 +154,7 @@ export const useRegistrationForm = () => {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erreur d'inscription",
+        title: "Registration error",
         description: error.message,
       });
     } finally {

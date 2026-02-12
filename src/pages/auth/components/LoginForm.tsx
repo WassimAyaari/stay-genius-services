@@ -13,8 +13,8 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Adresse email invalide' }),
-  password: z.string().min(1, { message: 'Le mot de passe est requis' }),
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z.string().min(1, { message: 'Password is required' }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -35,14 +35,14 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (values: LoginFormValues) => {
     setLoading(true);
     try {
-      console.log('Tentative de connexion avec:', values.email);
+      console.log('Login attempt with:', values.email);
       
       const result = await loginUser(values.email, values.password);
       
       if (result.success) {
         toast({
-          title: 'Connexion réussie',
-          description: 'Bienvenue dans l\'application Stay Genius',
+          title: 'Login successful',
+          description: 'Welcome to Stay Genius',
         });
         
         // Check if user is admin and redirect accordingly
@@ -61,19 +61,19 @@ const LoginForm: React.FC = () => {
           navigate('/');
         }
       } else {
-        console.error('Échec de la connexion:', result.error);
+        console.error('Login failed:', result.error);
         toast({
           variant: 'destructive',
-          title: 'Échec de la connexion',
-          description: result.error || 'Vérifiez vos identifiants et réessayez',
+          title: 'Login failed',
+          description: result.error || 'Please check your credentials and try again',
         });
       }
     } catch (error: any) {
-      console.error('Erreur lors de la connexion:', error);
+      console.error('Login error:', error);
       toast({
         variant: 'destructive',
-        title: 'Erreur',
-        description: error.message || 'Une erreur est survenue lors de la connexion',
+        title: 'Error',
+        description: error.message || 'An error occurred during login',
       });
     } finally {
       setLoading(false);
@@ -102,7 +102,7 @@ const LoginForm: React.FC = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" autoComplete="current-password" {...field} />
               </FormControl>
@@ -115,10 +115,10 @@ const LoginForm: React.FC = () => {
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Connexion en cours...
+              Signing in...
             </>
           ) : (
-            'Se connecter'
+            'Sign In'
           )}
         </Button>
       </form>

@@ -16,15 +16,15 @@ const LoginCard: React.FC = () => {
         </h2>
         <p className="text-center text-sm text-gray-600">
           {activeTab === 'login' 
-            ? 'Connectez-vous pour accéder à vos services hôteliers' 
-            : 'Créez votre compte pour accéder à vos services hôteliers'}
+            ? 'Sign in to access your hotel services' 
+            : 'Create your account to access hotel services'}
         </p>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="login">Connexion</TabsTrigger>
-            <TabsTrigger value="register">Inscription</TabsTrigger>
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register">Register</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <LoginForm />
