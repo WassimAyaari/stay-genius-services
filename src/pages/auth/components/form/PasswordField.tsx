@@ -36,12 +36,12 @@ const PasswordField: React.FC<PasswordFieldProps> = ({ form }) => {
         name="password"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Mot de passe</FormLabel>
+            <FormLabel>Password</FormLabel>
             <div className="relative">
               <FormControl>
                 <Input 
                   type={showPassword ? "text" : "password"} 
-                  placeholder="Mot de passe" 
+                  placeholder="Password"
                   {...field} 
                 />
               </FormControl>
@@ -65,12 +65,12 @@ const PasswordField: React.FC<PasswordFieldProps> = ({ form }) => {
         name="confirmPassword"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Confirmer le mot de passe</FormLabel>
+            <FormLabel>Confirm Password</FormLabel>
             <div className="relative">
               <FormControl>
                 <Input 
                   type={showConfirmPassword ? "text" : "password"} 
-                  placeholder="Confirmer le mot de passe" 
+                  placeholder="Confirm Password"
                   {...field} 
                 />
               </FormControl>

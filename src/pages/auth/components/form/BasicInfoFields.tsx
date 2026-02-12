@@ -23,9 +23,9 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
         name="firstName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Prénom</FormLabel>
+            <FormLabel>First Name</FormLabel>
             <FormControl>
-              <Input placeholder="Prénom" {...field} />
+              <Input placeholder="First Name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -37,9 +37,9 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({ form }) => {
         name="lastName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Nom</FormLabel>
+            <FormLabel>Last Name</FormLabel>
             <FormControl>
-              <Input placeholder="Nom" {...field} />
+              <Input placeholder="Last Name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

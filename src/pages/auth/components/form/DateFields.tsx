@@ -36,7 +36,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
         name="birthDate"
         render={({ field }) => (
           <FormItem className="flex flex-col">
-            <FormLabel>Date de naissance</FormLabel>
+            <FormLabel>Date of Birth</FormLabel>
             <FormControl>
               <BirthDatePicker
                 selected={field.value}
@@ -54,7 +54,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
           name="checkInDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date d'arrivée</FormLabel>
+              <FormLabel>Check-in Date</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -66,13 +66,13 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                       )}
                     >
                       {field.value ? (
-                        field.value.toLocaleDateString('fr-FR', {
+                        field.value.toLocaleDateString('en-US', {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric'
                         })
                       ) : (
-                        <span>Sélectionner</span>
+                        <span>Select</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -110,7 +110,7 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
           name="checkOutDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date de départ</FormLabel>
+              <FormLabel>Check-out Date</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -122,13 +122,13 @@ const DateFields: React.FC<DateFieldsProps> = ({ form }) => {
                       )}
                     >
                       {field.value ? (
-                        field.value.toLocaleDateString('fr-FR', {
+                        field.value.toLocaleDateString('en-US', {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric'
                         })
                       ) : (
-                        <span>Sélectionner</span>
+                        <span>Select</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>

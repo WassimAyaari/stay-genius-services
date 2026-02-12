@@ -23,9 +23,9 @@ const AdditionalFields: React.FC<AdditionalFieldsProps> = ({ form }) => {
         name="nationality"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Nationalité</FormLabel>
+            <FormLabel>Nationality</FormLabel>
             <FormControl>
-              <Input placeholder="Nationalité" {...field} />
+              <Input placeholder="Nationality" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -37,9 +37,9 @@ const AdditionalFields: React.FC<AdditionalFieldsProps> = ({ form }) => {
         name="roomNumber"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Numéro de chambre</FormLabel>
+            <FormLabel>Room Number</FormLabel>
             <FormControl>
-              <Input placeholder="Numéro de chambre" {...field} />
+              <Input placeholder="Room Number" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
