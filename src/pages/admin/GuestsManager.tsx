@@ -76,7 +76,11 @@ const GuestsManager: React.FC = () => {
       if (error) throw error;
 
       // Filter out guests that are staff/admin/moderator
-      return (data || []).filter((guest) => !guest.user_id || !staffUserIds.has(guest.user_id));
+      return (data || []).filter(
+        (guest) =>
+          guest.guest_type !== 'Staff' &&
+          (!guest.user_id || !staffUserIds.has(guest.user_id))
+      );
     },
   });
 
