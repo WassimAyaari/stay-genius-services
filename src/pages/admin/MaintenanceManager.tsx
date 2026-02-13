@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PlusCircle, Trash2, Edit, Pencil, Save, Search } from 'lucide-react';
+import { PlusCircle, Trash2, Edit, Pencil, Save, Search, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -154,7 +154,15 @@ const MaintenanceManager = () => {
   
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Maintenance & Technical Items Management</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <Wrench className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Maintenance & Technical Items Management</h1>
+          <p className="text-sm text-muted-foreground">Manage maintenance items and technical requests</p>
+        </div>
+      </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6">

@@ -9,7 +9,7 @@ import InfoItemSection from '@/components/admin/about/InfoItemSection';
 import DirectorySection from '@/components/admin/about/DirectorySection';
 import HeroSection from '@/components/admin/about/HeroSection';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const AboutEditor = () => {
@@ -118,7 +118,15 @@ const AboutEditor = () => {
   
   return (
     <div className="flex-1 space-y-6 p-6">
-      <h1 className="text-2xl font-bold mb-6">About Page Editor</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <FileText className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">About Page Editor</h1>
+          <p className="text-sm text-muted-foreground">Edit hotel information and directory</p>
+        </div>
+      </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">

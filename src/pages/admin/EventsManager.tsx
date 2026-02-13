@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PartyPopper } from 'lucide-react';
 import { EventsTab } from './components/events/EventsTab';
 import { StoriesTab } from './components/events/StoriesTab';
 import { EventReservationsTab } from './components/events/EventReservationsTab';
@@ -19,7 +20,15 @@ const EventsManager = () => {
   
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Gestion des Événements et Promotions</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <PartyPopper className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Gestion des Événements et Promotions</h1>
+          <p className="text-sm text-muted-foreground">Gérez les événements, réservations et stories</p>
+        </div>
+      </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="w-full bg-muted">

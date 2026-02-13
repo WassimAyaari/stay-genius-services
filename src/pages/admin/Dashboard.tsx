@@ -13,6 +13,7 @@ import {
   Sparkles,
   Calendar,
   Clock,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import StatisticCard from '@/components/admin/StatisticCard';
@@ -55,9 +56,14 @@ const AdminDashboard = () => {
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard Overview</h1>
-        <p className="text-muted-foreground">Real-time statistics and hotel management insights</p>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <LayoutDashboard className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
+          <p className="text-sm text-muted-foreground">Real-time statistics and hotel management insights</p>
+        </div>
       </div>
 
       {/* Stats Row 1 - Main metrics */}
