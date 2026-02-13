@@ -76,8 +76,10 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="sm:max-w-md">
+    <>
+      {open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Change Role</DialogTitle>
           <DialogDescription>
@@ -123,8 +125,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
             {isSubmitting ? 'Updating...' : 'Update Role'}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
