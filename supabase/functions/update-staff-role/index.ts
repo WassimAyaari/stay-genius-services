@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { user_id, new_role } = await req.json();
+    const { user_id, new_role, service_type } = await req.json();
 
     if (!user_id || !new_role) {
       return new Response(
@@ -88,6 +88,20 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
+    }
+
+    // Validate service_type for moderator role
+    if (new_role === "moderator") {
+      const validServiceTypes = ["housekeeping", "maintenance", "security", "it_support"];
+      if (!service_type || !validServiceTypes.includes(service_type)) {
+        return new Response(
+          JSON.stringify({ error: "A valid service type is required for moderators" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
     }
 
     // Self-demotion check
@@ -119,6 +133,24 @@ Deno.serve(async (req) => {
 
     if (insertError) {
       throw new Error(`Failed to assign new role: ${insertError.message}`);
+    }
+
+    // Handle moderator_services
+    // Always clean up old moderator_services record
+    await supabase
+      .from("moderator_services")
+      .delete()
+      .eq("user_id", user_id);
+
+    // Insert new moderator_services record if new role is moderator
+    if (new_role === "moderator" && service_type) {
+      const { error: serviceError } = await supabase
+        .from("moderator_services")
+        .insert({ user_id, service_type });
+
+      if (serviceError) {
+        throw new Error(`Failed to assign service type: ${serviceError.message}`);
+      }
     }
 
     return new Response(
