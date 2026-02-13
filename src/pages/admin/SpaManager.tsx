@@ -7,7 +7,7 @@ import SpaServicesTab from './spa/SpaServicesTab';
 import SpaBookingsTab from './spa/SpaBookingsTab';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Sparkles } from 'lucide-react';
 import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 export default function SpaManager() {
@@ -34,11 +34,14 @@ export default function SpaManager() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Spa Management</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage spa facilities, services and bookings
-        </p>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <Sparkles className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Spa Management</h1>
+          <p className="text-sm text-muted-foreground">Manage spa facilities, services and bookings</p>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

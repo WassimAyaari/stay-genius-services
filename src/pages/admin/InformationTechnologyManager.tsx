@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Wifi } from 'lucide-react';
 
 import { RequestItem } from '@/features/rooms/types';
 import { useRequestCategories, useCreateRequestItem, useUpdateRequestItem } from '@/hooks/useRequestCategories';
@@ -127,7 +128,15 @@ const InformationTechnologyManager = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Information Technology Management</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <Wifi className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Information Technology Management</h1>
+          <p className="text-sm text-muted-foreground">Manage IT items and support requests</p>
+        </div>
+      </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="items">Items</TabsTrigger>

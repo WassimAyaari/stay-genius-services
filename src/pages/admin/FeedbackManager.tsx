@@ -92,8 +92,15 @@ const FeedbackManager = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-2">Gestion des Feedbacks</h1>
-      <p className="text-muted-foreground mb-6">Gérez les avis et personnalisez la page de feedback</p>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <MessageSquare className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Gestion des Feedbacks</h1>
+          <p className="text-sm text-muted-foreground">Gérez les avis et personnalisez la page de feedback</p>
+        </div>
+      </div>
       
       <Tabs defaultValue="reviews" onValueChange={setActiveTab} value={activeTab}>
         <TabsList className="mb-4">
