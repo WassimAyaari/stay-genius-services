@@ -40,7 +40,9 @@ const AddItemDialog = ({
   const createItem = useCreateRequestItem();
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <>
+      {isOpen && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
+      <Dialog open={isOpen} onOpenChange={onOpenChange} modal={false}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Housekeeping Item</DialogTitle>
@@ -78,6 +80,7 @@ const AddItemDialog = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 };
 
