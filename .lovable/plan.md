@@ -1,49 +1,24 @@
 
+# Fix: Notification Click Not Redirecting to Service Page
 
-# Fix: Notification Click Navigates to Service Page Instead of Detail Page
+## Root Cause
+The notification message contains `"service - Room 400..."` instead of `"housekeeping - Room 400..."`. This happens because when creating the notification in `AssignToDropdown.tsx`, the code uses `requestData?.type` (which is always `"service"` in the database) instead of the `serviceType` prop (which correctly contains `"housekeeping"`, `"maintenance"`, etc.).
 
-## Change
-Update `StaffNotificationBell.tsx` to navigate to the correct service management page (e.g., `/admin/housekeeping`) instead of the dedicated detail page (`/admin/requests/:id`). The "Requests" tab should also be auto-selected.
+Since the click handler in `StaffNotificationBell.tsx` tries to match keywords like "housekeeping" in the message, it never finds a match and navigation doesn't happen.
 
-## What Changes
-
-### 1. `src/components/admin/StaffNotificationBell.tsx`
-- Remove the `navigate('/admin/requests/...')` logic
-- Always use the `serviceTypeToRoute` mapping to find the right service page from the notification message
-- Append `?tab=requests` query param so the page opens on the Requests tab automatically
-
-### 2. Service Manager Pages (HousekeepingManager, MaintenanceManager, SecurityManager, InformationTechnologyManager)
-- Read the `tab` query parameter from the URL
-- If `tab=requests`, set the active tab to "requests" on mount so the user lands directly on the requests list
-
-### 3. Optionally remove `ServiceRequestDetailPage.tsx` and its route
-- Since it's no longer needed, remove the dedicated detail page and the `/admin/requests/:requestId` route from `AdminRoutes.tsx`
-
-## Technical Details
-
-**Navigation logic (simplified):**
-```tsx
-const route = Object.entries(serviceTypeToRoute).find(([key]) =>
-  notif.message.toLowerCase().includes(key)
-);
-if (route) {
-  navigate(`${route[1]}?tab=requests`);
-}
+## Fix
+In `AssignToDropdown.tsx`, change line 45 from:
+```
+const reqType = requestData?.type || serviceType;
+```
+to:
+```
+const reqType = serviceType || requestData?.type;
 ```
 
-**Tab auto-selection in each manager page:**
-```tsx
-const [searchParams] = useSearchParams();
-const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'items');
-```
+This ensures the notification message starts with the correct service category name (e.g., `"housekeeping - Room 400..."`) so the route matching in `StaffNotificationBell` works properly.
 
-### Files to modify
-- `src/components/admin/StaffNotificationBell.tsx`
-- `src/pages/admin/HousekeepingManager.tsx`
-- `src/pages/admin/MaintenanceManager.tsx`
-- `src/pages/admin/SecurityManager.tsx`
-- `src/pages/admin/InformationTechnologyManager.tsx`
+## Files to Modify
+- `src/components/admin/AssignToDropdown.tsx` (1 line change)
 
-### Files to remove
-- `src/pages/admin/ServiceRequestDetailPage.tsx`
-- Route entry in `src/routes/AdminRoutes.tsx`
+No other files need changes -- the navigation logic in `StaffNotificationBell.tsx` and the tab auto-selection in manager pages are already correct.
