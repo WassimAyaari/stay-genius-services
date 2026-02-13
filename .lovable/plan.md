@@ -1,46 +1,32 @@
 
+# Change Assign Button Color and Icon When Ticket is Assigned
 
-# Remove "Hold" Status, Fix Moderator Permissions, and Hide Assign on Completed
+## Problem
+When a ticket is assigned to someone, the button shows the person's name instead of "Assign", but the visual styling (color and icon) remains unchanged. The user wants a clear visual distinction to indicate that a ticket has been assigned.
 
-## Three Changes
+## Solution
+Modify the `AssignToDropdown.tsx` component to:
 
-### 1. Remove "On Hold" status from all request tabs
-Remove the "On Hold" button and related logic from all 4 request tab components:
-- `HousekeepingRequestsTab.tsx`
-- `MaintenanceRequestsTab.tsx`
-- `SecurityRequestsTab.tsx`
-- `InformationTechnologyRequestsTab.tsx`
+1. **Change button variant/color when assigned**:
+   - Unassigned state: Keep the current `variant="outline"` (gray, neutral look)
+   - Assigned state: Switch to `variant="default"` or a custom color (e.g., green/blue) to visually indicate ownership
 
-The simplified action flow will be:
-- **Pending** -> Start, Complete, Cancel
-- **In Progress** -> Complete, Cancel
-- **Completed** -> No actions (finished)
-- **Cancelled** -> No actions
+2. **Swap the icon when assigned**:
+   - Unassigned state: Show `UserPlus` icon (person with + symbol)
+   - Assigned state: Show `User` icon (person only, no +) to remove the "plus" visual
 
-Also remove `on_hold` from type signatures in parent components (`HousekeepingManager.tsx`, `InformationTechnologyManager.tsx`).
+3. **Keep the person's name displayed** when assigned (already working)
 
-### 2. Hide "Assign" button when status is "completed" or "cancelled"
-In all 4 request tabs, conditionally render the `AssignToDropdown` only when the request status is not `completed` or `cancelled`.
+## Implementation Details
 
-### 3. Fix moderator permissions (RLS policy)
-Moderators can view requests (`is_staff_member` SELECT policy) but **cannot update** them because the UPDATE policy only allows admins (`is_admin`) or the guest themselves (`guest_id = auth.uid()`).
-
-**Fix**: Add a new RLS policy on the `service_requests` table:
-```sql
-CREATE POLICY "Staff can update service requests"
-ON service_requests
-FOR UPDATE
-USING (is_staff_member(auth.uid()));
+The change is simple - add conditional logic to the button styling:
+```
+- When assignedToName is null/undefined → show variant="outline" with UserPlus icon
+- When assignedToName exists → show variant="default" (or variant with a blue/green color) with User icon
 ```
 
-This allows moderators and staff to update request statuses (Start, Complete, Cancel).
+Import `User` icon from lucide-react alongside the existing `UserPlus` import.
 
 ## Files to Modify
-- `src/pages/admin/housekeeping/components/HousekeepingRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
-- `src/pages/admin/maintenance/components/MaintenanceRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
-- `src/pages/admin/security/SecurityRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
-- `src/pages/admin/information-technology/components/InformationTechnologyRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
-- `src/pages/admin/HousekeepingManager.tsx` - Remove `on_hold` from type signature
-- `src/pages/admin/InformationTechnologyManager.tsx` - Remove `on_hold` from type signature
-- **Database**: Add RLS UPDATE policy for staff members on `service_requests`
+- `src/components/admin/AssignToDropdown.tsx` - Update button variant and icon conditionally based on `assignedToName`
 
