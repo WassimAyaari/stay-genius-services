@@ -1,36 +1,56 @@
 
-# Apply Custom Color #d6f0f8 to Assigned Button
+# Change Cancelled Status Color to #f4b5ac
 
 ## Problem
-Currently, the assign button uses `variant="default"` when assigned, which applies the primary color. The user wants a specific light blue color (#d6f0f8) for better visual distinction.
+The "Cancelled" status badge currently uses a neutral gray color (`bg-gray-100 text-gray-800`), which doesn't provide sufficient visual distinction from pending statuses. The user wants a more distinct pinkish/salmon color (`#f4b5ac`) for cancelled requests.
 
 ## Solution
-Add an inline style to the button when `assignedToName` is true to apply the custom background color. The button component accepts a `className` prop that supports inline styles via the `style` attribute.
+Update the `getStatusBadgeColor` function in all four request tab components to apply the custom color `#f4b5ac` for cancelled status badges.
+
+Since `#f4b5ac` is a light salmon/pink color, we'll also need to set an appropriate dark text color for readability. Using `#8b3a34` (a dark brown/red) will provide good contrast.
 
 ## Implementation Details
 
-Modify the button on line 81 of `src/components/admin/AssignToDropdown.tsx`:
+### Changed Logic
+Replace the cancelled case in each `getStatusBadgeColor` function:
 
-**Current:**
+**Current (all 4 files):**
 ```tsx
-<Button variant={assignedToName ? "default" : "outline"} size="sm" className="gap-1 whitespace-nowrap">
+case 'cancelled':
+  return 'bg-gray-100 text-gray-800 border-gray-200';
 ```
 
-**Change to:**
+**Change to (with inline style approach):**
+Instead of using Tailwind classes for the custom color, we'll apply inline styles to the Badge component since `#f4b5ac` is not a standard Tailwind color.
+
+The Badge components already support the `style` prop, so we can conditionally apply:
+- `backgroundColor: '#f4b5ac'`
+- `color: '#8b3a34'` (dark text for contrast)
+
+### Files to Modify
+1. `src/pages/admin/maintenance/components/MaintenanceRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 52-53 and ~145-150)
+2. `src/pages/admin/housekeeping/components/HousekeepingRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 63-64)
+3. `src/pages/admin/security/SecurityRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 52-53 and ~145-150)
+4. `src/pages/admin/information-technology/components/InformationTechnologyRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 61-62)
+
+### Implementation Approach
+For each file, we'll:
+1. Update the `getStatusBadgeColor` function to return a special marker for cancelled (e.g., `'cancelled'`)
+2. Apply the custom inline style directly in the Badge component using a ternary conditional
+
+Example pattern:
 ```tsx
-<Button 
-  variant={assignedToName ? "default" : "outline"} 
-  size="sm" 
-  className="gap-1 whitespace-nowrap"
-  style={assignedToName ? { backgroundColor: '#d6f0f8', color: '#1f2937' } : undefined}
+<Badge
+  className={request.status === 'cancelled' ? '' : `${getStatusBadgeColor(request.status)} border`}
+  variant="outline"
+  style={request.status === 'cancelled' ? { 
+    backgroundColor: '#f4b5ac', 
+    color: '#8b3a34',
+    border: '1px solid #e8a39f'
+  } : undefined}
 >
+  {getStatusLabel(request.status)}
+</Badge>
 ```
 
-This applies:
-- **Background**: `#d6f0f8` (light blue) when assigned
-- **Text color**: `#1f2937` (dark gray) for readability on the light background
-- **No style** when unassigned (uses the outline variant normally)
-
-## Files to Modify
-- `src/components/admin/AssignToDropdown.tsx` - Add inline style to button when assigned
-
+Alternatively, we can simplify by always returning a style object from `getStatusBadgeColor` or by checking the status directly in the Badge rendering.
