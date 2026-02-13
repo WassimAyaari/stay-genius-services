@@ -1,88 +1,83 @@
 
+## Plan: Navigate to Service Request Detail Page from Notification
 
-# Moderator Assignment Notifications
+### Current State Analysis
+- **Notifications System**: The `StaffNotificationBell.tsx` currently stores `reference_id` (the service request ID) in the `staff_notifications` table.
+- **Current Navigation**: When clicking a notification, it navigates to the **service management page** (e.g., `/admin/housekeeping`) but doesn't open the specific request detail.
+- **Detail Pages**: There's a `ServiceRequestDetails` page for guests (`/my-room/requests/:id`), but no dedicated admin-specific service request detail page yet.
+- **Request Data**: Service requests have `id`, `room_number`, `guest_name`, `description`, `status`, `assigned_to`, `type`, `created_at`, etc.
 
-## Overview
-When an admin assigns a service request ticket to a moderator, the assigned moderator will receive a notification visible in their admin panel. This requires a new `staff_notifications` table and integration into the existing admin notification system.
+### Solution Approach
+Create a new **admin service request detail page** and update the notification click handler to navigate directly to it.
 
-## Database Changes
+**Option A** (Recommended): Create a unified admin service request detail page that works for all service types (housekeeping, maintenance, security, IT) that:
+- Fetches and displays the full request details
+- Shows request status, assignment info, timestamps
+- Allows admins to update status and reassign
+- Provides quick navigation back to the requests list
 
-### New table: `staff_notifications`
-A dedicated table to store notifications for staff members (moderators, admins, etc.).
+**Option B**: Implement a modal/dialog that opens the request details inline without navigating away.
 
-```text
-staff_notifications
-+------------------+------------------------+
-| Column           | Type                   |
-+------------------+------------------------+
-| id               | uuid (PK)              |
-| user_id          | uuid (recipient)       |
-| type             | text (e.g. 'assignment')|
-| title            | text                   |
-| message          | text                   |
-| reference_id     | uuid (service_request) |
-| reference_type   | text (e.g. 'service_request') |
-| is_read          | boolean (default false)|
-| created_at       | timestamptz            |
-+------------------+------------------------+
-```
+### Technical Changes
 
-### RLS Policies
-- Staff can view their own notifications: `user_id = auth.uid()`
-- Staff can update (mark read) their own notifications: `user_id = auth.uid()`
-- Admins can insert notifications for anyone: `is_admin(auth.uid())`
-- System/authenticated users can insert (for the assignment flow): open INSERT policy
+#### 1. Create New Admin Service Request Detail Page
+- **File**: `src/pages/admin/ServiceRequestDetailPage.tsx`
+- **Route**: `/admin/requests/:requestId` (add to `AdminRoutes.tsx`)
+- **Functionality**:
+  - Fetch service request by ID using `useServiceRequestDetail` hook
+  - Display: Room, Guest, Request type, Description, Status, Assigned to, Created date
+  - Action buttons: Update status, Reassign, Back button
+  - Show the service type (Housekeeping, Maintenance, Security, IT) in breadcrumbs or header
 
-### Realtime
-Add `staff_notifications` to the Supabase realtime publication so moderators get live updates.
+#### 2. Create Service Request Detail Hook (if needed)
+- Use existing `useServiceRequestDetail` hook or create a new one for admin context
+- Hook should fetch from `service_requests` table with all necessary fields
 
-## Code Changes
+#### 3. Update `StaffNotificationBell.tsx`
+- Modify `handleNotificationClick` function to:
+  1. Use `reference_id` (service request ID) from notification
+  2. Use `reference_type` to determine service type
+  3. Navigate to `/admin/requests/{reference_id}` instead of just the service page
+  4. Mark notification as read
 
-### 1. Update `AssignToDropdown.tsx`
-After successfully assigning a ticket, insert a row into `staff_notifications` with:
-- `user_id`: the assigned moderator's user ID
-- `type`: `'assignment'`
-- `title`: `'New ticket assigned'`
-- `message`: Details about the service request (room, type, description)
-- `reference_id`: the service request ID
-- `reference_type`: `'service_request'`
+#### 4. Add Route in `AdminRoutes.tsx`
+- Add new route: `<Route path="requests/:requestId" element={<ServiceRequestDetailPage />} />`
 
-### 2. Create `useStaffNotifications.ts` hook
-A new hook that:
-- Fetches unread `staff_notifications` for the current user
-- Subscribes to realtime INSERT events on `staff_notifications` filtered by `user_id`
-- Provides `markAsRead` and `markAllAsRead` functions
-- Returns unread count and notification list
+### Detailed Implementation Steps
 
-### 3. Update `AdminSidebar.tsx`
-- Add a notification bell icon (or badge) in the sidebar header that shows the unread staff notifications count
-- Clicking it opens a dropdown/popover listing the notifications with links to the relevant service request page
+1. **Create `ServiceRequestDetailPage.tsx`** - A full-page detail view for admin staff
+   - Header with breadcrumbs (Admin > Housekeeping > Request #123)
+   - Request details card showing:
+     - Room number, Guest name, Service type
+     - Request description, Created date/time
+     - Current status with badge
+     - Assigned to (with option to reassign via `AssignToDropdown`)
+   - Status update buttons (same as table: Hold, Start, Complete, Cancel)
+   - Back button to return to service management page
 
-### 4. Create `StaffNotificationBell.tsx` component
-A bell icon component placed in the admin sidebar header that:
-- Shows unread count badge
-- Opens a dropdown with recent notifications
-- Each notification links to the relevant service page (housekeeping, maintenance, etc.)
-- Allows marking notifications as read
+2. **Update navigation logic in `StaffNotificationBell.tsx`**
+   - Change from navigating to `/admin/housekeeping` to `/admin/requests/{reference_id}`
+   - Keep fallback to service page in case `reference_id` is missing
 
-## Technical Details
+3. **Add route in `AdminRoutes.tsx`**
+   - Register the new detail page route
 
-### Mapping `reference_type` to routes
-The notification will link to the correct admin service page based on the service request's type/category:
-- housekeeping -> `/admin/housekeeping`
-- maintenance -> `/admin/maintenance`
-- security -> `/admin/security`
-- it_support -> `/admin/information-technology`
+4. **Extract service type from request data** (in the detail page)
+   - Fetch the service request to determine its type
+   - Use to show appropriate breadcrumb/header context
 
-### Files to create
-- `src/hooks/admin/useStaffNotifications.ts`
-- `src/components/admin/StaffNotificationBell.tsx`
+### File Changes Summary
+- **Create**: `src/pages/admin/ServiceRequestDetailPage.tsx`
+- **Modify**: `src/components/admin/StaffNotificationBell.tsx` (update `handleNotificationClick`)
+- **Modify**: `src/routes/AdminRoutes.tsx` (add new route)
 
-### Files to modify
-- `src/components/admin/AssignToDropdown.tsx` (add notification insert after assignment)
-- `src/components/admin/AdminSidebar.tsx` (add StaffNotificationBell to header)
+### User Flow
+1. Admin assigns ticket to moderator → notification created with `reference_id`
+2. Moderator clicks notification bell → sees notification list
+3. Moderator clicks specific notification → navigates to `/admin/requests/{id}`
+4. Detail page loads and displays full request context
+5. Moderator can update status or reassign from detail page
 
-### Database migration
-- Create `staff_notifications` table with RLS policies
-- Add table to realtime publication
+### Fallback Behavior
+If `reference_id` is missing (legacy notifications), navigate to the service management page as currently implemented.
 
