@@ -146,7 +146,7 @@ const SecurityRequestsTab = ({ categoryIds }: SecurityRequestsTabProps) => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end flex-wrap gap-1">
+                      <div className="flex justify-end flex-nowrap gap-1">
                         <AssignToDropdown
                           requestId={request.id}
                           serviceType="security"

@@ -128,7 +128,7 @@ const HousekeepingRequestsTab = ({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-nowrap">
                       <AssignToDropdown
                         requestId={request.id}
                         serviceType="housekeeping"
