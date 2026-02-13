@@ -20,7 +20,7 @@ import { useRequestsData } from '@/hooks/useRequestsData';
 type InformationTechnologyRequestsTabProps = {
   requestsSearchTerm: string;
   setRequestsSearchTerm: (term: string) => void;
-  handleUpdateRequestStatus: (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold') => Promise<void>;
+  handleUpdateRequestStatus: (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled') => Promise<void>;
 };
 
 const InformationTechnologyRequestsTab = ({
@@ -60,8 +60,6 @@ const InformationTechnologyRequestsTab = ({
         return 'bg-green-100 text-green-800';
       case 'cancelled':
         return 'bg-gray-100 text-gray-800';
-      case 'on_hold':
-        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -132,32 +130,24 @@ const InformationTechnologyRequestsTab = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2 flex-nowrap">
-                      <AssignToDropdown
-                        requestId={request.id}
-                        serviceType="it_support"
-                        assignedToName={(request as any).assigned_to_name}
-                        onAssigned={handleRefresh}
-                      />
-                      {request.status === 'pending' && (
-                        <>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
-                          >
-                            Start
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleUpdateRequestStatus(request.id, 'on_hold')}
-                            className="text-orange-500"
-                          >
-                            Hold
-                          </Button>
-                        </>
+                      {request.status !== 'completed' && request.status !== 'cancelled' && (
+                        <AssignToDropdown
+                          requestId={request.id}
+                          serviceType="it_support"
+                          assignedToName={(request as any).assigned_to_name}
+                          onAssigned={handleRefresh}
+                        />
                       )}
-                      {request.status === 'in_progress' && (
+                      {request.status === 'pending' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
+                        >
+                          Start
+                        </Button>
+                      )}
+                      {(request.status === 'pending' || request.status === 'in_progress') && (
                         <>
                           <Button 
                             size="sm" 
@@ -169,31 +159,12 @@ const InformationTechnologyRequestsTab = ({
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => handleUpdateRequestStatus(request.id, 'on_hold')}
-                            className="text-orange-500"
+                            onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
+                            className="text-red-500"
                           >
-                            Hold
+                            Cancel
                           </Button>
                         </>
-                      )}
-                      {request.status === 'on_hold' && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
-                        >
-                          Resume
-                        </Button>
-                      )}
-                      {(request.status === 'pending' || request.status === 'in_progress' || request.status === 'on_hold') && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
-                          className="text-red-500"
-                        >
-                          Cancel
-                        </Button>
                       )}
                     </div>
                   </TableCell>

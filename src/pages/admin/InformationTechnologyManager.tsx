@@ -107,7 +107,7 @@ const InformationTechnologyManager = () => {
     setIsEditItemDialogOpen(true);
   };
 
-  const handleUpdateRequestStatus = async (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold') => {
+  const handleUpdateRequestStatus = async (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     try {
       await updateRequestStatus(requestId, status);
       handleRefresh();

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, CheckCircle, PlayCircle, XCircle, Pause } from 'lucide-react';
+import { Search, CheckCircle, PlayCircle, XCircle } from 'lucide-react';
 import { useHighlightedRequest } from '@/hooks/useHighlightedRequest';
 import AssignToDropdown from '@/components/admin/AssignToDropdown';
 import { Button } from '@/components/ui/button';
@@ -45,8 +45,6 @@ const SecurityRequestsTab = ({ categoryIds }: SecurityRequestsTabProps) => {
     switch(status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'on_hold':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'in_progress':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'completed':
@@ -61,7 +59,7 @@ const SecurityRequestsTab = ({ categoryIds }: SecurityRequestsTabProps) => {
   const getStatusLabel = (status: string) => {
     switch(status) {
       case 'pending': return 'Pending';
-      case 'on_hold': return 'On Hold';
+      
       case 'in_progress': return 'In Progress';
       case 'completed': return 'Completed';
       case 'cancelled': return 'Cancelled';
@@ -69,7 +67,7 @@ const SecurityRequestsTab = ({ categoryIds }: SecurityRequestsTabProps) => {
     }
   };
   
-  const handleStatusChange = async (requestId: string, newStatus: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled') => {
+  const handleStatusChange = async (requestId: string, newStatus: 'pending' | 'in_progress' | 'completed' | 'cancelled') => {
     try {
       await updateRequestStatus(requestId, newStatus);
       handleRefresh();
@@ -153,36 +151,15 @@ const SecurityRequestsTab = ({ categoryIds }: SecurityRequestsTabProps) => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end flex-nowrap gap-1">
-                        <AssignToDropdown
-                          requestId={request.id}
-                          serviceType="security"
-                          assignedToName={(request as any).assigned_to_name}
-                          onAssigned={handleRefresh}
-                        />
-                        {request.status === 'pending' && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center text-orange-600 whitespace-nowrap"
-                              onClick={() => handleStatusChange(request.id, 'on_hold')}
-                            >
-                              <Pause className="h-4 w-4 mr-1" />
-                              On Hold
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center text-blue-600 whitespace-nowrap"
-                              onClick={() => handleStatusChange(request.id, 'in_progress')}
-                            >
-                              <PlayCircle className="h-4 w-4 mr-1" />
-                              Start
-                            </Button>
-                          </>
+                        {request.status !== 'completed' && request.status !== 'cancelled' && (
+                          <AssignToDropdown
+                            requestId={request.id}
+                            serviceType="security"
+                            assignedToName={(request as any).assigned_to_name}
+                            onAssigned={handleRefresh}
+                          />
                         )}
-                        
-                        {request.status === 'on_hold' && (
+                        {request.status === 'pending' && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -194,7 +171,7 @@ const SecurityRequestsTab = ({ categoryIds }: SecurityRequestsTabProps) => {
                           </Button>
                         )}
                         
-                        {(request.status === 'pending' || request.status === 'on_hold' || request.status === 'in_progress') && (
+                        {(request.status === 'pending' || request.status === 'in_progress') && (
                           <>
                             <Button
                               variant="outline"
