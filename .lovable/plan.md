@@ -1,28 +1,30 @@
 
 
-# Fix: Add Item and Edit Item Dialogs Causing Layout Shift
+# Fix: Moderators Cannot See Service Requests
 
 ## Problem
-Same root cause as the previous Assign dropdown fix. The `AddItemDialog` and `EditItemDialog` components use Radix `Dialog` in default modal mode. When opened, Radix removes the body scrollbar and adds padding to compensate, causing the entire page to shift slightly.
+The `test@housekeeping.com` user has the **moderator** role, but the RLS policy "Admins can manage all service requests" on the `service_requests` table uses the `is_admin()` function, which only checks for the `admin` role. Moderators are therefore blocked from reading service requests at the database level.
+
+## Root Cause
+- `is_admin(uid)` checks: `role = 'admin'` (exact match)
+- `is_staff_member(uid)` checks: `role IN ('admin', 'moderator', 'staff')`
+- The RLS policy uses `is_admin()`, so only admins pass the check
 
 ## Solution
-Apply the same pattern already used throughout the project (e.g., `CreateStaffDialog`, `EditRoleDialog`, `AddPreferenceDialog`):
+Add a new RLS SELECT policy on `service_requests` that allows staff members (including moderators) to view all service requests. This uses the existing `is_staff_member()` function.
 
-1. Set `modal={false}` on the `Dialog` component
-2. Add a manual backdrop overlay (`div` with `bg-black/80`) that appears when the dialog is open
+### SQL Migration
 
-## Files to Edit
+```sql
+CREATE POLICY "Staff can view all service requests"
+ON public.service_requests
+FOR SELECT
+TO authenticated
+USING (is_staff_member(auth.uid()));
+```
 
-### 1. `src/pages/admin/housekeeping/components/AddItemDialog.tsx`
-- Wrap the `Dialog` in a fragment
-- Add a backdrop div: `{isOpen && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}`
-- Change `<Dialog open={isOpen} onOpenChange={onOpenChange}>` to `<Dialog open={isOpen} onOpenChange={onOpenChange} modal={false}>`
+This grants moderators (and staff) read access to all service requests, matching the admin's existing visibility. The existing "Admins can manage all service requests" policy (ALL command) remains for full CRUD by admins.
 
-### 2. `src/pages/admin/housekeeping/components/EditItemDialog.tsx`
-- Same changes: wrap in fragment, add backdrop div, add `modal={false}`
+## Files to Modify
+No code changes needed -- this is a database-only fix (one new RLS policy).
 
-Both changes follow the exact pattern already established in:
-- `CreateStaffDialog.tsx`
-- `EditRoleDialog.tsx`
-- `AddPreferenceDialog.tsx`
-- `AddMedicalAlertDialog.tsx`
