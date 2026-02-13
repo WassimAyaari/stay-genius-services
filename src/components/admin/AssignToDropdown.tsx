@@ -78,7 +78,7 @@ const AssignToDropdown = ({ requestId, serviceType, assignedToName, onAssigned }
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant={assignedToName ? "default" : "outline"} size="sm" className="gap-1 whitespace-nowrap">
+        <Button variant={assignedToName ? "default" : "outline"} size="sm" className="gap-1 whitespace-nowrap" style={assignedToName ? { backgroundColor: '#d6f0f8', color: '#1f2937' } : undefined}>
           {assignedToName ? <User className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
           {assignedToName || 'Assign'}
         </Button>
