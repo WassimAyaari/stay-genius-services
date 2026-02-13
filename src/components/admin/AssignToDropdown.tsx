@@ -54,7 +54,7 @@ const AssignToDropdown = ({ requestId, serviceType, assignedToName, onAssigned }
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1 whitespace-nowrap">
           <UserPlus className="h-4 w-4" />
