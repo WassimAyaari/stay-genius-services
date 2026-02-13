@@ -1,32 +1,26 @@
 
-
-# Fix: Add Accompanist Dialog -- Stop Layout Shift and Restore Backdrop
+# Fix: Restore Dark Backdrop on Admin Staff Dialogs
 
 ## Problem
-The "Add Accompanist" dialog in `CompanionsList.tsx` still uses the default `modal` mode, causing the same layout shift issue that was already fixed for the Preference and Medical Alert dialogs.
+The three admin staff dialogs (Create, Edit Role, Delete) have `modal={false}` to prevent layout shift, but are missing the manual dark backdrop (`bg-black/80`) that was added to the profile dialogs.
 
 ## Solution
-Apply the exact same pattern used for the other two dialogs:
-1. Add `modal={false}` to prevent scrollbar manipulation
-2. Add a manual backdrop div for the dark overlay
+Add the same manual backdrop pattern already used in the profile dialogs to all three admin staff dialogs.
 
-## File to Edit
+## Files to Edit
 
-### `src/pages/profile/components/CompanionsList.tsx`
+### 1. `src/pages/admin/staff/CreateStaffDialog.tsx`
+- Wrap the return in a fragment
+- Add `{open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}` before the `<Dialog>` component
 
-Change the Dialog section (around line 179) from:
+### 2. `src/pages/admin/staff/EditRoleDialog.tsx`
+- Wrap the return in a fragment
+- Add `{open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}` before the `<Dialog>` component
 
-```tsx
-<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-  <DialogContent className="sm:max-w-[425px]">
-```
+### 3. `src/pages/admin/staff/DeleteStaffDialog.tsx`
+- Wrap the return in a fragment
+- Add `{open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}` before the `<AlertDialog>` component
+- Note: The `AlertDialog` here does not currently have `modal={false}` -- this will be added as well to prevent layout shift, consistent with all other dialogs
 
-To:
-
-```tsx
-{isDialogOpen && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => setIsDialogOpen(false)} />}
-<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} modal={false}>
-  <DialogContent className="sm:max-w-[425px]">
-```
-
-This is the same two-line change already applied to `AddPreferenceDialog.tsx` and `AddMedicalAlertDialog.tsx`.
+## Result
+All three admin staff dialogs will show the dark semi-transparent backdrop when open, matching the profile dialogs and the expected behavior shown in the user's earlier screenshot.
