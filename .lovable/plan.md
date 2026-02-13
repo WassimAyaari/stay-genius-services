@@ -1,42 +1,46 @@
 
 
-## Fix: Notification Click - Navigate to Correct Service Page and Highlight Request
+# Remove "Hold" Status, Fix Moderator Permissions, and Hide Assign on Completed
 
-### Problem
-The current notification has "service" in its message (not "housekeeping"), so the keyword-based route matching fails. Even after the previous fix, existing notifications still won't work. Additionally, you want the specific request row to be visually highlighted.
+## Three Changes
 
-### Solution
-Two changes:
+### 1. Remove "On Hold" status from all request tabs
+Remove the "On Hold" button and related logic from all 4 request tab components:
+- `HousekeepingRequestsTab.tsx`
+- `MaintenanceRequestsTab.tsx`
+- `SecurityRequestsTab.tsx`
+- `InformationTechnologyRequestsTab.tsx`
 
-1. **Smarter navigation**: Instead of matching keywords in the notification message, use the `reference_id` to look up the service request's category from the database, then navigate to the correct page.
+The simplified action flow will be:
+- **Pending** -> Start, Complete, Cancel
+- **In Progress** -> Complete, Cancel
+- **Completed** -> No actions (finished)
+- **Cancelled** -> No actions
 
-2. **Highlight the request row**: Pass the request ID as a URL parameter (`?tab=requests&requestId=xxx`) and highlight the matching row in the requests table with a visual effect (e.g., a colored background that fades out).
+Also remove `on_hold` from type signatures in parent components (`HousekeepingManager.tsx`, `InformationTechnologyManager.tsx`).
 
-### Technical Details
+### 2. Hide "Assign" button when status is "completed" or "cancelled"
+In all 4 request tabs, conditionally render the `AssignToDropdown` only when the request status is not `completed` or `cancelled`.
 
-#### 1. Update `StaffNotificationBell.tsx`
-- When a notification with `reference_type === 'service_request'` is clicked, fetch the service request from the database using `reference_id`
-- Look up its `category_id` to determine the service type (Housekeeping, Maintenance, Security, IT)
-- Navigate to the correct route with both `tab=requests` and `requestId` parameters
-- Keep the keyword-based matching as a fallback
+### 3. Fix moderator permissions (RLS policy)
+Moderators can view requests (`is_staff_member` SELECT policy) but **cannot update** them because the UPDATE policy only allows admins (`is_admin`) or the guest themselves (`guest_id = auth.uid()`).
 
+**Fix**: Add a new RLS policy on the `service_requests` table:
+```sql
+CREATE POLICY "Staff can update service requests"
+ON service_requests
+FOR UPDATE
+USING (is_staff_member(auth.uid()));
 ```
-Category ID -> Route mapping:
-  Housekeeping -> /admin/housekeeping
-  Maintenance -> /admin/maintenance
-  Security -> /admin/security
-  Information Technology -> /admin/information-technology
-```
 
-#### 2. Update `HousekeepingRequestsTab.tsx` (and similar tabs for other services)
-- Read the `requestId` URL parameter
-- When rendering table rows, apply a highlight class (e.g., pulsing border or yellow background) to the matching row
-- Auto-scroll to the highlighted row using a ref
+This allows moderators and staff to update request statuses (Start, Complete, Cancel).
 
-### Files to Modify
-- `src/components/admin/StaffNotificationBell.tsx` - New navigation logic using DB lookup
-- `src/pages/admin/housekeeping/components/HousekeepingRequestsTab.tsx` - Add row highlighting
-- `src/pages/admin/maintenance/components/MaintenanceRequestsTab.tsx` - Add row highlighting
-- `src/pages/admin/security/components/SecurityRequestsTab.tsx` - Add row highlighting
-- `src/pages/admin/information-technology/components/ITRequestsTab.tsx` - Add row highlighting
+## Files to Modify
+- `src/pages/admin/housekeeping/components/HousekeepingRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
+- `src/pages/admin/maintenance/components/MaintenanceRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
+- `src/pages/admin/security/SecurityRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
+- `src/pages/admin/information-technology/components/InformationTechnologyRequestsTab.tsx` - Remove Hold buttons, hide Assign on completed
+- `src/pages/admin/HousekeepingManager.tsx` - Remove `on_hold` from type signature
+- `src/pages/admin/InformationTechnologyManager.tsx` - Remove `on_hold` from type signature
+- **Database**: Add RLS UPDATE policy for staff members on `service_requests`
 
