@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -14,7 +15,8 @@ import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 
 const HousekeepingManager = () => {
-  const [activeTab, setActiveTab] = useState('items');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'items');
   const { markSectionSeen } = useAdminNotifications();
 
   React.useEffect(() => {

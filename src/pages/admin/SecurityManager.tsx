@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRequestCategories, useCreateRequestItem } from '@/hooks/useRequestCategories';
 import { RequestItem } from '@/features/rooms/types';
@@ -13,7 +14,8 @@ import { Badge } from '@/components/ui/badge';
 
 
 const SecurityManager = () => {
-  const [activeTab, setActiveTab] = useState('items');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'items');
   const { counts, markSectionSeen } = useAdminNotifications();
 
   React.useEffect(() => {
