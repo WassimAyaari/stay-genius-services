@@ -136,7 +136,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
     <>
       {open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Staff Account</DialogTitle>
           <DialogDescription>
@@ -144,7 +144,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -168,7 +168,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                     <FormControl>
                       <Input placeholder="Doe" {...field} />
                     </FormControl>
-                    <div className="min-h-[20px]"><FormMessage /></div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -182,7 +182,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                   <FormControl>
                     <Input type="email" placeholder="john@example.com" {...field} />
                   </FormControl>
-                  <div className="min-h-[20px]"><FormMessage /></div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -204,7 +204,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
-                  <div className="min-h-[20px]"><FormMessage /></div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -228,7 +228,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                         <SelectItem value="it_support">IT Support</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="min-h-[20px]"><FormMessage /></div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -242,7 +242,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
-                  <div className="min-h-[20px]"><FormMessage /></div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -255,7 +255,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
-                  <div className="min-h-[20px]"><FormMessage /></div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
