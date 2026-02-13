@@ -1,32 +1,72 @@
 
 
-# Fix: Create Staff Dialog -- Reduce Spacing and Add Scroll for Mobile
+# Add "Assign To" Button for Service Request Tickets
 
-## Problem
-The "Create Staff Account" dialog has excessive white space between fields due to `min-h-[20px]` reserved for error messages and `space-y-4` gaps. With the new Service Type field, it overflows on mobile and isn't responsive.
+## Overview
+Add an "Assign to" button in the Actions column of each service's Requests table. Clicking it shows a dropdown listing only the moderators assigned to that specific service type (e.g., housekeeping moderators for housekeeping requests). When a moderator is selected, the request is assigned to them.
 
-## Solution
+## Database Changes
 
-### 1. Remove reserved error message space
-Remove all `<div className="min-h-[20px]"><FormMessage /></div>` wrappers and replace with plain `<FormMessage />`. Error messages will appear only when needed instead of reserving blank space.
+### 1. Add `assigned_to` column to `service_requests`
+- Add a nullable `assigned_to` UUID column to store the assigned moderator's user ID
+- Add an `assigned_to_name` text column for quick display without extra joins
 
-### 2. Reduce form spacing
-Change the form's `space-y-4` to `space-y-3` for tighter field grouping.
+```sql
+ALTER TABLE public.service_requests 
+  ADD COLUMN assigned_to uuid,
+  ADD COLUMN assigned_to_name text;
+```
 
-### 3. Add scrollable content area with max height
-Add `max-h-[85vh] overflow-y-auto` to the `DialogContent` so the dialog scrolls on small screens instead of overflowing.
+## New Shared Component
 
-### 4. Improve mobile responsiveness
-Update the `DialogContent` className to ensure proper width and padding on small screens:
-- Use `w-[95vw] sm:max-w-md` for proper mobile width
-- The scroll ensures all content is accessible regardless of screen size
+### 2. `src/components/admin/AssignToDropdown.tsx`
+A reusable dropdown button component that:
+- Accepts a `serviceType` prop (e.g., `'housekeeping'`, `'maintenance'`, `'security'`, `'it_support'`)
+- Accepts `requestId` and current `assignedToName` props
+- Fetches moderators from `moderator_services` filtered by `service_type`, joined with `guests` table for names
+- Renders a DropdownMenu with the list of matching moderators
+- On selection, updates `service_requests.assigned_to` and `assigned_to_name` for that request
+- Shows the assigned moderator name if already assigned, or an "Assign" button if not
+- Includes an "Unassign" option if already assigned
 
-## File to Edit
+## Frontend Changes
 
-### `src/pages/admin/staff/CreateStaffDialog.tsx`
+### 3. Update `ServiceRequest` type (`src/features/rooms/types/index.ts`)
+Add `assigned_to?: string` and `assigned_to_name?: string` fields.
 
-**Changes:**
-- Line 139: `DialogContent` className becomes `"w-[95vw] sm:max-w-md max-h-[85vh] overflow-y-auto"`
-- Line 147: `space-y-4` becomes `space-y-3`
-- Lines 171, 185, 207, 231, 245, 258: Remove the `<div className="min-h-[20px]">` wrappers, keep plain `<FormMessage />`
+### 4. Update all 4 Requests Tabs
+Each tab gets the `AssignToDropdown` component added in the Actions column, passing the appropriate service type:
 
+- **`HousekeepingRequestsTab.tsx`** -- serviceType = `'housekeeping'`
+- **`MaintenanceRequestsTab.tsx`** -- serviceType = `'maintenance'`
+- **`SecurityRequestsTab.tsx`** -- serviceType = `'security'`
+- **`InformationTechnologyRequestsTab.tsx`** -- serviceType = `'it_support'`
+
+The dropdown will appear alongside the existing action buttons (Hold, Start, Complete, Cancel) for active requests.
+
+## Technical Details
+
+### AssignToDropdown Component Logic
+```text
+1. On mount/open, query moderator_services WHERE service_type = [serviceType]
+2. For each moderator user_id, fetch name from guests table
+3. Display as a DropdownMenu with moderator names
+4. On select: UPDATE service_requests SET assigned_to = [user_id], assigned_to_name = [name] WHERE id = [requestId]
+5. Trigger a refetch of requests data
+```
+
+### Hook: `useServiceModerators`
+A small custom hook to fetch and cache moderators by service type:
+- Query `moderator_services` filtered by `service_type`
+- Join with `guests` to get `first_name`, `last_name`
+- Cache with React Query keyed by service type
+
+## Files to Create/Edit
+- **SQL migration**: Add `assigned_to` and `assigned_to_name` columns to `service_requests`
+- **New**: `src/hooks/useServiceModerators.ts` -- hook to fetch moderators by service type
+- **New**: `src/components/admin/AssignToDropdown.tsx` -- reusable assign dropdown
+- **Edit**: `src/features/rooms/types/index.ts` -- add new fields to ServiceRequest
+- **Edit**: `src/pages/admin/housekeeping/components/HousekeepingRequestsTab.tsx` -- add AssignToDropdown
+- **Edit**: `src/pages/admin/maintenance/components/MaintenanceRequestsTab.tsx` -- add AssignToDropdown
+- **Edit**: `src/pages/admin/security/SecurityRequestsTab.tsx` -- add AssignToDropdown
+- **Edit**: `src/pages/admin/information-technology/components/InformationTechnologyRequestsTab.tsx` -- add AssignToDropdown
