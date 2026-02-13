@@ -42,7 +42,7 @@ const AssignToDropdown = ({ requestId, serviceType, assignedToName, onAssigned }
     }
 
     // Create notification for the assigned staff member
-    const reqType = requestData?.type || serviceType;
+    const reqType = serviceType || requestData?.type;
     const roomInfo = requestData?.room_number ? ` - Room ${requestData.room_number}` : '';
     const guestInfo = requestData?.guest_name ? ` from ${requestData.guest_name}` : '';
     const notifMessage = `${reqType}${roomInfo}${guestInfo}: ${requestData?.description || 'No description'}`;
