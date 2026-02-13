@@ -1,23 +1,28 @@
 
 
-# Fix: Assign Dropdown Causing Table Layout Shift
+# Fix: Add Item and Edit Item Dialogs Causing Layout Shift
 
 ## Problem
-The `AssignToDropdown` component uses Radix `DropdownMenu` without `modal={false}`. By default, Radix modal dropdowns add `pointer-events: none` and adjust body padding/scroll when opened, which causes the entire page layout to shift slightly.
+Same root cause as the previous Assign dropdown fix. The `AddItemDialog` and `EditItemDialog` components use Radix `Dialog` in default modal mode. When opened, Radix removes the body scrollbar and adds padding to compensate, causing the entire page to shift slightly.
 
-## Root Cause
-Every other `DropdownMenu` in the project already uses `modal={false}` (e.g., `StaffTable.tsx`, `UserMenu.tsx`, `NotificationMenu.tsx`), but the newly created `AssignToDropdown.tsx` was missing it.
+## Solution
+Apply the same pattern already used throughout the project (e.g., `CreateStaffDialog`, `EditRoleDialog`, `AddPreferenceDialog`):
 
-## Fix
-One single change in `src/components/admin/AssignToDropdown.tsx`:
+1. Set `modal={false}` on the `Dialog` component
+2. Add a manual backdrop overlay (`div` with `bg-black/80`) that appears when the dialog is open
 
-Change line 57 from:
-```tsx
-<DropdownMenu>
-```
-to:
-```tsx
-<DropdownMenu modal={false}>
-```
+## Files to Edit
 
-This is a one-line fix in one file. No other changes needed.
+### 1. `src/pages/admin/housekeeping/components/AddItemDialog.tsx`
+- Wrap the `Dialog` in a fragment
+- Add a backdrop div: `{isOpen && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}`
+- Change `<Dialog open={isOpen} onOpenChange={onOpenChange}>` to `<Dialog open={isOpen} onOpenChange={onOpenChange} modal={false}>`
+
+### 2. `src/pages/admin/housekeeping/components/EditItemDialog.tsx`
+- Same changes: wrap in fragment, add backdrop div, add `modal={false}`
+
+Both changes follow the exact pattern already established in:
+- `CreateStaffDialog.tsx`
+- `EditRoleDialog.tsx`
+- `AddPreferenceDialog.tsx`
+- `AddMedicalAlertDialog.tsx`
