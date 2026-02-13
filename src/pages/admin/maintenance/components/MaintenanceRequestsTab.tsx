@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Search, CheckCircle, PlayCircle, XCircle, Pause } from 'lucide-react';
+import { useHighlightedRequest } from '@/hooks/useHighlightedRequest';
 import AssignToDropdown from '@/components/admin/AssignToDropdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,7 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const { requests, isLoading, handleRefresh } = useRequestsData();
+  const { highlightedId, highlightRef } = useHighlightedRequest();
   
   const maintenanceRequests = requests.filter(
     request => 
@@ -126,7 +128,11 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
               </TableHeader>
               <TableBody>
                 {maintenanceRequests.map((request) => (
-                  <TableRow key={request.id}>
+                  <TableRow
+                    key={request.id}
+                    ref={request.id === highlightedId ? highlightRef : undefined}
+                    className={request.id === highlightedId ? 'animate-pulse bg-primary/10 ring-2 ring-primary/30' : ''}
+                  >
                     <TableCell className="font-medium">{request.room_number || 'N/A'}</TableCell>
                     <TableCell>{request.guest_name || 'Anonymous'}</TableCell>
                     <TableCell>

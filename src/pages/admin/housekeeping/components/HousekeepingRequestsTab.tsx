@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Layers, Clock, PlayCircle, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
+import { useHighlightedRequest } from '@/hooks/useHighlightedRequest';
 import AssignToDropdown from '@/components/admin/AssignToDropdown';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ const HousekeepingRequestsTab = ({
 }: HousekeepingRequestsTabProps) => {
   const { categories } = useRequestCategories();
   const { requests, isLoading: isRequestsLoading, handleRefresh } = useRequestsData();
+  const { highlightedId, highlightRef } = useHighlightedRequest();
 
   const housekeepingCategory = categories.find(cat => cat.name === 'Housekeeping');
   
@@ -110,7 +112,11 @@ const HousekeepingRequestsTab = ({
             </TableHeader>
             <TableBody>
               {housekeepingRequests.map((request) => (
-                <TableRow key={request.id}>
+                <TableRow
+                  key={request.id}
+                  ref={request.id === highlightedId ? highlightRef : undefined}
+                  className={request.id === highlightedId ? 'animate-pulse bg-primary/10 ring-2 ring-primary/30' : ''}
+                >
                   <TableCell className="font-medium">{request.room_number || '-'}</TableCell>
                   <TableCell>{request.guest_name || '-'}</TableCell>
                   <TableCell>
