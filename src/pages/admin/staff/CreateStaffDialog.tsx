@@ -117,8 +117,10 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="sm:max-w-md">
+    <>
+      {open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create Staff Account</DialogTitle>
           <DialogDescription>
@@ -238,8 +240,9 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
             </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

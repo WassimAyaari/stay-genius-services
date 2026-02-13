@@ -54,8 +54,10 @@ const DeleteStaffDialog: React.FC<DeleteStaffDialogProps> = ({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+    <>
+      {open && <div className="fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Staff Account</AlertDialogTitle>
           <AlertDialogDescription>
@@ -74,8 +76,9 @@ const DeleteStaffDialog: React.FC<DeleteStaffDialogProps> = ({
             {isDeleting ? 'Deleting...' : 'Delete Account'}
           </AlertDialogAction>
         </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
