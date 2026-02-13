@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { first_name, last_name, email, password, role } = await req.json();
+    const { first_name, last_name, email, password, role, service_type } = await req.json();
 
     // Validate inputs
     if (!first_name || !last_name || !email || !password || !role) {
@@ -71,6 +71,20 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Validate service_type for moderator role
+    if (role === "moderator") {
+      const validServiceTypes = ["housekeeping", "maintenance", "security", "it_support"];
+      if (!service_type || !validServiceTypes.includes(service_type)) {
+        return new Response(
+          JSON.stringify({ error: "A valid service type is required for moderators" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
     }
 
     // Use service role to create user
@@ -113,6 +127,23 @@ Deno.serve(async (req) => {
       .delete()
       .eq("user_id", newUser.user.id)
       .eq("role", "user");
+
+    // Insert moderator service type if applicable
+    if (role === "moderator" && service_type) {
+      const { error: serviceError } = await supabaseAdmin
+        .from("moderator_services")
+        .insert({ user_id: newUser.user.id, service_type });
+
+      if (serviceError) {
+        return new Response(
+          JSON.stringify({ error: serviceError.message }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
 
     // Insert guest profile so StaffManager can display name/email
     await supabaseAdmin.from("guests").insert({

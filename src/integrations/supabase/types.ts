@@ -887,6 +887,27 @@ export type Database = {
           },
         ]
       }
+      moderator_services: {
+        Row: {
+          created_at: string | null
+          id: string
+          service_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          service_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          service_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       public_transport: {
         Row: {
           created_at: string | null

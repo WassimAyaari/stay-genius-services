@@ -41,8 +41,18 @@ const StaffManager: React.FC = () => {
         .select('user_id, first_name, last_name, email')
         .in('user_id', userIds);
 
+      // Fetch moderator service types
+      const { data: modServices } = await supabase
+        .from('moderator_services' as any)
+        .select('user_id, service_type')
+        .in('user_id', userIds);
+
       const guestMap = new Map(
         (guests || []).map((g) => [g.user_id, g])
+      );
+
+      const serviceMap = new Map(
+        ((modServices as any[]) || []).map((s: any) => [s.user_id, s.service_type])
       );
 
       const staffList: StaffMember[] = roles.map((r) => {
@@ -53,6 +63,7 @@ const StaffManager: React.FC = () => {
           first_name: guest?.first_name || '',
           last_name: guest?.last_name || '',
           role: r.role,
+          service_type: serviceMap.get(r.user_id) || undefined,
           created_at: r.created_at || '',
         };
       });

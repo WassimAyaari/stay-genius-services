@@ -38,12 +38,17 @@ const createStaffSchema = z
     role: z.enum(['staff', 'moderator', 'admin'], {
       required_error: 'Please select a role',
     }),
+    service_type: z.enum(['housekeeping', 'maintenance', 'security', 'it_support']).optional(),
     password: z.string().min(6, 'Password must be at least 6 characters').max(72),
     confirm_password: z.string(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: 'Passwords do not match',
     path: ['confirm_password'],
+  })
+  .refine((data) => data.role !== 'moderator' || !!data.service_type, {
+    message: 'Please select a service type',
+    path: ['service_type'],
   });
 
 type CreateStaffFormValues = z.infer<typeof createStaffSchema>;
@@ -68,10 +73,20 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
       last_name: '',
       email: '',
       role: undefined,
+      service_type: undefined,
       password: '',
       confirm_password: '',
     },
   });
+
+  const watchedRole = form.watch('role');
+
+  // Clear service_type when role changes away from moderator
+  React.useEffect(() => {
+    if (watchedRole !== 'moderator') {
+      form.setValue('service_type', undefined);
+    }
+  }, [watchedRole, form]);
 
   const onSubmit = async (values: CreateStaffFormValues) => {
     setIsLoading(true);
@@ -86,6 +101,7 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
           email: values.email,
           password: values.password,
           role: values.role,
+          ...(values.role === 'moderator' && values.service_type ? { service_type: values.service_type } : {}),
         },
       });
 
@@ -192,6 +208,31 @@ const CreateStaffDialog: React.FC<CreateStaffDialogProps> = ({
                 </FormItem>
               )}
             />
+            {watchedRole === 'moderator' && (
+              <FormField
+                control={form.control}
+                name="service_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Service Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a service type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="housekeeping">Housekeeping</SelectItem>
+                        <SelectItem value="maintenance">Maintenance</SelectItem>
+                        <SelectItem value="security">Security</SelectItem>
+                        <SelectItem value="it_support">IT Support</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="min-h-[20px]"><FormMessage /></div>
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="password"

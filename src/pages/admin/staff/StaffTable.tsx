@@ -24,8 +24,16 @@ export interface StaffMember {
   first_name: string;
   last_name: string;
   role: string;
+  service_type?: string;
   created_at: string;
 }
+
+const SERVICE_TYPE_LABELS: Record<string, string> = {
+  housekeeping: 'Housekeeping',
+  maintenance: 'Maintenance',
+  security: 'Security',
+  it_support: 'IT Support',
+};
 
 interface StaffTableProps {
   staff: StaffMember[];
@@ -102,10 +110,17 @@ const StaffTable: React.FC<StaffTableProps> = ({
               </TableCell>
               <TableCell>{member.email}</TableCell>
               <TableCell>
-                <Badge variant={roleBadgeVariant(member.role) as any} className="capitalize flex items-center w-fit">
-                  {roleIcon(member.role)}
-                  {member.role}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={roleBadgeVariant(member.role) as any} className="capitalize flex items-center w-fit">
+                    {roleIcon(member.role)}
+                    {member.role}
+                  </Badge>
+                  {member.role === 'moderator' && member.service_type && (
+                    <Badge variant="outline" className="text-xs">
+                      {SERVICE_TYPE_LABELS[member.service_type] || member.service_type}
+                    </Badge>
+                  )}
+                </div>
               </TableCell>
               <TableCell className="text-muted-foreground">
                 {member.created_at
