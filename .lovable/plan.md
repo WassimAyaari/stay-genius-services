@@ -1,56 +1,67 @@
 
-# Change Cancelled Status Color to #f4b5ac
+# Make Alert, Note, and Add Buttons Functional on Admin Guest Detail Page
 
-## Problem
-The "Cancelled" status badge currently uses a neutral gray color (`bg-gray-100 text-gray-800`), which doesn't provide sufficient visual distinction from pending statuses. The user wants a more distinct pinkish/salmon color (`#f4b5ac`) for cancelled requests.
+## Overview
+The admin Guest 360 page has three non-functional buttons: the "Add" button on the Preferences card, the "Alert" button, and the "Note" button on the Intelligence card. This plan wires them up to work properly, reusing the existing dialog components from the guest profile, and also creates a new staff notes system.
 
-## Solution
-Update the `getStatusBadgeColor` function in all four request tab components to apply the custom color `#f4b5ac` for cancelled status badges.
+## What Changes
 
-Since `#f4b5ac` is a light salmon/pink color, we'll also need to set an appropriate dark text color for readability. Using `#8b3a34` (a dark brown/red) will provide good contrast.
+### 1. GuestPreferencesCard - Wire up "Add" button
+- Import `AddPreferenceDialog` from the profile components
+- Add state for dialog open/close
+- Add a mutation to insert preferences into `guest_preferences` table using the guest's ID (passed as prop)
+- Invalidate the `admin-guest-preferences` query on success
+- The "Add" button opens the dialog, and on submit it inserts directly with the known `guestId`
 
-## Implementation Details
+### 2. GuestIntelligenceCard - Wire up "Alert" button
+- Import `AddMedicalAlertDialog` from the profile components
+- Add state for dialog open/close
+- Add a mutation to insert into `guest_medical_alerts` table using `guest.id`
+- Invalidate the `admin-guest-alerts` query on success
+- The "Alert" button opens the dialog, and on submit it inserts the alert
 
-### Changed Logic
-Replace the cancelled case in each `getStatusBadgeColor` function:
+### 3. GuestIntelligenceCard - Wire up "Note" button and "Add a note"
+- Create a new database table `guest_staff_notes` with columns: `id`, `guest_id` (uuid), `author_name` (text), `content` (text), `created_at` (timestamptz)
+- Create a simple `AddStaffNoteDialog` component with a textarea for the note content
+- Add a query to fetch notes from `guest_staff_notes` for the guest
+- Add a mutation to insert notes
+- Display existing notes in the Staff-to-Staff Notes section
+- Both the "Note" button in the header and the "Add a note" button at the bottom open the dialog
 
-**Current (all 4 files):**
-```tsx
-case 'cancelled':
-  return 'bg-gray-100 text-gray-800 border-gray-200';
-```
+## Technical Details
 
-**Change to (with inline style approach):**
-Instead of using Tailwind classes for the custom color, we'll apply inline styles to the Badge component since `#f4b5ac` is not a standard Tailwind color.
+### New Database Table
+Table: `guest_staff_notes`
+- `id` uuid PK default gen_random_uuid()
+- `guest_id` uuid NOT NULL
+- `author_name` text NOT NULL
+- `content` text NOT NULL
+- `created_at` timestamptz default now()
 
-The Badge components already support the `style` prop, so we can conditionally apply:
-- `backgroundColor: '#f4b5ac'`
-- `color: '#8b3a34'` (dark text for contrast)
+RLS policies:
+- Admins can manage all notes (ALL using is_admin(auth.uid()))
+- Admins can view all notes (SELECT using is_admin(auth.uid()))
 
-### Files to Modify
-1. `src/pages/admin/maintenance/components/MaintenanceRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 52-53 and ~145-150)
-2. `src/pages/admin/housekeeping/components/HousekeepingRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 63-64)
-3. `src/pages/admin/security/SecurityRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 52-53 and ~145-150)
-4. `src/pages/admin/information-technology/components/InformationTechnologyRequestsTab.tsx` - Update `getStatusBadgeColor` and Badge rendering (lines 61-62)
+### New Component
+`src/pages/admin/components/guests/AddStaffNoteDialog.tsx`
+- Simple dialog with a textarea for the note content
+- Props: `open`, `onOpenChange`, `onAdd` (callback with `{ content: string }`)
 
-### Implementation Approach
-For each file, we'll:
-1. Update the `getStatusBadgeColor` function to return a special marker for cancelled (e.g., `'cancelled'`)
-2. Apply the custom inline style directly in the Badge component using a ternary conditional
+### Modified Files
+1. **`src/pages/admin/components/guests/GuestPreferencesCard.tsx`**
+   - Add `useState` for dialog open state
+   - Add `useMutation` for inserting preferences
+   - Import and render `AddPreferenceDialog`
+   - Wire the "Add" button's `onClick` to open the dialog
 
-Example pattern:
-```tsx
-<Badge
-  className={request.status === 'cancelled' ? '' : `${getStatusBadgeColor(request.status)} border`}
-  variant="outline"
-  style={request.status === 'cancelled' ? { 
-    backgroundColor: '#f4b5ac', 
-    color: '#8b3a34',
-    border: '1px solid #e8a39f'
-  } : undefined}
->
-  {getStatusLabel(request.status)}
-</Badge>
-```
+2. **`src/pages/admin/components/guests/GuestIntelligenceCard.tsx`**
+   - Add `useState` for alert dialog and note dialog open states
+   - Add `useMutation` for inserting alerts and notes
+   - Add `useQuery` for fetching staff notes
+   - Import and render `AddMedicalAlertDialog` and `AddStaffNoteDialog`
+   - Wire "Alert" button and "Note" button to open respective dialogs
+   - Render fetched notes in the staff notes section with author name and timestamp
 
-Alternatively, we can simplify by always returning a style object from `getStatusBadgeColor` or by checking the status directly in the Badge rendering.
+3. **New file: `src/pages/admin/components/guests/AddStaffNoteDialog.tsx`**
+
+4. **Database migration** to create `guest_staff_notes` table with RLS policies
