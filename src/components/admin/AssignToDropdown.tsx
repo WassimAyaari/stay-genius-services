@@ -24,6 +24,13 @@ const AssignToDropdown = ({ requestId, serviceType, assignedToName, onAssigned }
   const { toast } = useToast();
 
   const handleAssign = async (userId: string, name: string) => {
+    // Fetch request details for notification message
+    const { data: requestData } = await supabase
+      .from('service_requests')
+      .select('type, description, room_number, guest_name')
+      .eq('id', requestId)
+      .single();
+
     const { error } = await supabase
       .from('service_requests')
       .update({ assigned_to: userId, assigned_to_name: name } as any)
@@ -33,6 +40,21 @@ const AssignToDropdown = ({ requestId, serviceType, assignedToName, onAssigned }
       toast({ title: 'Error', description: 'Failed to assign request', variant: 'destructive' });
       return;
     }
+
+    // Create notification for the assigned staff member
+    const reqType = requestData?.type || serviceType;
+    const roomInfo = requestData?.room_number ? ` - Room ${requestData.room_number}` : '';
+    const guestInfo = requestData?.guest_name ? ` from ${requestData.guest_name}` : '';
+    const notifMessage = `${reqType}${roomInfo}${guestInfo}: ${requestData?.description || 'No description'}`;
+
+    await supabase.from('staff_notifications').insert({
+      user_id: userId,
+      type: 'assignment',
+      title: 'New ticket assigned to you',
+      message: notifMessage,
+      reference_id: requestId,
+      reference_type: 'service_request',
+    } as any);
 
     toast({ title: 'Assigned', description: `Request assigned to ${name}` });
     onAssigned();
