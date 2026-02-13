@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { UserCog, Plus, RefreshCw, Search } from 'lucide-react';
+import { UserCog, Plus, RefreshCw, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import StaffTable, { StaffMember } from './staff/StaffTable';
 import CreateStaffDialog from './staff/CreateStaffDialog';
@@ -18,6 +19,7 @@ const StaffManager: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState<StaffMember | null>(null);
   const [staffToEdit, setStaffToEdit] = useState<StaffMember | null>(null);
+  const [roleFilter, setRoleFilter] = useState('all');
 
   const fetchStaff = useCallback(async () => {
     setIsLoading(true);
@@ -96,12 +98,13 @@ const StaffManager: React.FC = () => {
 
   const filtered = staff.filter((m) => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch =
       m.first_name.toLowerCase().includes(q) ||
       m.last_name.toLowerCase().includes(q) ||
       m.email.toLowerCase().includes(q) ||
-      m.role.toLowerCase().includes(q)
-    );
+      m.role.toLowerCase().includes(q);
+    const matchesRole = roleFilter === 'all' || m.role === roleFilter;
+    return matchesSearch && matchesRole;
   });
 
   return (
@@ -131,15 +134,29 @@ const StaffManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by name, email or role..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      {/* Search & Filter */}
+      <div className="flex items-center gap-3">
+        <div className="relative max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, email or role..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className="w-[160px]">
+            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="All Roles" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="moderator">Moderator</SelectItem>
+            <SelectItem value="staff">Staff</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
