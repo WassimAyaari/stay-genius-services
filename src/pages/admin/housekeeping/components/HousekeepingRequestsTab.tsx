@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Layers, Clock, PlayCircle, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
+import { Search, Layers, PlayCircle, CheckCircle, XCircle } from 'lucide-react';
 import { useHighlightedRequest } from '@/hooks/useHighlightedRequest';
 import AssignToDropdown from '@/components/admin/AssignToDropdown';
 import { format } from 'date-fns';
@@ -20,7 +20,7 @@ import { useRequestsData } from '@/hooks/useRequestsData';
 type HousekeepingRequestsTabProps = {
   requestsSearchTerm: string;
   setRequestsSearchTerm: (term: string) => void;
-  handleUpdateRequestStatus: (requestId: string, status: 'pending' | 'on_hold' | 'in_progress' | 'completed' | 'cancelled') => Promise<void>;
+  handleUpdateRequestStatus: (requestId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled') => Promise<void>;
 };
 
 const HousekeepingRequestsTab = ({
@@ -56,8 +56,6 @@ const HousekeepingRequestsTab = ({
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'on_hold':
-        return 'bg-orange-100 text-orange-800';
       case 'in_progress':
         return 'bg-blue-100 text-blue-800';
       case 'completed':
@@ -135,36 +133,15 @@ const HousekeepingRequestsTab = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2 flex-nowrap">
-                      <AssignToDropdown
-                        requestId={request.id}
-                        serviceType="housekeeping"
-                        assignedToName={(request as any).assigned_to_name}
-                        onAssigned={handleRefresh}
-                      />
-                      {request.status === 'pending' && (
-                        <>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleUpdateRequestStatus(request.id, 'on_hold')}
-                            className="gap-2"
-                          >
-                            <PauseCircle className="h-4 w-4" />
-                            Hold
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleUpdateRequestStatus(request.id, 'in_progress')}
-                            className="gap-2"
-                          >
-                            <PlayCircle className="h-4 w-4" />
-                            Start
-                          </Button>
-                        </>
+                      {request.status !== 'completed' && request.status !== 'cancelled' && (
+                        <AssignToDropdown
+                          requestId={request.id}
+                          serviceType="housekeeping"
+                          assignedToName={(request as any).assigned_to_name}
+                          onAssigned={handleRefresh}
+                        />
                       )}
-
-                      {request.status === 'on_hold' && (
+                      {request.status === 'pending' && (
                         <Button 
                           size="sm" 
                           variant="outline"
@@ -176,28 +153,27 @@ const HousekeepingRequestsTab = ({
                         </Button>
                       )}
                       
-                      {request.status === 'in_progress' && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleUpdateRequestStatus(request.id, 'completed')}
-                          className="gap-2"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          Complete
-                        </Button>
-                      )}
-                    
-                      {(request.status === 'pending' || request.status === 'on_hold' || request.status === 'in_progress') && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
-                          className="gap-2 text-red-500"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          Cancel
-                        </Button>
+                      {(request.status === 'pending' || request.status === 'in_progress') && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleUpdateRequestStatus(request.id, 'completed')}
+                            className="gap-2"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                            Complete
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
+                            className="gap-2 text-red-500"
+                          >
+                            <XCircle className="h-4 w-4" />
+                            Cancel
+                          </Button>
+                        </>
                       )}
                     </div>
                   </TableCell>
