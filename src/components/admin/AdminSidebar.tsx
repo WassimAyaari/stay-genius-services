@@ -60,6 +60,7 @@ import {
   Globe,
   UserCog,
 } from 'lucide-react';
+import { StaffNotificationBell } from '@/components/admin/StaffNotificationBell';
 import { useUserRole } from '@/hooks/useUserRole';
 
 interface NavItem {
@@ -274,11 +275,12 @@ export const AdminSidebar: React.FC = () => {
             <Hotel className="h-5 w-5" />
           </div>
           {!isCollapsed && (
-            <div className="flex flex-col">
+            <div className="flex flex-1 flex-col">
               <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">Admin Panel</span>
               <span className="text-[11px] text-muted-foreground">Hotel Management</span>
             </div>
           )}
+          <StaffNotificationBell />
         </div>
       </SidebarHeader>
 
