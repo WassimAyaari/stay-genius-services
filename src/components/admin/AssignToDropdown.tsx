@@ -82,7 +82,7 @@ const AssignToDropdown = ({ requestId, serviceType, assignedToName, onAssigned }
           variant={assignedToName ? "default" : "outline"}
           size="sm"
           className="gap-1 whitespace-nowrap"
-          style={assignedToName ? { backgroundColor: "#eef7e6", color: "#1f2937" } : undefined}
+          style={assignedToName ? { backgroundColor: "#ddeac3", color: "#1f2937" } : undefined}
         >
           {assignedToName ? <User className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
           {assignedToName || "Assign"}
