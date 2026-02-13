@@ -10,7 +10,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStaffNotifications } from '@/hooks/admin/useStaffNotifications';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
+const categoryNameToRoute: Record<string, string> = {
+  housekeeping: '/admin/housekeeping',
+  maintenance: '/admin/maintenance',
+  security: '/admin/security',
+  'information technology': '/admin/information-technology',
+};
+
+// Fallback keyword matching
 const serviceTypeToRoute: Record<string, string> = {
   housekeeping: '/admin/housekeeping',
   maintenance: '/admin/maintenance',
@@ -24,18 +33,47 @@ export const StaffNotificationBell: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  const handleNotificationClick = (notif: typeof notifications[0]) => {
+  const handleNotificationClick = async (notif: typeof notifications[0]) => {
     if (!notif.is_read) {
       markAsRead(notif.id);
     }
-    if (notif.reference_type === 'service_request') {
-      const route = Object.entries(serviceTypeToRoute).find(([key]) =>
-        notif.message.toLowerCase().includes(key)
-      );
-      if (route) {
-        navigate(`${route[1]}?tab=requests`);
+
+    if (notif.reference_type === 'service_request' && notif.reference_id) {
+      // Fetch the service request to get its category
+      const { data: request } = await supabase
+        .from('service_requests')
+        .select('category_id')
+        .eq('id', notif.reference_id)
+        .single();
+
+      let targetRoute: string | undefined;
+
+      if (request?.category_id) {
+        // Look up category name
+        const { data: category } = await supabase
+          .from('request_categories')
+          .select('name')
+          .eq('id', request.category_id)
+          .single();
+
+        if (category?.name) {
+          targetRoute = categoryNameToRoute[category.name.toLowerCase()];
+        }
+      }
+
+      // Fallback: keyword matching in message
+      if (!targetRoute) {
+        const entry = Object.entries(serviceTypeToRoute).find(([key]) =>
+          notif.message.toLowerCase().includes(key)
+        );
+        if (entry) targetRoute = entry[1];
+      }
+
+      if (targetRoute) {
+        navigate(`${targetRoute}?tab=requests&requestId=${notif.reference_id}`);
       }
     }
+
     setOpen(false);
   };
 
