@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserPlus, X } from 'lucide-react';
+import { UserPlus, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -78,8 +78,8 @@ const AssignToDropdown = ({ requestId, serviceType, assignedToName, onAssigned }
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1 whitespace-nowrap">
-          <UserPlus className="h-4 w-4" />
+        <Button variant={assignedToName ? "default" : "outline"} size="sm" className="gap-1 whitespace-nowrap">
+          {assignedToName ? <User className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
           {assignedToName || 'Assign'}
         </Button>
       </DropdownMenuTrigger>
