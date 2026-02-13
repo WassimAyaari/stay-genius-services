@@ -40,12 +40,12 @@ interface FilterCard {
 }
 
 const filterCards: FilterCard[] = [
-  { id: 'all', label: 'All', icon: Users, colorClass: 'text-foreground', bgClass: 'bg-muted' },
+  { id: 'all', label: 'All', icon: Users, colorClass: 'text-violet-600', bgClass: 'bg-violet-50' },
   { id: 'in-house', label: 'In-House', icon: Home, colorClass: 'text-blue-600', bgClass: 'bg-blue-50' },
-  { id: 'arrivals', label: 'Arrivals', icon: ArrowRight, colorClass: 'text-muted-foreground', bgClass: 'bg-muted' },
-  { id: 'upcoming', label: 'Upcoming', icon: Calendar, colorClass: 'text-red-600', bgClass: 'bg-red-50' },
-  { id: 'departures', label: 'Departures', icon: ArrowLeftRight, colorClass: 'text-red-600', bgClass: 'bg-red-50' },
-  { id: 'past', label: 'Past', icon: Clock, colorClass: 'text-muted-foreground', bgClass: 'bg-muted' },
+  { id: 'arrivals', label: 'Arrivals', icon: ArrowRight, colorClass: 'text-green-600', bgClass: 'bg-green-50' },
+  { id: 'upcoming', label: 'Upcoming', icon: Calendar, colorClass: 'text-amber-600', bgClass: 'bg-amber-50' },
+  { id: 'departures', label: 'Departures', icon: ArrowLeftRight, colorClass: 'text-rose-600', bgClass: 'bg-rose-50' },
+  { id: 'past', label: 'Past', icon: Clock, colorClass: 'text-slate-500', bgClass: 'bg-slate-100' },
 ];
 
 const GuestsManager: React.FC = () => {
