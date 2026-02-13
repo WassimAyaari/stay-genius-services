@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PlusCircle, Trash2, Edit, Pencil, Save, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,8 @@ import { useAdminNotifications } from '@/hooks/admin/useAdminNotifications';
 
 
 const MaintenanceManager = () => {
-  const [activeTab, setActiveTab] = useState('items');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'items');
   const { markSectionSeen } = useAdminNotifications();
 
   React.useEffect(() => {

@@ -28,14 +28,12 @@ export const StaffNotificationBell: React.FC = () => {
     if (!notif.is_read) {
       markAsRead(notif.id);
     }
-    if (notif.reference_type === 'service_request' && notif.reference_id) {
-      navigate(`/admin/requests/${notif.reference_id}`);
-    } else if (notif.reference_type === 'service_request') {
+    if (notif.reference_type === 'service_request') {
       const route = Object.entries(serviceTypeToRoute).find(([key]) =>
         notif.message.toLowerCase().includes(key)
       );
       if (route) {
-        navigate(route[1]);
+        navigate(`${route[1]}?tab=requests`);
       }
     }
     setOpen(false);
