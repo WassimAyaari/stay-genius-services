@@ -1,83 +1,49 @@
 
-## Plan: Navigate to Service Request Detail Page from Notification
 
-### Current State Analysis
-- **Notifications System**: The `StaffNotificationBell.tsx` currently stores `reference_id` (the service request ID) in the `staff_notifications` table.
-- **Current Navigation**: When clicking a notification, it navigates to the **service management page** (e.g., `/admin/housekeeping`) but doesn't open the specific request detail.
-- **Detail Pages**: There's a `ServiceRequestDetails` page for guests (`/my-room/requests/:id`), but no dedicated admin-specific service request detail page yet.
-- **Request Data**: Service requests have `id`, `room_number`, `guest_name`, `description`, `status`, `assigned_to`, `type`, `created_at`, etc.
+# Fix: Notification Click Navigates to Service Page Instead of Detail Page
 
-### Solution Approach
-Create a new **admin service request detail page** and update the notification click handler to navigate directly to it.
+## Change
+Update `StaffNotificationBell.tsx` to navigate to the correct service management page (e.g., `/admin/housekeeping`) instead of the dedicated detail page (`/admin/requests/:id`). The "Requests" tab should also be auto-selected.
 
-**Option A** (Recommended): Create a unified admin service request detail page that works for all service types (housekeeping, maintenance, security, IT) that:
-- Fetches and displays the full request details
-- Shows request status, assignment info, timestamps
-- Allows admins to update status and reassign
-- Provides quick navigation back to the requests list
+## What Changes
 
-**Option B**: Implement a modal/dialog that opens the request details inline without navigating away.
+### 1. `src/components/admin/StaffNotificationBell.tsx`
+- Remove the `navigate('/admin/requests/...')` logic
+- Always use the `serviceTypeToRoute` mapping to find the right service page from the notification message
+- Append `?tab=requests` query param so the page opens on the Requests tab automatically
 
-### Technical Changes
+### 2. Service Manager Pages (HousekeepingManager, MaintenanceManager, SecurityManager, InformationTechnologyManager)
+- Read the `tab` query parameter from the URL
+- If `tab=requests`, set the active tab to "requests" on mount so the user lands directly on the requests list
 
-#### 1. Create New Admin Service Request Detail Page
-- **File**: `src/pages/admin/ServiceRequestDetailPage.tsx`
-- **Route**: `/admin/requests/:requestId` (add to `AdminRoutes.tsx`)
-- **Functionality**:
-  - Fetch service request by ID using `useServiceRequestDetail` hook
-  - Display: Room, Guest, Request type, Description, Status, Assigned to, Created date
-  - Action buttons: Update status, Reassign, Back button
-  - Show the service type (Housekeeping, Maintenance, Security, IT) in breadcrumbs or header
+### 3. Optionally remove `ServiceRequestDetailPage.tsx` and its route
+- Since it's no longer needed, remove the dedicated detail page and the `/admin/requests/:requestId` route from `AdminRoutes.tsx`
 
-#### 2. Create Service Request Detail Hook (if needed)
-- Use existing `useServiceRequestDetail` hook or create a new one for admin context
-- Hook should fetch from `service_requests` table with all necessary fields
+## Technical Details
 
-#### 3. Update `StaffNotificationBell.tsx`
-- Modify `handleNotificationClick` function to:
-  1. Use `reference_id` (service request ID) from notification
-  2. Use `reference_type` to determine service type
-  3. Navigate to `/admin/requests/{reference_id}` instead of just the service page
-  4. Mark notification as read
+**Navigation logic (simplified):**
+```tsx
+const route = Object.entries(serviceTypeToRoute).find(([key]) =>
+  notif.message.toLowerCase().includes(key)
+);
+if (route) {
+  navigate(`${route[1]}?tab=requests`);
+}
+```
 
-#### 4. Add Route in `AdminRoutes.tsx`
-- Add new route: `<Route path="requests/:requestId" element={<ServiceRequestDetailPage />} />`
+**Tab auto-selection in each manager page:**
+```tsx
+const [searchParams] = useSearchParams();
+const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'items');
+```
 
-### Detailed Implementation Steps
+### Files to modify
+- `src/components/admin/StaffNotificationBell.tsx`
+- `src/pages/admin/HousekeepingManager.tsx`
+- `src/pages/admin/MaintenanceManager.tsx`
+- `src/pages/admin/SecurityManager.tsx`
+- `src/pages/admin/InformationTechnologyManager.tsx`
 
-1. **Create `ServiceRequestDetailPage.tsx`** - A full-page detail view for admin staff
-   - Header with breadcrumbs (Admin > Housekeeping > Request #123)
-   - Request details card showing:
-     - Room number, Guest name, Service type
-     - Request description, Created date/time
-     - Current status with badge
-     - Assigned to (with option to reassign via `AssignToDropdown`)
-   - Status update buttons (same as table: Hold, Start, Complete, Cancel)
-   - Back button to return to service management page
-
-2. **Update navigation logic in `StaffNotificationBell.tsx`**
-   - Change from navigating to `/admin/housekeeping` to `/admin/requests/{reference_id}`
-   - Keep fallback to service page in case `reference_id` is missing
-
-3. **Add route in `AdminRoutes.tsx`**
-   - Register the new detail page route
-
-4. **Extract service type from request data** (in the detail page)
-   - Fetch the service request to determine its type
-   - Use to show appropriate breadcrumb/header context
-
-### File Changes Summary
-- **Create**: `src/pages/admin/ServiceRequestDetailPage.tsx`
-- **Modify**: `src/components/admin/StaffNotificationBell.tsx` (update `handleNotificationClick`)
-- **Modify**: `src/routes/AdminRoutes.tsx` (add new route)
-
-### User Flow
-1. Admin assigns ticket to moderator → notification created with `reference_id`
-2. Moderator clicks notification bell → sees notification list
-3. Moderator clicks specific notification → navigates to `/admin/requests/{id}`
-4. Detail page loads and displays full request context
-5. Moderator can update status or reassign from detail page
-
-### Fallback Behavior
-If `reference_id` is missing (legacy notifications), navigate to the service management page as currently implemented.
-
+### Files to remove
+- `src/pages/admin/ServiceRequestDetailPage.tsx`
+- Route entry in `src/routes/AdminRoutes.tsx`
