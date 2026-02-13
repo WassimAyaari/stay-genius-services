@@ -619,6 +619,38 @@ export type Database = {
           },
         ]
       }
+      guest_staff_notes: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          guest_id: string
+          id: string
+        }
+        Insert: {
+          author_name: string
+          content: string
+          created_at?: string
+          guest_id: string
+          id?: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          guest_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_staff_notes_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guests: {
         Row: {
           birth_date: string | null

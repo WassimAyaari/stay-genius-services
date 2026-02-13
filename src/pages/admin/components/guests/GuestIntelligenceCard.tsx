@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,12 @@ import {
   Bell
 } from 'lucide-react';
 import { Guest } from './types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import AddMedicalAlertDialog from '@/pages/profile/components/AddMedicalAlertDialog';
+import AddStaffNoteDialog from './AddStaffNoteDialog';
 
 interface GuestIntelligenceCardProps {
   guest: Guest;
@@ -26,6 +30,9 @@ const severityColors: Record<string, string> = {
 };
 
 const GuestIntelligenceCard: React.FC<GuestIntelligenceCardProps> = ({ guest }) => {
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
   const isHighValueGuest = guest.guest_type === 'Premium Guest' || guest.guest_type === 'VIP';
 
   const { data: alerts = [] } = useQuery({
@@ -40,7 +47,51 @@ const GuestIntelligenceCard: React.FC<GuestIntelligenceCardProps> = ({ guest }) 
     },
     enabled: !!guest.id,
   });
-  
+
+  const { data: notes = [] } = useQuery({
+    queryKey: ['admin-guest-notes', guest.id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from('guest_staff_notes')
+        .select('*')
+        .eq('guest_id', guest.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as { id: string; author_name: string; content: string; created_at: string }[];
+    },
+    enabled: !!guest.id,
+  });
+
+  const addAlert = useMutation({
+    mutationFn: async (alert: { alert_type: string; severity: string; description: string }) => {
+      const { error } = await supabase
+        .from('guest_medical_alerts')
+        .insert({ guest_id: guest.id, ...alert });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-guest-alerts', guest.id] });
+      toast.success('Alert added');
+    },
+    onError: () => toast.error('Failed to add alert'),
+  });
+
+  const addNote = useMutation({
+    mutationFn: async ({ content }: { content: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const authorName = user?.email || 'Staff';
+      const { error } = await (supabase as any)
+        .from('guest_staff_notes')
+        .insert({ guest_id: guest.id, author_name: authorName, content });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-guest-notes', guest.id] });
+      toast.success('Note added');
+    },
+    onError: () => toast.error('Failed to add note'),
+  });
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -50,11 +101,11 @@ const GuestIntelligenceCard: React.FC<GuestIntelligenceCardProps> = ({ guest }) 
             Intelligence & Alerts
           </CardTitle>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setAlertDialogOpen(true)}>
               <Bell className="h-3.5 w-3.5 mr-1" />
               Alert
             </Button>
-            <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setNoteDialogOpen(true)}>
               <StickyNote className="h-3.5 w-3.5 mr-1" />
               Note
             </Button>
@@ -117,16 +168,43 @@ const GuestIntelligenceCard: React.FC<GuestIntelligenceCardProps> = ({ guest }) 
             STAFF-TO-STAFF NOTES
           </div>
           
-          <p className="text-sm text-muted-foreground italic">
-            No notes
-          </p>
+          {notes.length > 0 ? (
+            <div className="space-y-2">
+              {notes.map((note) => (
+                <div key={note.id} className="rounded-md border p-2.5 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium">{note.author_name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(note.created_at), 'MMM d, yyyy HH:mm')}
+                    </span>
+                  </div>
+                  <p className="text-sm">{note.content}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              No notes
+            </p>
+          )}
           
-          <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
+          <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => setNoteDialogOpen(true)}>
             <Plus className="h-3.5 w-3.5 mr-1" />
             Add a note
           </Button>
         </div>
       </CardContent>
+
+      <AddMedicalAlertDialog
+        open={alertDialogOpen}
+        onOpenChange={setAlertDialogOpen}
+        onAdd={(alert) => addAlert.mutate(alert)}
+      />
+      <AddStaffNoteDialog
+        open={noteDialogOpen}
+        onOpenChange={setNoteDialogOpen}
+        onAdd={(data) => addNote.mutate(data)}
+      />
     </Card>
   );
 };

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Sparkles, Plus, Bed, Utensils, ConciergeBell } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import AddPreferenceDialog from '@/pages/profile/components/AddPreferenceDialog';
 
 interface GuestPreferencesCardProps {
   guestId: string;
@@ -17,6 +19,9 @@ const categoryConfig = [
 ];
 
 const GuestPreferencesCard: React.FC<GuestPreferencesCardProps> = ({ guestId }) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+
   const { data: preferences = [] } = useQuery({
     queryKey: ['admin-guest-preferences', guestId],
     queryFn: async () => {
@@ -28,6 +33,20 @@ const GuestPreferencesCard: React.FC<GuestPreferencesCardProps> = ({ guestId }) 
       return data as { id: string; category: string; value: string }[];
     },
     enabled: !!guestId,
+  });
+
+  const addPreference = useMutation({
+    mutationFn: async ({ category, value }: { category: string; value: string }) => {
+      const { error } = await supabase
+        .from('guest_preferences')
+        .insert({ guest_id: guestId, category, value });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-guest-preferences', guestId] });
+      toast.success('Preference added');
+    },
+    onError: () => toast.error('Failed to add preference'),
   });
 
   const grouped = preferences.reduce<Record<string, string[]>>((acc, p) => {
@@ -43,7 +62,7 @@ const GuestPreferencesCard: React.FC<GuestPreferencesCardProps> = ({ guestId }) 
             <Sparkles className="h-4 w-4" />
             Preferences (Guest DNA)
           </CardTitle>
-          <Button variant="outline" size="sm" className="h-8 text-xs">
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDialogOpen(true)}>
             <Plus className="h-3.5 w-3.5 mr-1" />
             Add
           </Button>
@@ -82,6 +101,12 @@ const GuestPreferencesCard: React.FC<GuestPreferencesCardProps> = ({ guestId }) 
           );
         })}
       </CardContent>
+
+      <AddPreferenceDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onAdd={(category, value) => addPreference.mutate({ category, value })}
+      />
     </Card>
   );
 };
