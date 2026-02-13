@@ -37,15 +37,16 @@ interface FilterCard {
   icon: React.ElementType;
   colorClass: string;
   bgClass: string;
+  cardBgClass: string;
 }
 
 const filterCards: FilterCard[] = [
-  { id: 'all', label: 'All', icon: Users, colorClass: 'text-violet-600', bgClass: 'bg-violet-50' },
-  { id: 'in-house', label: 'In-House', icon: Home, colorClass: 'text-blue-600', bgClass: 'bg-blue-50' },
-  { id: 'arrivals', label: 'Arrivals', icon: ArrowRight, colorClass: 'text-green-600', bgClass: 'bg-green-50' },
-  { id: 'upcoming', label: 'Upcoming', icon: Calendar, colorClass: 'text-amber-600', bgClass: 'bg-amber-50' },
-  { id: 'departures', label: 'Departures', icon: ArrowLeftRight, colorClass: 'text-rose-600', bgClass: 'bg-rose-50' },
-  { id: 'past', label: 'Past', icon: Clock, colorClass: 'text-slate-500', bgClass: 'bg-slate-100' },
+  { id: 'all', label: 'All', icon: Users, colorClass: 'text-violet-600', bgClass: 'bg-violet-100', cardBgClass: 'bg-violet-50 border-violet-200' },
+  { id: 'in-house', label: 'In-House', icon: Home, colorClass: 'text-blue-600', bgClass: 'bg-blue-100', cardBgClass: 'bg-blue-50 border-blue-200' },
+  { id: 'arrivals', label: 'Arrivals', icon: ArrowRight, colorClass: 'text-green-600', bgClass: 'bg-green-100', cardBgClass: 'bg-green-50 border-green-200' },
+  { id: 'upcoming', label: 'Upcoming', icon: Calendar, colorClass: 'text-amber-600', bgClass: 'bg-amber-100', cardBgClass: 'bg-amber-50 border-amber-200' },
+  { id: 'departures', label: 'Departures', icon: ArrowLeftRight, colorClass: 'text-rose-600', bgClass: 'bg-rose-100', cardBgClass: 'bg-rose-50 border-rose-200' },
+  { id: 'past', label: 'Past', icon: Clock, colorClass: 'text-slate-500', bgClass: 'bg-slate-100', cardBgClass: 'bg-slate-50 border-slate-200' },
 ];
 
 const GuestsManager: React.FC = () => {
@@ -187,6 +188,7 @@ const GuestsManager: React.FC = () => {
               key={filter.id}
               className={cn(
                 'cursor-pointer transition-all hover:shadow-md',
+                filter.cardBgClass,
                 isActive && 'ring-2 ring-primary'
               )}
               onClick={() => setActiveFilter(filter.id)}
