@@ -1,32 +1,36 @@
 
-# Change Assign Button Color and Icon When Ticket is Assigned
+# Apply Custom Color #d6f0f8 to Assigned Button
 
 ## Problem
-When a ticket is assigned to someone, the button shows the person's name instead of "Assign", but the visual styling (color and icon) remains unchanged. The user wants a clear visual distinction to indicate that a ticket has been assigned.
+Currently, the assign button uses `variant="default"` when assigned, which applies the primary color. The user wants a specific light blue color (#d6f0f8) for better visual distinction.
 
 ## Solution
-Modify the `AssignToDropdown.tsx` component to:
-
-1. **Change button variant/color when assigned**:
-   - Unassigned state: Keep the current `variant="outline"` (gray, neutral look)
-   - Assigned state: Switch to `variant="default"` or a custom color (e.g., green/blue) to visually indicate ownership
-
-2. **Swap the icon when assigned**:
-   - Unassigned state: Show `UserPlus` icon (person with + symbol)
-   - Assigned state: Show `User` icon (person only, no +) to remove the "plus" visual
-
-3. **Keep the person's name displayed** when assigned (already working)
+Add an inline style to the button when `assignedToName` is true to apply the custom background color. The button component accepts a `className` prop that supports inline styles via the `style` attribute.
 
 ## Implementation Details
 
-The change is simple - add conditional logic to the button styling:
-```
-- When assignedToName is null/undefined → show variant="outline" with UserPlus icon
-- When assignedToName exists → show variant="default" (or variant with a blue/green color) with User icon
+Modify the button on line 81 of `src/components/admin/AssignToDropdown.tsx`:
+
+**Current:**
+```tsx
+<Button variant={assignedToName ? "default" : "outline"} size="sm" className="gap-1 whitespace-nowrap">
 ```
 
-Import `User` icon from lucide-react alongside the existing `UserPlus` import.
+**Change to:**
+```tsx
+<Button 
+  variant={assignedToName ? "default" : "outline"} 
+  size="sm" 
+  className="gap-1 whitespace-nowrap"
+  style={assignedToName ? { backgroundColor: '#d6f0f8', color: '#1f2937' } : undefined}
+>
+```
+
+This applies:
+- **Background**: `#d6f0f8` (light blue) when assigned
+- **Text color**: `#1f2937` (dark gray) for readability on the light background
+- **No style** when unassigned (uses the outline variant normally)
 
 ## Files to Modify
-- `src/components/admin/AssignToDropdown.tsx` - Update button variant and icon conditionally based on `assignedToName`
+- `src/components/admin/AssignToDropdown.tsx` - Add inline style to button when assigned
 
