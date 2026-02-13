@@ -59,7 +59,7 @@ const InformationTechnologyRequestsTab = ({
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'cancelled':
-        return 'bg-gray-100 text-gray-800';
+        return '';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -124,7 +124,10 @@ const InformationTechnologyRequestsTab = ({
                     {format(new Date(request.created_at), 'dd/MM/yyyy HH:mm')}
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeColor(request.status)}`}>
+                    <span 
+                      className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeColor(request.status)}`}
+                      style={request.status === 'cancelled' ? { backgroundColor: '#f4b5ac', color: '#8b3a34' } : undefined}
+                    >
                       {request.status}
                     </span>
                   </TableCell>

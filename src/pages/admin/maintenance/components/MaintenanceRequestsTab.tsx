@@ -50,7 +50,7 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
       case 'completed':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'cancelled':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return '';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -145,6 +145,7 @@ const MaintenanceRequestsTab = ({ categoryIds }: MaintenanceRequestsTabProps) =>
                       <Badge 
                         className={`${getStatusBadgeColor(request.status)} border`} 
                         variant="outline"
+                        style={request.status === 'cancelled' ? { backgroundColor: '#f4b5ac', color: '#8b3a34', borderColor: '#e8a39f' } : undefined}
                       >
                         {getStatusLabel(request.status)}
                       </Badge>
