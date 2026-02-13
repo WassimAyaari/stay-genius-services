@@ -1,27 +1,23 @@
 
+
+# Fix: Assign Dropdown Causing Table Layout Shift
+
 ## Problem
-When the "Assign To" dropdown is clicked, the table shifts slightly. This is caused by:
+The `AssignToDropdown` component uses Radix `DropdownMenu` without `modal={false}`. By default, Radix modal dropdowns add `pointer-events: none` and adjust body padding/scroll when opened, which causes the entire page layout to shift slightly.
 
-1. **Actions cell layout**: The `flex-wrap` class allows buttons to wrap when space is limited, and the dropdown's Portal rendering can affect available space in the viewport
-2. **No fixed width**: The Actions cell doesn't have a fixed or minimum width, so it compresses when the dropdown opens
+## Root Cause
+Every other `DropdownMenu` in the project already uses `modal={false}` (e.g., `StaffTable.tsx`, `UserMenu.tsx`, `NotificationMenu.tsx`), but the newly created `AssignToDropdown.tsx` was missing it.
 
-## Solution
-The fix involves ensuring the Actions cell maintains stable width and the dropdown doesn't cause layout reflow:
+## Fix
+One single change in `src/components/admin/AssignToDropdown.tsx`:
 
-### Option 1: Use `flex-nowrap` (Recommended)
-Change the Actions cell container from `flex-wrap` to `flex-nowrap` and ensure buttons don't wrap:
-- Line 131 in HousekeepingRequestsTab.tsx: Change `className="flex gap-2 flex-wrap"` to `className="flex gap-2 flex-nowrap"`
-- This prevents buttons from wrapping and maintains consistent cell width
-- Apply same change to all other service request tabs (Maintenance, Security, IT Support)
+Change line 57 from:
+```tsx
+<DropdownMenu>
+```
+to:
+```tsx
+<DropdownMenu modal={false}>
+```
 
-### Option 2: Set fixed min-width on Actions cell
-If wrapping is desired for mobile, add `min-w-[200px]` or similar to the TableCell containing actions to reserve space
-
-## Files to Modify
-1. `src/pages/admin/housekeeping/components/HousekeepingRequestsTab.tsx` (Line 131)
-2. `src/pages/admin/maintenance/components/MaintenanceRequestsTab.tsx` (similar line)
-3. `src/pages/admin/security/SecurityRequestsTab.tsx` (similar line)
-4. `src/pages/admin/information-technology/components/InformationTechnologyRequestsTab.tsx` (similar line)
-
-## Implementation
-Change `flex-wrap` to `flex-nowrap` in the actions container for all request tabs to prevent button wrapping and ensure the table layout remains stable when the dropdown opens.
+This is a one-line fix in one file. No other changes needed.
