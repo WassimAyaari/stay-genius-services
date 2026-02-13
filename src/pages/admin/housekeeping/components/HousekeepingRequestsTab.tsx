@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Layers, Clock, PlayCircle, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
+import AssignToDropdown from '@/components/admin/AssignToDropdown';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -127,7 +128,13 @@ const HousekeepingRequestsTab = ({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <AssignToDropdown
+                        requestId={request.id}
+                        serviceType="housekeeping"
+                        assignedToName={(request as any).assigned_to_name}
+                        onAssigned={handleRefresh}
+                      />
                       {request.status === 'pending' && (
                         <>
                           <Button 

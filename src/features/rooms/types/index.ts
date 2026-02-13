@@ -12,6 +12,8 @@ export interface ServiceRequest {
   category_id?: string;
   guest_name?: string;
   room_number?: string;
+  assigned_to?: string;
+  assigned_to_name?: string;
   profiles?: {
     first_name: string | null;
     last_name: string | null;

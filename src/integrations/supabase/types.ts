@@ -1132,6 +1132,8 @@ export type Database = {
       }
       service_requests: {
         Row: {
+          assigned_to: string | null
+          assigned_to_name: string | null
           category_id: string | null
           created_at: string | null
           description: string | null
@@ -1146,6 +1148,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          assigned_to?: string | null
+          assigned_to_name?: string | null
           category_id?: string | null
           created_at?: string | null
           description?: string | null
@@ -1160,6 +1164,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          assigned_to?: string | null
+          assigned_to_name?: string | null
           category_id?: string | null
           created_at?: string | null
           description?: string | null

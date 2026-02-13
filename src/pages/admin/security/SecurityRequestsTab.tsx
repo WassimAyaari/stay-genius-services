@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Search, CheckCircle, PlayCircle, XCircle, Pause } from 'lucide-react';
+import AssignToDropdown from '@/components/admin/AssignToDropdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -146,6 +147,12 @@ const SecurityRequestsTab = ({ categoryIds }: SecurityRequestsTabProps) => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end flex-wrap gap-1">
+                        <AssignToDropdown
+                          requestId={request.id}
+                          serviceType="security"
+                          assignedToName={(request as any).assigned_to_name}
+                          onAssigned={handleRefresh}
+                        />
                         {request.status === 'pending' && (
                           <>
                             <Button
