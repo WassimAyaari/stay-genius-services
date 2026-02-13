@@ -25,6 +25,7 @@ import DemoManager from '@/pages/admin/DemoManager';
 import GuestsManager from '@/pages/admin/GuestsManager';
 import GuestDetailPage from '@/pages/admin/GuestDetailPage';
 import StaffManager from '@/pages/admin/StaffManager';
+import ServiceRequestDetailPage from '@/pages/admin/ServiceRequestDetailPage';
 
 const AdminRoutes = () => {
   return (
@@ -53,6 +54,7 @@ const AdminRoutes = () => {
             <Route path="destination-admin" element={<DestinationAdmin />} />
             <Route path="demo" element={<DemoManager />} />
             <Route path="staff" element={<StaffManager />} />
+            <Route path="requests/:requestId" element={<ServiceRequestDetailPage />} />
           </Routes>
         </AdminLayout>
       </AdminRoleGuard>
