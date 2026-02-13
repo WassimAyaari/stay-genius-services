@@ -28,8 +28,9 @@ export const StaffNotificationBell: React.FC = () => {
     if (!notif.is_read) {
       markAsRead(notif.id);
     }
-    if (notif.reference_type === 'service_request') {
-      // Try to extract service type from the message or use a default
+    if (notif.reference_type === 'service_request' && notif.reference_id) {
+      navigate(`/admin/requests/${notif.reference_id}`);
+    } else if (notif.reference_type === 'service_request') {
       const route = Object.entries(serviceTypeToRoute).find(([key]) =>
         notif.message.toLowerCase().includes(key)
       );
