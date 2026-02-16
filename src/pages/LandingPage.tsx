@@ -1,7 +1,6 @@
 import React from 'react';
 import LandingHeader from '@/components/landing/LandingHeader';
 import LandingHero from '@/components/landing/LandingHero';
-import HowItWorks from '@/components/landing/HowItWorks';
 import HotelDirectory from '@/components/landing/HotelDirectory';
 import LandingFooter from '@/components/landing/LandingFooter';
 
@@ -11,7 +10,6 @@ const LandingPage = () => {
       <LandingHeader />
       <main className="pt-16">
         <LandingHero />
-        <HowItWorks />
         <HotelDirectory />
       </main>
       <LandingFooter />

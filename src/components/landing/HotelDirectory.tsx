@@ -8,6 +8,11 @@ const demoHotels = [
     name: 'Hotel Genius',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
   },
+  {
+    slug: 'fiesta-beach-djerba',
+    name: 'Fiesta Beach Djerba',
+    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  },
 ];
 
 const HotelDirectory = () => {
