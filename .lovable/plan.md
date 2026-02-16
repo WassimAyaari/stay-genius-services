@@ -1,108 +1,48 @@
 
-
-# Hotel Genius Landing Page
+# Redesign Landing Page for Guest-Focused Experience
 
 ## Overview
-Replace the current home page (`/`) with a beautiful, modern SaaS-style landing page for the Hotel Genius platform. The existing hotel guest home page will move to `/hotel/hotel-genius` for the demo.
+Transform the landing page from a hotel-owner-facing marketing page into a guest-facing hotel directory. Guests arrive here, see the list of hotels, pick one, and enter that hotel's dedicated experience.
 
-## Landing Page Sections
+## Changes
 
-### 1. Header
-- Hotel Genius logo (using existing `/lovable-uploads/aab13959-5215-4313-87f8-c3012cdb27f0.png`)
-- Clean minimal header with "Login" link on the right
-- No BottomNav or MainMenu -- this is a standalone page
+### 1. LandingHeader.tsx -- Simplify
+- Remove the "Login" button entirely (guests must choose a hotel first)
+- Remove the duplicate "Hotel Genius" text next to the logo (the logo image already contains the brand name)
+- Keep only the logo, centered or left-aligned cleanly
 
-### 2. Hero Section
-- Large headline: "The Smart Hotel Directory Platform"
-- Subtext describing what Hotel Genius offers to hotels
-- Prominent **"Create Free Account"** button (primary teal color)
-- Secondary "Explore Demo" button
-- Background with subtle gradient using the brand teal (`#00AFB9`)
+### 2. LandingHero.tsx -- Rewrite for Guests
+- Change headline to something guest-focused, e.g. **"Your Hotel, At Your Fingertips"**
+- Update description to focus on the guest experience: browsing hotel services, chatting with concierge, discovering restaurants and spa
+- Remove the "Create Free Account" button (not relevant for guests)
+- Remove the "Explore Demo" button
+- Make the hero section shorter and more compact so hotel cards are visible quickly
+- Keep subtle gradient background and animation
 
-### 3. How It Works Section
-- 3 steps displayed as animated cards with icons:
-  1. **Create Your Account** -- Sign up for free in under 2 minutes
-  2. **Set Up Your Hotel** -- Add restaurants, spa, events, and hotel info
-  3. **Share With Guests** -- Your hotel gets a dedicated page guests can browse
-- Each step card with an icon, number badge, title, and description
+### 3. LandingPage.tsx -- Remove HowItWorks
+- Remove the `HowItWorks` import and component from the page
+- Page flow becomes: Header -> compact Hero -> Hotel Directory -> Footer
 
-### 4. Hotel Directory Section
-- Section title: "Discover Our Hotels"
-- Responsive grid of hotel cards
-- **For now**: one demo card "Hotel Genius" with a hotel image
-- Clicking it navigates to `/hotel/hotel-genius` (the current guest home page)
-- Cards feature: image, hotel name, hover shadow animation via Framer Motion
+### 4. HotelDirectory.tsx -- Add Fiesta Beach Djerba
+- Add a second hardcoded hotel card:
+  - Name: "Fiesta Beach Djerba"
+  - Image: a beach/resort Unsplash image
+  - Slug: `fiesta-beach-djerba`
+- Keep "Hotel Genius" as the first card
+- Both cards link to `/hotel/{slug}` on click
 
-### 5. Footer
-- Simple footer with Hotel Genius branding
-
-## Visual Design
-- Clean white background with teal accent sections
-- Framer Motion animations for scroll reveal on each section
-- Gradient backgrounds on hero section
-- Card hover effects with shadow transitions
-- Fully responsive (mobile-first)
-- Uses existing Shadcn UI components (Button, Card) and Tailwind styling
-
-## Routing Changes
-
-**Current:**
-- `/` renders `Index` (hotel guest home page)
-
-**New:**
-- `/` renders `LandingPage` (platform landing page)
-- `/hotel/hotel-genius/*` renders the existing guest home page (`PublicRoutes`)
-- All other existing routes remain unchanged for now
-
-### App.tsx Update
-```text
-Routes:
-  /                        --> LandingPage (NEW)
-  /hotel/:hotelSlug/*      --> PublicRoutes (moved here)
-  /profile/*               --> AuthenticatedRoutes (unchanged)
-  /admin/*                 --> AdminRoutes (unchanged)
-  ...other authenticated routes unchanged
-```
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/pages/LandingPage.tsx` | Main landing page assembling all sections |
-| `src/components/landing/LandingHeader.tsx` | Minimal header with logo and login |
-| `src/components/landing/LandingHero.tsx` | Hero section with CTAs |
-| `src/components/landing/HowItWorks.tsx` | 3-step explanation section |
-| `src/components/landing/HotelDirectory.tsx` | Hotel cards grid section |
-| `src/components/landing/HotelCard.tsx` | Individual hotel card component |
-| `src/components/landing/LandingFooter.tsx` | Simple footer |
+### 5. LandingFooter.tsx -- Fix duplicate branding
+- Remove the "Hotel Genius" text next to the logo (same issue as header)
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/App.tsx` | Add `/` route for LandingPage, add `/hotel/:hotelSlug/*` for PublicRoutes |
-| `src/routes/PublicRoutes.tsx` | No changes needed -- it will just render under the new prefix |
+| `src/components/landing/LandingHeader.tsx` | Remove Login button, remove duplicate "Hotel Genius" text |
+| `src/components/landing/LandingHero.tsx` | Rewrite headline/description for guests, remove CTA buttons, make section compact |
+| `src/pages/LandingPage.tsx` | Remove HowItWorks import and usage |
+| `src/components/landing/HotelDirectory.tsx` | Add "Fiesta Beach Djerba" card to the list |
+| `src/components/landing/LandingFooter.tsx` | Remove duplicate brand text |
 
-## Technical Details
-
-### Demo Hotel Card (hardcoded for now)
-```text
-{
-  slug: 'hotel-genius',
-  name: 'Hotel Genius',
-  image: Unsplash luxury hotel image,
-  description: 'Experience our demo hotel'
-}
-```
-
-### "Create Free Account" Button
-For this initial step, clicking it will show a toast notification saying "Coming soon -- hotel registration will be available shortly." The full registration flow will be built in a future step.
-
-### Animations
-- Hero section: fade-in on mount
-- How It Works cards: staggered fade-in using Framer Motion
-- Hotel cards: hover scale + shadow transitions
-
-### No Database Changes
-Everything is hardcoded for this step. When the multi-tenant system is built later, hotel cards will be fetched from the `hotels` table.
-
+## No files to create or delete
+## No database changes
