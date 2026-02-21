@@ -61,6 +61,7 @@ import {
   UserCog,
 } from 'lucide-react';
 import { StaffNotificationBell } from '@/components/admin/StaffNotificationBell';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useUserRole } from '@/hooks/useUserRole';
 
 interface NavItem {
@@ -394,32 +395,35 @@ export const AdminSidebar: React.FC = () => {
 
       {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border p-3">
-        {/* Language Selector */}
+        {/* Theme Toggle & Language Selector */}
         {!isCollapsed && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2 h-8 px-2 text-xs text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                <Globe className="h-3.5 w-3.5" />
-                <span>{currentLanguage.flag} {currentLanguage.name}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-36">
-              {languages.map((lang) => (
-                <DropdownMenuItem
-                  key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code)}
-                  className="cursor-pointer text-xs"
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 justify-start gap-2 h-8 px-2 text-xs text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
                 >
-                  <span className="mr-2">{lang.flag}</span>
-                  {lang.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <Globe className="h-3.5 w-3.5" />
+                  <span>{currentLanguage.flag} {currentLanguage.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-36">
+                {languages.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className="cursor-pointer text-xs"
+                  >
+                    <span className="mr-2">{lang.flag}</span>
+                    {lang.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
 
         {/* User Profile */}

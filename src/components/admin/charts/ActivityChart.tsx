@@ -22,7 +22,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[250px] flex items-center justify-center">
+          <div className="h-[180px] sm:h-[250px] flex items-center justify-center">
             <div className="animate-pulse text-muted-foreground">Loading chart...</div>
           </div>
         </CardContent>
@@ -39,7 +39,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[250px]">
+        <div className="h-[180px] sm:h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" vertical={false} />
