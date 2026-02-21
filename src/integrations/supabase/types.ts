@@ -846,6 +846,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          slug: string
           subdomain: string | null
           updated_at: string
         }
@@ -858,6 +859,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          slug: string
           subdomain?: string | null
           updated_at?: string
         }
@@ -870,6 +872,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          slug?: string
           subdomain?: string | null
           updated_at?: string
         }
@@ -1081,6 +1084,7 @@ export type Database = {
           created_at: string | null
           cuisine: string
           description: string
+          hotel_id: string | null
           id: string
           images: string[]
           is_featured: boolean | null
@@ -1095,6 +1099,7 @@ export type Database = {
           created_at?: string | null
           cuisine: string
           description: string
+          hotel_id?: string | null
           id?: string
           images?: string[]
           is_featured?: boolean | null
@@ -1109,6 +1114,7 @@ export type Database = {
           created_at?: string | null
           cuisine?: string
           description?: string
+          hotel_id?: string | null
           id?: string
           images?: string[]
           is_featured?: boolean | null
@@ -1118,7 +1124,15 @@ export type Database = {
           status?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rooms: {
         Row: {
@@ -1666,23 +1680,34 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string | null
+          hotel_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          hotel_id?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string | null
+          hotel_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1779,7 +1804,13 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user" | "staff"
+      app_role:
+        | "admin"
+        | "moderator"
+        | "user"
+        | "staff"
+        | "super_admin"
+        | "hotel_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1907,7 +1938,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user", "staff"],
+      app_role: [
+        "admin",
+        "moderator",
+        "user",
+        "staff",
+        "super_admin",
+        "hotel_admin",
+      ],
     },
   },
 } as const

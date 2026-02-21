@@ -45,14 +45,14 @@ const StatisticCard: React.FC<StatisticCardProps> = ({
   if (loading) {
     return (
       <Card className="h-full bg-card border shadow-sm">
-        <CardContent className="p-5">
+        <CardContent className="p-3 sm:p-5">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <div className="h-4 w-24 bg-muted animate-pulse rounded" />
-              <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-              <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+              <div className="h-3 sm:h-4 w-20 sm:w-24 bg-muted animate-pulse rounded" />
+              <div className="h-6 sm:h-8 w-12 sm:w-16 bg-muted animate-pulse rounded" />
+              <div className="h-3 w-16 sm:w-20 bg-muted animate-pulse rounded" />
             </div>
-            <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-muted animate-pulse" />
           </div>
         </CardContent>
       </Card>
@@ -61,24 +61,24 @@ const StatisticCard: React.FC<StatisticCardProps> = ({
 
   return (
     <Card className="h-full bg-card border shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="p-5">
+      <CardContent className="p-3 sm:p-5">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</p>
             <div className="flex items-baseline gap-1">
-              <h3 className="text-2xl font-bold text-card-foreground">
+              <h3 className="text-lg sm:text-2xl font-bold text-card-foreground">
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </h3>
-              {suffix && <span className="text-sm text-muted-foreground">{suffix}</span>}
+              {suffix && <span className="text-xs sm:text-sm text-muted-foreground">{suffix}</span>}
             </div>
             {subtitle && (
-              <p className={cn('text-xs', subtitleColorClasses[subtitleColor])}>
+              <p className={cn('text-[10px] sm:text-xs', subtitleColorClasses[subtitleColor])}>
                 {subtitle}
               </p>
             )}
           </div>
-          <div className={cn('flex h-10 w-10 items-center justify-center rounded-full', iconColorClasses[iconColor])}>
-            <Icon className="h-5 w-5" />
+          <div className={cn('flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full ml-2', iconColorClasses[iconColor])}>
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
         </div>
       </CardContent>

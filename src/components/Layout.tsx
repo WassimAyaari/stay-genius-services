@@ -9,6 +9,7 @@ import BottomNav from './BottomNav';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from './ui/scroll-area';
+import { ThemeToggle } from './ThemeToggle';
 
 
 interface LayoutProps {
@@ -47,7 +48,8 @@ const Layout = ({
               </div>
               
               {/* Right section - Notifications and User Menu */}
-              <div className="absolute right-0 flex items-center gap-2">
+              <div className="absolute right-0 flex items-center gap-1">
+                <ThemeToggle />
                 <NotificationMenu />
                 <UserMenu />
               </div>

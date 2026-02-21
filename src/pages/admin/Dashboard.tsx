@@ -54,20 +54,20 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-4 md:space-y-6 p-3 sm:p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <LayoutDashboard className="h-5 w-5 text-primary" />
+        <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-primary/10">
+          <LayoutDashboard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
-          <p className="text-sm text-muted-foreground">Real-time statistics and hotel management insights</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Dashboard Overview</h1>
+          <p className="text-sm text-muted-foreground hidden sm:block">Real-time statistics and hotel management insights</p>
         </div>
       </div>
 
       {/* Stats Row 1 - Main metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatisticCard
           title="Total Reservations"
           value={stats?.totalReservations ?? 0}
@@ -107,7 +107,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Row 2 - Secondary metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatisticCard
           title="Service Requests"
           value={stats?.serviceRequests.total ?? 0}
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
         {/* Reservations Breakdown */}
         <Card className="bg-card border shadow-sm">
           <CardHeader className="pb-3">
@@ -279,7 +279,7 @@ const AdminDashboard = () => {
       {/* Charts Section */}
       <div>
         <h2 className="mb-4 text-lg font-semibold text-foreground">Request Status Overview</h2>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <ActivityChart data={activityData} loading={isLoading} />
           <StatusChart data={statusData} loading={isLoading} />
         </div>
