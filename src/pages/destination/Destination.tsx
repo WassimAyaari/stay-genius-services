@@ -292,7 +292,7 @@ const Destination = () => {
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-sm text-gray-600 mb-3">{activity.description}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{activity.description}</p>
                     <Button size="sm" className="w-full">{t('destinationPage.activities.bookNow')}</Button>
                   </div>
                 </Card>
@@ -313,7 +313,7 @@ const Destination = () => {
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-sm text-gray-600 mb-3">{t('destinationPage.activities.defaultItems.cityTour.description')}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{t('destinationPage.activities.defaultItems.cityTour.description')}</p>
                     <Button size="sm" className="w-full">{t('destinationPage.activities.defaultItems.cityTour.action')}</Button>
                   </div>
                 </Card>
@@ -331,7 +331,7 @@ const Destination = () => {
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-sm text-gray-600 mb-3">{t('destinationPage.activities.defaultItems.boatTrip.description')}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{t('destinationPage.activities.defaultItems.boatTrip.description')}</p>
                     <Button size="sm" className="w-full">{t('destinationPage.activities.defaultItems.boatTrip.action')}</Button>
                   </div>
                 </Card>
@@ -365,7 +365,7 @@ const Destination = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">{carRental.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{carRental.description}</p>
+                    <p className="text-sm text-muted-foreground mb-2">{carRental.description}</p>
                     {carRental.website ? (
                       <Button 
                         size="sm" 
@@ -389,7 +389,7 @@ const Destination = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">{t('destinationPage.transportation.carRental.title')}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{t('destinationPage.transportation.carRental.description')}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t('destinationPage.transportation.carRental.description')}</p>
                   <Button size="sm" variant="outline">{t('destinationPage.transportation.carRental.bookCar')}</Button>
                 </div>
               </div>
@@ -417,7 +417,7 @@ const Destination = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">{transport.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{transport.description}</p>
+                    <p className="text-sm text-muted-foreground mb-2">{transport.description}</p>
                     {transport.website ? (
                       <Button 
                         size="sm" 
@@ -441,7 +441,7 @@ const Destination = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">{t('destinationPage.transportation.publicTransport.title')}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{t('destinationPage.transportation.publicTransport.description')}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t('destinationPage.transportation.publicTransport.description')}</p>
                   <Button size="sm" variant="outline">{t('destinationPage.transportation.publicTransport.viewSchedule')}</Button>
                 </div>
               </div>

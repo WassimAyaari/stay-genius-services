@@ -169,7 +169,7 @@ const ProductFormFields = ({ form, shops, onSubmit, onCancel, isEditing }: Produ
             <FormItem className="flex flex-row items-center justify-between p-4 border rounded-lg">
               <div className="space-y-0.5">
                 <FormLabel className="text-base">Produit mis en avant</FormLabel>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Ce produit doit-il apparaître en premier ?
                 </p>
               </div>

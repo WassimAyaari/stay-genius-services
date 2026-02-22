@@ -79,29 +79,29 @@ const ReservationCard = ({ reservation, onOpenStatusDialog, restaurantName }: Re
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 text-sm">
-          <Calendar className="h-4 w-4 text-gray-500" />
+          <Calendar className="h-4 w-4 text-muted-foreground" />
           <span>{formatDate(reservation.date)}</span>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <Clock className="h-4 w-4 text-gray-500" />
+          <Clock className="h-4 w-4 text-muted-foreground" />
           <span>{reservation.time}</span>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <Users className="h-4 w-4 text-gray-500" />
+          <Users className="h-4 w-4 text-muted-foreground" />
           <span>{reservation.guests} personnes</span>
         </div>
         
         {/* Affichage du numéro de chambre */}
         {reservation.roomNumber && (
           <div className="flex items-center gap-2 text-sm">
-            <Home className="h-4 w-4 text-gray-500" />
+            <Home className="h-4 w-4 text-muted-foreground" />
             <span>Chambre: {reservation.roomNumber}</span>
           </div>
         )}
         
         {reservation.specialRequests && (
           <div className="flex items-start gap-2 text-sm">
-            <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
+            <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5" />
             <span className="flex-1">{reservation.specialRequests}</span>
           </div>
         )}
@@ -109,10 +109,10 @@ const ReservationCard = ({ reservation, onOpenStatusDialog, restaurantName }: Re
         <div className="space-y-2">
           <p className="text-sm font-medium">Informations de contact:</p>
           {reservation.guestEmail && (
-            <p className="text-sm text-gray-600">Email: {reservation.guestEmail}</p>
+            <p className="text-sm text-muted-foreground">Email: {reservation.guestEmail}</p>
           )}
           {reservation.guestPhone && (
-            <p className="text-sm text-gray-600">Téléphone: {reservation.guestPhone}</p>
+            <p className="text-sm text-muted-foreground">Téléphone: {reservation.guestPhone}</p>
           )}
         </div>
         

@@ -16,7 +16,7 @@ const SpaServiceCard = ({
 }: SpaServiceCardProps) => {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <div className="h-40 bg-gray-200">
+      <div className="h-40 bg-muted">
         <img 
           src={service.image || "/lovable-uploads/3c659231-2940-4890-99b3-5080c513de7f.png"} 
           alt={service.name} 
@@ -29,7 +29,7 @@ const SpaServiceCard = ({
           <span className="text-primary font-semibold">${service.price}</span>
         </div>
         {service.duration && (
-          <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
             <Clock className="h-3 w-3" />
             <span>{service.duration}</span>
           </div>

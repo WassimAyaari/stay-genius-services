@@ -159,7 +159,7 @@ const EventReservationForm: React.FC<EventReservationFormProps> = ({
         <GuestInfoFields form={form} />
         
         <div className="form-field">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             {t('forms.labels.participants')}
           </label>
           <select 

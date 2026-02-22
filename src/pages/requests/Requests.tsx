@@ -66,7 +66,7 @@ const Requests = () => {
         {/* Search and Filter Controls */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search requests..."
               value={searchTerm}
@@ -105,7 +105,7 @@ const Requests = () => {
 
         {/* Results Summary */}
         <div className="mb-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Showing {filteredNotifications.length} of {notifications.length} requests
           </p>
         </div>
@@ -126,11 +126,11 @@ const Requests = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">
+                <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">
                   {notifications.length === 0 ? "No requests yet" : "No matching requests"}
                 </h3>
-                <p className="text-gray-500 mb-4">
+                <p className="text-muted-foreground mb-4">
                   {notifications.length === 0
                     ? "You haven't made any service requests yet."
                     : "Try adjusting your search or filter criteria."}

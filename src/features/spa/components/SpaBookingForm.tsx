@@ -131,7 +131,7 @@ export default function SpaBookingForm({
         </div>
         <div>
           <Label htmlFor="time">Time</Label>
-          <select id="time" value={selectedTime} onChange={e => setSelectedTime(e.target.value)} required className="w-full p-2 border rounded bg-gray-50">
+          <select id="time" value={selectedTime} onChange={e => setSelectedTime(e.target.value)} required className="w-full p-2 border rounded bg-background">
             <option value="">Select a time</option>
             {[...Array(24)].map((_, i) => {
             const hour = i.toString().padStart(2, '0');

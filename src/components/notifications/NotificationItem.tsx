@@ -76,7 +76,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     } else if (type === 'event_reservation') {
       return <Calendar className="h-4 w-4 text-green-600" />;
     } else if (type === 'general') {
-      return <Bell className="h-4 w-4 text-gray-600" />;
+      return <Bell className="h-4 w-4 text-muted-foreground" />;
     }
     return <span className="text-lg">{icon}</span>;
   }
@@ -119,9 +119,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   return (
     <Link to={getDirectLink()} key={id}>
-      <div className="flex items-start gap-3 p-3 cursor-pointer hover:bg-gray-200/70">
+      <div className="flex items-start gap-3 p-3 cursor-pointer hover:bg-muted">
         <div className="flex-shrink-0 mt-1">
-          <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200">
+          <div className="h-8 w-8 flex items-center justify-center rounded-full bg-muted">
             {renderIcon()}
           </div>
         </div>
@@ -132,8 +132,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               {getStatusText(status)}
             </span>
           </div>
-          <p className="text-xs text-gray-800">{getSummary()}</p>
-          <div className="flex items-center text-xs text-gray-500">
+          <p className="text-xs text-foreground">{getSummary()}</p>
+          <div className="flex items-center text-xs text-muted-foreground">
             <Clock className="h-3 w-3 mr-1" />
             {getSafeTimeAgo(time)}
           </div>

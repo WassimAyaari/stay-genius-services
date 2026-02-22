@@ -111,8 +111,8 @@ const EventsStories: React.FC = () => {
             <CarouselContent className="py-2">
               {activeStories.map((story, index) => <CarouselItem key={story.id} className="basis-auto pl-4 pr-2">
                   <button className="flex flex-col items-center space-y-1 bg-transparent border-none" onClick={() => handleMarkAsSeen(story.id, index)}>
-                    <div className={cn("p-1 rounded-full", viewedStories.includes(story.id) || story.seen ? "bg-gray-300" : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500")}>
-                      <div className="p-0.5 bg-white rounded-full">
+                    <div className={cn("p-1 rounded-full", viewedStories.includes(story.id) || story.seen ? "bg-muted-foreground/30" : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500")}>
+                      <div className="p-0.5 bg-background rounded-full">
                         <Avatar className="h-16 w-16">
                           <AvatarImage src={story.image} alt={story.title} className="object-cover" loading="lazy" />
                           <AvatarFallback className="bg-primary/10 text-primary">
@@ -134,8 +134,8 @@ const EventsStories: React.FC = () => {
         </div> : <div className="overflow-x-auto pb-4">
           <div className="flex space-x-4 pb-2">
             {activeStories.map((story, index) => <button key={story.id} className="flex flex-col items-center space-y-1 bg-transparent border-none" onClick={() => handleMarkAsSeen(story.id, index)}>
-                <div className={cn("p-1 rounded-full", viewedStories.includes(story.id) || story.seen ? "bg-gray-300" : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500")}>
-                  <div className="p-0.5 bg-white rounded-full">
+                <div className={cn("p-1 rounded-full", viewedStories.includes(story.id) || story.seen ? "bg-muted-foreground/30" : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500")}>
+                  <div className="p-0.5 bg-background rounded-full">
                     <Avatar className="h-16 w-16">
                       <AvatarImage src={story.image} alt={story.title} className="object-cover" loading="lazy" />
                       <AvatarFallback className="bg-primary/10 text-primary">

@@ -43,7 +43,7 @@ const NearbyShopsTab = () => {
         </div>
 
         {nearbyShops.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             No nearby shopping centers added yet. Add your first one!
           </div>
         ) : (

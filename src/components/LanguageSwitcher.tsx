@@ -28,17 +28,17 @@ const LanguageSwitcher = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="bg-white border shadow-md z-50"
+        className="bg-card border shadow-md z-50"
       >
         <DropdownMenuItem 
           onClick={() => changeLanguage('en')}
-          className={i18n.language === 'en' ? 'bg-gray-100' : ''}
+          className={i18n.language === 'en' ? 'bg-muted' : ''}
         >
           {t('common.english')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => changeLanguage('fr')}
-          className={i18n.language === 'fr' ? 'bg-gray-100' : ''}
+          className={i18n.language === 'fr' ? 'bg-muted' : ''}
         >
           {t('common.french')}
         </DropdownMenuItem>

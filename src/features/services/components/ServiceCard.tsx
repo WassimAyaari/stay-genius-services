@@ -24,7 +24,7 @@ const ServiceCard = ({ title, description, icon: Icon, actionText, onAction }: S
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-base sm:text-lg font-semibold mb-2 leading-tight">{title}</h3>
-          <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base leading-relaxed">
+          <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base leading-relaxed">
             {description}
           </p>
           <Button 

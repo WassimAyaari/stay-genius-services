@@ -87,12 +87,12 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-full">
+            <div className="p-2 bg-muted rounded-full">
               {getTypeIcon(notification.type)}
             </div>
             <div>
               <CardTitle className="text-lg">{notification.title}</CardTitle>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {formatDistanceToNow(new Date(notification.time), { addSuffix: true })}
               </p>
             </div>
@@ -106,7 +106,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       <CardContent className="pt-0">
         {notification.description && (
           <div className="mb-4">
-            <p className="text-gray-700">{notification.description}</p>
+            <p className="text-foreground/80">{notification.description}</p>
           </div>
         )}
         

@@ -37,7 +37,7 @@ const SpaSection = ({
     <div className="mb-12">
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-secondary mb-2">Spa Services</h2>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Discover our range of relaxing and rejuvenating treatments
         </p>
       </div>

@@ -28,7 +28,7 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({
   }
   
   if (!serviceType) {
-    return <BellRing className="h-6 w-6 text-gray-600" />;
+    return <BellRing className="h-6 w-6 text-muted-foreground" />;
   }
   
   switch (serviceType) {
@@ -47,7 +47,7 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({
     case 'concierge':
       return <PhoneCall className="h-6 w-6 text-rose-600" />;
     default:
-      return <BellRing className="h-6 w-6 text-gray-600" />;
+      return <BellRing className="h-6 w-6 text-muted-foreground" />;
   }
 };
 
