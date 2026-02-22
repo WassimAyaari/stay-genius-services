@@ -20,7 +20,7 @@ const ChatHeader = ({ chat, onBack }: ChatHeaderProps) => {
     : chat.userName;
 
   return (
-    <div className="flex items-center p-4 border-b bg-white">
+    <div className="flex items-center p-4 border-b bg-card">
       <Button 
         variant="ghost" 
         size="icon" 
@@ -31,13 +31,13 @@ const ChatHeader = ({ chat, onBack }: ChatHeaderProps) => {
       </Button>
       <Avatar className="h-9 w-9 mr-3">
         <AvatarImage src={chat.userInfo?.avatar} />
-        <AvatarFallback className="bg-primary text-white text-xs">
+        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
           {userInitials}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1">
         <div className="font-medium">{displayName}</div>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-muted-foreground">
           {chat.roomNumber && `Room ${chat.roomNumber}`}
         </div>
       </div>

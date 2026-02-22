@@ -29,20 +29,20 @@ const RestaurantBookingDialog = ({
           <DialogTitle className="text-xl font-semibold text-secondary">
             Book a Table at {restaurant.name}
           </DialogTitle>
-          <DialogDescription className="text-gray-600">
+          <DialogDescription className="text-muted-foreground">
             Reserve your table for a wonderful dining experience. Fill in the details below.
           </DialogDescription>
         </DialogHeader>
         
         <div className="mt-4">
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">
+          <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">
               <strong>Restaurant:</strong> {restaurant.name}
             </p>
-            <p className="text-sm text-gray-600 mb-1">
+            <p className="text-sm text-muted-foreground mb-1">
               <strong>Cuisine:</strong> {restaurant.cuisine}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               <strong>Location:</strong> {restaurant.location}
             </p>
           </div>

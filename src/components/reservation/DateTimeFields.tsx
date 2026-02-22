@@ -54,7 +54,7 @@ const DateTimeFields = ({ form }: DateTimeFieldsProps) => {
                     disabled={(date) => date < new Date()}
                     initialFocus
                     locale={fr}
-                    className="pointer-events-auto bg-white"
+                    className="pointer-events-auto bg-card"
                   />
                 </PopoverContent>
               </Popover>

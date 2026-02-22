@@ -34,7 +34,7 @@ const Shops = () => {
 
         <div className="space-y-4 mb-16">
           {hotelShops.length === 0 ? (
-            <Card className="p-6 text-center text-gray-500">
+            <Card className="p-6 text-center text-muted-foreground">
               {t('shopsPage.hotelShops.noShops')}
             </Card>
           ) : (
@@ -51,14 +51,14 @@ const Shops = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold mb-1">{shop.name}</h3>
-                    <div className="flex items-center text-sm text-gray-500 mb-1">
+                    <div className="flex items-center text-sm text-muted-foreground mb-1">
                       <MapPin className="h-3 w-3 mr-1" />
                       <span>{shop.location || t('shopsPage.hotelShops.insideHotel')}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{shop.description}</p>
+                    <p className="text-sm text-muted-foreground mb-2">{shop.description}</p>
                     <div className="flex gap-2">
                       {shop.hours && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {t('shopsPage.hotelShops.hours')}: {shop.hours}
                         </div>
                       )}
@@ -100,11 +100,11 @@ const Shops = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold mb-1">{shop.name}</h3>
-                      <div className="flex items-center text-sm text-gray-500 mb-1">
+                      <div className="flex items-center text-sm text-muted-foreground mb-1">
                         <MapPin className="h-3 w-3 mr-1" />
                         <span>{shop.location}</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{shop.description}</p>
+                      <p className="text-sm text-muted-foreground mb-2">{shop.description}</p>
                       <div className="flex gap-2">
                         {shop.location && (
                           <Button size="sm" variant="outline" className="text-xs" asChild>

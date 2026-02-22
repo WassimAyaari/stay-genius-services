@@ -24,19 +24,19 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
     <Tabs defaultValue="all" className="w-full">
       <TabsList className="mb-4">
         <TabsTrigger value="all">
-          All <span className="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full">{allNotifications.length}</span>
+          All <span className="ml-1 text-xs bg-muted px-1.5 py-0.5 rounded-full">{allNotifications.length}</span>
         </TabsTrigger>
         <TabsTrigger value="requests">
-          Requests <span className="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full">{requestNotifications.length}</span>
+          Requests <span className="ml-1 text-xs bg-muted px-1.5 py-0.5 rounded-full">{requestNotifications.length}</span>
         </TabsTrigger>
         <TabsTrigger value="reservations">
-          Restaurant <span className="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full">{reservationNotifications.length}</span>
+          Restaurant <span className="ml-1 text-xs bg-muted px-1.5 py-0.5 rounded-full">{reservationNotifications.length}</span>
         </TabsTrigger>
         <TabsTrigger value="spa">
-          Spa <span className="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full">{spaNotifications.length}</span>
+          Spa <span className="ml-1 text-xs bg-muted px-1.5 py-0.5 rounded-full">{spaNotifications.length}</span>
         </TabsTrigger>
         <TabsTrigger value="events">
-          Events <span className="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full">{eventNotifications.length}</span>
+          Events <span className="ml-1 text-xs bg-muted px-1.5 py-0.5 rounded-full">{eventNotifications.length}</span>
         </TabsTrigger>
       </TabsList>
       
@@ -58,7 +58,7 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
             />
           ))
         ) : (
-          <div className="text-center py-4 text-gray-500">No service requests</div>
+          <div className="text-center py-4 text-muted-foreground">No service requests</div>
         )}
       </TabsContent>
       
@@ -71,7 +71,7 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
             />
           ))
         ) : (
-          <div className="text-center py-4 text-gray-500">No restaurant reservations</div>
+          <div className="text-center py-4 text-muted-foreground">No restaurant reservations</div>
         )}
       </TabsContent>
       
@@ -84,7 +84,7 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
             />
           ))
         ) : (
-          <div className="text-center py-4 text-gray-500">No spa reservations</div>
+          <div className="text-center py-4 text-muted-foreground">No spa reservations</div>
         )}
       </TabsContent>
       
@@ -97,7 +97,7 @@ export const NotificationsList: React.FC<NotificationsListProps> = ({ notificati
             />
           ))
         ) : (
-          <div className="text-center py-4 text-gray-500">No event reservations</div>
+          <div className="text-center py-4 text-muted-foreground">No event reservations</div>
         )}
       </TabsContent>
     </Tabs>

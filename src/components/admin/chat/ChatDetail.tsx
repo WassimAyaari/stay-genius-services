@@ -51,10 +51,10 @@ const ChatDetail = ({ chat, onBack, onSendReply }: ChatDetailProps) => {
   
   if (!chat) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50 bg-opacity-50">
+      <div className="flex items-center justify-center h-full bg-muted/50">
         <div className="text-center p-8">
-          <h3 className="text-lg font-medium text-gray-600">Select a conversation</h3>
-          <p className="text-gray-500 mt-2">Choose a conversation from the list to view messages</p>
+          <h3 className="text-lg font-medium text-muted-foreground">Select a conversation</h3>
+          <p className="text-muted-foreground mt-2">Choose a conversation from the list to view messages</p>
         </div>
       </div>
     );
@@ -63,7 +63,7 @@ const ChatDetail = ({ chat, onBack, onSendReply }: ChatDetailProps) => {
   const messageGroups = groupMessagesByDate(chat.messages);
     
   return (
-    <div className="flex flex-col h-full bg-gray-50 bg-opacity-50">
+    <div className="flex flex-col h-full bg-muted/50">
       <ChatHeader chat={chat} onBack={onBack} />
       <MessageList 
         messageGroups={messageGroups} 

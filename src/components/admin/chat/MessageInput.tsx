@@ -39,7 +39,7 @@ const MessageInput = ({ chat, onSendMessage, isSending }: MessageInputProps) => 
   };
 
   return (
-    <div className="p-4 bg-white border-t relative">
+    <div className="p-4 bg-card border-t relative">
       <ChatTemplates 
         isOpen={showTemplates}
         onClose={() => setShowTemplates(false)}

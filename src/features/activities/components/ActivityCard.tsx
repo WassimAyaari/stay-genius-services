@@ -38,24 +38,24 @@ const ActivityCard = ({ activity, onBook }: ActivityCardProps) => {
           <span className="text-primary font-semibold">${activity.price}</span>
         </div>
         <div className="flex flex-col gap-2 mb-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="w-4 h-4" />
             {activity.date}
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
             {activity.time} ({activity.duration})
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4" />
             {activity.location}
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="w-4 h-4" />
             {activity.capacity} spots available
           </div>
         </div>
-        <p className="text-sm text-gray-600 mb-4">{activity.description}</p>
+        <p className="text-sm text-muted-foreground mb-4">{activity.description}</p>
         <Button 
           onClick={() => onBook(activity.id)}
           className="w-full bg-primary hover:bg-primary/90 transition-colors"

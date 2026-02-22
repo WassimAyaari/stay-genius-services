@@ -49,7 +49,7 @@ const ShopsTab = () => {
         </div>
 
         {shops.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             Aucune boutique disponible. Créez votre première boutique !
           </div>
         ) : (

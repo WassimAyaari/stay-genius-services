@@ -26,14 +26,14 @@ const RoomCard = ({ id, name, price, capacity, size, image }: RoomCardProps) => 
           className="w-full h-full object-cover"
         />
         <div className="absolute top-2 right-2">
-          <span className="px-2 py-1 bg-primary text-white text-sm rounded-full">
+          <span className="px-2 py-1 bg-primary text-primary-foreground text-sm rounded-full">
             ${price}/night
           </span>
         </div>
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-lg mb-2">{name}</h3>
-        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center gap-1">
             <BedDouble className="w-4 h-4" />
             <span>{size}</span>

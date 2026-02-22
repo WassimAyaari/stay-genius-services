@@ -53,7 +53,7 @@ const ServiceCard = ({
             <h3 className="font-medium text-secondary text-sm sm:text-base leading-tight mb-1 sm:mb-2">
               {title}
             </h3>
-            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed flex-1">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed flex-1">
               {description}
             </p>
             {action && (

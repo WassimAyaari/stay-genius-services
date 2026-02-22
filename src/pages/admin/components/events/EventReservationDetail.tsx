@@ -61,7 +61,7 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <h4 className="text-sm font-medium text-gray-500 mb-3">Contact Information</h4>
+            <h4 className="text-sm font-medium text-muted-foreground mb-3">Contact Information</h4>
             <div className="space-y-3">
               <p className="text-sm flex items-center">
                 <User className="h-4 w-4 mr-2 opacity-70" />
@@ -85,7 +85,7 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({
         
         <Card>
           <CardContent className="pt-6">
-            <h4 className="text-sm font-medium text-gray-500 mb-3">Reservation Details</h4>
+            <h4 className="text-sm font-medium text-muted-foreground mb-3">Reservation Details</h4>
             <div className="space-y-3">
               <p className="text-sm flex items-center">
                 <Calendar className="h-4 w-4 mr-2 opacity-70" />
@@ -106,7 +106,7 @@ export const EventReservationDetail: React.FC<EventReservationDetailProps> = ({
       {reservation.specialRequests && (
         <Card>
           <CardContent className="pt-6">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Special Requests</h4>
+            <h4 className="text-sm font-medium text-muted-foreground mb-1">Special Requests</h4>
             <p className="text-sm">{reservation.specialRequests}</p>
           </CardContent>
         </Card>

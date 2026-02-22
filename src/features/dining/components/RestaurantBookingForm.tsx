@@ -200,7 +200,7 @@ export default function RestaurantBookingForm({
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
             required
-            className="w-full p-2 border rounded bg-white"
+            className="w-full p-2 border rounded bg-background"
           >
             <option value="">Select a time</option>
             {/* Restaurant hours typically 17:00 - 23:00 */}

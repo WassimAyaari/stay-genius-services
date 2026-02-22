@@ -21,7 +21,7 @@ const DiningSection = () => {
   if (isFeaturedLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-pulse text-gray-400">{t('dining.featuredRestaurants')}</div>
+        <div className="animate-pulse text-muted-foreground">{t('dining.featuredRestaurants')}</div>
       </div>
     );
   }
@@ -29,7 +29,7 @@ const DiningSection = () => {
   if (!featuredRestaurants || featuredRestaurants.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-gray-400">{t('dining.noFeaturedRestaurants')}</div>
+        <div className="text-muted-foreground">{t('dining.noFeaturedRestaurants')}</div>
       </div>
     );
   }
