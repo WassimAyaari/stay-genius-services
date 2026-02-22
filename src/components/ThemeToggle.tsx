@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -11,6 +12,7 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
   return (
+    <TooltipProvider>
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
@@ -26,5 +28,6 @@ export function ThemeToggle() {
       </TooltipTrigger>
       <TooltipContent side="bottom">Toggle theme</TooltipContent>
     </Tooltip>
+    </TooltipProvider>
   );
 }
