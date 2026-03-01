@@ -406,6 +406,7 @@ export type Database = {
           guest_name: string | null
           guest_phone: string | null
           guests: number
+          hotel_id: string | null
           id: string
           room_number: string | null
           special_requests: string | null
@@ -421,6 +422,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           guests: number
+          hotel_id?: string | null
           id?: string
           room_number?: string | null
           special_requests?: string | null
@@ -436,6 +438,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           guests?: number
+          hotel_id?: string | null
           id?: string
           room_number?: string | null
           special_requests?: string | null
@@ -451,6 +454,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "event_reservations_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
         ]
       }
       events: {
@@ -460,6 +470,7 @@ export type Database = {
           created_at: string
           date: string | null
           description: string
+          hotel_id: string | null
           id: string
           image: string
           is_featured: boolean | null
@@ -477,6 +488,7 @@ export type Database = {
           created_at?: string
           date?: string | null
           description: string
+          hotel_id?: string | null
           id?: string
           image: string
           is_featured?: boolean | null
@@ -494,6 +506,7 @@ export type Database = {
           created_at?: string
           date?: string | null
           description?: string
+          hotel_id?: string | null
           id?: string
           image?: string
           is_featured?: boolean | null
@@ -506,6 +519,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "events_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "events_restaurant_id_fkey"
             columns: ["restaurant_id"]
@@ -660,6 +680,7 @@ export type Database = {
           email: string | null
           first_name: string
           guest_type: string | null
+          hotel_id: string | null
           id: string
           last_name: string
           nationality: string | null
@@ -678,6 +699,7 @@ export type Database = {
           email?: string | null
           first_name: string
           guest_type?: string | null
+          hotel_id?: string | null
           id?: string
           last_name: string
           nationality?: string | null
@@ -696,6 +718,7 @@ export type Database = {
           email?: string | null
           first_name?: string
           guest_type?: string | null
+          hotel_id?: string | null
           id?: string
           last_name?: string
           nationality?: string | null
@@ -706,7 +729,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "guests_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hotel_about: {
         Row: {
@@ -1385,6 +1416,7 @@ export type Database = {
           guest_email: string
           guest_name: string
           guest_phone: string | null
+          hotel_id: string | null
           id: string
           room_number: string | null
           service_id: string | null
@@ -1401,6 +1433,7 @@ export type Database = {
           guest_email: string
           guest_name: string
           guest_phone?: string | null
+          hotel_id?: string | null
           id?: string
           room_number?: string | null
           service_id?: string | null
@@ -1417,6 +1450,7 @@ export type Database = {
           guest_email?: string
           guest_name?: string
           guest_phone?: string | null
+          hotel_id?: string | null
           id?: string
           room_number?: string | null
           service_id?: string | null
@@ -1435,6 +1469,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "spa_bookings_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "spa_bookings_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -1448,6 +1489,7 @@ export type Database = {
           capacity: number | null
           created_at: string | null
           description: string | null
+          hotel_id: string | null
           id: string
           image_url: string | null
           location: string | null
@@ -1460,6 +1502,7 @@ export type Database = {
           capacity?: number | null
           created_at?: string | null
           description?: string | null
+          hotel_id?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
@@ -1472,6 +1515,7 @@ export type Database = {
           capacity?: number | null
           created_at?: string | null
           description?: string | null
+          hotel_id?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
@@ -1480,7 +1524,15 @@ export type Database = {
           status?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "spa_facilities_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spa_services: {
         Row: {
@@ -1489,6 +1541,7 @@ export type Database = {
           description: string
           duration: string
           facility_id: string | null
+          hotel_id: string | null
           id: string
           image: string | null
           is_featured: boolean | null
@@ -1503,6 +1556,7 @@ export type Database = {
           description: string
           duration: string
           facility_id?: string | null
+          hotel_id?: string | null
           id?: string
           image?: string | null
           is_featured?: boolean | null
@@ -1517,6 +1571,7 @@ export type Database = {
           description?: string
           duration?: string
           facility_id?: string | null
+          hotel_id?: string | null
           id?: string
           image?: string | null
           is_featured?: boolean | null
@@ -1531,6 +1586,13 @@ export type Database = {
             columns: ["facility_id"]
             isOneToOne: false
             referencedRelation: "spa_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spa_services_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
             referencedColumns: ["id"]
           },
         ]
@@ -1577,6 +1639,7 @@ export type Database = {
           created_at: string
           description: string
           eventId: string | null
+          hotel_id: string | null
           id: string
           image: string
           is_active: boolean | null
@@ -1589,6 +1652,7 @@ export type Database = {
           created_at?: string
           description: string
           eventId?: string | null
+          hotel_id?: string | null
           id?: string
           image: string
           is_active?: boolean | null
@@ -1601,6 +1665,7 @@ export type Database = {
           created_at?: string
           description?: string
           eventId?: string | null
+          hotel_id?: string | null
           id?: string
           image?: string
           is_active?: boolean | null
@@ -1616,6 +1681,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "stories_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
         ]
       }
       table_reservations: {
@@ -1626,6 +1698,7 @@ export type Database = {
           guest_name: string | null
           guest_phone: string | null
           guests: number
+          hotel_id: string | null
           id: string
           restaurant_id: string | null
           room_number: string | null
@@ -1642,6 +1715,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           guests: number
+          hotel_id?: string | null
           id?: string
           restaurant_id?: string | null
           room_number?: string | null
@@ -1658,6 +1732,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           guests?: number
+          hotel_id?: string | null
           id?: string
           restaurant_id?: string | null
           room_number?: string | null
@@ -1668,6 +1743,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "table_reservations_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "table_reservations_restaurant_id_fkey"
             columns: ["restaurant_id"]
@@ -1724,6 +1806,7 @@ export type Database = {
           email: string | null
           first_name: string
           guest_type: string | null
+          hotel_id: string | null
           id: string
           last_name: string
           nationality: string | null
@@ -1740,6 +1823,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_hotel_by_slug: {
+        Args: { p_slug: string }
+        Returns: {
+          id: string
+          logo_url: string
+          name: string
+          slug: string
+        }[]
       }
       get_user_hotels: {
         Args: { user_id: string }

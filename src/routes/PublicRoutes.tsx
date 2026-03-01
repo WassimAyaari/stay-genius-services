@@ -21,6 +21,7 @@ import Feedback from '@/pages/feedback/Feedback';
 import Messages from '@/pages/messages/Messages';
 import Notifications from '@/pages/notifications/Notifications';
 import DebugInfo from '@/pages/debug/DebugInfo';
+import DemoVideo from '@/pages/demo/DemoVideo';
 import MyRoom from '@/pages/my-room/MyRoom';
 import ServiceRequestDetails from '@/pages/my-room/ServiceRequestDetails';
 import Requests from '@/pages/requests/Requests';
@@ -52,6 +53,7 @@ const PublicRoutes = () => {
         <Route path="my-room" element={<MyRoom />} />
         <Route path="my-room/requests/:id" element={<ServiceRequestDetails />} />
         <Route path="debug" element={<DebugInfo />} />
+        <Route path="demo" element={<DemoVideo />} />
         <Route path="*" element={<NotFound />} />
     </Routes>
   );
